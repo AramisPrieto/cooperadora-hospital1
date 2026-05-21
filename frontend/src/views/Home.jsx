@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import CampaignCard from '../components/CampaignCard';
 import { Newspaper, Heart, Search, Users, ShieldAlert, Award, FileText } from 'lucide-react';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [campaigns, setCampaigns] = useState([]);
   const [news, setNews] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,7 +15,32 @@ const Home = () => {
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   
+  // Estados para procesar donaciones en tiempo real
+  const [donationAmount, setDonationAmount] = useState('');
+  const [donationSuccess, setDonationSuccess] = useState('');
+  const [donationError, setDonationError] = useState('');
+  const [submittingDonation, setSubmittingDonation] = useState(false);
+  
   const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+  // Acción al presionar "Ver más" en una campaña (Cero Anonimato: Requiere JWT)
+  const handleViewCampaignDetail = async (id) => {
+    if (!token) {
+      // Redirigir a login con aviso si es anónimo
+      navigate('/login?redirect=campana&id=' + id);
+      return;
+    }
+
+    try {
+      setErrorMsg('');
+      const res = await api.get(`/campanas/${id}`); // Endpoint Data Mashup protegido
+      setSelectedCampaign(res.data);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('No se pudieron obtener los detalles enriquecidos de esta campaña.');
+    }
+  };
 
   // Cargar campañas y noticias públicas
   useEffect(() => {
@@ -22,6 +48,19 @@ const Home = () => {
       try {
         const res = await api.get('/campanas');
         setCampaigns(res.data);
+        
+        // Si hay una campaña en la URL para abrir y el usuario está logueado, la abrimos automáticamente
+        const viewId = searchParams.get('view');
+        if (viewId) {
+          if (localStorage.getItem('token')) {
+            const detailRes = await api.get(`/campanas/${viewId}`);
+            setSelectedCampaign(detailRes.data);
+          }
+          // Limpiar el parámetro de la URL sin recargar
+          const newParams = new URLSearchParams(searchParams);
+          newParams.delete('view');
+          setSearchParams(newParams);
+        }
       } catch (err) {
         console.error('Error cargando campañas:', err);
       } finally {
@@ -42,7 +81,7 @@ const Home = () => {
 
     fetchCampaigns();
     fetchNews();
-  }, []);
+  }, [searchParams]);
 
   // Búsqueda de noticias por texto
   const handleSearch = async (e) => {
@@ -58,21 +97,73 @@ const Home = () => {
     }
   };
 
-  // Acción al presionar "Ver más" en una campaña (Cero Anonimato: Requiere JWT)
-  const handleViewCampaignDetail = async (id) => {
-    if (!token) {
-      // Redirigir a login con aviso si es anónimo
-      navigate('/login?redirect=campana&id=' + id);
+  // Cerrar modal y limpiar estados de donación
+  const handleCloseModal = () => {
+    setSelectedCampaign(null);
+    setDonationAmount('');
+    setDonationSuccess('');
+    setDonationError('');
+  };
+
+  // Enviar donación transaccional al Backend (PostgreSQL)
+  const handleDonate = async (e) => {
+    e.preventDefault();
+    if (!donationAmount || isNaN(donationAmount) || parseFloat(donationAmount) <= 0) {
+      setDonationError('Por favor, ingresa un monto válido mayor a 0.');
       return;
     }
 
+    setSubmittingDonation(true);
+    setDonationError('');
+    setDonationSuccess('');
+
     try {
-      setErrorMsg('');
-      const res = await api.get(`/campanas/${id}`); // Endpoint Data Mashup protegido
-      setSelectedCampaign(res.data);
+      const res = await api.post(`/campanas/${selectedCampaign.id}/donar`, {
+        monto: parseFloat(donationAmount)
+      });
+      
+      setDonationSuccess(`¡Donación de $${parseFloat(donationAmount).toLocaleString('es-AR')} realizada con éxito!`);
+      setDonationAmount('');
+      
+      // Actualizar el monto de la campaña seleccionada en tiempo real (modal)
+      setSelectedCampaign(prev => ({
+        ...prev,
+        monto_actual: res.data.monto_actual
+      }));
+
+      // Actualizar en la lista general de campañas de Home (en tiempo real)
+      setCampaigns(prev => prev.map(c => 
+        c.id === selectedCampaign.id 
+          ? { ...c, monto_actual: res.data.monto_actual } 
+          : c
+      ));
+
     } catch (err) {
-      console.error(err);
-      setErrorMsg('No se pudieron obtener los detalles enriquecidos de esta campaña.');
+      console.error('Error al donar:', err);
+      setDonationError(err.response?.data?.error || 'Error al procesar la donación en el servidor.');
+    } finally {
+      setSubmittingDonation(false);
+    }
+  };
+
+  // Manejadores de acciones del Hero (Smart Navigation)
+  const handleHeroAssociate = () => {
+    if (!token) {
+      navigate('/login');
+    } else if (user?.rol === 'admin') {
+      navigate('/admin');
+    } else {
+      document.getElementById('campanas-section')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleHeroDonate = () => {
+    if (!token) {
+      navigate('/login');
+    } else if (campaigns.length > 0) {
+      handleViewCampaignDetail(campaigns[0].id);
+    } else {
+      document.getElementById('campanas-section')?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -98,10 +189,10 @@ const Home = () => {
             </p>
             <div class="flex gap-4 pt-2">
               <button 
-                onClick={() => navigate('/login')}
+                onClick={handleHeroAssociate}
                 class="bg-accent-red hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider px-6 py-3.5 rounded-xl shadow-lg shadow-red-950/20 transform active:scale-95 transition-all"
               >
-                Quiero Asociarme Ahora
+                {token ? (user?.rol === 'admin' ? 'Ir al Panel Admin' : 'Ver Estado de Socio') : 'Quiero Asociarme Ahora'}
               </button>
             </div>
           </div>
@@ -124,10 +215,10 @@ const Home = () => {
               </div>
             </div>
             <button 
-              onClick={() => navigate('/login')}
+              onClick={handleHeroDonate}
               class="w-full text-center py-3 bg-slate-700 hover:bg-slate-650 rounded-xl text-xs uppercase font-bold tracking-wider transition-all border border-slate-600/30"
             >
-              Donar con Tarjeta o QR
+              {token ? 'Donar a Campaña Activa' : 'Donar con Tarjeta o QR'}
             </button>
           </div>
         </div>
@@ -156,7 +247,7 @@ const Home = () => {
       </section>
 
       {/* 3. CAMPAÑAS ECONÓMICAS */}
-      <section class="max-w-7xl mx-auto py-16 px-4">
+      <section id="campanas-section" class="max-w-7xl mx-auto py-16 px-4">
         <div class="flex items-baseline justify-between mb-8">
           <div>
             <h2 class="text-2xl font-black text-slate-800 tracking-tight">Campañas de Recaudación Activas</h2>
@@ -251,7 +342,7 @@ const Home = () => {
                 <h3 class="text-lg font-bold mt-1 text-slate-100 leading-tight">{selectedCampaign.titulo}</h3>
               </div>
               <button 
-                onClick={() => setSelectedCampaign(null)}
+                onClick={handleCloseModal}
                 class="text-white hover:text-slate-200 font-bold bg-white/10 hover:bg-white/20 h-8 w-8 rounded-full flex items-center justify-center"
               >
                 ✕
@@ -259,7 +350,7 @@ const Home = () => {
             </div>
 
             {/* Body */}
-            <div class="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+            <div class="p-6 space-y-6 max-h-[50vh] overflow-y-auto">
               
               {/* Financial Progress Grid (SQL) */}
               <div class="bg-slate-50 border border-slate-100 p-4 rounded-2xl grid grid-cols-2 gap-4">
@@ -317,20 +408,52 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Footer */}
-            <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-end gap-3">
-              <button 
-                onClick={() => setSelectedCampaign(null)}
-                class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-xs uppercase tracking-wider rounded-xl transition-colors"
-              >
-                Cerrar
-              </button>
-              <button 
-                onClick={() => alert('¡Gracias por su apoyo! Redirigiendo a pasarela de pagos simulada...')}
-                class="px-5 py-2 bg-accent-red hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-colors"
-              >
-                Donar Ahora
-              </button>
+            {/* Donation Form and Footer */}
+            <div class="bg-slate-50 p-6 border-t border-slate-100 space-y-4">
+              {donationSuccess && (
+                <div class="bg-emerald-100 border border-emerald-200 text-emerald-800 text-xs font-semibold p-3.5 rounded-xl">
+                  {donationSuccess}
+                </div>
+              )}
+              {donationError && (
+                <div class="bg-red-100 border border-red-200 text-accent-red text-xs font-semibold p-3.5 rounded-xl">
+                  {donationError}
+                </div>
+              )}
+
+              <form onSubmit={handleDonate} class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-grow">
+                  <span class="absolute left-3 top-2.5 text-slate-400 font-black text-sm">$</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="any"
+                    value={donationAmount}
+                    onChange={(e) => setDonationAmount(e.target.value)}
+                    placeholder="Monto a donar (ARS)..."
+                    class="w-full pl-7 pr-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm font-semibold"
+                    required
+                    disabled={submittingDonation}
+                  />
+                </div>
+                <div class="flex gap-2">
+                  <button 
+                    type="button"
+                    onClick={handleCloseModal}
+                    class="px-4 py-2 border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-xs uppercase tracking-wider rounded-xl transition-colors whitespace-nowrap"
+                    disabled={submittingDonation}
+                  >
+                    Cerrar
+                  </button>
+                  <button 
+                    type="submit"
+                    class="px-5 py-2.5 bg-accent-red hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl shadow-md transition-colors whitespace-nowrap disabled:bg-slate-400"
+                    disabled={submittingDonation}
+                  >
+                    {submittingDonation ? 'Procesando...' : 'Confirmar Donación'}
+                  </button>
+                </div>
+              </form>
             </div>
 
           </div>

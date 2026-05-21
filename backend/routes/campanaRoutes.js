@@ -4,7 +4,8 @@ import {
   getCampanaById,
   createCampana,
   updateCampana,
-  deleteCampana
+  deleteCampana,
+  donarCampana
 } from '../controllers/campanaController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 
@@ -15,6 +16,9 @@ router.get('/', getAllCampanas);
 
 // Ver campaña individual completa: requiere JWT (Cero Anonimato para interactuar con detalles de campaña)
 router.get('/:id', authenticateJWT, getCampanaById);
+
+// Donar a campaña: requiere JWT (Cero Anonimato)
+router.post('/:id/donar', authenticateJWT, donarCampana);
 
 // Rutas de administración de campañas (Solo Admin)
 router.post('/', authenticateJWT, authorizeRoles('admin'), createCampana);

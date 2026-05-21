@@ -1,5 +1,6 @@
 import { CampanaEco } from '../models/index.js';
 import CampanaDetalle from '../models/CampanaDetalle.js';
+import sequelize from '../config/db.js';
 
 // 1. OBTENER TODAS LAS CAMPAÑAS (SQL Básicas - Públicas para Home)
 export const getAllCampanas = async (req, res) => {
@@ -172,5 +173,41 @@ export const deleteCampana = async (req, res) => {
   } catch (error) {
     console.error('Error al eliminar campaña:', error);
     return res.status(500).json({ error: 'Error al eliminar la campaña.' });
+  }
+};
+
+// 6. DONAR A CAMPAÑA (Autenticado - Transaccional ACID en SQL)
+export const donarCampana = async (req, res) => {
+  const { id } = req.params;
+  const { monto } = req.body;
+
+  if (!monto || isNaN(monto) || parseFloat(monto) <= 0) {
+    return res.status(400).json({ error: 'El monto de donación debe ser un número positivo.' });
+  }
+
+  const transaction = await sequelize.transaction();
+
+  try {
+    const campana = await CampanaEco.findByPk(id, { transaction });
+    if (!campana) {
+      await transaction.rollback();
+      return res.status(404).json({ error: 'Campaña no encontrada.' });
+    }
+
+    // Incrementar monto actual de la campaña
+    campana.monto_actual = parseFloat(campana.monto_actual) + parseFloat(monto);
+    await campana.save({ transaction });
+
+    await transaction.commit();
+
+    return res.json({
+      message: '¡Donación procesada exitosamente en PostgreSQL!',
+      monto_actual: campana.monto_actual,
+      campana
+    });
+  } catch (error) {
+    await transaction.rollback();
+    console.error('Error al procesar la donación en SQL:', error);
+    return res.status(500).json({ error: 'Error interno al registrar la donación.' });
   }
 };
