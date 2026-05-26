@@ -9,7 +9,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
 // Registro de nuevos usuarios
 export const register = async (req, res) => {
-  const { email, password, rol, dni } = req.body;
+  const { email, password, dni } = req.body;
 
   try {
     // Validar si el usuario ya existe
@@ -18,24 +18,24 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: 'El email ya se encuentra registrado.' });
     }
 
+    if (!dni) {
+      return res.status(400).json({ error: 'Se requiere el DNI para registrar un perfil de socio.' });
+    }
+
     // Hashear contraseña
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    // Crear el usuario (transaccional)
+    // Crear el usuario — rol siempre 'socio', los admins se crean desde la base de datos
     const user = await Usuario.create({
       email,
       password_hash,
-      rol: rol || 'socio'
+      rol: 'socio'
     });
 
     let perfil = null;
-    // Si el rol es socio, crear automáticamente su perfil
-    if (user.rol === 'socio') {
-      if (!dni) {
-        return res.status(400).json({ error: 'Se requiere el DNI para registrar un perfil de socio.' });
-      }
-
+    // Crear automáticamente el perfil de socio
+    {
       // Validar DNI único
       const existingDni = await PerfilSocio.findOne({ where: { dni } });
       if (existingDni) {
