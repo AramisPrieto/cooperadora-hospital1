@@ -188,7 +188,13 @@ export const donarCampana = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const campana = await CampanaEco.findByPk(id, { transaction });
+    // lock: LOCK.UPDATE emite SELECT ... FOR UPDATE en PostgreSQL.
+    // Bloquea la fila hasta el commit, evitando que dos donaciones simultáneas
+    // lean el mismo monto_actual y sobreescriban la suma del otro.
+    const campana = await CampanaEco.findByPk(id, {
+      transaction,
+      lock: transaction.LOCK.UPDATE
+    });
     if (!campana) {
       await transaction.rollback();
       return res.status(404).json({ error: 'Campaña no encontrada.' });

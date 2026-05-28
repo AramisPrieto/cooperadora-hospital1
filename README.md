@@ -27,6 +27,12 @@ Este proyecto consiste en el diseño e implementación de un portal web integral
   - Implementación de seguridad estricta mediante **JSON Web Tokens (JWT)** para garantizar el *Cero Anonimato* en interacciones privadas.
   - Creación del esqueleto interactivo del frontend en **React (Vite) + Tailwind CSS** (Home, Login/Registro, y Panel Administrativo).
   - Integración sincrónica **Data Mashup** para la unificación de datos transaccionales y multimedia.
+  - Flujo de redirección post-login inteligente: si un usuario anónimo intenta ver los detalles de una campaña, es redirigido al Login con `?redirect=campana&id=X`. Al autenticarse, navega a `/?view=X` y el Home abre el modal automáticamente, sin recargas de página.
+  - Panel Administrativo con gestión completa de Noticias (crear, editar, eliminar) directamente sobre MongoDB, con soporte de tags y contenido HTML.
+  - Sanitización de HTML con **DOMPurify** en el renderizado de noticias para prevenir ataques XSS.
+  - Corrección de todos los atributos JSX de `class=` a `className=` en los 6 componentes del frontend (303 ocurrencias).
+  - Card del Hero conectada a datos reales: muestra la primera campaña activa con título, porcentaje de progreso y montos dinámicos. Incluye skeleton de carga y estado vacío.
+  - Panel Administrativo con protección contra acciones duplicadas: todos los botones de mutación (aprobar socio, editar/eliminar campaña, editar/eliminar noticia) se deshabilitan mientras una operación está en curso.
 
 ---
 
@@ -63,6 +69,17 @@ Almacena documentos de formato libre de alta carga multimedia:
 * **`noticias_actualidad`**: Publicaciones con galerías fotográficas, videos y tags dinámicos.
 * **`campanas_detalle`**: Complemento de narrativa enriquecida para campañas (testimonios, estado de ejecución de obras y arrays de videos/imágenes) vinculados dinámicamente mediante `campana_id_ref`.
 
+### ⚛️ Transacciones ACID y Concurrencia en Donaciones
+
+El endpoint `POST /api/campanas/:id/donar` utiliza una transacción SQL con **bloqueo de fila** (`SELECT ... FOR UPDATE`) para garantizar consistencia bajo carga concurrente:
+
+1. Se abre una transacción Sequelize.
+2. Se adquiere un lock exclusivo sobre la fila de la campaña (`lock: transaction.LOCK.UPDATE`).
+3. Se actualiza el `monto_actual` y se hace commit.
+4. Cualquier otra donación simultánea sobre la misma campaña espera en cola hasta que la transacción anterior libere el lock.
+
+Esto evita la condición de carrera donde dos donaciones simultáneas leen el mismo valor y sobreescriben la suma del otro.
+
 ### 🔄 Fusión Sincrónica: Data Mashup
 Cuando un usuario ingresa a ver los detalles de una campaña completa (`GET /api/campanas/:id`), el backend utiliza `Promise.all` para ejecutar de manera paralela y sincrónica dos consultas:
 1. Una consulta por clave primaria en SQL para obtener las finanzas de `campanas_eco`.
@@ -98,12 +115,13 @@ Tener instalado en su sistema local:
 4. Configurar las variables de entorno dentro del archivo `.env` recién creado:
    * `DATABASE_URL`: URI de conexión a su base SQL (ej: `postgres://usuario:pass@localhost:5432/cooperadora_db`).
    * `MONGODB_URI`: URI de conexión a su MongoDB (ej: `mongodb://localhost:27017/cooperadora_nosql`).
-   * `JWT_SECRET`: Llave secreta para firmar tokens.
+   * `JWT_SECRET`: Llave secreta para firmar tokens (usar una cadena aleatoria larga en producción).
+   * `PORT`: Puerto del servidor backend. **Debe ser `5001`** para que el proxy de Vite funcione correctamente.
 5. Iniciar el servidor backend en modo desarrollo (nodemon):
    ```bash
    npm run dev
    ```
-   *El servidor compilará y sincronizará automáticamente las tablas relacionales de SQL y escuchará en el puerto 5000 (`http://localhost:5000`).*
+   *El servidor compilará y sincronizará automáticamente las tablas relacionales de SQL y escuchará en el puerto 5001 (`http://localhost:5001`).*
 
 ---
 
@@ -120,7 +138,23 @@ Tener instalado en su sistema local:
    ```bash
    npm run dev
    ```
-   *Vite levantará la aplicación frontend en `http://localhost:3000` con proxy reverso automático hacia el puerto 5000 para evitar bloqueos por CORS.*
+   *Vite levantará la aplicación frontend en `http://localhost:3000` con proxy reverso automático hacia el puerto 5001 para evitar bloqueos por CORS.*
+
+---
+
+## 🔐 Seguridad: Gestión de Roles de Administrador
+
+El endpoint público `POST /api/auth/register` **siempre crea usuarios con rol `socio`**. No es posible auto-asignarse el rol `admin` desde el formulario de registro.
+
+Las cuentas de administrador deben crearse **directamente en la base de datos SQL**, ejecutando una sentencia similar a:
+
+```sql
+-- 1. Insertar el usuario admin con contraseña hasheada (generar el hash previamente con bcrypt)
+INSERT INTO usuarios (email, password_hash, rol)
+VALUES ('admin@cooperadora.org', '$2a$10$...hash...', 'admin');
+```
+
+> **Nota:** Para generar el `password_hash` se puede usar un script Node.js con `bcryptjs` o una herramienta online de bcrypt. Nunca almacenar contraseñas en texto plano.
 
 ---
 
