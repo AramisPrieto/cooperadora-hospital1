@@ -1,23 +1,21 @@
-﻿import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
-import { Mail, Lock, User, Heart, ShieldAlert, Award } from 'lucide-react';
+import { Mail, Lock, User, Heart, ShieldAlert, Award, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
-  // Estados para el login
+
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [dni, setDni] = useState('');
-
+  const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Validar si venía de un redireccionamiento expirado
   const expired = searchParams.get('expired');
   const redirectCampaign = searchParams.get('redirect') === 'campana';
   const campaignId = searchParams.get('id');
@@ -30,31 +28,20 @@ const Login = () => {
 
     try {
       if (isLogin) {
-        // Enviar Login
         const res = await api.post('/auth/login', { email, password });
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
-        
         setSuccessMsg('¡Sesión iniciada con éxito!');
-        
-        // Redirigir si venía a ver una campaña
         if (redirectCampaign && campaignId) {
           navigate('/?view=' + campaignId);
         } else {
           navigate('/');
         }
       } else {
-        // Enviar Registro (Cero Anonimato, requiere DNI — todos los registros son socios)
-        const payload = {
-          email,
-          password,
-          dni: parseInt(dni)
-        };
-        const res = await api.post('/auth/register', payload);
+        const res = await api.post('/auth/register', { email, password, dni: parseInt(dni) });
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
-
-        setSuccessMsg('¡Registro exitoso! Su perfil ha sido creado.');
+        setSuccessMsg('¡Registro exitoso!');
         navigate('/');
       }
     } catch (err) {
@@ -65,125 +52,185 @@ const Login = () => {
     }
   };
 
+  const toggle = () => {
+    setIsLogin(!isLogin);
+    setErrorMsg('');
+    setSuccessMsg('');
+  };
+
   return (
-    <div className="flex-grow flex items-center justify-center bg-slate-100 py-16 px-4">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-200/60 p-8 space-y-6 relative overflow-hidden">
-        
-        {/* Top brand styling */}
-        <div className="text-center space-y-2">
-          <div className="h-12 w-12 bg-accent-red rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-red-500/20">
-            <Heart className="h-6 w-6 text-white fill-white" />
-          </div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-            {isLogin ? 'Ingresar a la Cooperadora' : 'Crear Cuenta de Socio'}
-          </h2>
-          <p className="text-xs text-slate-500 max-w-[280px] mx-auto">
-            {isLogin 
-              ? 'Identifíquese con sus credenciales para acceder a la autogestión.' 
-              : 'Únase al Libro Registro de Asociados del Hospital Emilio Ferreyra.'}
-          </p>
-        </div>
+    /* Fondo institucional — claro y limpio */
+    <div className="flex-grow flex items-center justify-center py-10 pt-28 px-4 relative overflow-hidden bg-slate-50">
 
-        {/* Warnings / Success alerts */}
-        {expired && (
-          <div className="flex items-center gap-2 p-3.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-2xl text-xs font-semibold">
-            <ShieldAlert className="h-4 w-4 shrink-0" />
-            Su sesión ha expirado. Por favor, vuelva a ingresar.
-          </div>
-        )}
-        {errorMsg && (
-          <div className="flex items-center gap-2 p-3.5 bg-rose-50 text-rose-800 border border-rose-200 rounded-2xl text-xs font-semibold">
-            <ShieldAlert className="h-4 w-4 shrink-0" />
-            {errorMsg}
-          </div>
-        )}
-        {successMsg && (
-          <div className="flex items-center gap-2 p-3.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-semibold">
-            <Award className="h-4 w-4 shrink-0" />
-            {successMsg}
-          </div>
-        )}
+      {/* Card —— fondo BLANCO para máxima legibilidad */}
+      <div className="relative w-full max-w-md animate-fade-up">
+        <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-8 space-y-6">
 
-        {/* Auth Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Correo Electrónico</label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="ejemplo@correo.com"
-                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none transition-all"
-              />
+          {/* Header de la card */}
+          <div className="text-center space-y-3">
+            <div className="relative inline-block">
+              <div
+                className="h-14 w-14 rounded-2xl flex items-center justify-center mx-auto bg-brand-50"
+              >
+                <Heart className="h-7 w-7 text-brand-600 fill-brand-600" />
+              </div>
+              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 bg-red-500 rounded-full border-2 border-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-display font-black text-slate-900">
+                {isLogin ? 'Ingresar' : 'Crear cuenta'}
+              </h2>
+              <p className="text-slate-500 text-sm mt-1 leading-relaxed">
+                {isLogin
+                  ? 'Cooperadora del Hospital Municipal Ferreyra'
+                  : 'Únase al Libro de Asociados del Hospital Ferreyra'}
+              </p>
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Contraseña</label>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none transition-all"
-              />
-            </div>
+          {/* Toggle login / registro */}
+          <div className="flex bg-slate-100 rounded-xl p-1">
+            <button
+              type="button"
+              onClick={() => { setIsLogin(true); setErrorMsg(''); setSuccessMsg(''); }}
+              className={`flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                isLogin
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Iniciar Sesión
+            </button>
+            <button
+              type="button"
+              onClick={() => { setIsLogin(false); setErrorMsg(''); setSuccessMsg(''); }}
+              className={`flex-1 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                !isLogin
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Registrarse
+            </button>
           </div>
 
-          {/* Dynamic Registration Fields */}
-          {!isLogin && (
-            <div className="space-y-4 pt-1 animate-in fade-in slide-in-from-top-2 duration-200">
-              <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">DNI (Obligatorio)</label>
+          {/* Alertas */}
+          {expired && <Alert color="amber" icon={<ShieldAlert className="h-4 w-4" />}>Sesión expirada. Por favor vuelva a ingresar.</Alert>}
+          {errorMsg && <Alert color="rose" icon={<ShieldAlert className="h-4 w-4" />}>{errorMsg}</Alert>}
+          {successMsg && <Alert color="emerald" icon={<Award className="h-4 w-4" />}>{successMsg}</Alert>}
+
+          {/* Formulario */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Correo Electrónico
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="ejemplo@correo.com"
+                  className="input-field pl-10"
+                />
+              </div>
+            </div>
+
+            {/* Contraseña */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Contraseña
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Ingrese su contraseña"
+                  className="input-field pl-10 pr-11"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* DNI (sólo registro) */}
+            {!isLogin && (
+              <div className="space-y-1.5 animate-fade-up">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  DNI <span className="text-red-500 normal-case font-normal">(Obligatorio para socios)</span>
+                </label>
                 <div className="relative">
-                  <User className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                   <input
                     type="number"
                     required
                     value={dni}
-                    onChange={(e) => setDni(e.target.value)}
-                    placeholder="DNI sin puntos"
-                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none transition-all"
+                    onChange={e => setDni(e.target.value)}
+                    placeholder="Sin puntos ej: 30123456"
+                    className="input-field pl-10"
                   />
                 </div>
+                <p className="text-[10px] text-slate-500 flex items-center gap-1 pl-0.5">
+                  <ShieldAlert className="h-3 w-3 text-amber-500 shrink-0" />
+                  El DNI queda registrado permanentemente en el Libro de Asociados.
+                </p>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 px-4 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs uppercase font-bold tracking-wider shadow-lg shadow-teal-900/10 transition-all transform active:scale-95 disabled:opacity-50 disabled:pointer-events-none mt-2"
-          >
-            {loading ? 'Cargando...' : isLogin ? 'Ingresar' : 'Registrar Cuenta'}
-          </button>
-        </form>
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-brand w-full py-3.5 mt-1 text-sm"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  Procesando...
+                </span>
+              ) : (
+                isLogin ? 'Ingresar a la Cooperadora' : 'Crear cuenta de socio'
+              )}
+            </button>
+          </form>
 
-        {/* Toggle between Login and Register */}
-        <div className="text-center pt-2">
-          <button
-            type="button"
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setErrorMsg('');
-              setSuccessMsg('');
-            }}
-            className="text-xs font-bold text-teal-600 hover:text-teal-700 transition-colors uppercase tracking-wider"
-          >
-            {isLogin ? '¿No tienes cuenta? Regístrate aquí' : '¿Ya posees una cuenta? Inicia Sesión'}
-          </button>
+          {/* Nota de seguridad */}
+          <p className="text-center text-xs text-slate-400">
+            Acceso protegido de forma <span className="text-brand-600 font-semibold">segura y encriptada</span>. Sin anonimato.
+          </p>
         </div>
-
       </div>
     </div>
   );
 };
+
+/* Helper Alert */
+const ALERT_STYLES = {
+  amber:  'bg-amber-50 border-amber-200 text-amber-800',
+  rose:   'bg-red-50 border-red-200 text-red-700',
+  emerald:'bg-emerald-50 border-emerald-200 text-emerald-800',
+};
+const Alert = ({ color, icon, children }) => (
+  <div className={`flex items-start gap-2.5 p-3.5 border rounded-xl text-xs font-semibold ${ALERT_STYLES[color]}`}>
+    <span className="shrink-0 mt-0.5">{icon}</span>
+    <span>{children}</span>
+  </div>
+);
 
 export default Login;

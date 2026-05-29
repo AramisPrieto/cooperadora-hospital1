@@ -8,7 +8,7 @@
 * **Aramis Prieto**
 * **Kevin Nielsen**
 * **Thiago Masson**
-* **Santi Ialungo**
+* **Santiago Ialungo**
 
 **Profesor:** Ing. Hernández Gauna, Jorge G.
 
@@ -33,6 +33,14 @@ Este proyecto consiste en el diseño e implementación de un portal web integral
   - Corrección de todos los atributos JSX de `class=` a `className=` en los 6 componentes del frontend (303 ocurrencias).
   - Card del Hero conectada a datos reales: muestra la primera campaña activa con título, porcentaje de progreso y montos dinámicos. Incluye skeleton de carga y estado vacío.
   - Panel Administrativo con protección contra acciones duplicadas: todos los botones de mutación (aprobar socio, editar/eliminar campaña, editar/eliminar noticia) se deshabilitan mientras una operación está en curso.
+
+### ✨ Mejoras Recientes de UI/UX (Rediseño Clínico)
+- **Migración Estética:** Transición de un diseño oscuro/tecnológico a una apariencia **clínica, institucional y profesional**, optimizando la confianza del usuario.
+- **Paleta de Colores Renovada:** Uso de fondos claros (`slate-50`) con acentos estratégicos en rojo institucional (`brand-600`) y verde esmeralda clínico (`accent-600`).
+- **Navegación Inteligente y Enlaces:** Se añadieron accesos directos (*Campañas Activas*, *Obras Concretadas*, *Noticias*). El Navbar transparente ahora cuenta con detección automática de lectura (*Scroll-Spy*) para resaltar dinámicamente la sección activa, combinado con `Lenis` para un desplazamiento inercial premium.
+- **Fondo de Cuadrícula Avanzada:** Implementación de un patrón de fondo global mediante `linear-gradient` simulando una cuadrícula médica (estilo ECG o Blueprint), aportando innovación visual y textura.
+- **Dashboard y Estadísticas:** Solución de solapamientos (header spacing), transformación de contadores del Home a *cards* blancas con sombras sutiles, y gráficos optimizados (con color rojo institucional y etiquetas dinámicas) en el Panel Administrativo para lectura inmediata.
+- **Footer Institucional Limpio:** Eliminación de *badges* y etiquetas de desarrollo en el pie de página para consolidar un aspecto 100% profesional y limpio de cara al usuario final.
 
 ---
 

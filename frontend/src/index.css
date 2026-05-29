@@ -4,34 +4,82 @@
 
 @layer base {
   body {
-    @apply h-full bg-slate-50 text-slate-900;
+    @apply text-slate-800 font-sans antialiased;
+    background-color: #f8fafc; /* bg-slate-50 */
+    background-image: 
+      linear-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+      linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+    background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+    background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-black;
   }
 }
 
-/* Glassmorphism custom styling utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+@layer components {
+  /* ── BOTONES CLÍNICOS ── */
+  .btn-brand {
+    @apply flex items-center justify-center gap-2 bg-brand-600 text-white font-bold rounded-xl shadow-sm hover:bg-brand-700 hover:shadow-md transition-all duration-300;
+  }
+
+  .btn-accent {
+    @apply flex items-center justify-center gap-2 bg-white text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow-md transition-all duration-300;
+  }
+
+  /* ── FONDOS ESTRUCTURALES ── */
+  .hero-bg {
+    @apply bg-white relative;
+  }
+  
+  /* ── COMPONENTES GENERALES ── */
+  .card {
+    @apply bg-white border border-slate-200 rounded-3xl shadow-card transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest border;
+  }
+  
+  .badge-red {
+    @apply bg-brand-50 text-brand-700 border-brand-200;
+  }
+  
+  .badge-green {
+    @apply bg-accent-50 text-accent-700 border-accent-200;
+  }
+
+  .badge-slate {
+    @apply bg-slate-50 text-slate-600 border-slate-200;
+  }
+
+  /* ── TIPOGRAFÍA Y ESTRUCTURA ── */
+  .section-title {
+    @apply text-3xl font-display font-black text-black leading-tight;
+  }
+  .section-subtitle {
+    @apply text-sm text-slate-500 font-medium mt-2 max-w-xl;
+  }
+
+  /* ── INPUTS ── */
+  .input-field {
+    @apply w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all duration-200;
+  }
+
+  /* ── BARRAS DE PROGRESO ── */
+  .progress-bar {
+    @apply w-full bg-slate-100 rounded-full overflow-hidden;
+  }
+  .progress-fill {
+    @apply bg-accent-500 rounded-full transition-all duration-1000 ease-out;
+  }
 }
 
-.glass-dark {
-  background: rgba(15, 23, 42, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Custom gorgeous scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+/* Scroll global */
+html {
+  /* Scroll behavior se controla ahora vía Lenis, pero lo mantenemos por si algo falla */
+  scroll-behavior: smooth;
 }
