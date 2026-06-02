@@ -1,82 +1,280 @@
-﻿import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Shield, LogOut, User, Menu, Heart } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Shield, LogOut, User, Menu, X, Heart } from 'lucide-react';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('inicio');
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 10);
+
+      if (location.pathname !== '/') {
+        setActiveSection('');
+        return;
+      }
+
+      const sections = ['noticias-section', 'obras-section', 'campanas-section'];
+      let current = 'inicio';
+      for (const section of sections) {
+        const el = document.getElementById(section);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 200) {
+            current = section;
+            break;
+          }
+        }
+      }
+      setActiveSection(current);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [location]);
+
+  useEffect(() => { setMobileOpen(false); }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/login');
+    navigate('/');
   };
 
+  const initials = user?.email?.charAt(0).toUpperCase() ?? 'U';
+  const isAdmin = user?.rol === 'admin';
+
+  /* ── Navbar Clínico ── */
+  const navStyle = scrolled
+    ? 'bg-white/70 backdrop-blur-md border-b border-slate-200/50 shadow-sm'
+    : 'bg-transparent border-b border-transparent';
+
   return (
-    <nav className="sticky top-0 z-50 bg-slate-900 text-white shadow-md">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navStyle}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo & Brand */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2 group">
-              {/* Logo institucional de la Cooperadora */}
-              <img 
-                src="/logo.png" 
-                alt="Logo Cooperadora" 
-                className="h-10 w-10 object-contain rounded-lg bg-white p-0.5 shadow-lg transition-transform group-hover:scale-105" 
-              />
-              <div className="ml-2">
-                <span className="block text-sm font-bold tracking-wide uppercase text-slate-100">Cooperadora</span>
-                <span className="block text-[11px] text-teal-400 font-semibold tracking-wider uppercase -mt-1">Hosp. Necochea</span>
-              </div>
-            </Link>
+        <div className="flex items-center justify-between h-20">
+
+          {/* ── Logo + Marca ── */}
+          <Link to="/" className="flex items-center gap-4 group shrink-0">
+            <img
+              src="/logo.png"
+              alt="Logo Cooperadora Hospital Necochea"
+              className="h-12 w-12 object-contain"
+              onError={e => { e.target.style.display = 'none'; }}
+            />
+            <div className="hidden sm:block border-l border-slate-200 pl-4 py-1">
+              <span className="block text-sm font-display font-black text-slate-800 leading-none tracking-wide">
+                Cooperadora
+              </span>
+              <span className="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">
+                Hospital Emilio Ferreyra
+              </span>
+            </div>
+          </Link>
+
+          {/* ── Desktop Nav links ── */}
+          <div className="hidden md:flex items-center gap-1">
+            <NavLink 
+              to="/" 
+              active={location.pathname === '/' && activeSection === 'inicio'}
+              onClick={(e) => {
+                if (location.pathname === '/') {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+            >
+              Inicio
+            </NavLink>
+            <ScrollLink to="campanas-section" active={activeSection === 'campanas-section'}>Campañas</ScrollLink>
+            <ScrollLink to="obras-section" active={activeSection === 'obras-section'}>Obras Concretadas</ScrollLink>
+            <ScrollLink to="noticias-section" active={activeSection === 'noticias-section'}>Noticias</ScrollLink>
+            {token && isAdmin && (
+              <NavLink to="/admin" active={location.pathname === '/admin'}>
+                <Shield className="h-4 w-4" />
+                Panel Admin
+              </NavLink>
+            )}
           </div>
 
-          {/* Navigation Links */}
-          <div className="flex items-center gap-4">
-            <Link to="/" className="px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
-              Inicio
-            </Link>
-
+          {/* ── Desktop Auth ── */}
+          <div className="hidden md:flex items-center gap-4">
             {token ? (
-              <div className="flex items-center gap-3">
-                {/* User Badges */}
-                <div className="hidden md:flex flex-col items-end">
-                  <span className="text-xs text-slate-300 font-medium">{user?.email}</span>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
-                    user?.rol === 'admin' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-teal-500/20 text-teal-300 border border-teal-500/30'
-                  }`}>
-                    {user?.rol === 'admin' ? 'Administrador' : 'Socio'}
-                  </span>
+              <div className="flex items-center gap-4 border-l border-slate-200 pl-4">
+                {/* Chip usuario */}
+                <div className="flex items-center gap-3">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${isAdmin ? 'bg-slate-800 text-white' : 'bg-brand-100 text-brand-700'}`}>
+                    {initials}
+                  </div>
+                  <div className="hidden lg:block min-w-0">
+                    <p className="text-xs text-slate-800 font-bold leading-none truncate max-w-[130px]">
+                      {user?.email}
+                    </p>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      {isAdmin ? 'Admin' : 'Socio'}
+                    </span>
+                  </div>
                 </div>
-
-                {user?.rol === 'admin' && (
-                  <Link to="/admin" className="flex items-center gap-1.5 bg-slate-800 text-amber-400 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider border border-amber-500/20 transition-all">
-                    <Shield className="h-3.5 w-3.5" />
-                    Panel Admin
-                  </Link>
-                )}
-
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 bg-slate-800 hover:bg-rose-950/40 hover:text-rose-400 hover:border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider border border-slate-700 transition-all"
-                  title="Cerrar Sesión"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:text-brand-600 hover:bg-brand-50 transition-colors"
                 >
-                  <LogOut className="h-3.5 w-3.5" />
+                  <LogOut className="h-4 w-4" />
                   Salir
                 </button>
               </div>
             ) : (
-              <Link to="/login" className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 text-white px-4 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider shadow-lg shadow-teal-900/20 transition-all">
-                <User className="h-3.5 w-3.5" />
+              <Link to="/login" className="btn-brand px-6 py-2.5 text-sm">
+                <Heart className="h-4 w-4" />
                 Asociarse / Ingresar
               </Link>
             )}
           </div>
+
+          {/* ── Mobile hamburger ── */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            aria-label="Menú"
+          >
+            {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
       </div>
+
+      {/* ── Mobile menu ── */}
+      {mobileOpen && (
+        <div className="md:hidden bg-white border-t border-slate-100 animate-slide-down shadow-lg absolute w-full">
+          <div className="px-4 py-5 space-y-2">
+            <MobileNavLink 
+              to="/" 
+              active={location.pathname === '/' && activeSection === 'inicio'}
+              onClick={(e) => {
+                if (location.pathname === '/') {
+                  e.preventDefault();
+                  setMobileOpen(false);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+            >
+              Inicio
+            </MobileNavLink>
+            <MobileScrollLink to="campanas-section" active={activeSection === 'campanas-section'} setMobileOpen={setMobileOpen}>Campañas Activas</MobileScrollLink>
+            <MobileScrollLink to="obras-section" active={activeSection === 'obras-section'} setMobileOpen={setMobileOpen}>Obras Concretadas</MobileScrollLink>
+            <MobileScrollLink to="noticias-section" active={activeSection === 'noticias-section'} setMobileOpen={setMobileOpen}>Noticias</MobileScrollLink>
+            {token && isAdmin && (
+              <MobileNavLink to="/admin" active={location.pathname === '/admin'}>
+                Panel Administrativo
+              </MobileNavLink>
+            )}
+            <div className="pt-4 border-t border-slate-100 mt-4 space-y-3">
+              {token ? (
+                <>
+                  <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${isAdmin ? 'bg-slate-800 text-white' : 'bg-brand-100 text-brand-700'}`}>
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm text-slate-800 font-bold truncate">{user?.email}</p>
+                      <p className="text-[10px] font-bold uppercase text-slate-500">
+                        {isAdmin ? 'Administrador' : 'Socio Activo'}
+                      </p>
+                    </div>
+                  </div>
+                  <button onClick={handleLogout}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-slate-600 hover:text-brand-600 bg-white border border-slate-200 hover:border-brand-200 rounded-xl transition-colors">
+                    <LogOut className="h-4 w-4" />
+                    Cerrar Sesión
+                  </button>
+                </>
+              ) : (
+                <Link to="/login" className="w-full btn-brand py-3.5 text-sm flex items-center justify-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  Asociarse / Ingresar
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
+  );
+};
+
+const NavLink = ({ to, active, onClick, children }) => (
+  <Link to={to}
+    onClick={onClick}
+    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+      active
+        ? 'text-brand-700 bg-brand-50'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+    }`}
+  >
+    {children}
+  </Link>
+);
+
+const MobileNavLink = ({ to, active, onClick, children }) => (
+  <Link to={to}
+    onClick={onClick}
+    className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+      active ? 'text-brand-700 bg-brand-50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+    }`}>
+    {children}
+  </Link>
+);
+
+const ScrollLink = ({ to, active, children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleScroll = (e) => {
+    e.preventDefault();
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => document.getElementById(to)?.scrollIntoView({ behavior: 'smooth' }), 300);
+    } else {
+      document.getElementById(to)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <button onClick={handleScroll} className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+      active ? 'text-brand-700 bg-brand-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+    }`}>
+      {children}
+    </button>
+  );
+};
+
+const MobileScrollLink = ({ to, active, setMobileOpen, children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleScroll = (e) => {
+    e.preventDefault();
+    setMobileOpen(false);
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => document.getElementById(to)?.scrollIntoView({ behavior: 'smooth' }), 300);
+    } else {
+      document.getElementById(to)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <button onClick={handleScroll} className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-left ${
+      active ? 'text-brand-700 bg-brand-50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+    }`}>
+      {children}
+    </button>
   );
 };
 

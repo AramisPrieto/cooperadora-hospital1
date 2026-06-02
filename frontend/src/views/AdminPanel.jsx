@@ -1,35 +1,81 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { Shield, Users, Target, Plus, Pencil, Trash, FileText, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LabelList
+} from 'recharts';
+import {
+  Shield, Users, Target, Plus, Pencil, Trash, FileText,
+  CheckCircle, Clock, AlertTriangle, LayoutDashboard,
+  Newspaper, TrendingUp, X, Save, AlertCircle, Sparkles,
+  Banknote, XCircle
+} from 'lucide-react';
+
+/* ── Small stat card in header ── */
+const HeaderStat = ({ label, value, icon: Icon, color }) => (
+  <div className={`flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-4 py-3 shadow-sm`}>
+    <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${color}`}>
+      <Icon className="h-4 w-4 text-white" />
+    </div>
+    <div>
+      <p className="text-lg font-display font-black text-slate-800 leading-none">{value}</p>
+      <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mt-0.5">{label}</p>
+    </div>
+  </div>
+);
+
+/* ── Tabs ── */
+const TABS = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'campaigns', label: 'Campañas', icon: Target },
+  { id: 'partners',  label: 'Socios',   icon: Users },
+  { id: 'news',      label: 'Noticias', icon: Newspaper },
+  { id: 'transfers', label: 'Transferencias', icon: Banknote }, // TEAM_001: Nueva pestaña
+];
+
+/* ── Mock Data para Gráficos ── */
+const mockRevenueData = [
+  { name: 'Ene', ingresos: 400000 },
+  { name: 'Feb', ingresos: 300000 },
+  { name: 'Mar', ingresos: 550000 },
+  { name: 'Abr', ingresos: 450000 },
+  { name: 'May', ingresos: 800000 },
+  { name: 'Jun', ingresos: 1200000 },
+];
+
+const mockPartnersData = [
+  { name: 'Ene', nuevos: 12 },
+  { name: 'Feb', nuevos: 18 },
+  { name: 'Mar', nuevos: 25 },
+  { name: 'Abr', nuevos: 20 },
+  { name: 'May', nuevos: 40 },
+  { name: 'Jun', nuevos: 65 },
+];
 
 const AdminPanel = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [partners, setPartners] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
-  
-  // Estados de formularios para Campañas
+  const [news, setNews] = useState([]);
+  const [transfers, setTransfers] = useState([]); // TEAM_001: Estado para transferencias
+
+
+  /* Campaign form */
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [editingCampaignId, setEditingCampaignId] = useState(null);
-  
-  // Campos del formulario
   const [titulo, setTitulo] = useState('');
   const [montoObjetivo, setMontoObjetivo] = useState('');
   const [montoActual, setMontoActual] = useState('');
   const [fechaLimite, setFechaLimite] = useState('');
-  
-  // NoSQL Fields for Rich Details
   const [testimoniosText, setTestimoniosText] = useState('');
   const [testimoniosAutor, setTestimoniosAutor] = useState('');
   const [imagenUrl, setImagenUrl] = useState('');
   const [obraStatus, setObraStatus] = useState('Planeada');
 
-  // Estados de formularios para Noticias
-  const [news, setNews] = useState([]);
+  /* News form */
   const [showNewsForm, setShowNewsForm] = useState(false);
   const [editingNewsId, setEditingNewsId] = useState(null);
-
-  // Campos del formulario de noticias
   const [newsTitulo, setNewsTitulo] = useState('');
   const [newsCuerpoHtml, setNewsCuerpoHtml] = useState('');
   const [newsTags, setNewsTags] = useState('');
@@ -42,647 +88,756 @@ const AdminPanel = () => {
 
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-  // Redirigir si no es admin
   useEffect(() => {
-    if (!user || user.rol !== 'admin') {
-      navigate('/');
-    }
+    if (!user || user.rol !== 'admin') navigate('/');
   }, [user, navigate]);
 
-  // Cargar socios y campañas
   const loadDashboardData = async () => {
     setLoading(true);
     setErrorMsg('');
     try {
-      const [partnersRes, campaignsRes, newsRes] = await Promise.all([
+      const [pRes, cRes, nRes, tRes] = await Promise.all([
         api.get('/socios'),
         api.get('/campanas'),
-        api.get('/noticias')
+        api.get('/noticias'),
+        api.get('/donaciones/transferencias') // TEAM_001: Petición a la API de transferencias
       ]);
-      setPartners(partnersRes.data);
-      setCampaigns(campaignsRes.data);
-      setNews(newsRes.data);
+      setPartners(pRes.data);
+      setCampaigns(cRes.data);
+      setNews(nRes.data);
+      setTransfers(tRes.data); // TEAM_001: Actualizar estado de transferencias
     } catch (err) {
       console.error(err);
-      setErrorMsg('Error al cargar la información del panel administrativo.');
+      setErrorMsg('Error al cargar la información del panel.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadDashboardData();
-  }, []);
 
-  // Aprobar un socio (Cambiar estado a activo)
-  const handleApprovePartner = async (numeroAsociado) => {
+  useEffect(() => { loadDashboardData(); }, []);
+
+  /* Auto-dismiss success */
+  useEffect(() => {
+    if (!successMsg) return;
+    const t = setTimeout(() => setSuccessMsg(''), 4000);
+    return () => clearTimeout(t);
+  }, [successMsg]);
+
+  /* ── Approve partner ── */
+  const handleApprovePartner = async (num) => {
     setSubmitting(true);
     try {
-      await api.put(`/socios/${numeroAsociado}`, { estado: 'activo' });
-      setSuccessMsg('Estado de socio actualizado a Activo.');
+      await api.put(`/socios/${num}`, { estado: 'activo' });
+      setSuccessMsg('Socio aprobado y activo en el Libro Registro.');
       loadDashboardData();
     } catch (err) {
-      console.error(err);
-      setErrorMsg('Error al cambiar el estado del socio.');
+      setErrorMsg('Error al actualizar el estado del socio.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Crear o actualizar Campaña (Híbrida SQL + NoSQL)
-  const handleSaveCampaign = async (e) => {
-    e.preventDefault();
+  // TEAM_001: Aprobar una transferencia declarada por un socio
+  const handleApproveTransfer = async (id) => {
+    setSubmitting(true);
     setErrorMsg('');
     setSuccessMsg('');
-
-    // Estructurar NoSQL details payload
-    const testimonios = (testimoniosText && testimoniosAutor) 
-      ? [{ autor: testimoniosAutor, texto: testimoniosText }] 
-      : [];
-    const galeria_rica = imagenUrl 
-      ? { imagenes: [imagenUrl], videos: [] } 
-      : { imagenes: [], videos: [] };
-
-    const payload = {
-      titulo,
-      monto_objetivo: parseFloat(montoObjetivo),
-      monto_actual: montoActual ? parseFloat(montoActual) : 0,
-      fecha_limite: fechaLimite || null,
-      testimonios,
-      galeria_rica,
-      obra_status: obraStatus
-    };
-
     try {
-      if (editingCampaignId) {
-        // Actualizar campaña
-        await api.put(`/campanas/${editingCampaignId}`, payload);
-        setSuccessMsg('Campaña híbrida actualizada correctamente.');
-      } else {
-        // Crear nueva campaña
-        await api.post('/campanas', payload);
-        setSuccessMsg('Campaña híbrida creada exitosamente en SQL y NoSQL.');
-      }
-
-      // Resetear formulario
-      setShowCampaignForm(false);
-      setEditingCampaignId(null);
-      setTitulo('');
-      setMontoObjetivo('');
-      setMontoActual('');
-      setFechaLimite('');
-      setTestimoniosText('');
-      setTestimoniosAutor('');
-      setImagenUrl('');
-      setObraStatus('Planeada');
-      
+      await api.put(`/donaciones/transferencias/${id}/aprobar`);
+      setSuccessMsg('Transferencia aprobada con éxito. Fondos acreditados y campaña actualizada.');
       loadDashboardData();
     } catch (err) {
       console.error(err);
-      setErrorMsg(err.response?.data?.error || 'Error al guardar la campaña híbrida.');
+      setErrorMsg(err.response?.data?.error || 'Error al aprobar la transferencia bancaria.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Disparar edición de campaña
+  // TEAM_001: Rechazar una transferencia declarada por un socio
+  const handleRejectTransfer = async (id) => {
+    if (!confirm('¿Seguro que desea rechazar esta declaración de transferencia?')) return;
+    setSubmitting(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      await api.put(`/donaciones/transferencias/${id}/rechazar`);
+      setSuccessMsg('Declaración de transferencia rechazada.');
+      loadDashboardData();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.error || 'Error al rechazar la transferencia.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+
+  /* ── Save campaign ── */
+  const handleSaveCampaign = async (e) => {
+    e.preventDefault();
+    setErrorMsg(''); setSuccessMsg('');
+    const testimonios = (testimoniosText && testimoniosAutor)
+      ? [{ autor: testimoniosAutor, texto: testimoniosText }]
+      : [];
+    const galeria_rica = imagenUrl
+      ? { imagenes: [imagenUrl], videos: [] }
+      : { imagenes: [], videos: [] };
+    const payload = {
+      titulo, monto_objetivo: parseFloat(montoObjetivo),
+      monto_actual: montoActual ? parseFloat(montoActual) : 0,
+      fecha_limite: fechaLimite || null,
+      testimonios, galeria_rica, obra_status: obraStatus,
+    };
+    try {
+      if (editingCampaignId) {
+        await api.put(`/campanas/${editingCampaignId}`, payload);
+        setSuccessMsg('Campaña actualizada correctamente.');
+      } else {
+        await api.post('/campanas', payload);
+        setSuccessMsg('Nueva campaña híbrida creada exitosamente.');
+      }
+      resetCampaignForm();
+      loadDashboardData();
+    } catch (err) {
+      setErrorMsg(err.response?.data?.error || 'Error al guardar la campaña.');
+    }
+  };
+
+  const resetCampaignForm = () => {
+    setShowCampaignForm(false); setEditingCampaignId(null);
+    setTitulo(''); setMontoObjetivo(''); setMontoActual('');
+    setFechaLimite(''); setTestimoniosText('');
+    setTestimoniosAutor(''); setImagenUrl(''); setObraStatus('Planeada');
+  };
+
   const handleEditCampaign = async (id) => {
     setErrorMsg('');
     try {
-      const res = await api.get(`/campanas/${id}`); // Data mashup
-      const data = res.data;
-      
-      setEditingCampaignId(data.id);
-      setTitulo(data.titulo);
-      setMontoObjetivo(data.monto_objetivo);
-      setMontoActual(data.monto_actual);
-      setFechaLimite(data.fecha_limite ? data.fecha_limite.split('T')[0] : '');
-      
-      // NoSQL data details
-      if (data.detalles.testimonios?.length > 0) {
-        setTestimoniosText(data.detalles.testimonios[0].texto);
-        setTestimoniosAutor(data.detalles.testimonios[0].autor);
-      } else {
-        setTestimoniosText('');
-        setTestimoniosAutor('');
-      }
-      if (data.detalles.galeria_rica.imagenes?.length > 0) {
-        setImagenUrl(data.detalles.galeria_rica.imagenes[0]);
-      } else {
-        setImagenUrl('');
-      }
-      setObraStatus(data.detalles.obra_status || 'Planeada');
-      
+      const res = await api.get(`/campanas/${id}`);
+      const d = res.data;
+      setEditingCampaignId(d.id); setTitulo(d.titulo);
+      setMontoObjetivo(d.monto_objetivo); setMontoActual(d.monto_actual);
+      setFechaLimite(d.fecha_limite ? d.fecha_limite.split('T')[0] : '');
+      setTestimoniosText(d.detalles.testimonios?.[0]?.texto ?? '');
+      setTestimoniosAutor(d.detalles.testimonios?.[0]?.autor ?? '');
+      setImagenUrl(d.detalles.galeria_rica.imagenes?.[0] ?? '');
+      setObraStatus(d.detalles.obra_status ?? 'Planeada');
       setShowCampaignForm(true);
     } catch (err) {
-      console.error(err);
       setErrorMsg('No se pudieron recuperar los detalles de la campaña.');
     }
   };
 
-  // Eliminar campaña
   const handleDeleteCampaign = async (id) => {
-    if (!confirm('¿Está seguro de eliminar esta campaña y todos sus registros híbridos (SQL + NoSQL)?')) return;
+    if (!confirm('¿Seguro que desea eliminar esta campaña y todo su contenido asociado?')) return;
     setSubmitting(true);
     try {
       await api.delete(`/campanas/${id}`);
-      setSuccessMsg('Campaña eliminada correctamente de ambas bases de datos.');
+      setSuccessMsg('Campaña eliminada de ambas bases de datos.');
       loadDashboardData();
     } catch (err) {
-      console.error(err);
-      setErrorMsg('Error al intentar eliminar la campaña.');
+      setErrorMsg('Error al eliminar la campaña.');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Abrir formulario para editar una noticia existente
-  const handleEditNews = (noticia) => {
-    setEditingNewsId(noticia._id);
-    setNewsTitulo(noticia.titulo);
-    setNewsCuerpoHtml(noticia.cuerpo_html);
-    setNewsTags(noticia.tags ? noticia.tags.join(', ') : '');
-    setNewsFecha(noticia.fecha ? noticia.fecha.split('T')[0] : '');
-    setShowNewsForm(true);
-    setErrorMsg('');
-  };
-
-  // Crear o actualizar una noticia (NoSQL - MongoDB)
+  /* ── Save news ── */
   const handleSaveNews = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-
+    setErrorMsg(''); setSuccessMsg('');
     const payload = {
-      titulo: newsTitulo,
-      cuerpo_html: newsCuerpoHtml,
+      titulo: newsTitulo, cuerpo_html: newsCuerpoHtml,
       tags: newsTags ? newsTags.split(',').map(t => t.trim()).filter(Boolean) : [],
-      fecha: newsFecha || undefined
+      fecha: newsFecha || undefined,
     };
-
     try {
       if (editingNewsId) {
         await api.put(`/noticias/${editingNewsId}`, payload);
         setSuccessMsg('Noticia actualizada correctamente.');
       } else {
         await api.post('/noticias', payload);
-        setSuccessMsg('Noticia publicada correctamente en MongoDB.');
+        setSuccessMsg('Noticia publicada correctamente.');
       }
-
-      setShowNewsForm(false);
-      setEditingNewsId(null);
-      setNewsTitulo('');
-      setNewsCuerpoHtml('');
-      setNewsTags('');
-      setNewsFecha('');
+      resetNewsForm();
       loadDashboardData();
     } catch (err) {
-      console.error(err);
       setErrorMsg(err.response?.data?.error || 'Error al guardar la noticia.');
     }
   };
 
-  // Eliminar una noticia
+  const resetNewsForm = () => {
+    setShowNewsForm(false); setEditingNewsId(null);
+    setNewsTitulo(''); setNewsCuerpoHtml(''); setNewsTags(''); setNewsFecha('');
+  };
+
+  const handleEditNews = (n) => {
+    setEditingNewsId(n._id); setNewsTitulo(n.titulo);
+    setNewsCuerpoHtml(n.cuerpo_html);
+    setNewsTags(n.tags?.join(', ') ?? '');
+    setNewsFecha(n.fecha ? n.fecha.split('T')[0] : '');
+    setShowNewsForm(true); setErrorMsg('');
+  };
+
   const handleDeleteNews = async (id) => {
-    if (!confirm('¿Está seguro de eliminar esta noticia permanentemente?')) return;
+    if (!confirm('¿Eliminar esta noticia permanentemente?')) return;
     setSubmitting(true);
     try {
       await api.delete(`/noticias/${id}`);
       setSuccessMsg('Noticia eliminada correctamente.');
       loadDashboardData();
     } catch (err) {
-      console.error(err);
       setErrorMsg('Error al eliminar la noticia.');
     } finally {
       setSubmitting(false);
     }
   };
 
+  /* ── Label helper ── */
+  const FormLabel = ({ children }) => (
+    <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
+      {children}
+    </label>
+  );
+  const inputCls = "input-field";
+
   return (
-    <div className="flex-grow bg-slate-50 py-10 px-4">
-      <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* Header Dashboard Banner */}
-        <div className="bg-gradient-to-r from-slate-900 to-teal-950 rounded-3xl p-8 text-white flex flex-col md:flex-row md:items-center justify-between gap-6 border border-slate-800 shadow-xl relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 h-40 w-40 bg-teal-500/10 rounded-full filter blur-[40px]"></div>
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="h-12 w-12 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20">
-              <Shield className="h-6 w-6 text-slate-900" />
+    <div className="flex-grow bg-slate-50">
+      {/* ── Header banner ── */}
+      <div className="bg-slate-50 border-b border-slate-200 relative overflow-hidden pt-28">
+        <div className="relative max-w-7xl mx-auto px-4 py-8 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 bg-slate-800 rounded-2xl flex items-center justify-center shadow-sm shrink-0">
+                <Shield className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-display font-black text-slate-900">Panel Administrativo</h1>
+                <p className="text-slate-500 text-xs font-medium mt-0.5">
+                  Panel de control general — Operador: <span className="text-brand-600 font-bold">{user?.email}</span>
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tight leading-tight">Panel Administrativo</h1>
-              <p className="text-xs text-slate-300 font-light mt-0.5">Controlador maestro de bases de datos híbridas y asociados.</p>
+            <div className="flex flex-wrap gap-3">
+              <HeaderStat label="Campañas" value={campaigns.length} icon={Target} color="bg-brand-600" />
+              <HeaderStat label="Socios" value={partners.length} icon={Users} color="bg-slate-600" />
+              <HeaderStat label="Noticias" value={news.length} icon={Newspaper} color="bg-accent-600" />
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-slate-300 bg-slate-800/80 px-4 py-2.5 border border-slate-700/60 rounded-xl">
-            <span>Operador: {user?.email}</span>
+
+          {/* Tabs */}
+          <div className="flex gap-1">
+            {TABS.map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => { setActiveTab(tab.id); setShowCampaignForm(false); setShowNewsForm(false); }}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-brand-50 text-brand-700 shadow-sm border border-brand-100'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
         </div>
+      </div>
 
-        {/* Global Warnings / Success alerts */}
+      {/* ── Main content ── */}
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+
+        {/* Global alerts */}
         {errorMsg && (
-          <div className="flex items-center gap-2 p-4 bg-rose-50 text-rose-800 border border-rose-200 rounded-2xl text-xs font-bold">
-            <AlertTriangle className="h-5 w-5 shrink-0" />
+          <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold rounded-2xl">
+            <AlertCircle className="h-5 w-5 shrink-0" />
             {errorMsg}
+            <button onClick={() => setErrorMsg('')} className="ml-auto text-rose-400 hover:text-rose-600">
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
         {successMsg && (
-          <div className="flex items-center gap-2 p-4 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-2xl text-xs font-bold">
+          <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold rounded-2xl">
             <CheckCircle className="h-5 w-5 shrink-0" />
             {successMsg}
           </div>
         )}
 
-        {/* Formulario de Campañas */}
-        {showCampaignForm && (
-          <form onSubmit={handleSaveCampaign} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6 animate-in fade-in duration-200">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-              <h3 className="text-lg font-black text-slate-800">
-                {editingCampaignId ? 'Editar Campaña Híbrida' : 'Registrar Nueva Campaña Híbrida'}
-              </h3>
-              <button 
-                type="button" 
-                onClick={() => { setShowCampaignForm(false); setEditingCampaignId(null); }}
-                className="text-xs uppercase font-bold text-slate-400 hover:text-slate-600 tracking-wider"
-              >
-                Cancelar
-              </button>
-            </div>
-
-            {/* Grid 1: SQL Data Fields */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-1.5 md:col-span-2">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Título de Campaña (SQL/NoSQL)</label>
-                <input
-                  type="text"
-                  required
-                  value={titulo}
-                  onChange={(e) => setTitulo(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <div className="h-10 w-10 border-4 border-slate-200 border-t-brand-500 rounded-full animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* ══════════════ DASHBOARD TAB ══════════════ */}
+            {activeTab === 'dashboard' && (
+              <div className="space-y-6 animate-fade-up">
+                <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2 mb-4">
+                  <LayoutDashboard className="h-5 w-5 text-brand-600" />
+                  Métricas y Evolución
+                </h2>
+                <div className="grid lg:grid-cols-2 gap-6">
+                  {/* Gráfico 1 */}
+                  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Evolución de Recaudaciones (Mensual)</h3>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={mockRevenueData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                          <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                          <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val/1000}k`} />
+                          <Tooltip formatter={(value) => `$${value}`} contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                          <Line type="monotone" dataKey="ingresos" stroke="#0d9488" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  
+                  {/* Gráfico 2 */}
+                  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Nuevos Socios Registrados</h3>
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={mockPartnersData} margin={{ top: 20 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                          <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                          <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                          <Tooltip cursor={{ fill: '#fef2f2' }} contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
+                          <Bar dataKey="nuevos" fill="#dc2626" radius={[4, 4, 0, 0]}>
+                            <LabelList dataKey="nuevos" position="top" fill="#dc2626" fontSize={12} fontWeight="bold" />
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                </div>
+                
+                <p className="text-[11px] text-slate-400 text-center mt-4 font-semibold px-4 py-3 bg-slate-100/50 rounded-xl">
+                  <AlertCircle className="h-3.5 w-3.5 inline mr-1 -mt-0.5" />
+                  Nota: Los gráficos muestran datos de muestra (mock data) de forma demostrativa hasta la integración del historial transaccional en el servidor.
+                </p>
               </div>
+            )}
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Monto Objetivo en Pesos (SQL)</label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  value={montoObjetivo}
-                  onChange={(e) => setMontoObjetivo(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
+            {/* ══════════════ CAMPAIGNS TAB ══════════════ */}
+        {activeTab === 'campaigns' && (
+          <div className="space-y-5">
+            {/* Campaign Form */}
+            {showCampaignForm && (
+              <form onSubmit={handleSaveCampaign} className="bg-white rounded-3xl border border-slate-100 shadow-card p-6 space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <h3 className="text-lg font-display font-black text-slate-800">
+                    {editingCampaignId ? '✏️ Editar Campaña' : '+ Nueva Campaña Híbrida'}
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={resetCampaignForm}
+                    className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Monto Actual Recaudado (SQL)</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={montoActual}
-                  onChange={(e) => setMontoActual(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
+                {/* SQL fields */}
+                <div>
+                  <p className="text-[10px] font-black text-brand-600 uppercase tracking-widest mb-4 flex items-center gap-1.5">
+                    <div className="h-0.5 w-5 bg-brand-400 rounded-full" />
+                    Datos Generales
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <FormLabel>Título de la Campaña</FormLabel>
+                      <input type="text" required value={titulo} onChange={e => setTitulo(e.target.value)} className={inputCls} placeholder="Ej: Equipamiento para Pediatría" />
+                    </div>
+                    <div>
+                      <FormLabel>Monto Objetivo (ARS)</FormLabel>
+                      <input type="number" required min="0" value={montoObjetivo} onChange={e => setMontoObjetivo(e.target.value)} className={inputCls} placeholder="5000000" />
+                    </div>
+                    <div>
+                      <FormLabel>Monto Actual Recaudado (ARS)</FormLabel>
+                      <input type="number" min="0" value={montoActual} onChange={e => setMontoActual(e.target.value)} className={inputCls} placeholder="0" />
+                    </div>
+                    <div>
+                      <FormLabel>Fecha Límite</FormLabel>
+                      <input type="date" value={fechaLimite} onChange={e => setFechaLimite(e.target.value)} className={inputCls} />
+                    </div>
+                    <div>
+                      <FormLabel>Estado de Obra</FormLabel>
+                      <select value={obraStatus} onChange={e => setObraStatus(e.target.value)} className={inputCls}>
+                        <option value="Planeada">Planeada</option>
+                        <option value="En Ejecución">En Ejecución</option>
+                        <option value="En Proceso de Licitación">En Proceso de Licitación</option>
+                        <option value="Finalizada">Finalizada</option>
+                        <option value="Suspendida">Suspendida</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Fecha Límite (SQL)</label>
-                <input
-                  type="date"
-                  value={fechaLimite}
-                  onChange={(e) => setFechaLimite(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
+                {/* NoSQL fields */}
+                <div className="bg-violet-50 border border-violet-200/50 rounded-2xl p-5 space-y-4">
+                  <p className="text-[10px] font-black text-violet-700 uppercase tracking-widest flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Detalles Multimedia
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <FormLabel>Testimonio (Texto)</FormLabel>
+                      <input type="text" value={testimoniosText} onChange={e => setTestimoniosText(e.target.value)} className={inputCls} placeholder="Fue un gran aporte para el hospital..." />
+                    </div>
+                    <div>
+                      <FormLabel>Testimonio (Autor)</FormLabel>
+                      <input type="text" value={testimoniosAutor} onChange={e => setTestimoniosAutor(e.target.value)} className={inputCls} placeholder="Dr. Juan Gómez" />
+                    </div>
+                    <div className="md:col-span-2">
+                      <FormLabel>URL de Imagen (Galería)</FormLabel>
+                      <input type="url" value={imagenUrl} onChange={e => setImagenUrl(e.target.value)} className={inputCls} placeholder="https://imagenes.hospital/foto.jpg" />
+                    </div>
+                  </div>
+                </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Estado de Obra (NoSQL - MongoDB)</label>
-                <select
-                  value={obraStatus}
-                  onChange={(e) => setObraStatus(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                <button type="submit" className="btn-brand w-full py-3.5 shine">
+                  <Save className="h-4 w-4" />
+                  {editingCampaignId ? 'Guardar Cambios' : 'Crear Campaña'}
+                </button>
+              </form>
+            )}
+
+            {/* Campaigns list */}
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden">
+              <div className="flex items-center justify-between p-5 border-b border-slate-100">
+                <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
+                  <Target className="h-5 w-5 text-brand-600" />
+                  Gestión de Campañas
+                </h2>
+                <button
+                  onClick={() => { resetCampaignForm(); setShowCampaignForm(true); }}
+                  className="btn-brand py-2 px-4 text-xs"
                 >
-                  <option value="Planeada">Planeada</option>
-                  <option value="En Ejecución">En Ejecución</option>
-                  <option value="Finalizada">Finalizada</option>
-                  <option value="Suspendida">Suspendida</option>
-                </select>
+                  <Plus className="h-3.5 w-3.5" />
+                  Nueva
+                </button>
               </div>
+
+              {loading ? (
+                <div className="p-8 text-center text-slate-400 text-sm">Cargando campañas...</div>
+              ) : campaigns.length === 0 ? (
+                <div className="p-12 text-center">
+                  <Target className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                  <p className="text-slate-400 text-sm font-semibold">No hay campañas registradas.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-50">
+                  {campaigns.map(camp => {
+                    const pct = Math.min(100, Math.round((parseFloat(camp.monto_actual) / parseFloat(camp.monto_objetivo)) * 100));
+                    return (
+                      <div key={camp.id} className="flex items-center gap-4 p-5 hover:bg-slate-50 transition-colors">
+                        {/* Progress circle */}
+                        <div className="shrink-0 h-12 w-12 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center">
+                          <span className="text-sm font-black text-brand-700">{pct}%</span>
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <h4 className="text-sm font-bold text-slate-800 truncate">{camp.titulo}</h4>
+                          <div className="flex gap-3 mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                            <span>Meta: ${parseFloat(camp.monto_objetivo).toLocaleString('es-AR')}</span>
+                            <span className="text-emerald-600">Recaudado: ${parseFloat(camp.monto_actual).toLocaleString('es-AR')}</span>
+                          </div>
+                          <div className="mt-1.5 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div className="progress-fill h-full" style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => handleEditCampaign(camp.id)}
+                            disabled={submitting}
+                            className="p-2 rounded-xl hover:bg-brand-50 hover:text-brand-600 text-slate-400 transition-colors disabled:opacity-40"
+                            title="Editar"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCampaign(camp.id)}
+                            disabled={submitting}
+                            className="p-2 rounded-xl hover:bg-rose-50 hover:text-rose-600 text-slate-400 transition-colors disabled:opacity-40"
+                            title="Eliminar"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-
-            {/* Grid 2: MongoDB NoSQL Details (Testimonios & multimedia) */}
-            <div className="bg-teal-50/20 border border-teal-500/10 rounded-2xl p-5 space-y-4">
-              <h4 className="text-xs font-bold text-teal-800 uppercase tracking-widest flex items-center gap-1.5">
-                <FileText className="h-4 w-4" />
-                Detalles Narrativos Multimedia (NoSQL - MongoDB)
-              </h4>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Testimonio (Texto)</label>
-                  <input
-                    type="text"
-                    value={testimoniosText}
-                    onChange={(e) => setTestimoniosText(e.target.value)}
-                    placeholder="Hermoso esfuerzo para el hospital..."
-                    className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Testimonio (Autor)</label>
-                  <input
-                    type="text"
-                    value={testimoniosAutor}
-                    onChange={(e) => setTestimoniosAutor(e.target.value)}
-                    placeholder="Dr. Juan Gómez"
-                    className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1.5 md:col-span-2">
-                  <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Enlace de Imagen Enriquecida / Banner (Galería)</label>
-                  <input
-                    type="text"
-                    value={imagenUrl}
-                    onChange={(e) => setImagenUrl(e.target.value)}
-                    placeholder="https://imagenes.hospital/campana-foto.jpg"
-                    className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <button 
-              type="submit"
-              className="w-full py-3.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs uppercase font-bold tracking-wider shadow-lg shadow-teal-900/10"
-            >
-              {editingCampaignId ? 'Guardar Cambios Híbridos' : 'Crear Campaña en SQL + NoSQL'}
-            </button>
-          </form>
+          </div>
         )}
 
-        {/* Formulario de Noticias */}
-        {showNewsForm && (
-          <form onSubmit={handleSaveNews} className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-6 animate-in fade-in duration-200">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-4">
-              <h3 className="text-lg font-black text-slate-800">
-                {editingNewsId ? 'Editar Noticia' : 'Publicar Nueva Noticia'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => { setShowNewsForm(false); setEditingNewsId(null); }}
-                className="text-xs uppercase font-bold text-slate-400 hover:text-slate-600 tracking-wider"
-              >
-                Cancelar
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Título</label>
-                <input
-                  type="text"
-                  required
-                  value={newsTitulo}
-                  onChange={(e) => setNewsTitulo(e.target.value)}
-                  placeholder="Ej: Nuevo equipamiento para el área de maternidad"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  Cuerpo / Contenido <span className="normal-case text-slate-400 font-normal">(HTML permitido)</span>
-                </label>
-                <textarea
-                  required
-                  rows={5}
-                  value={newsCuerpoHtml}
-                  onChange={(e) => setNewsCuerpoHtml(e.target.value)}
-                  placeholder="<p>Texto de la noticia...</p>"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono resize-y"
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    Tags <span className="normal-case text-slate-400 font-normal">(separados por coma)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={newsTags}
-                    onChange={(e) => setNewsTags(e.target.value)}
-                    placeholder="equipamiento, pediatría, donación"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Fecha de Publicación</label>
-                  <input
-                    type="date"
-                    value={newsFecha}
-                    onChange={(e) => setNewsFecha(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3.5 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs uppercase font-bold tracking-wider shadow-lg shadow-teal-900/10"
-            >
-              {editingNewsId ? 'Guardar Cambios' : 'Publicar Noticia en MongoDB'}
-            </button>
-          </form>
-        )}
-
-        {/* Dashboard Sections grid */}
-        <div className="grid lg:grid-cols-12 gap-8">
-          
-          {/* Listado de Campañas (Admin Column) */}
-          <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200/60 p-6 space-y-6 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                <Target className="h-5 w-5 text-teal-600" />
-                Gestión de Campañas
+        {/* ══════════════ PARTNERS TAB ══════════════ */}
+        {activeTab === 'partners' && (
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden">
+            <div className="p-5 border-b border-slate-100">
+              <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
+                <Users className="h-5 w-5 text-amber-500" />
+                Libro Registro de Asociados
               </h2>
-              <button
-                onClick={() => {
-                  setEditingCampaignId(null);
-                  setTitulo('');
-                  setMontoObjetivo('');
-                  setMontoActual('');
-                  setFechaLimite('');
-                  setTestimoniosText('');
-                  setTestimoniosAutor('');
-                  setImagenUrl('');
-                  setObraStatus('Planeada');
-                  setShowCampaignForm(true);
-                }}
-                className="flex items-center gap-1 bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Nueva
-              </button>
+              <p className="text-xs text-slate-400 mt-0.5">Gestione los estados de aprobación de los socios.</p>
             </div>
 
             {loading ? (
-              <p className="text-center py-6 text-slate-400 text-xs">Cargando campañas...</p>
-            ) : campaigns.length === 0 ? (
-              <p className="text-center py-6 text-slate-400 text-xs">No hay campañas.</p>
+              <div className="p-8 text-center text-slate-400 text-sm">Cargando socios...</div>
+            ) : partners.length === 0 ? (
+              <div className="p-12 text-center">
+                <Users className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                <p className="text-slate-400 text-sm font-semibold">No hay perfiles de socios registrados.</p>
+              </div>
             ) : (
-              <div className="space-y-4">
-                {campaigns.map((camp) => (
-                  <div key={camp.id} className="flex items-center justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:bg-slate-100/50 transition-colors">
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-800 line-clamp-1">{camp.titulo}</h4>
-                      <div className="flex gap-2 text-[10px] font-bold uppercase text-slate-400 mt-1">
-                        <span>Meta: ${parseFloat(camp.monto_objetivo).toLocaleString('es-AR')}</span>
-                        <span>•</span>
-                        <span className="text-emerald-600">Recaudado: ${parseFloat(camp.monto_actual).toLocaleString('es-AR')}</span>
+              <div className="divide-y divide-slate-50">
+                {partners.map(part => (
+                  <div key={part.numero_asociado} className="flex items-center gap-4 p-5 hover:bg-slate-50 transition-colors">
+                    {/* Avatar */}
+                    <div className={`shrink-0 h-10 w-10 rounded-xl flex items-center justify-center font-black text-sm ${
+                      part.estado === 'activo'
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-amber-100 text-amber-700'
+                    }`}>
+                      {part.numero_asociado}
+                    </div>
+                    <div className="flex-grow min-w-0">
+                      <p className="text-sm font-bold text-slate-800 truncate">{part.usuario?.email ?? '—'}</p>
+                      <p className="text-[10px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wide">
+                        DNI: {part.dni}
+                      </p>
+                    </div>
+                    <div className="shrink-0">
+                      {part.estado === 'pendiente' ? (
+                        <button
+                          onClick={() => handleApprovePartner(part.numero_asociado)}
+                          disabled={submitting}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                        >
+                          <Clock className="h-3 w-3" />
+                          Aprobar
+                        </button>
+                      ) : (
+                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-[11px] font-black uppercase tracking-wider">
+                          <CheckCircle className="h-3 w-3" />
+                          Activo
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══════════════ NEWS TAB ══════════════ */}
+        {activeTab === 'news' && (
+          <div className="space-y-5">
+            {/* News Form */}
+            {showNewsForm && (
+              <form onSubmit={handleSaveNews} className="bg-white rounded-3xl border border-slate-100 shadow-card p-6 space-y-5">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <h3 className="text-lg font-display font-black text-slate-800">
+                    {editingNewsId ? '✏️ Editar Noticia' : '+ Nueva Noticia'}
+                  </h3>
+                  <button type="button" onClick={resetNewsForm} className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div>
+                  <FormLabel>Título</FormLabel>
+                  <input type="text" required value={newsTitulo} onChange={e => setNewsTitulo(e.target.value)} className={inputCls} placeholder="Ej: Nuevo equipamiento para maternidad" />
+                </div>
+                <div>
+                  <FormLabel>Cuerpo / Contenido <span className="normal-case text-slate-400 font-normal ml-1">(HTML permitido)</span></FormLabel>
+                  <textarea
+                    required rows={5} value={newsCuerpoHtml}
+                    onChange={e => setNewsCuerpoHtml(e.target.value)}
+                    placeholder="<p>Texto de la noticia...</p>"
+                    className={`${inputCls} font-mono resize-y`}
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <FormLabel>Tags <span className="normal-case text-slate-400 font-normal">(separados por coma)</span></FormLabel>
+                    <input type="text" value={newsTags} onChange={e => setNewsTags(e.target.value)} className={inputCls} placeholder="equipamiento, pediatría, donación" />
+                  </div>
+                  <div>
+                    <FormLabel>Fecha de Publicación</FormLabel>
+                    <input type="date" value={newsFecha} onChange={e => setNewsFecha(e.target.value)} className={inputCls} />
+                  </div>
+                </div>
+
+                <button type="submit" className="btn-brand w-full py-3.5 shine">
+                  <Save className="h-4 w-4" />
+                  {editingNewsId ? 'Guardar Cambios' : 'Publicar Noticia'}
+                </button>
+              </form>
+            )}
+
+            {/* News list */}
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden">
+              <div className="flex items-center justify-between p-5 border-b border-slate-100">
+                <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
+                  <Newspaper className="h-5 w-5 text-violet-600" />
+                  Gestión de Noticias
+                  <span className="badge bg-violet-100 text-violet-700 ml-1">Visible</span>
+                </h2>
+                <button
+                  onClick={() => { resetNewsForm(); setShowNewsForm(true); }}
+                  className="btn-brand py-2 px-4 text-xs"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Nueva
+                </button>
+              </div>
+
+              {loading ? (
+                <div className="p-8 text-center text-slate-400 text-sm">Cargando noticias...</div>
+              ) : news.length === 0 ? (
+                <div className="p-12 text-center">
+                  <Newspaper className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                  <p className="text-slate-400 text-sm font-semibold">No hay noticias publicadas.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-50">
+                  {news.map(n => (
+                    <div key={n._id} className="flex items-start gap-4 p-5 hover:bg-slate-50 transition-colors">
+                      <div className="flex-grow min-w-0">
+                        <h4 className="text-sm font-bold text-slate-800 truncate">{n.titulo}</h4>
+                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                          <span className="text-[10px] text-slate-400 font-semibold">
+                            {new Date(n.fecha).toLocaleDateString('es-AR')}
+                          </span>
+                          {n.tags?.map((tag, i) => (
+                            <span key={i} className="badge badge-teal">#{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => handleEditNews(n)}
+                          disabled={submitting}
+                          className="p-2 rounded-xl hover:bg-brand-50 hover:text-brand-600 text-slate-400 transition-colors disabled:opacity-40"
+                          title="Editar"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteNews(n._id)}
+                          disabled={submitting}
+                          className="p-2 rounded-xl hover:bg-rose-50 hover:text-rose-600 text-slate-400 transition-colors disabled:opacity-40"
+                          title="Eliminar"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEditCampaign(camp.id)}
-                        disabled={submitting}
-                        className="p-2 hover:bg-teal-50 hover:text-teal-600 rounded-lg transition-colors text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
-                        title="Editar con Data Mashup"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCampaign(camp.id)}
-                        disabled={submitting}
-                        className="p-2 hover:bg-rose-50 hover:text-rose-600 rounded-lg transition-colors text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
-                        title="Eliminar Híbrido"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+        )}
 
-          {/* Listado de Socios (Admin Column) */}
-          <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-200/60 p-6 space-y-6 shadow-sm">
-            <h2 className="text-lg font-black text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-4">
-              <Users className="h-5 w-5 text-teal-600" />
-              Libro Registro de Asociados
-            </h2>
+        {/* ══════════════ TRANSFERS TAB ══════════════ */}
+        {activeTab === 'transfers' && (
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden animate-fade-up">
+            <div className="p-5 border-b border-slate-100">
+              <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
+                <Banknote className="h-5 w-5 text-emerald-600" />
+                Donaciones por Transferencia Bancaria
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">Gestione y apruebe las declaraciones de transferencia de los socios.</p>
+            </div>
 
             {loading ? (
-              <p className="text-center py-6 text-slate-400 text-xs">Cargando socios...</p>
-            ) : partners.length === 0 ? (
-              <p className="text-center py-6 text-slate-400 text-xs">No hay perfiles de socios registrados.</p>
+              <div className="p-8 text-center text-slate-400 text-sm">Cargando transferencias...</div>
+            ) : transfers.length === 0 ? (
+              <div className="p-12 text-center">
+                <Banknote className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                <p className="text-slate-400 text-sm font-semibold">No hay transferencias registradas.</p>
+              </div>
             ) : (
-              <div className="space-y-4">
-                {partners.map((part) => (
-                  <div key={part.numero_asociado} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between">
-                    <div>
-                      <div className="text-xs font-extrabold text-slate-800">Socio N° {part.numero_asociado}</div>
-                      <div className="text-[10px] text-slate-400 font-semibold mt-0.5">DNI: {part.dni} | {part.usuario?.email}</div>
-                    </div>
-
-                    {part.estado === 'pendiente' ? (
-                      <button
-                        onClick={() => handleApprovePartner(part.numero_asociado)}
-                        disabled={submitting}
-                        className="flex items-center gap-1 px-3 py-1 bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-800 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                        title="Aprobar Socio físicamente"
-                      >
-                        <Clock className="h-3 w-3" />
-                        Pendiente
-                      </button>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 border border-emerald-300 text-emerald-800 rounded-lg text-[9px] font-bold uppercase tracking-wider">
-                        <CheckCircle className="h-3 w-3" />
-                        Activo
-                      </span>
-                    )}
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                      <th className="p-4">Socio (Email)</th>
+                      <th className="p-4">Campaña</th>
+                      <th className="p-4 text-right">Monto</th>
+                      <th className="p-4">Fecha Reporte</th>
+                      <th className="p-4">Estado</th>
+                      <th className="p-4 text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {transfers.map(tr => (
+                      <tr key={tr.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-700">{tr.usuario?.email ?? '—'}</td>
+                        <td className="p-4 text-slate-600 font-semibold">{tr.campana?.titulo ?? '—'}</td>
+                        <td className="p-4 text-right font-black text-slate-800">
+                          ${parseFloat(tr.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="p-4 text-slate-400 font-medium">
+                          {new Date(tr.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            tr.estado === 'aprobada'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                              : tr.estado === 'rechazada'
+                              ? 'bg-rose-50 text-rose-700 border-rose-100'
+                              : 'bg-amber-50 text-amber-700 border-amber-100'
+                          }`}>
+                            {tr.estado}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          {tr.estado === 'pendiente' ? (
+                            <div className="inline-flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => handleApproveTransfer(tr.id)}
+                                disabled={submitting}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                                Aprobar
+                              </button>
+                              <button
+                                onClick={() => handleRejectTransfer(tr.id)}
+                                disabled={submitting}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <XCircle className="h-3 w-3" />
+                                Rechazar
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px]">Procesada</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
-
-        </div>
-
-        {/* Sección de Noticias (ancho completo) */}
-        <div className="bg-white rounded-3xl border border-slate-200/60 p-6 space-y-6 shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-            <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-teal-600" />
-              Gestión de Noticias e Impacto Social
-              <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded uppercase tracking-wider">NoSQL</span>
-            </h2>
-            <button
-              onClick={() => {
-                setEditingNewsId(null);
-                setNewsTitulo('');
-                setNewsCuerpoHtml('');
-                setNewsTags('');
-                setNewsFecha('');
-                setShowNewsForm(true);
-              }}
-              className="flex items-center gap-1 bg-teal-600 hover:bg-teal-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Nueva
-            </button>
-          </div>
-
-          {loading ? (
-            <p className="text-center py-6 text-slate-400 text-xs">Cargando noticias...</p>
-          ) : news.length === 0 ? (
-            <p className="text-center py-6 text-slate-400 text-xs">No hay noticias publicadas.</p>
-          ) : (
-            <div className="space-y-3">
-              {news.map((noticia) => (
-                <div key={noticia._id} className="flex items-start justify-between p-4 bg-slate-50 border border-slate-100 rounded-2xl hover:bg-slate-100/50 transition-colors gap-4">
-                  <div className="flex-grow min-w-0">
-                    <h4 className="text-sm font-bold text-slate-800 truncate">{noticia.titulo}</h4>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className="text-[10px] font-semibold text-slate-400">
-                        {new Date(noticia.fecha).toLocaleDateString('es-AR')}
-                      </span>
-                      {noticia.tags?.map((tag, i) => (
-                        <span key={i} className="bg-teal-50 text-teal-700 px-2 py-0.5 rounded text-[10px] uppercase font-semibold">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={() => handleEditNews(noticia)}
-                      disabled={submitting}
-                      className="p-2 hover:bg-teal-50 hover:text-teal-600 rounded-lg transition-colors text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
-                      title="Editar noticia"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteNews(noticia._id)}
-                      disabled={submitting}
-                      className="p-2 hover:bg-rose-50 hover:text-rose-600 rounded-lg transition-colors text-slate-400 disabled:opacity-40 disabled:cursor-not-allowed"
-                      title="Eliminar noticia"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
+        )}
+          </>
+        )}
       </div>
     </div>
   );
