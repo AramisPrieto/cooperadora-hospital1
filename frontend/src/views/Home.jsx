@@ -66,6 +66,12 @@ const Home = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const lenis = useLenis(); // TEAM_001: Hook de Lenis para control de scroll
+  const scrollTo = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (lenis) lenis.scrollTo(el, { offset: -80, duration: 1.4 });
+    else el.scrollIntoView({ behavior: 'smooth' });
+  };
   const [campaigns, setCampaigns] = useState([]);
 
   const [news, setNews] = useState([]);
@@ -216,13 +222,13 @@ const Home = () => {
   const handleHeroAssociate = () => {
     if (!token) navigate('/login');
     else if (user?.rol === 'admin') navigate('/admin');
-    else lenis?.scrollTo('#campanas-section'); // TEAM_001: Desplazamiento inercial suave nativo
+    else scrollTo('campanas-section');
   };
 
   const handleHeroDonate = () => {
     if (!token) navigate('/login');
     else if (campaigns.length > 0) handleViewCampaignDetail(campaigns[0].id);
-    else lenis?.scrollTo('#campanas-section'); // TEAM_001: Desplazamiento inercial suave nativo
+    else scrollTo('campanas-section');
   };
 
 
@@ -312,7 +318,7 @@ const Home = () => {
                   <ChevronRight className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => document.getElementById('noticias-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => scrollTo('noticias-section')}
                   className="btn-accent px-7 py-4 text-sm"
                 >
                   <Newspaper className="h-4 w-4" />

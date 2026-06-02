@@ -8,6 +8,8 @@ import {
   donarCampana
 } from '../controllers/campanaController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { donationLimiter } from '../middleware/rateLimiter.js';
+import { validateDonation } from '../middleware/validators.js';
 
 const router = express.Router();
 
@@ -17,8 +19,8 @@ router.get('/', getAllCampanas);
 // Ver campaña individual completa: requiere JWT (Cero Anonimato para interactuar con detalles de campaña)
 router.get('/:id', authenticateJWT, getCampanaById);
 
-// Donar a campaña: requiere JWT (Cero Anonimato)
-router.post('/:id/donar', authenticateJWT, donarCampana);
+// Donar a campaña: requiere JWT (Cero Anonimato) + rate limit + validación de monto
+router.post('/:id/donar', authenticateJWT, donationLimiter, validateDonation, donarCampana);
 
 // Rutas de administración de campañas (Solo Admin)
 router.post('/', authenticateJWT, authorizeRoles('admin'), createCampana);

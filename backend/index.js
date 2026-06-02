@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import mongoSanitize from 'express-mongo-sanitize';
 import { connectSQL } from './config/db.js';
 import { connectMongoDB } from './config/mongo.js';
 import sequelize from './config/db.js';
+import { globalLimiter } from './middleware/rateLimiter.js';
 
 // Importar modelos para asegurar que Sequelize los registre
 import './models/index.js';
@@ -24,6 +26,8 @@ const PORT = process.env.PORT || 5000;
 // Middlewares globales
 app.use(cors());
 app.use(express.json());
+app.use(mongoSanitize());      // Sanitiza req.body/params/query — bloquea NoSQL injection
+app.use('/api', globalLimiter); // Rate limit global: 100 req / 15 min por IP
 
 // Log de peticiones simple en desarrollo
 if (process.env.NODE_ENV === 'development') {

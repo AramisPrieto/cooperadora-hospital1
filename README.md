@@ -200,3 +200,17 @@ git checkout -b develop
 - **Seguridad en Contenedores**:
   - Parametrizadas las credenciales de PostgreSQL en `docker-compose.yml` utilizando variables de entorno (`DB_USER`, `DB_PASSWORD`) con fallbacks seguros de desarrollo local.
 
+### Versión 1.2.0 — Seguridad Backend e Inputs (Kevin Nielsen)
+- **Rate Limiting por IP** (`backend/middleware/rateLimiter.js`):
+  - `globalLimiter`: 100 requests por IP cada 15 minutos sobre toda la API.
+  - `authLimiter`: 10 requests por IP cada 15 minutos en `/api/auth/*` — protege contra ataques de fuerza bruta al login y registro.
+  - `donationLimiter`: 5 requests por IP por hora en endpoints de donación (estándar y transferencia) — evita spam de donaciones.
+- **Validación de Inputs** (`backend/middleware/validators.js`):
+  - Registro: valida formato de email, contraseña mínimo 8 caracteres, y DNI entre 1.000.000 y 99.999.999.
+  - Login: valida que email y contraseña tengan formato correcto y no estén vacíos.
+  - Donaciones: valida que el monto sea mayor a 0 y no supere $10.000.000.
+- **Protección NoSQL Injection** (`express-mongo-sanitize`):
+  - Middleware global que elimina claves con `$` y `.` del body antes de que lleguen a Mongoose. Previene ataques de inyección NoSQL.
+- **Unificación de Scroll**:
+  - Integrado el helper `scrollTo` con offset `-80` y duración `1.4` para un desplazamiento inercial sin solapamiento con el Navbar.
+

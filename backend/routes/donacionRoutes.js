@@ -7,11 +7,13 @@ import {
   rechazarTransferencia
 } from '../controllers/donacionController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { donationLimiter } from '../middleware/rateLimiter.js';
+import { validateDonation } from '../middleware/validators.js';
 
 const router = express.Router();
 
-// Rutas de Socio (requiere autenticación general)
-router.post('/campanas/:id/donar-transferencia', authenticateJWT, declararTransferencia);
+// Rutas de Socio (requiere autenticación general) + rate limit + validación de monto
+router.post('/campanas/:id/donar-transferencia', authenticateJWT, donationLimiter, validateDonation, declararTransferencia);
 
 // Rutas de Administración (requiere rol de admin)
 router.get('/transferencias', authenticateJWT, authorizeRoles('admin'), getTransferencias);

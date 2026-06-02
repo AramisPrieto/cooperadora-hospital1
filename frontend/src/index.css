@@ -78,8 +78,8 @@
   }
 }
 
-/* Scroll global */
+/* Scroll global - controlado 100% por Lenis */
 html {
-  /* TEAM_001: Se controla mediante Lenis para evitar tironeos de scroll */
+  overflow: auto;
 }
 
