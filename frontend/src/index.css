@@ -80,6 +80,6 @@
 
 /* Scroll global */
 html {
-  /* Scroll behavior se controla ahora vía Lenis, pero lo mantenemos por si algo falla */
-  scroll-behavior: smooth;
+  /* TEAM_001: Se controla mediante Lenis para evitar tironeos de scroll */
 }
+

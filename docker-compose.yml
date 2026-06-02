@@ -8,8 +8,11 @@ services:
     restart: always
     environment:
       POSTGRES_DB: cooperadora_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: admin123
+      POSTGRES_USER: ${DB_USER:-postgres}
+      # TEAM_001: Credenciales parametrizadas para evitar contraseñas fijas expuestas
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin123}
+
+
     ports:
       - "5435:5432"
     volumes:

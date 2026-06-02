@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ReactLenis } from '@studio-freight/react-lenis';
+import { ReactLenis } from 'lenis/react'; // TEAM_001: Wrapper oficial para React
+
 import Navbar from './components/Navbar';
 import Home from './views/Home';
 import Login from './views/Login';

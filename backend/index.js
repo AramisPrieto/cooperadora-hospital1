@@ -13,6 +13,7 @@ import authRoutes from './routes/authRoutes.js';
 import socioRoutes from './routes/socioRoutes.js';
 import campanaRoutes from './routes/campanaRoutes.js';
 import noticiaRoutes from './routes/noticiaRoutes.js';
+import donacionRoutes from './routes/donacionRoutes.js'; // TEAM_001: Importamos las rutas de transferencias
 
 // Cargar variables de entorno
 dotenv.config();
@@ -37,6 +38,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/socios', socioRoutes);
 app.use('/api/campanas', campanaRoutes);
 app.use('/api/noticias', noticiaRoutes);
+app.use('/api/donaciones', donacionRoutes); // TEAM_001: Montamos las rutas en /api/donaciones
+
 
 // Ruta de estado de la API (Pública)
 app.get('/api/health', (req, res) => {

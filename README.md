@@ -181,3 +181,22 @@ git commit -m "feat: inicializar backend y frontend híbrido para Etapa 4"
 # Crear y cambiarse a la rama de desarrollo
 git checkout -b develop
 ```
+
+---
+
+## 📋 Historial de Cambios
+
+### Versión 1.1.0 — Checkout de Transferencias y Corrección de Scroll (Kevin Nielsen)
+- **Donaciones por Transferencia Bancaria**: 
+  - Creado el modelo relacional `DonacionTransferencia` en PostgreSQL para registrar transferencias pendientes, aprobadas y rechazadas.
+  - Implementado el controlador y las rutas de la API en `/api/donaciones` para la declaración de transferencias bancarias de socios de forma segura.
+- **Aprobación Administrativa Manual**:
+  - Incorporada la pestaña **"Transferencias"** en el panel administrativo (`AdminPanel.jsx`) para que el operador de la ONG apruebe o rechace de forma manual y transaccional las donaciones declaradas, impactando de forma segura en la barra de progreso de la campaña.
+- **Visualización Compacta del Modal**:
+  - Simplificado el modal de detalles de campaña en el Home para eliminar los bloques multimedia de testimonios, galerías y estado del proyecto a fin de agilizar el proceso de donación.
+- **Optimización de UX & Scroll (Lenis)**:
+  - Migrado el wrapper de Lenis al paquete oficial `lenis/react`.
+  - Removido `scroll-behavior: smooth` de `index.css` y modificados los manejadores del Hero para utilizar la API inercial nativa de Lenis, solucionando los problemas de tironeo en el scroll.
+- **Seguridad en Contenedores**:
+  - Parametrizadas las credenciales de PostgreSQL en `docker-compose.yml` utilizando variables de entorno (`DB_USER`, `DB_PASSWORD`) con fallbacks seguros de desarrollo local.
+

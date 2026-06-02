@@ -7,7 +7,8 @@ import {
 import {
   Shield, Users, Target, Plus, Pencil, Trash, FileText,
   CheckCircle, Clock, AlertTriangle, LayoutDashboard,
-  Newspaper, TrendingUp, X, Save, AlertCircle, Sparkles
+  Newspaper, TrendingUp, X, Save, AlertCircle, Sparkles,
+  Banknote, XCircle
 } from 'lucide-react';
 
 /* ── Small stat card in header ── */
@@ -29,6 +30,7 @@ const TABS = [
   { id: 'campaigns', label: 'Campañas', icon: Target },
   { id: 'partners',  label: 'Socios',   icon: Users },
   { id: 'news',      label: 'Noticias', icon: Newspaper },
+  { id: 'transfers', label: 'Transferencias', icon: Banknote }, // TEAM_001: Nueva pestaña
 ];
 
 /* ── Mock Data para Gráficos ── */
@@ -56,6 +58,8 @@ const AdminPanel = () => {
   const [partners, setPartners] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [news, setNews] = useState([]);
+  const [transfers, setTransfers] = useState([]); // TEAM_001: Estado para transferencias
+
 
   /* Campaign form */
   const [showCampaignForm, setShowCampaignForm] = useState(false);
@@ -92,14 +96,16 @@ const AdminPanel = () => {
     setLoading(true);
     setErrorMsg('');
     try {
-      const [pRes, cRes, nRes] = await Promise.all([
+      const [pRes, cRes, nRes, tRes] = await Promise.all([
         api.get('/socios'),
         api.get('/campanas'),
         api.get('/noticias'),
+        api.get('/donaciones/transferencias') // TEAM_001: Petición a la API de transferencias
       ]);
       setPartners(pRes.data);
       setCampaigns(cRes.data);
       setNews(nRes.data);
+      setTransfers(tRes.data); // TEAM_001: Actualizar estado de transferencias
     } catch (err) {
       console.error(err);
       setErrorMsg('Error al cargar la información del panel.');
@@ -107,6 +113,7 @@ const AdminPanel = () => {
       setLoading(false);
     }
   };
+
 
   useEffect(() => { loadDashboardData(); }, []);
 
@@ -130,6 +137,42 @@ const AdminPanel = () => {
       setSubmitting(false);
     }
   };
+
+  // TEAM_001: Aprobar una transferencia declarada por un socio
+  const handleApproveTransfer = async (id) => {
+    setSubmitting(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      await api.put(`/donaciones/transferencias/${id}/aprobar`);
+      setSuccessMsg('Transferencia aprobada con éxito. Fondos acreditados y campaña actualizada.');
+      loadDashboardData();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.error || 'Error al aprobar la transferencia bancaria.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // TEAM_001: Rechazar una transferencia declarada por un socio
+  const handleRejectTransfer = async (id) => {
+    if (!confirm('¿Seguro que desea rechazar esta declaración de transferencia?')) return;
+    setSubmitting(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      await api.put(`/donaciones/transferencias/${id}/rechazar`);
+      setSuccessMsg('Declaración de transferencia rechazada.');
+      loadDashboardData();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.error || 'Error al rechazar la transferencia.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   /* ── Save campaign ── */
   const handleSaveCampaign = async (e) => {
@@ -705,6 +748,92 @@ const AdminPanel = () => {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* ══════════════ TRANSFERS TAB ══════════════ */}
+        {activeTab === 'transfers' && (
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden animate-fade-up">
+            <div className="p-5 border-b border-slate-100">
+              <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
+                <Banknote className="h-5 w-5 text-emerald-600" />
+                Donaciones por Transferencia Bancaria
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">Gestione y apruebe las declaraciones de transferencia de los socios.</p>
+            </div>
+
+            {loading ? (
+              <div className="p-8 text-center text-slate-400 text-sm">Cargando transferencias...</div>
+            ) : transfers.length === 0 ? (
+              <div className="p-12 text-center">
+                <Banknote className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                <p className="text-slate-400 text-sm font-semibold">No hay transferencias registradas.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                      <th className="p-4">Socio (Email)</th>
+                      <th className="p-4">Campaña</th>
+                      <th className="p-4 text-right">Monto</th>
+                      <th className="p-4">Fecha Reporte</th>
+                      <th className="p-4">Estado</th>
+                      <th className="p-4 text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {transfers.map(tr => (
+                      <tr key={tr.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4 font-bold text-slate-700">{tr.usuario?.email ?? '—'}</td>
+                        <td className="p-4 text-slate-600 font-semibold">{tr.campana?.titulo ?? '—'}</td>
+                        <td className="p-4 text-right font-black text-slate-800">
+                          ${parseFloat(tr.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="p-4 text-slate-400 font-medium">
+                          {new Date(tr.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            tr.estado === 'aprobada'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                              : tr.estado === 'rechazada'
+                              ? 'bg-rose-50 text-rose-700 border-rose-100'
+                              : 'bg-amber-50 text-amber-700 border-amber-100'
+                          }`}>
+                            {tr.estado}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          {tr.estado === 'pendiente' ? (
+                            <div className="inline-flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => handleApproveTransfer(tr.id)}
+                                disabled={submitting}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                                Aprobar
+                              </button>
+                              <button
+                                onClick={() => handleRejectTransfer(tr.id)}
+                                disabled={submitting}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <XCircle className="h-3 w-3" />
+                                Rechazar
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px]">Procesada</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
           </>

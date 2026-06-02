@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
+import { useLenis } from 'lenis/react'; // TEAM_001: Importamos el hook de Lenis
 import api from '../api/axios';
+
 import CampaignCard from '../components/CampaignCard';
 import {
   Newspaper, Heart, Search, FileText, Users, Target,
   TrendingUp, ArrowRight, X, CheckCircle, AlertCircle,
-  ChevronRight, Banknote, Calendar, Sparkles
+  ChevronRight, Banknote, Calendar, Sparkles, Copy, Check
 } from 'lucide-react';
+
 
 /* ── Stat item ── */
 const StatItem = ({ value, label, icon: Icon, color }) => (
@@ -62,7 +65,9 @@ const NEWS_COLORS = [
 const Home = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const lenis = useLenis(); // TEAM_001: Hook de Lenis para control de scroll
   const [campaigns, setCampaigns] = useState([]);
+
   const [news, setNews] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
@@ -74,6 +79,10 @@ const Home = () => {
   const [donationSuccess, setDonationSuccess] = useState('');
   const [donationError, setDonationError] = useState('');
   const [submittingDonation, setSubmittingDonation] = useState(false);
+  const [activeDonationTab, setActiveDonationTab] = useState('rapida'); // TEAM_001: 'rapida' o 'transferencia'
+  const [transferAmount, setTransferAmount] = useState('');
+  const [copiedAlias, setCopiedAlias] = useState(false);
+  const [copiedCbu, setCopiedCbu] = useState(false);
 
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
@@ -145,9 +154,12 @@ const Home = () => {
   const handleCloseModal = () => {
     setSelectedCampaign(null);
     setDonationAmount('');
+    setTransferAmount('');
     setDonationSuccess('');
     setDonationError('');
+    setActiveDonationTab('rapida'); // TEAM_001: Reseteamos los estados al cerrar
   };
+
 
   const handleDonate = async (e) => {
     e.preventDefault();
@@ -176,17 +188,43 @@ const Home = () => {
     }
   };
 
+  // TEAM_001: Envía al backend la declaración de la transferencia del socio
+  const handleDeclareTransfer = async (e) => {
+    e.preventDefault();
+    if (!transferAmount || isNaN(transferAmount) || parseFloat(transferAmount) <= 0) {
+      setDonationError('Por favor, ingresá un monto válido mayor a 0.');
+      return;
+    }
+    setSubmittingDonation(true);
+    setDonationError('');
+    setDonationSuccess('');
+    try {
+      await api.post(`/donaciones/campanas/${selectedCampaign.id}/donar-transferencia`, {
+        monto: parseFloat(transferAmount)
+      });
+      setDonationSuccess('¡Muchas gracias por su donación! Pronto le llegará un mail con la confirmación de que nos llegó la transferencia. El impacto en la campaña se verá reflejado una vez que nuestro equipo valide el movimiento bancario.');
+      setTransferAmount('');
+    } catch (err) {
+      console.error('Error al registrar transferencia:', err);
+      setDonationError(err.response?.data?.error || 'Error al procesar la declaración en el servidor.');
+    } finally {
+      setSubmittingDonation(false);
+    }
+  };
+
+
   const handleHeroAssociate = () => {
     if (!token) navigate('/login');
     else if (user?.rol === 'admin') navigate('/admin');
-    else document.getElementById('campanas-section')?.scrollIntoView({ behavior: 'smooth' });
+    else lenis?.scrollTo('#campanas-section'); // TEAM_001: Desplazamiento inercial suave nativo
   };
 
   const handleHeroDonate = () => {
     if (!token) navigate('/login');
     else if (campaigns.length > 0) handleViewCampaignDetail(campaigns[0].id);
-    else document.getElementById('campanas-section')?.scrollIntoView({ behavior: 'smooth' });
+    else lenis?.scrollTo('#campanas-section'); // TEAM_001: Desplazamiento inercial suave nativo
   };
+
 
   /* ── Computed Data ── */
   const activeCampaigns = campaigns.filter(c => parseFloat(c.monto_actual) < parseFloat(c.monto_objetivo));
@@ -648,108 +686,200 @@ const Home = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Estado de obra */}
-              <div>
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                  <div className="h-0.5 w-4 bg-violet-400 rounded-full" />
-                  Estado del Proyecto
-                  <div className="h-0.5 w-4 bg-violet-400 rounded-full" />
-                </p>
-                <span className="badge bg-violet-100 text-violet-800 border border-violet-200 text-xs px-3 py-1.5">
-                  {selectedCampaign.detalles.obra_status}
-                </span>
-              </div>
-
-              {/* Testimonios */}
-              {selectedCampaign.detalles.testimonios?.length > 0 && (
-                <div>
-                  <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3">
-                    Testimonios
-                  </p>
-                  <div className="space-y-3">
-                    {selectedCampaign.detalles.testimonios.map((t, i) => (
-                      <blockquote key={i} className="bg-brand-50 border-l-4 border-brand-400 rounded-r-2xl p-4">
-                        <p className="text-sm text-slate-700 italic">"{t.texto}"</p>
-                        <footer className="text-xs font-bold text-brand-700 mt-2">— {t.autor}</footer>
-                      </blockquote>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Galería */}
-              {(selectedCampaign.detalles.galeria_rica?.imagenes?.length > 0) && (
-                <div>
-                  <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3">
-                    Galería de Imágenes
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {selectedCampaign.detalles.galeria_rica.imagenes.map((img, i) => (
-                      <img
-                        key={i}
-                        src={img}
-                        alt={`Galería ${i + 1}`}
-                        className="w-full h-32 object-cover rounded-2xl border border-slate-100"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
+
 
             {/* Donation footer */}
             <div className="border-t border-slate-100 bg-slate-50 p-6 space-y-4">
-              {donationSuccess && (
-                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold p-3.5 rounded-xl">
-                  <CheckCircle className="h-4 w-4 shrink-0" />
-                  {donationSuccess}
+              {donationSuccess ? (
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium p-4 rounded-2xl shadow-sm">
+                    <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
+                    <p className="leading-normal">{donationSuccess}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="w-full btn-brand py-3 text-sm justify-center"
+                  >
+                    Entendido, Cerrar
+                  </button>
                 </div>
-              )}
-              {donationError && (
-                <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold p-3.5 rounded-xl">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  {donationError}
-                </div>
-              )}
+              ) : (
+                <>
+                  {donationError && (
+                    <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold p-3.5 rounded-xl">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      {donationError}
+                    </div>
+                  )}
 
-              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-                Realizar Donación Segura
-              </p>
+                  {/* Tabs de Selección */}
+                  <div className="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+                    <button
+                      type="button"
+                      onClick={() => { setActiveDonationTab('rapida'); setDonationError(''); }}
+                      className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
+                        activeDonationTab === 'rapida'
+                          ? 'bg-white text-slate-800 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      Donación Rápida
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setActiveDonationTab('transferencia'); setDonationError(''); }}
+                      className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
+                        activeDonationTab === 'transferencia'
+                          ? 'bg-white text-slate-800 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      Transferencia Bancaria
+                    </button>
+                  </div>
 
-              <form onSubmit={handleDonate} className="flex gap-3">
-                <div className="relative flex-grow">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm pointer-events-none">$</span>
-                  <input
-                    type="number"
-                    min="1"
-                    step="any"
-                    value={donationAmount}
-                    onChange={(e) => setDonationAmount(e.target.value)}
-                    placeholder="Monto en ARS..."
-                    className="input-field pl-8"
-                    required
-                    disabled={submittingDonation}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  disabled={submittingDonation}
-                  className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
-                >
-                  Cerrar
-                </button>
-                <button
-                  type="submit"
-                  disabled={submittingDonation}
-                  className="btn-accent text-xs py-2.5 px-5 whitespace-nowrap disabled:opacity-50"
-                >
-                  {submittingDonation ? 'Procesando...' : 'Confirmar Donación'}
-                </button>
-              </form>
+                  {activeDonationTab === 'rapida' ? (
+                    /* ── Formulario Donación Rápida ── */
+                    <form onSubmit={handleDonate} className="space-y-3">
+                      <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
+                        Ingresá el monto a donar
+                      </p>
+                      <div className="flex gap-3">
+                        <div className="relative flex-grow">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm pointer-events-none">$</span>
+                          <input
+                            type="number"
+                            min="1"
+                            step="any"
+                            value={donationAmount}
+                            onChange={(e) => setDonationAmount(e.target.value)}
+                            placeholder="Monto en ARS..."
+                            className="input-field pl-8"
+                            required
+                            disabled={submittingDonation}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCloseModal}
+                          disabled={submittingDonation}
+                          className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
+                        >
+                          Cerrar
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={submittingDonation}
+                          className="btn-accent text-xs py-2.5 px-5 whitespace-nowrap disabled:opacity-50"
+                        >
+                          {submittingDonation ? 'Procesando...' : 'Confirmar'}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    /* ── Formulario Transferencia Bancaria ── */
+                    <form onSubmit={handleDeclareTransfer} className="space-y-4">
+                      {/* Datos de cuenta */}
+                      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-3 text-xs shadow-sm">
+                        <div className="flex justify-between border-b border-slate-100 pb-2">
+                          <span className="text-slate-400 font-medium">Entidad bancaria:</span>
+                          <span className="text-slate-800 font-black">Banco Provincia</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-100 pb-2">
+                          <span className="text-slate-400 font-medium">Razón Social:</span>
+                          <span className="text-slate-800 font-black">Asoc. Cooperadora Hosp. Ferreyra</span>
+                        </div>
+                        <div className="flex justify-between border-b border-slate-100 pb-2">
+                          <span className="text-slate-400 font-medium">CUIT:</span>
+                          <span className="text-slate-800 font-black">30-67891234-5</span>
+                        </div>
+
+                        {/* Alias copiable */}
+                        <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2">
+                          <span className="text-slate-400 font-medium">Alias:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">cooperadora.hospital.nec</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText('cooperadora.hospital.nec');
+                                setCopiedAlias(true);
+                                setTimeout(() => setCopiedAlias(false), 2000);
+                              }}
+                              className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
+                              title="Copiar Alias"
+                            >
+                              {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* CBU copiable */}
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-slate-400 font-medium">CBU:</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">0140354701354701354701</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText('0140354701354701354701');
+                                setCopiedCbu(true);
+                                setTimeout(() => setCopiedCbu(false), 2000);
+                              }}
+                              className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
+                              title="Copiar CBU"
+                            >
+                              {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Declarar monto */}
+                      <div className="space-y-2">
+                        <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
+                          Monto a declarar (el transferido)
+                        </p>
+                        <div className="flex gap-3">
+                          <div className="relative flex-grow">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm pointer-events-none">$</span>
+                            <input
+                              type="number"
+                              min="1"
+                              step="any"
+                              value={transferAmount}
+                              onChange={(e) => setTransferAmount(e.target.value)}
+                              placeholder="Monto transferido..."
+                              className="input-field pl-8"
+                              required
+                              disabled={submittingDonation}
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleCloseModal}
+                            disabled={submittingDonation}
+                            className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
+                          >
+                            Cerrar
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={submittingDonation}
+                            className="btn-brand text-xs py-2.5 px-5 whitespace-nowrap disabled:opacity-50"
+                          >
+                            {submittingDonation ? 'Procesando...' : 'Ya transferí'}
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  )}
+                </>
+              )}
             </div>
+
           </div>
         </div>
       )}
