@@ -676,7 +676,7 @@ const Home = () => {
                     onClick={handleCloseModal}
                     className="w-full btn-brand py-3 text-sm justify-center"
                   >
-                    Entendido, Cerrar
+                    Entendido
                   </button>
                 </div>
               ) : (
