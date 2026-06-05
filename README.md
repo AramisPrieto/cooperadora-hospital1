@@ -186,31 +186,73 @@ git checkout -b develop
 
 ## 📋 Historial de Cambios
 
+### Versión 1.0.0 — Prototipo e APIs de la Etapa 4 (Aramis Prieto)
+- **Persistencia Híbrida SQL/NoSQL**:
+  - Implementación del motor relacional PostgreSQL (`usuarios`, `perfiles_socios`, `campanas_eco`) para consistencia transaccional y el motor documental MongoDB (`noticias_actualidad`, `campanas_detalle`) para datos estructurados flexibles y multimedia.
+  - Creación del mecanismo **Data Mashup** sincrónico mediante `Promise.all` para fusionar y retornar en una sola llamada el estado financiero (SQL) y el contenido enriquecido (NoSQL) de las campañas.
+- **Seguridad y Control de Acceso**:
+  - Autenticación segura mediante **JSON Web Tokens (JWT)** y hashing de contraseñas con `bcryptjs`.
+  - Redirección inteligente post-login: navegación fluida que redirige usuarios anónimos al Login y vuelve de forma transparente a abrir la campaña seleccionada mediante parámetros de URL.
+- **Componentes Interactivos del Frontend**:
+  - Esqueleto interactivo del cliente desarrollado en React (Vite) + Tailwind CSS.
+  - Conexión del Hero a la primera campaña activa con estados de carga (skeletons) y control de estados vacíos.
+  - Protección de concurrencia y doble clic en el Panel Administrativo deshabilitando botones de acción de forma dinámica.
+
+### Versión 1.0.1 — Entorno pnpm, Logo Oficial y Noticias (Thiago Masson)
+- **Migración a pnpm**:
+  - Transición completa del monorrepo al gestor de paquetes `pnpm` para agilizar descargas y garantizar la consistencia en el árbol de dependencias.
+- **Branding Institucional**:
+  - Incorporación del logotipo oficial de la Asociación Cooperadora del Hospital Municipal "Dr. Emilio Ferreyra".
+- **Módulo de Actualidad e Información**:
+  - Creación del gestor de noticias dinámico conectado a la colección MongoDB (`noticias_actualidad`).
+  - Renderizado HTML enriquecido de artículos sanitizado con **DOMPurify** en el cliente para prevenir inyecciones de código malicioso XSS.
+
+### Versión 1.0.2 — Rediseño Estético Clínico y Scroll-Spy (Santiago Ialungo)
+- **Renovación Estética de UI/UX**:
+  - Transición de un diseño oscuro de desarrollo a una interfaz moderna, limpia y netamente profesional orientada a la salud.
+  - Paleta de color optimizada: base clara en `slate-50`, acentos rojos institucionales (`brand-600`) y verde esmeralda clínico (`accent-600`).
+  - Textura visual mediante un patrón lineal que emula una cuadrícula de electrocardiograma (ECG) en el fondo.
+- **Navegación e Interacción**:
+  - Detección de lectura en Navbar (*Scroll-Spy*) para destacar dinámicamente la sección activa de la vista actual.
+  - Integración de Lenis para un scroll inercial suave sin tirones.
+  - Rediseño de indicadores financieros, contadores y optimización de gráficos en el Panel Administrativo.
+
 ### Versión 1.1.0 — Checkout de Transferencias y Corrección de Scroll (Kevin Nielsen)
-- **Donaciones por Transferencia Bancaria**: 
-  - Creado el modelo relacional `DonacionTransferencia` en PostgreSQL para registrar transferencias pendientes, aprobadas y rechazadas.
-  - Implementado el controlador y las rutas de la API en `/api/donaciones` para la declaración de transferencias bancarias de socios de forma segura.
+- **Donaciones por Transferencia Bancaria**:
+  - Creación de la tabla relacional [DonacionTransferencia.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/DonacionTransferencia.js) en PostgreSQL para auditar transferencias declaradas.
+  - Implementación de rutas y controladores para la declaración segura de transferencias en `/api/donaciones`.
 - **Aprobación Administrativa Manual**:
-  - Incorporada la pestaña **"Transferencias"** en el panel administrativo (`AdminPanel.jsx`) para que el operador de la ONG apruebe o rechace de forma manual y transaccional las donaciones declaradas, impactando de forma segura en la barra de progreso de la campaña.
-- **Visualización Compacta del Modal**:
-  - Simplificado el modal de detalles de campaña en el Home para eliminar los bloques multimedia de testimonios, galerías y estado del proyecto a fin de agilizar el proceso de donación.
-- **Optimización de UX & Scroll (Lenis)**:
-  - Migrado el wrapper de Lenis al paquete oficial `lenis/react`.
-  - Removido `scroll-behavior: smooth` de `index.css` y modificados los manejadores del Hero para utilizar la API inercial nativa de Lenis, solucionando los problemas de tironeo en el scroll.
-- **Seguridad en Contenedores**:
-  - Parametrizadas las credenciales de PostgreSQL en `docker-compose.yml` utilizando variables de entorno (`DB_USER`, `DB_PASSWORD`) con fallbacks seguros de desarrollo local.
+  - Adición de la sección de transferencias en [AdminPanel.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/AdminPanel.jsx) permitiendo a los operadores aprobar o rechazar transacciones manualmente, actualizando en tiempo real la barra de progreso de la campaña correspondiente.
+- **Optimización y Limpieza de UI**:
+  - Simplificación del modal en [Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx) ocultando datos multimedia secundarios a fin de incentivar una conversión de donación rápida.
+  - Migración del wrapper de Lenis al módulo `@lenis/react`, removiendo comportamientos heredados de [index.css](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/index.css) para evitar colisiones.
+- **Variables de Entorno**:
+  - Parametrización en [docker-compose.yml](file:///Users/aramisprieto/Documents/cooperadora-hospital1/docker-compose.yml) usando variables locales para mayor portabilidad de infraestructura.
 
 ### Versión 1.2.0 — Seguridad Backend e Inputs (Kevin Nielsen)
-- **Rate Limiting por IP** (`backend/middleware/rateLimiter.js`):
-  - `globalLimiter`: 100 requests por IP cada 15 minutos sobre toda la API.
-  - `authLimiter`: 10 requests por IP cada 15 minutos en `/api/auth/*` — protege contra ataques de fuerza bruta al login y registro.
-  - `donationLimiter`: 5 requests por IP por hora en endpoints de donación (estándar y transferencia) — evita spam de donaciones.
-- **Validación de Inputs** (`backend/middleware/validators.js`):
-  - Registro: valida formato de email, contraseña mínimo 8 caracteres, y DNI entre 1.000.000 y 99.999.999.
-  - Login: valida que email y contraseña tengan formato correcto y no estén vacíos.
-  - Donaciones: valida que el monto sea mayor a 0 y no supere $10.000.000.
-- **Protección NoSQL Injection** (`express-mongo-sanitize`):
-  - Middleware global que elimina claves con `$` y `.` del body antes de que lleguen a Mongoose. Previene ataques de inyección NoSQL.
-- **Unificación de Scroll**:
-  - Integrado el helper `scrollTo` con offset `-80` y duración `1.4` para un desplazamiento inercial sin solapamiento con el Navbar.
+- **Rate Limiting por IP**:
+  - Configuración de políticas de control de tasa en [rateLimiter.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/middleware/rateLimiter.js): 100 peticiones globales cada 15 min, 10 intentos de autenticación cada 15 min, y 5 donaciones por hora.
+- **Validación de Datos Entrantes**:
+  - Middleware de control en [validators.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/middleware/validators.js) con reglas estrictas para DNI (longitud y valor), formato de correo electrónico y límites de donación seguros (entre $1 y $10.000.000).
+- **Protección contra Inyección NoSQL**:
+  - Sanitización automática del cuerpo de solicitudes mediante `express-mongo-sanitize` para remover operadores prohibidos (como `$` y `.`).
+- **Navegación Fluida**:
+  - Ajuste del helper de desplazamiento con offset negativo de `-80px` para impedir que el Navbar fije tapase el título de la sección de destino.
+
+### Versión 1.3.0 — Simplificación de Donaciones y Peticiones Directas (Kevin Nielsen)
+- **Eliminación de Donación Simulada**:
+  - Remoción total del método de pago directo con tarjeta simulada de crédito en frontend y backend para concentrar la contabilidad en transferencias auditables directas.
+  - Eliminación de controladores y rutas obsoletas como `POST /api/campanas/:id/donar` en [campanaController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/campanaController.js).
+- **Consolidación de Dependencias**:
+  - Adición formal de archivos de bloqueo `pnpm-lock.yaml` en las carpetas de frontend y backend para consolidar entornos de ejecución idénticos e impedir desajustes en versiones de paquetes instalados.
+
+### Versión 1.4.0 — Servicio de Correo y Agradecimientos Automatizados (Kevin Nielsen)
+- **Integración del Módulo SMTP**:
+  - Integración de `nodemailer` en el backend para envío de correos electrónicos.
+  - Configuración y parametrización de variables SMTP en el archivo de entorno mediante la actualización de [backend/.env.example](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/.env.example).
+- **Plantillas HTML de Emails Personalizados**:
+  - Creación del servicio en [emailService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/emailService.js) con soporte de diseño adaptativo y estilizado para enviar un mensaje formal de agradecimiento institucional al socio una vez que el operador aprueba su transferencia en el panel.
+- **Desencadenador Transaccional**:
+  - Conexión asíncrona en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para despachar el correo de forma no bloqueante inmediatamente al confirmarse la transacción de la donación.
+
 
