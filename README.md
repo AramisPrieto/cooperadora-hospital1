@@ -207,7 +207,16 @@ git checkout -b develop
   - Creación del gestor de noticias dinámico conectado a la colección MongoDB (`noticias_actualidad`).
   - Renderizado HTML enriquecido de artículos sanitizado con **DOMPurify** en el cliente para prevenir inyecciones de código malicioso XSS.
 
-### Versión 1.0.2 — Rediseño Estético Clínico y Scroll-Spy (Santiago Ialungo)
+### Versión 1.0.2 — Fusión e Integración en Rama Principal (Aramis Prieto)
+- **Consolidación de Producción**:
+  - Fusión e integración de los primeros desarrollos estables acumulados de `develop` hacia la rama principal `main` (Pull Request #1) para establecer la línea base funcional del proyecto.
+
+### Versión 1.0.3 — Seguimiento de Tareas (TODO.md) (Aramis Prieto & Thiago Masson)
+- **Coordinación de Equipo**:
+  - Creación y actualización del archivo de seguimiento [TODO.md](file:///Users/aramisprieto/Documents/cooperadora-hospital1/TODO.md) en la raíz del proyecto para organizar de manera transparente el backlog de tareas pendientes, en curso y finalizadas.
+  - Registro de requerimientos prioritarios como la validación de PDFs de etapas previas, límites de donación para campañas completadas, diseño del panel administrativo y selección mensual de campañas de recaudación.
+
+### Versión 1.0.4 — Rediseño Estético Clínico y Scroll-Spy (Santiago Ialungo)
 - **Renovación Estética de UI/UX**:
   - Transición de un diseño oscuro de desarrollo a una interfaz moderna, limpia y netamente profesional orientada a la salud.
   - Paleta de color optimizada: base clara en `slate-50`, acentos rojos institucionales (`brand-600`) y verde esmeralda clínico (`accent-600`).
@@ -239,6 +248,10 @@ git checkout -b develop
 - **Navegación Fluida**:
   - Ajuste del helper de desplazamiento con offset negativo de `-80px` para impedir que el Navbar fije tapase el título de la sección de destino.
 
+### Versión 1.2.1 — Registro de Cierre de Sesión (Kevin Nielsen)
+- **Auditoría e Historial de Accesos**:
+  - Registro de eventos específicos de cierre de sesión (`TEAM_002`) en logs para seguimiento de la sesión del usuario operador en el panel de administración.
+
 ### Versión 1.3.0 — Simplificación de Donaciones y Peticiones Directas (Kevin Nielsen)
 - **Eliminación de Donación Simulada**:
   - Remoción total del método de pago directo con tarjeta simulada de crédito en frontend y backend para concentrar la contabilidad en transferencias auditables directas.
@@ -254,5 +267,6 @@ git checkout -b develop
   - Creación del servicio en [emailService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/emailService.js) con soporte de diseño adaptativo y estilizado para enviar un mensaje formal de agradecimiento institucional al socio una vez que el operador aprueba su transferencia en el panel.
 - **Desencadenador Transaccional**:
   - Conexión asíncrona en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para despachar el correo de forma no bloqueante inmediatamente al confirmarse la transacción de la donación.
+
 
 
