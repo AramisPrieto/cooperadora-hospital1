@@ -265,7 +265,7 @@ git checkout -b develop
 - **Desencadenador Transaccional**:
   - Conexión asíncrona en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para despachar el correo de forma no bloqueante inmediatamente al confirmarse la transacción de la donación.
 
-### Versión 1.5.0 — Límites de Campaña y Suite de Pruebas Automatizadas (Antigravity AI)
+### Versión 1.5.0 — Límites de Campaña y Suite de Pruebas Automatizadas (Aramis Prieto)
 - **Validación del Límite de Recaudación en Campañas**:
   - Implementación de reglas de negocio en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para evitar sobre-donaciones. Bloquea la declaración e impide la aprobación de transferencias que superen el monto objetivo restante de la campaña.
 - **Suite de Pruebas Automatizadas con Vitest y Supertest**:
