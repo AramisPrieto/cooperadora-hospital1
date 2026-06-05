@@ -22,25 +22,7 @@ Este proyecto consiste en el diseño e implementación de un portal web integral
 * **Etapa 1: Investigación y Análisis:** Análisis situacional de la institución, diagnóstico de las necesidades de centralización y digitalización de pagos, estructuración del modelo de navegación y definición del público objetivo (vecinos de Necochea y Quequén).
 * **Etapa 2: Diseño de Wireframes:** Creación de maquetas estáticas en HTML que definen la jerarquía visual de la plataforma (Home, Login, Área Restringida y Buscador).
 * **Etapa 3: Análisis de Datos y Arquitectura de Backend:** Diseño del esquema híbrido de datos, análisis de alternativas de persistencia (SQL relacional y NoSQL documental) y definición técnica de la comunicación mediante APIs seguras.
-* **Etapa 4: Diseño e Implementación de las API y Prototipo (Etapa Actual):**
-  - Desarrollo de APIs CRUD completas en Node.js y Express.
-  - Implementación de seguridad estricta mediante **JSON Web Tokens (JWT)** para garantizar el *Cero Anonimato* en interacciones privadas.
-  - Creación del esqueleto interactivo del frontend en **React (Vite) + Tailwind CSS** (Home, Login/Registro, y Panel Administrativo).
-  - Integración sincrónica **Data Mashup** para la unificación de datos transaccionales y multimedia.
-  - Flujo de redirección post-login inteligente: si un usuario anónimo intenta ver los detalles de una campaña, es redirigido al Login con `?redirect=campana&id=X`. Al autenticarse, navega a `/?view=X` y el Home abre el modal automáticamente, sin recargas de página.
-  - Panel Administrativo con gestión completa de Noticias (crear, editar, eliminar) directamente sobre MongoDB, con soporte de tags y contenido HTML.
-  - Sanitización de HTML con **DOMPurify** en el renderizado de noticias para prevenir ataques XSS.
-  - Corrección de todos los atributos JSX de `class=` a `className=` en los 6 componentes del frontend (303 ocurrencias).
-  - Card del Hero conectada a datos reales: muestra la primera campaña activa con título, porcentaje de progreso y montos dinámicos. Incluye skeleton de carga y estado vacío.
-  - Panel Administrativo con protección contra acciones duplicadas: todos los botones de mutación (aprobar socio, editar/eliminar campaña, editar/eliminar noticia) se deshabilitan mientras una operación está en curso.
-
-### ✨ Mejoras Recientes de UI/UX (Rediseño Clínico)
-- **Migración Estética:** Transición de un diseño oscuro/tecnológico a una apariencia **clínica, institucional y profesional**, optimizando la confianza del usuario.
-- **Paleta de Colores Renovada:** Uso de fondos claros (`slate-50`) con acentos estratégicos en rojo institucional (`brand-600`) y verde esmeralda clínico (`accent-600`).
-- **Navegación Inteligente y Enlaces:** Se añadieron accesos directos (*Campañas Activas*, *Obras Concretadas*, *Noticias*). El Navbar transparente ahora cuenta con detección automática de lectura (*Scroll-Spy*) para resaltar dinámicamente la sección activa, combinado con `Lenis` para un desplazamiento inercial premium.
-- **Fondo de Cuadrícula Avanzada:** Implementación de un patrón de fondo global mediante `linear-gradient` simulando una cuadrícula médica (estilo ECG o Blueprint), aportando innovación visual y textura.
-- **Dashboard y Estadísticas:** Solución de solapamientos (header spacing), transformación de contadores del Home a *cards* blancas con sombras sutiles, y gráficos optimizados (con color rojo institucional y etiquetas dinámicas) en el Panel Administrativo para lectura inmediata.
-- **Footer Institucional Limpio:** Eliminación de *badges* y etiquetas de desarrollo en el pie de página para consolidar un aspecto 100% profesional y limpio de cara al usuario final.
+* **Etapa 4: Diseño e Implementación de las API y Prototipo (Etapa Final):** Desarrollo del backend y frontend del portal web interactivo con persistencia híbrida, seguridad JWT y rate limiters, panel administrativo, flujo de aprobación de transferencias bancarias, y envío de correos SMTP. Para un desglose de todos los cambios de esta etapa y su evolución cronológica por versión, consulte la sección **[Historial de Cambios](#-historial-de-cambios)**.
 
 ---
 
