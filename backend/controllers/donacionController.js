@@ -1,6 +1,7 @@
 // TEAM_001: Controlador para gestionar el flujo de donaciones por transferencia y su aprobación manual
 import { DonacionTransferencia, CampanaEco, Usuario } from '../models/index.js';
 import sequelize from '../config/db.js';
+import { enviarMailAgradecimiento } from '../services/emailService.js';
 
 // 1. Declarar una transferencia bancaria (Socio)
 export const declararTransferencia = async (req, res) => {
@@ -69,8 +70,22 @@ export const aprobarTransferencia = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    // Buscar la transferencia
-    const donacion = await DonacionTransferencia.findByPk(id, { transaction });
+    // Buscar la transferencia incluyendo los datos del usuario y la campaña
+    const donacion = await DonacionTransferencia.findByPk(id, {
+      include: [
+        {
+          model: Usuario,
+          as: 'usuario',
+          attributes: ['id', 'email']
+        },
+        {
+          model: CampanaEco,
+          as: 'campana',
+          attributes: ['id', 'titulo']
+        }
+      ],
+      transaction
+    });
     if (!donacion) {
       await transaction.rollback();
       return res.status(404).json({ error: 'La transferencia declarada no existe.' });
@@ -101,6 +116,17 @@ export const aprobarTransferencia = async (req, res) => {
     await donacion.save({ transaction });
 
     await transaction.commit();
+
+    // Enviar mail de agradecimiento de forma asíncrona sin bloquear la respuesta de la API
+    if (donacion.usuario && donacion.usuario.email) {
+      enviarMailAgradecimiento({
+        email: donacion.usuario.email,
+        monto: donacion.monto,
+        campanaTitulo: donacion.campana ? donacion.campana.titulo : 'Campaña de la Cooperadora'
+      }).catch(err => {
+        console.error('[Mail Error] No se pudo enviar el correo de agradecimiento tras aprobación:', err);
+      });
+    }
 
     return res.json({
       message: 'Transferencia aprobada con éxito. El progreso de la campaña ha sido actualizado.',
