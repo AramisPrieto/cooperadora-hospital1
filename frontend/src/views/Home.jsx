@@ -81,11 +81,9 @@ const Home = () => {
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const [donationAmount, setDonationAmount] = useState('');
   const [donationSuccess, setDonationSuccess] = useState('');
   const [donationError, setDonationError] = useState('');
   const [submittingDonation, setSubmittingDonation] = useState(false);
-  const [activeDonationTab, setActiveDonationTab] = useState('rapida'); // TEAM_001: 'rapida' o 'transferencia'
   const [transferAmount, setTransferAmount] = useState('');
   const [copiedAlias, setCopiedAlias] = useState(false);
   const [copiedCbu, setCopiedCbu] = useState(false);
@@ -159,39 +157,9 @@ const Home = () => {
 
   const handleCloseModal = () => {
     setSelectedCampaign(null);
-    setDonationAmount('');
     setTransferAmount('');
     setDonationSuccess('');
     setDonationError('');
-    setActiveDonationTab('rapida'); // TEAM_001: Reseteamos los estados al cerrar
-  };
-
-
-  const handleDonate = async (e) => {
-    e.preventDefault();
-    if (!donationAmount || isNaN(donationAmount) || parseFloat(donationAmount) <= 0) {
-      setDonationError('Por favor, ingresá un monto válido mayor a 0.');
-      return;
-    }
-    setSubmittingDonation(true);
-    setDonationError('');
-    setDonationSuccess('');
-    try {
-      const res = await api.post(`/campanas/${selectedCampaign.id}/donar`, {
-        monto: parseFloat(donationAmount)
-      });
-      setDonationSuccess(`¡Donación de $${parseFloat(donationAmount).toLocaleString('es-AR')} registrada con éxito!`);
-      setDonationAmount('');
-      setSelectedCampaign(prev => ({ ...prev, monto_actual: res.data.monto_actual }));
-      setCampaigns(prev => prev.map(c =>
-        c.id === selectedCampaign.id ? { ...c, monto_actual: res.data.monto_actual } : c
-      ));
-    } catch (err) {
-      console.error('Error al donar:', err);
-      setDonationError(err.response?.data?.error || 'Error al procesar la donación en el servidor.');
-    } finally {
-      setSubmittingDonation(false);
-    }
   };
 
   // TEAM_001: Envía al backend la declaración de la transferencia del socio
@@ -262,7 +230,7 @@ const Home = () => {
         {/* Subtle decorative shapes for clinical aesthetic */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-50/80 rounded-full blur-[120px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent-50/80 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/4 translate-y-1/4" />
-        
+
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
@@ -277,7 +245,7 @@ const Home = () => {
                   src="/logo.png"
                   alt="Logo Cooperadora"
                   className="h-16 w-16 object-contain rounded-2xl shadow-sm border border-slate-100 bg-white p-1"
-                  onError={e => { e.target.style.display='none'; }}
+                  onError={e => { e.target.style.display = 'none'; }}
                 />
                 <div>
                   <div className="badge badge-red mb-1">
@@ -720,37 +688,68 @@ const Home = () => {
                     </div>
                   )}
 
-                  {/* Tabs de Selección */}
-                  <div className="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-                    <button
-                      type="button"
-                      onClick={() => { setActiveDonationTab('rapida'); setDonationError(''); }}
-                      className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                        activeDonationTab === 'rapida'
-                          ? 'bg-white text-slate-800 shadow-sm'
-                          : 'text-slate-500 hover:text-slate-700'
-                      }`}
-                    >
-                      Donación Rápida
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setActiveDonationTab('transferencia'); setDonationError(''); }}
-                      className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${
-                        activeDonationTab === 'transferencia'
-                          ? 'bg-white text-slate-800 shadow-sm'
-                          : 'text-slate-500 hover:text-slate-700'
-                      }`}
-                    >
-                      Transferencia Bancaria
-                    </button>
-                  </div>
+                  {/* Formulario Transferencia Bancaria */}
+                  <form onSubmit={handleDeclareTransfer} className="space-y-4">
+                    {/* Datos de cuenta */}
+                    <div className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-3 text-xs shadow-sm">
+                      <div className="flex justify-between border-b border-slate-100 pb-2">
+                        <span className="text-slate-400 font-medium">Entidad bancaria:</span>
+                        <span className="text-slate-800 font-black">Banco Provincia</span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2">
+                        <span className="text-slate-400 font-medium">Razón Social:</span>
+                        <span className="text-slate-800 font-black">Asoc. Cooperadora Hosp. Ferreyra</span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-100 pb-2">
+                        <span className="text-slate-400 font-medium">CUIT:</span>
+                        <span className="text-slate-800 font-black">30-67891234-5</span>
+                      </div>
 
-                  {activeDonationTab === 'rapida' ? (
-                    /* ── Formulario Donación Rápida ── */
-                    <form onSubmit={handleDonate} className="space-y-3">
+                      {/* Alias copiable */}
+                      <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2">
+                        <span className="text-slate-400 font-medium">Alias:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">cooperadora.hospital.nec</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText('cooperadora.hospital.nec');
+                              setCopiedAlias(true);
+                              setTimeout(() => setCopiedAlias(false), 2000);
+                            }}
+                            className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
+                            title="Copiar Alias"
+                          >
+                            {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* CBU copiable */}
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-slate-400 font-medium">CBU:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">0140354701354701354701</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText('0140354701354701354701');
+                              setCopiedCbu(true);
+                              setTimeout(() => setCopiedCbu(false), 2000);
+                            }}
+                            className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
+                            title="Copiar CBU"
+                          >
+                            {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Declarar monto */}
+                    <div className="space-y-2">
                       <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-                        Ingresá el monto a donar
+                        Monto de tu aporte
                       </p>
                       <div className="flex gap-3">
                         <div className="relative flex-grow">
@@ -759,9 +758,9 @@ const Home = () => {
                             type="number"
                             min="1"
                             step="any"
-                            value={donationAmount}
-                            onChange={(e) => setDonationAmount(e.target.value)}
-                            placeholder="Monto en ARS..."
+                            value={transferAmount}
+                            onChange={(e) => setTransferAmount(e.target.value)}
+                            placeholder="Ej: $ 5.000"
                             className="input-field pl-8"
                             required
                             disabled={submittingDonation}
@@ -778,110 +777,13 @@ const Home = () => {
                         <button
                           type="submit"
                           disabled={submittingDonation}
-                          className="btn-accent text-xs py-2.5 px-5 whitespace-nowrap disabled:opacity-50"
+                          className="btn-brand text-xs py-2.5 px-5 whitespace-nowrap disabled:opacity-50"
                         >
-                          {submittingDonation ? 'Procesando...' : 'Confirmar'}
+                          {submittingDonation ? 'Procesando...' : 'Ya transferí'}
                         </button>
                       </div>
-                    </form>
-                  ) : (
-                    /* ── Formulario Transferencia Bancaria ── */
-                    <form onSubmit={handleDeclareTransfer} className="space-y-4">
-                      {/* Datos de cuenta */}
-                      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-3 text-xs shadow-sm">
-                        <div className="flex justify-between border-b border-slate-100 pb-2">
-                          <span className="text-slate-400 font-medium">Entidad bancaria:</span>
-                          <span className="text-slate-800 font-black">Banco Provincia</span>
-                        </div>
-                        <div className="flex justify-between border-b border-slate-100 pb-2">
-                          <span className="text-slate-400 font-medium">Razón Social:</span>
-                          <span className="text-slate-800 font-black">Asoc. Cooperadora Hosp. Ferreyra</span>
-                        </div>
-                        <div className="flex justify-between border-b border-slate-100 pb-2">
-                          <span className="text-slate-400 font-medium">CUIT:</span>
-                          <span className="text-slate-800 font-black">30-67891234-5</span>
-                        </div>
-
-                        {/* Alias copiable */}
-                        <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2">
-                          <span className="text-slate-400 font-medium">Alias:</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">cooperadora.hospital.nec</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText('cooperadora.hospital.nec');
-                                setCopiedAlias(true);
-                                setTimeout(() => setCopiedAlias(false), 2000);
-                              }}
-                              className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
-                              title="Copiar Alias"
-                            >
-                              {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* CBU copiable */}
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="text-slate-400 font-medium">CBU:</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">0140354701354701354701</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText('0140354701354701354701');
-                                setCopiedCbu(true);
-                                setTimeout(() => setCopiedCbu(false), 2000);
-                              }}
-                              className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
-                              title="Copiar CBU"
-                            >
-                              {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Declarar monto */}
-                      <div className="space-y-2">
-                        <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-                          Monto a declarar (el transferido)
-                        </p>
-                        <div className="flex gap-3">
-                          <div className="relative flex-grow">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm pointer-events-none">$</span>
-                            <input
-                              type="number"
-                              min="1"
-                              step="any"
-                              value={transferAmount}
-                              onChange={(e) => setTransferAmount(e.target.value)}
-                              placeholder="Monto transferido..."
-                              className="input-field pl-8"
-                              required
-                              disabled={submittingDonation}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={handleCloseModal}
-                            disabled={submittingDonation}
-                            className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
-                          >
-                            Cerrar
-                          </button>
-                          <button
-                            type="submit"
-                            disabled={submittingDonation}
-                            className="btn-brand text-xs py-2.5 px-5 whitespace-nowrap disabled:opacity-50"
-                          >
-                            {submittingDonation ? 'Procesando...' : 'Ya transferí'}
-                          </button>
-                        </div>
-                      </div>
-                    </form>
-                  )}
+                    </div>
+                  </form>
                 </>
               )}
             </div>

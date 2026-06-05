@@ -176,44 +176,4 @@ export const deleteCampana = async (req, res) => {
   }
 };
 
-// 6. DONAR A CAMPAÑA (Autenticado - Transaccional ACID en SQL)
-export const donarCampana = async (req, res) => {
-  const { id } = req.params;
-  const { monto } = req.body;
 
-  if (!monto || isNaN(monto) || parseFloat(monto) <= 0) {
-    return res.status(400).json({ error: 'El monto de donación debe ser un número positivo.' });
-  }
-
-  const transaction = await sequelize.transaction();
-
-  try {
-    // lock: LOCK.UPDATE emite SELECT ... FOR UPDATE en PostgreSQL.
-    // Bloquea la fila hasta el commit, evitando que dos donaciones simultáneas
-    // lean el mismo monto_actual y sobreescriban la suma del otro.
-    const campana = await CampanaEco.findByPk(id, {
-      transaction,
-      lock: transaction.LOCK.UPDATE
-    });
-    if (!campana) {
-      await transaction.rollback();
-      return res.status(404).json({ error: 'Campaña no encontrada.' });
-    }
-
-    // Incrementar monto actual de la campaña
-    campana.monto_actual = parseFloat(campana.monto_actual) + parseFloat(monto);
-    await campana.save({ transaction });
-
-    await transaction.commit();
-
-    return res.json({
-      message: '¡Donación procesada exitosamente en PostgreSQL!',
-      monto_actual: campana.monto_actual,
-      campana
-    });
-  } catch (error) {
-    await transaction.rollback();
-    console.error('Error al procesar la donación en SQL:', error);
-    return res.status(500).json({ error: 'Error interno al registrar la donación.' });
-  }
-};
