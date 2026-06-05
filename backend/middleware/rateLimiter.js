@@ -17,6 +17,7 @@ export const globalLimiter = rateLimit({
   standardHeaders: true,  // Devuelve info de límite en headers RateLimit-*
   legacyHeaders: false,
   handler: tooManyRequestsHandler,
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 /**
@@ -29,6 +30,7 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: tooManyRequestsHandler,
+  skip: () => process.env.NODE_ENV === 'test',
 });
 
 /**
@@ -45,4 +47,6 @@ export const donationLimiter = rateLimit({
       error: 'Límite de donaciones alcanzado. Podés intentarlo de nuevo en una hora.'
     });
   },
+  skip: () => process.env.NODE_ENV === 'test',
 });
+

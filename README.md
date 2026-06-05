@@ -132,6 +132,21 @@ Tener instalado en su sistema local:
 
 ---
 
+### 🧪 Paso 3: Ejecutar las Pruebas Automatizadas
+Para ejecutar la suite de pruebas unitarias y de integración del backend:
+1. Asegurar que los contenedores de base de datos estén corriendo (`docker-compose up -d`). El helper de pruebas creará y limpiará automáticamente las bases de datos de prueba (`cooperadora_db_test` y `cooperadora_nosql_test`).
+2. Navegar a la carpeta del backend:
+   ```bash
+   cd backend
+   ```
+3. Ejecutar las pruebas:
+   ```bash
+   pnpm test
+   ```
+   *Vitest ejecutará los 47 tests secuencialmente garantizando la coherencia y el aislamiento de datos.*
+
+---
+
 ## 🔐 Seguridad: Gestión de Roles de Administrador
 
 El endpoint público `POST /api/auth/register` **siempre crea usuarios con rol `socio`**. No es posible auto-asignarse el rol `admin` desde el formulario de registro.
@@ -249,6 +264,15 @@ git checkout -b develop
   - Creación del servicio en [emailService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/emailService.js) con soporte de diseño adaptativo y estilizado para enviar un mensaje formal de agradecimiento institucional al socio una vez que el operador aprueba su transferencia en el panel.
 - **Desencadenador Transaccional**:
   - Conexión asíncrona en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para despachar el correo de forma no bloqueante inmediatamente al confirmarse la transacción de la donación.
+
+### Versión 1.5.0 — Límites de Campaña y Suite de Pruebas Automatizadas (Antigravity AI)
+- **Validación del Límite de Recaudación en Campañas**:
+  - Implementación de reglas de negocio en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para evitar sobre-donaciones. Bloquea la declaración e impide la aprobación de transferencias que superen el monto objetivo restante de la campaña.
+- **Suite de Pruebas Automatizadas con Vitest y Supertest**:
+  - Creación de 47 pruebas de integración en la carpeta `backend/tests/` que cubren todas las API expuestas (Autenticación, Socios, Campañas con Mashup, Noticias y Donaciones/Límites).
+  - Configuración de un entorno de bases de datos de test aislado en Postgres (`cooperadora_db_test`) y MongoDB (`cooperadora_nosql_test`) con limpieza automática entre tests a través de [setup.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/helpers/setup.js).
+  - Exclusión de rate limiting en modo test en [rateLimiter.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/middleware/rateLimiter.js) para evitar bloqueos por solicitudes frecuentes.
+
 
 
 

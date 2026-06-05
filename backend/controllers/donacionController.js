@@ -20,6 +20,19 @@ export const declararTransferencia = async (req, res) => {
       return res.status(400).json({ error: 'No se pueden realizar donaciones a campañas inactivas.' });
     }
 
+    // Validar si la campaña ya alcanzó su objetivo
+    if (parseFloat(campana.monto_actual) >= parseFloat(campana.monto_objetivo)) {
+      return res.status(400).json({ error: 'La campaña ya ha alcanzado su objetivo de recaudación.' });
+    }
+
+    // Validar que el monto no exceda el restante
+    const restante = parseFloat(campana.monto_objetivo) - parseFloat(campana.monto_actual);
+    if (parseFloat(monto) > restante) {
+      return res.status(400).json({ 
+        error: `El monto donado supera el límite restante de la campaña. El saldo máximo a donar es $${restante.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.` 
+      });
+    }
+
     // Registrar la transferencia como pendiente
     const donacion = await DonacionTransferencia.create({
       usuario_id: usuarioId,
@@ -106,6 +119,15 @@ export const aprobarTransferencia = async (req, res) => {
     if (!campana) {
       await transaction.rollback();
       return res.status(404).json({ error: 'La campaña asociada a esta donación ya no existe.' });
+    }
+
+    // Validar si al aprobar supera el objetivo (por si otra donación fue aprobada concurrentemente o después de que se declaró)
+    const restante = parseFloat(campana.monto_objetivo) - parseFloat(campana.monto_actual);
+    if (parseFloat(donacion.monto) > restante) {
+      await transaction.rollback();
+      return res.status(400).json({ 
+        error: `No se puede aprobar la donación porque supera el límite restante de la campaña ($${restante.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}).` 
+      });
     }
 
     // Actualizar montos y cambiar estado a aprobada
