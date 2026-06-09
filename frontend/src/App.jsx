@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Home from './views/Home';
 import Login from './views/Login';
 import AdminPanel from './views/AdminPanel';
+import SocioPanel from './views/SocioPanel';
 import { Heart, Shield, Github } from 'lucide-react';
 
 /* Protección de ruta admin */
@@ -13,6 +14,13 @@ const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   if (!token || user?.rol !== 'admin') return <Navigate to="/" replace />;
+  return children;
+};
+
+/* Protección de ruta socio/usuario general */
+const ProtectedRouteSocio = ({ children }) => {
+  const token = localStorage.getItem('token');
+  if (!token) return <Navigate to="/login" replace />;
   return children;
 };
 
@@ -33,6 +41,14 @@ function App() {
                 <ProtectedRoute>
                   <AdminPanel />
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mi-panel"
+              element={
+                <ProtectedRouteSocio>
+                  <SocioPanel />
+                </ProtectedRouteSocio>
               }
             />
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -4,7 +4,8 @@ import {
   declararTransferencia,
   getTransferencias,
   aprobarTransferencia,
-  rechazarTransferencia
+  rechazarTransferencia,
+  getMyDonaciones
 } from '../controllers/donacionController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 import { donationLimiter } from '../middleware/rateLimiter.js';
@@ -14,6 +15,7 @@ const router = express.Router();
 
 // Rutas de Socio (requiere autenticación general) + rate limit + validación de monto
 router.post('/campanas/:id/donar-transferencia', authenticateJWT, donationLimiter, validateDonation, declararTransferencia);
+router.get('/mis-donaciones', authenticateJWT, getMyDonaciones);
 
 // Rutas de Administración (requiere rol de admin)
 router.get('/transferencias', authenticateJWT, authorizeRoles('admin'), getTransferencias);

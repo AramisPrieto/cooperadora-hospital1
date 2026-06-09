@@ -273,6 +273,19 @@ git checkout -b develop
   - Configuración de un entorno de bases de datos de test aislado en Postgres (`cooperadora_db_test`) y MongoDB (`cooperadora_nosql_test`) con limpieza automática entre tests a través de [setup.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/helpers/setup.js).
   - Exclusión de rate limiting en modo test en [rateLimiter.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/middleware/rateLimiter.js) para evitar bloqueos por solicitudes frecuentes.
 
+### Versión 1.6.0 — Desarrollo del Panel de Socios en el Backend (Thiago Masson)
+- **Modelo de Control de Cuotas Sociales**:
+  - Creación del modelo relacional [PagoCuota.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/models/PagoCuota.js) en PostgreSQL para registrar el historial de pago de cuotas mensuales de los asociados (mes, año, monto, estado de pago).
+  - Configuración de relaciones y cascada de borrado en [models/index.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/models/index.js).
+- **Nuevas Rutas y Controladores de Autogestión**:
+  - Implementación de la ruta `GET /api/socios/mi-perfil/cuotas` para consultar el historial de cuotas sociales del socio autenticado en [socioRoutes.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/routes/socioRoutes.js) y [socioController.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/controllers/socioController.js).
+  - Implementación de la ruta `GET /api/donaciones/mis-donaciones` en [donacionRoutes.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/routes/donacionRoutes.js) y su controlador en [donacionController.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/controllers/donacionController.js) para permitir que los socios consulten las transferencias que declararon históricamente.
+- **Actualización de Datos de Prueba y Seeds**:
+  - Ajuste en [seed.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/seed.js) para levantar automáticamente un administrador (`admin@cooperadora.org`) y un socio de prueba (`socio@cooperadora.org`) con su perfil activo e historial de cuotas del año 2026.
+- **Verificación Automatizada**:
+  - Creación de la suite de pruebas automatizadas [socioPanel.test.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/tests/socioPanel.test.js) que valida el correcto funcionamiento de los endpoints y los mecanismos de bloqueo de peticiones anónimas (Status 401).
+
+
 
 
 

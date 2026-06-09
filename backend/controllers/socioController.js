@@ -1,4 +1,4 @@
-import { PerfilSocio, Usuario } from '../models/index.js';
+import { PerfilSocio, Usuario, PagoCuota } from '../models/index.js';
 
 // Obtener todos los perfiles de socios (Solo Admin)
 export const getAllSocios = async (req, res) => {
@@ -29,6 +29,39 @@ export const getMyProfile = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener perfil propio:', error);
     return res.status(500).json({ error: 'Error al obtener la información de perfil.' });
+  }
+};
+
+// Obtener el historial de cuotas del socio actual autenticado
+export const getMyCuotas = async (req, res) => {
+  try {
+    const profile = await PerfilSocio.findOne({
+      where: { usuario_id_fk: req.user.id }
+    });
+
+    if (!profile) {
+      return res.status(404).json({ error: 'No se encontró un perfil de socio vinculado a este usuario.' });
+    }
+
+    const cuotas = await PagoCuota.findAll({
+      where: { socio_numero_asociado: profile.numero_asociado },
+      order: [
+        ['anio', 'DESC'],
+        ['mes', 'DESC']
+      ]
+    });
+
+    return res.json({
+      socio: {
+        numero_asociado: profile.numero_asociado,
+        dni: profile.dni,
+        estado: profile.estado
+      },
+      cuotas
+    });
+  } catch (error) {
+    console.error('Error al obtener cuotas propias:', error);
+    return res.status(500).json({ error: 'Error al obtener la información de las cuotas sociales.' });
   }
 };
 

@@ -2,6 +2,7 @@ import express from 'express';
 import {
   getAllSocios,
   getMyProfile,
+  getMyCuotas,
   createSocio,
   updateSocio,
   deleteSocio
@@ -15,6 +16,9 @@ router.use(authenticateJWT);
 
 // Autogestión: Ver propio perfil de socio
 router.get('/mi-perfil', getMyProfile);
+
+// Autogestión: Ver historial de cuotas pagadas/pendientes del socio
+router.get('/mi-perfil/cuotas', getMyCuotas);
 
 // Autogestión / Admin: Actualizar perfil de socio (Socio edita su DNI, Admin edita todo y estado)
 router.put('/:id', updateSocio);

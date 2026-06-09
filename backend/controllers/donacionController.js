@@ -189,3 +189,25 @@ export const rechazarTransferencia = async (req, res) => {
     return res.status(500).json({ error: 'Error interno al intentar rechazar la transferencia.' });
   }
 };
+
+// 5. Obtener las transferencias declaradas por el socio actual autenticado
+export const getMyDonaciones = async (req, res) => {
+  try {
+    const donaciones = await DonacionTransferencia.findAll({
+      where: { usuario_id: req.user.id },
+      include: [
+        {
+          model: CampanaEco,
+          as: 'campana',
+          attributes: ['id', 'titulo']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    return res.json(donaciones);
+  } catch (error) {
+    console.error('Error al obtener donaciones del socio:', error);
+    return res.status(500).json({ error: 'Error interno al listar las donaciones del socio.' });
+  }
+};

@@ -2,6 +2,7 @@ import Usuario from './Usuario.js';
 import PerfilSocio from './PerfilSocio.js';
 import CampanaEco from './CampanaEco.js';
 import DonacionTransferencia from './DonacionTransferencia.js'; // TEAM_001: Importamos el modelo de transferencias
+import PagoCuota from './PagoCuota.js';
 
 // Establecer relaciones SQL
 Usuario.hasOne(PerfilSocio, {
@@ -36,10 +37,22 @@ DonacionTransferencia.belongsTo(CampanaEco, {
   as: 'campana'
 });
 
+// Relación PerfilSocio <-> PagoCuota (para las cuotas sociales de los socios)
+PerfilSocio.hasMany(PagoCuota, {
+  foreignKey: 'socio_numero_asociado',
+  as: 'pagosCuotas',
+  onDelete: 'CASCADE'
+});
+
+PagoCuota.belongsTo(PerfilSocio, {
+  foreignKey: 'socio_numero_asociado',
+  as: 'perfilSocio'
+});
+
 export {
   Usuario,
   PerfilSocio,
   CampanaEco,
-  DonacionTransferencia // TEAM_001: Exportamos para el mashup o controladores
+  DonacionTransferencia, // TEAM_001: Exportamos para el mashup o controladores
+  PagoCuota
 };
-
