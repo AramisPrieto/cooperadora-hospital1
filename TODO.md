@@ -2,14 +2,14 @@
 ## 🚀 Prioridades Actuales
 ## 🛠️ Tareas por Hacer (Backlog)
 - [ ] Validar los PDFs de las etapas del proyecto
-- [ ] elegir campañas del mes
-- [ ] arreglar agregar imagenes, elegir imagen background
-- [ ] arreglar el registrarse (datos que pide)
+- [ ] elegir campañas del mes (Kevin)
+- [ ] arreglar agregar imagenes, elegir imagen background (Kevin)
+- [ ] arreglar el registrarse (datos que pide) Aramis
 - [ ] hacer wireframes como en el boceto
 - [ ] quitar # en noticias
 - [ ] agregar panel de socios(ver cuotas pagas,donaciones demas)
-- [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora)
-- [ ] Minimo de donacion por rifa o demas 
+- [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) - ARAMIS
+- [ ] Minimo de donacion (Kevin)
 - [ ] Armar panel de socio hecho en el wireframe 
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
