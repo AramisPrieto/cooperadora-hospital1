@@ -7,7 +7,7 @@
 - [ ] arreglar el registrarse (datos que pide) Aramis
 - [ ] hacer wireframes como en el boceto
 - [ ] quitar # en noticias
-- [ ] agregar panel de socios(ver cuotas pagas,donaciones demas)
+- [ ] agregar panel de socios(ver cuotas pagas,donaciones demas) - THIAGO
 - [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) - ARAMIS
 - [ ] Minimo de donacion (Kevin)
 - [ ] Armar panel de socio hecho en el wireframe 
