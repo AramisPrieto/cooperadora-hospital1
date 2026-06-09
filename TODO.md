@@ -9,6 +9,8 @@
 - [ ] quitar # en noticias
 - [ ] agregar panel de socios(ver cuotas pagas,donaciones demas)
 - [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora)
+- [ ] Minimo de donacion por rifa o demas 
+- [ ] Armar panel de socio hecho en el wireframe 
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 ## ✅ Terminado
