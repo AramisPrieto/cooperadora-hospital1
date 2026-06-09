@@ -28,6 +28,18 @@ beforeEach(async () => {
   const salt = await bcrypt.genSalt(10);
   const passwordHash = await bcrypt.hash('password123', salt);
 
+  const mockSocioFields = {
+    nombre: 'TestSocio',
+    apellido: 'TestSocio',
+    direccion: 'Av. 59 1234',
+    localidad: 'Necochea',
+    nacionalidad: 'Argentina',
+    telefono: '2262112233',
+    fecha_nacimiento: '1990-01-01',
+    genero: 'otro',
+    metodo_pago: 'debito'
+  };
+
   // 1. Crear usuario Socio con Perfil
   socioUser = await Usuario.create({
     email: 'socio@panel.com',
@@ -35,6 +47,7 @@ beforeEach(async () => {
     rol: 'socio'
   });
   socioPerfil = await PerfilSocio.create({
+    ...mockSocioFields,
     usuario_id_fk: socioUser.id,
     dni: 88776655,
     estado: 'activo'
@@ -48,6 +61,7 @@ beforeEach(async () => {
     rol: 'socio'
   });
   otherSocioPerfil = await PerfilSocio.create({
+    ...mockSocioFields,
     usuario_id_fk: otherSocioUser.id,
     dni: 44332211,
     estado: 'activo'
