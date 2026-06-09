@@ -34,6 +34,11 @@ const CampanaEco = sequelize.define('CampanaEco', {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: true
+  },
+  es_campana_del_mes: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
   }
 }, {
   tableName: 'campanas_eco',

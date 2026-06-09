@@ -38,6 +38,7 @@ export const getCampanaById = async (req, res) => {
       monto_actual: parseFloat(sqlData.monto_actual),
       fecha_limite: sqlData.fecha_limite,
       activo: sqlData.activo,
+      es_campana_del_mes: sqlData.es_campana_del_mes,
       createdAt: sqlData.createdAt,
       updatedAt: sqlData.updatedAt,
       // Datos provenientes de NoSQL MongoDB
@@ -63,12 +64,17 @@ export const getCampanaById = async (req, res) => {
 
 // 3. CREAR CAMPAÑA (Solo Admin - SQL + NoSQL)
 export const createCampana = async (req, res) => {
-  const { titulo, monto_objetivo, monto_actual, fecha_limite, testimonios, galeria_rica, obra_status } = req.body;
+  const { titulo, monto_objetivo, monto_actual, fecha_limite, es_campana_del_mes, testimonios, galeria_rica, obra_status } = req.body;
 
   try {
     // Validar montos económicos no negativos
     if (monto_objetivo < 0 || (monto_actual && monto_actual < 0)) {
       return res.status(400).json({ error: 'Los montos económicos no pueden ser negativos.' });
+    }
+
+    // Si se establece como campaña del mes, desactivar las demás
+    if (es_campana_del_mes === true) {
+      await CampanaEco.update({ es_campana_del_mes: false }, { where: {} });
     }
 
     // 1. Guardar progreso financiero en SQL (Transaccional)
@@ -77,7 +83,8 @@ export const createCampana = async (req, res) => {
       monto_objetivo,
       monto_actual: monto_actual || 0.00,
       fecha_limite,
-      activo: true
+      activo: true,
+      es_campana_del_mes: es_campana_del_mes || false
     });
 
     // 2. Guardar detalles enriquecidos y multimedia en NoSQL (MongoDB)
@@ -105,7 +112,7 @@ export const createCampana = async (req, res) => {
 // 4. ACTUALIZAR CAMPAÑA (Solo Admin - SQL + NoSQL)
 export const updateCampana = async (req, res) => {
   const { id } = req.params;
-  const { titulo, monto_objetivo, monto_actual, fecha_limite, activo, testimonios, galeria_rica, obra_status } = req.body;
+  const { titulo, monto_objetivo, monto_actual, fecha_limite, activo, es_campana_del_mes, testimonios, galeria_rica, obra_status } = req.body;
 
   try {
     // Validar montos no negativos
@@ -125,6 +132,14 @@ export const updateCampana = async (req, res) => {
     if (monto_actual !== undefined) sqlCampana.monto_actual = monto_actual;
     if (fecha_limite !== undefined) sqlCampana.fecha_limite = fecha_limite;
     if (activo !== undefined) sqlCampana.activo = activo;
+    if (es_campana_del_mes !== undefined) {
+      if (es_campana_del_mes === true) {
+        await CampanaEco.update({ es_campana_del_mes: false }, { where: {} });
+        sqlCampana.es_campana_del_mes = true;
+      } else {
+        sqlCampana.es_campana_del_mes = false;
+      }
+    }
     await sqlCampana.save();
 
     // 2. Buscar y actualizar en MongoDB

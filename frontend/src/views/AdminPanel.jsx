@@ -72,6 +72,7 @@ const AdminPanel = () => {
   const [testimoniosAutor, setTestimoniosAutor] = useState('');
   const [imagenUrl, setImagenUrl] = useState('');
   const [obraStatus, setObraStatus] = useState('Planeada');
+  const [esCampanaDelMes, setEsCampanaDelMes] = useState(false);
 
   /* News form */
   const [showNewsForm, setShowNewsForm] = useState(false);
@@ -188,6 +189,7 @@ const AdminPanel = () => {
       titulo, monto_objetivo: parseFloat(montoObjetivo),
       monto_actual: montoActual ? parseFloat(montoActual) : 0,
       fecha_limite: fechaLimite || null,
+      es_campana_del_mes: esCampanaDelMes,
       testimonios, galeria_rica, obra_status: obraStatus,
     };
     try {
@@ -210,6 +212,7 @@ const AdminPanel = () => {
     setTitulo(''); setMontoObjetivo(''); setMontoActual('');
     setFechaLimite(''); setTestimoniosText('');
     setTestimoniosAutor(''); setImagenUrl(''); setObraStatus('Planeada');
+    setEsCampanaDelMes(false);
   };
 
   const handleEditCampaign = async (id) => {
@@ -224,6 +227,7 @@ const AdminPanel = () => {
       setTestimoniosAutor(d.detalles.testimonios?.[0]?.autor ?? '');
       setImagenUrl(d.detalles.galeria_rica.imagenes?.[0] ?? '');
       setObraStatus(d.detalles.obra_status ?? 'Planeada');
+      setEsCampanaDelMes(d.es_campana_del_mes ?? false);
       setShowCampaignForm(true);
     } catch (err) {
       setErrorMsg('No se pudieron recuperar los detalles de la campaña.');
@@ -478,6 +482,18 @@ const AdminPanel = () => {
                         <option value="Suspendida">Suspendida</option>
                       </select>
                     </div>
+                    <div className="md:col-span-2 flex items-center bg-slate-50 border border-slate-200/60 p-4 rounded-xl mt-2 select-none hover:bg-slate-100/50 transition-colors">
+                      <input
+                        type="checkbox"
+                        id="esCampanaDelMes"
+                        checked={esCampanaDelMes}
+                        onChange={e => setEsCampanaDelMes(e.target.checked)}
+                        className="h-4.5 w-4.5 text-brand-600 focus:ring-brand-500 border-slate-300 rounded cursor-pointer"
+                      />
+                      <label htmlFor="esCampanaDelMes" className="ml-3 block text-xs font-black text-slate-700 uppercase tracking-wider cursor-pointer">
+                        ★ Destacar como Campaña Activa del Mes (Hero del Home)
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -544,7 +560,14 @@ const AdminPanel = () => {
                           <span className="text-sm font-black text-brand-700">{pct}%</span>
                         </div>
                         <div className="flex-grow min-w-0">
-                          <h4 className="text-sm font-bold text-slate-800 truncate">{camp.titulo}</h4>
+                          <h4 className="text-sm font-bold text-slate-800 truncate flex items-center gap-2">
+                            {camp.titulo}
+                            {camp.es_campana_del_mes && (
+                              <span className="inline-flex items-center gap-1 bg-brand-50 text-brand-700 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border border-brand-100 shrink-0">
+                                ★ Campaña del Mes
+                              </span>
+                            )}
+                          </h4>
                           <div className="flex gap-3 mt-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                             <span>Meta: ${parseFloat(camp.monto_objetivo).toLocaleString('es-AR')}</span>
                             <span className="text-emerald-600">Recaudado: ${parseFloat(camp.monto_actual).toLocaleString('es-AR')}</span>

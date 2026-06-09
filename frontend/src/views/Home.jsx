@@ -203,7 +203,7 @@ const Home = () => {
   /* ── Computed Data ── */
   const activeCampaigns = campaigns.filter(c => parseFloat(c.monto_actual) < parseFloat(c.monto_objetivo));
   const completedCampaigns = campaigns.filter(c => parseFloat(c.monto_actual) >= parseFloat(c.monto_objetivo));
-  const featuredCampaign = activeCampaigns[0] || null;
+  const featuredCampaign = activeCampaigns.find(c => c.es_campana_del_mes) || activeCampaigns[0] || null;
 
   const formatter = new Intl.NumberFormat('es-AR', {
     style: 'currency',

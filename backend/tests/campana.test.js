@@ -202,4 +202,78 @@ describe('Rutas de Campañas (/api/campanas)', () => {
       expect(await CampanaDetalle.findOne({ campana_id_ref: sqlCampana.id })).toBeNull();
     });
   });
+
+  describe('Campaña del Mes (es_campana_del_mes)', () => {
+    it('debe permitir crear una campaña con es_campana_del_mes: true', async () => {
+      const res = await request(app)
+        .post('/api/campanas')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          titulo: 'Campaña del Mes de Test',
+          monto_objetivo: 300000.00,
+          es_campana_del_mes: true,
+          obra_status: 'Planeada'
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.campana).toHaveProperty('es_campana_del_mes', true);
+    });
+
+    it('debe garantizar que solo una campaña esté marcada como es_campana_del_mes', async () => {
+      // Crear la primera campaña destacada
+      const campana1 = await CampanaEco.create({
+        titulo: 'Campaña Destacada 1',
+        monto_objetivo: 100000,
+        es_campana_del_mes: true
+      });
+
+      // Crear la segunda campaña destacada a través del endpoint
+      const res = await request(app)
+        .post('/api/campanas')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          titulo: 'Campaña Destacada 2',
+          monto_objetivo: 200000,
+          es_campana_del_mes: true
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.campana).toHaveProperty('es_campana_del_mes', true);
+
+      // Verificar que la primera campaña fue desmarcada
+      const dbCampana1 = await CampanaEco.findByPk(campana1.id);
+      expect(dbCampana1.es_campana_del_mes).toBe(false);
+    });
+
+    it('debe desmarcar otras campañas al actualizar una campaña a es_campana_del_mes: true', async () => {
+      const campana1 = await CampanaEco.create({
+        titulo: 'Campaña Destacada Anterior',
+        monto_objetivo: 100000,
+        es_campana_del_mes: true
+      });
+      const campana2 = await CampanaEco.create({
+        titulo: 'Campaña A Destacar',
+        monto_objetivo: 200000,
+        es_campana_del_mes: false
+      });
+
+      const res = await request(app)
+        .put(`/api/campanas/${campana2.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          titulo: 'Campaña A Destacar Modificada',
+          monto_objetivo: 200000,
+          es_campana_del_mes: true
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.campana).toHaveProperty('es_campana_del_mes', true);
+
+      // Verificar en DB
+      const dbCampana1 = await CampanaEco.findByPk(campana1.id);
+      expect(dbCampana1.es_campana_del_mes).toBe(false);
+      const dbCampana2 = await CampanaEco.findByPk(campana2.id);
+      expect(dbCampana2.es_campana_del_mes).toBe(true);
+    });
+  });
 });
