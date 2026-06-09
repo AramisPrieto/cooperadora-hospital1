@@ -25,6 +25,14 @@ const DonacionTransferencia = sequelize.define('DonacionTransferencia', {
     defaultValue: DataTypes.UUIDV4,
     allowNull: false,
     unique: true
+  },
+  numero_comprobante: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  comprobante_url: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: 'donaciones_transferencia',

@@ -16,6 +16,7 @@ import socioRoutes from './routes/socioRoutes.js';
 import campanaRoutes from './routes/campanaRoutes.js';
 import noticiaRoutes from './routes/noticiaRoutes.js';
 import donacionRoutes from './routes/donacionRoutes.js'; // TEAM_001: Importamos las rutas de transferencias
+import { webhookMercadoPago } from './controllers/socioSubscriptionController.js'; // Importamos el webhook público
 
 // Cargar variables de entorno
 dotenv.config();
@@ -43,6 +44,7 @@ app.use('/api/socios', socioRoutes);
 app.use('/api/campanas', campanaRoutes);
 app.use('/api/noticias', noticiaRoutes);
 app.use('/api/donaciones', donacionRoutes); // TEAM_001: Montamos las rutas en /api/donaciones
+app.post('/api/webhooks/mercadopago', webhookMercadoPago); // Webhook público para Mercado Pago
 
 
 // Ruta de estado de la API (Pública)

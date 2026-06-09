@@ -6,6 +6,12 @@ import {
   updateSocio,
   deleteSocio
 } from '../controllers/socioController.js';
+import {
+  iniciarSuscripcion,
+  cancelarSuscripcion,
+  obtenerMiHistorialPagos,
+  declararPagoTransferencia
+} from '../controllers/socioSubscriptionController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -15,6 +21,16 @@ router.use(authenticateJWT);
 
 // Autogestión: Ver propio perfil de socio
 router.get('/mi-perfil', getMyProfile);
+
+// Autogestión: Ver historial de pagos de cuotas
+router.get('/mi-perfil/pagos', obtenerMiHistorialPagos);
+
+// Autogestión: Declarar pago de cuota por transferencia
+router.post('/mi-perfil/pagos/declarar', declararPagoTransferencia);
+
+// Autogestión: Gestión de suscripción Mercado Pago
+router.post('/suscripcion/crear', iniciarSuscripcion);
+router.post('/suscripcion/cancelar', cancelarSuscripcion);
 
 // Autogestión / Admin: Actualizar perfil de socio (Socio edita su DNI, Admin edita todo y estado)
 router.put('/:id', updateSocio);

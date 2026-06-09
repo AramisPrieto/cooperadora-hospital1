@@ -102,6 +102,12 @@ const Navbar = () => {
                 Panel Admin
               </NavLink>
             )}
+            {token && !isAdmin && (
+              <NavLink to="/mi-panel" active={location.pathname === '/mi-panel'}>
+                <User className="h-4 w-4" />
+                Mi Panel
+              </NavLink>
+            )}
           </div>
 
           {/* ── Desktop Auth ── */}
@@ -172,6 +178,11 @@ const Navbar = () => {
             {token && isAdmin && (
               <MobileNavLink to="/admin" active={location.pathname === '/admin'}>
                 Panel Administrativo
+              </MobileNavLink>
+            )}
+            {token && !isAdmin && (
+              <MobileNavLink to="/mi-panel" active={location.pathname === '/mi-panel'}>
+                Mi Panel de Socio
               </MobileNavLink>
             )}
             <div className="pt-4 border-t border-slate-100 mt-4 space-y-3">

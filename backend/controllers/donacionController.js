@@ -6,7 +6,7 @@ import { enviarMailAgradecimiento } from '../services/emailService.js';
 // 1. Declarar una transferencia bancaria (Socio)
 export const declararTransferencia = async (req, res) => {
   const { id: campanaId } = req.params;
-  const { monto } = req.body;
+  const { monto, numero_comprobante, comprobante_url } = req.body;
   const usuarioId = req.user.id; // Extraído del token JWT por authenticateJWT
 
   try {
@@ -38,7 +38,9 @@ export const declararTransferencia = async (req, res) => {
       usuario_id: usuarioId,
       campana_id: parseInt(campanaId),
       monto: parseFloat(monto),
-      estado: 'pendiente'
+      estado: 'pendiente',
+      numero_comprobante,
+      comprobante_url
     });
 
     return res.status(201).json({

@@ -9,7 +9,22 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
 // Registro de nuevos usuarios
 export const register = async (req, res) => {
-  const { email, password, dni } = req.body;
+  const {
+    email,
+    password,
+    dni,
+    nombre,
+    apellido,
+    direccion,
+    nacionalidad,
+    telefono,
+    fecha_nacimiento,
+    genero,
+    metodo_pago,
+    fecha_ultimo_pago,
+    localidad,
+    observaciones
+  } = req.body;
 
   try {
     // Validar si el usuario ya existe
@@ -47,7 +62,18 @@ export const register = async (req, res) => {
       perfil = await PerfilSocio.create({
         usuario_id_fk: user.id,
         dni,
-        estado: 'pendiente' // Por defecto ingresa como pendiente de aprobación física
+        estado: 'pendiente', // Por defecto ingresa como pendiente de aprobación física
+        nombre,
+        apellido,
+        direccion,
+        nacionalidad,
+        telefono,
+        fecha_nacimiento,
+        genero,
+        metodo_pago,
+        fecha_ultimo_pago,
+        localidad,
+        observaciones
       });
     }
 
@@ -68,7 +94,18 @@ export const register = async (req, res) => {
         perfil: perfil ? {
           numero_asociado: perfil.numero_asociado,
           dni: perfil.dni,
-          estado: perfil.estado
+          estado: perfil.estado,
+          nombre: perfil.nombre,
+          apellido: perfil.apellido,
+          direccion: perfil.direccion,
+          nacionalidad: perfil.nacionalidad,
+          telefono: perfil.telefono,
+          fecha_nacimiento: perfil.fecha_nacimiento,
+          genero: perfil.genero,
+          metodo_pago: perfil.metodo_pago,
+          fecha_ultimo_pago: perfil.fecha_ultimo_pago,
+          localidad: perfil.localidad,
+          observaciones: perfil.observaciones
         } : null
       }
     });
@@ -117,7 +154,18 @@ export const login = async (req, res) => {
         perfil: user.perfilSocio ? {
           numero_asociado: user.perfilSocio.numero_asociado,
           dni: user.perfilSocio.dni,
-          estado: user.perfilSocio.estado
+          estado: user.perfilSocio.estado,
+          nombre: user.perfilSocio.nombre,
+          apellido: user.perfilSocio.apellido,
+          direccion: user.perfilSocio.direccion,
+          nacionalidad: user.perfilSocio.nacionalidad,
+          telefono: user.perfilSocio.telefono,
+          fecha_nacimiento: user.perfilSocio.fecha_nacimiento,
+          genero: user.perfilSocio.genero,
+          metodo_pago: user.perfilSocio.metodo_pago,
+          fecha_ultimo_pago: user.perfilSocio.fecha_ultimo_pago,
+          localidad: user.perfilSocio.localidad,
+          observaciones: user.perfilSocio.observaciones
         } : null
       }
     });

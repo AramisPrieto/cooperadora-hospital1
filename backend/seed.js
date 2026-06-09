@@ -1,7 +1,8 @@
+import bcrypt from 'bcryptjs';
 import { connectSQL } from './config/db.js';
 import { connectMongoDB } from './config/mongo.js';
 import sequelize from './config/db.js';
-import { CampanaEco } from './models/index.js';
+import { CampanaEco, Usuario, PerfilSocio, DonacionTransferencia } from './models/index.js';
 import CampanaDetalle from './models/CampanaDetalle.js';
 import NoticiaActualidad from './models/NoticiaActualidad.js';
 
@@ -13,11 +14,120 @@ const seed = async () => {
 
     // Limpiar base de datos
     // Usamos Sequelize para limpiar SQL y Mongoose para NoSQL
+    await DonacionTransferencia.destroy({ where: {} });
+    await PerfilSocio.destroy({ where: {} });
+    await Usuario.destroy({ where: {} });
     await CampanaEco.destroy({ where: {}, cascade: true });
     await CampanaDetalle.deleteMany({});
     await NoticiaActualidad.deleteMany({});
 
-    console.log('🧹 Wiped existing campaigns, campaign details, and news.');
+    console.log('🧹 Wiped existing campaigns, campaign details, news, transfers, profiles, and users.');
+
+    // 0. Crear usuarios y perfiles de socios de relleno
+    const salt = await bcrypt.genSalt(10);
+    const adminPasswordHash = await bcrypt.hash('admin123', salt);
+    const socioPasswordHash = await bcrypt.hash('socio123', salt);
+
+    // Crear Admin
+    const adminUser = await Usuario.create({
+      email: 'admin@cooperadora.org',
+      password_hash: adminPasswordHash,
+      rol: 'admin'
+    });
+
+    // Socio 1 (Activo)
+    const user1 = await Usuario.create({
+      email: 'juan.perez@email.com',
+      password_hash: socioPasswordHash,
+      rol: 'socio'
+    });
+    const socio1 = await PerfilSocio.create({
+      usuario_id_fk: user1.id,
+      dni: 28456123,
+      estado: 'activo',
+      nombre: 'Juan Carlos',
+      apellido: 'Pérez',
+      direccion: 'Av. 59 1234',
+      nacionalidad: 'Argentino',
+      telefono: '2262551122',
+      fecha_nacimiento: '1980-05-15',
+      genero: 'masculino',
+      metodo_pago: 'efectivo',
+      fecha_ultimo_pago: '2026-05-10',
+      localidad: 'Necochea',
+      observaciones: 'Colaborador frecuente en campañas de pediatría.'
+    });
+
+    // Socio 2 (Activo)
+    const user2 = await Usuario.create({
+      email: 'maria.gomez@email.com',
+      password_hash: socioPasswordHash,
+      rol: 'socio'
+    });
+    const socio2 = await PerfilSocio.create({
+      usuario_id_fk: user2.id,
+      dni: 32987456,
+      estado: 'activo',
+      nombre: 'María Laura',
+      apellido: 'Gómez',
+      direccion: 'Calle 62 2541',
+      nacionalidad: 'Argentina',
+      telefono: '2262553344',
+      fecha_nacimiento: '1987-08-20',
+      genero: 'femenino',
+      metodo_pago: 'transferencia',
+      fecha_ultimo_pago: '2026-06-01',
+      localidad: 'Quequén',
+      observaciones: 'Prefiere ser contactada por email.'
+    });
+
+    // Socio 3 (Pendiente)
+    const user3 = await Usuario.create({
+      email: 'carlos.rodriguez@email.com',
+      password_hash: socioPasswordHash,
+      rol: 'socio'
+    });
+    const socio3 = await PerfilSocio.create({
+      usuario_id_fk: user3.id,
+      dni: 25123987,
+      estado: 'pendiente',
+      nombre: 'Carlos Alberto',
+      apellido: 'Rodríguez',
+      direccion: 'Calle 519 321',
+      nacionalidad: 'Argentino',
+      telefono: '2262555566',
+      fecha_nacimiento: '1975-12-05',
+      genero: 'masculino',
+      metodo_pago: 'cobrador',
+      fecha_ultimo_pago: null,
+      localidad: 'Necochea',
+      observaciones: 'Pendiente de validación de firma y entrega de formulario en papel.'
+    });
+
+    // Socio 4 (Inactivo)
+    const user4 = await Usuario.create({
+      email: 'ana.martinez@email.com',
+      password_hash: socioPasswordHash,
+      rol: 'socio'
+    });
+    const socio4 = await PerfilSocio.create({
+      usuario_id_fk: user4.id,
+      dni: 38456789,
+      estado: 'inactivo',
+      nombre: 'Ana Belén',
+      apellido: 'Martínez',
+      direccion: 'Calle 66 1890',
+      nacionalidad: 'Argentina',
+      telefono: '2262557788',
+      fecha_nacimiento: '1994-03-30',
+      genero: 'femenino',
+      metodo_pago: 'debito',
+      fecha_ultimo_pago: '2026-02-15',
+      localidad: 'Necochea',
+      observaciones: 'Solicitó la baja temporal por mudanza.'
+    });
+
+    console.log('👥 Seeded admin and 4 mock partners (Juan, María, Carlos, Ana).');
 
     // 1. Campaña 1 (SQL)
     const campana1 = await CampanaEco.create({
@@ -83,6 +193,27 @@ const seed = async () => {
       tags: ['Equipamiento', 'Guardia', 'Socios'],
       fecha: new Date('2026-05-25')
     });
+
+    // 4. Donaciones por Transferencia (SQL)
+    await DonacionTransferencia.create({
+      usuario_id: user1.id,
+      campana_id: campana1.id,
+      monto: 15000.00,
+      estado: 'pendiente',
+      numero_comprobante: 'TXN-987654321',
+      comprobante_url: 'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&w=600&q=80'
+    });
+
+    await DonacionTransferencia.create({
+      usuario_id: user2.id,
+      campana_id: campana2.id,
+      monto: 30000.00,
+      estado: 'aprobada',
+      numero_comprobante: 'TXN-123456789',
+      comprobante_url: 'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&w=600&q=80'
+    });
+
+    console.log('💰 Seeded 2 mock transfer donations.');
 
     console.log('🌱 Seeding completed successfully!');
     process.exit(0);

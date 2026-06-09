@@ -84,6 +84,7 @@ Ambas respuestas se ensamblan en un único objeto JSON unificado que se envía a
 ### 📋 Prerrequisitos
 Tener instalado en su sistema local:
 * **Node.js** (v18 o superior)
+* **pnpm** (v8 o superior)
 * Una instancia activa de **PostgreSQL** o **MySQL**.
 * Una instancia activa de **MongoDB**.
 
@@ -96,7 +97,7 @@ Tener instalado en su sistema local:
    ```
 2. Instalar todas las dependencias:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Crear el archivo `.env` a partir de la plantilla:
    ```bash
@@ -109,7 +110,7 @@ Tener instalado en su sistema local:
    * `PORT`: Puerto del servidor backend. **Debe ser `5001`** para que el proxy de Vite funcione correctamente.
 5. Iniciar el servidor backend en modo desarrollo (nodemon):
    ```bash
-   npm run dev
+   pnpm dev
    ```
    *El servidor compilará y sincronizará automáticamente las tablas relacionales de SQL y escuchará en el puerto 5001 (`http://localhost:5001`).*
 
@@ -122,11 +123,11 @@ Tener instalado en su sistema local:
    ```
 2. Instalar dependencias del cliente:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Iniciar el servidor de desarrollo de Vite:
    ```bash
-   npm run dev
+   pnpm dev
    ```
    *Vite levantará la aplicación frontend en `http://localhost:3000` con proxy reverso automático hacia el puerto 5001 para evitar bloqueos por CORS.*
 

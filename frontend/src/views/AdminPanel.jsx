@@ -8,7 +8,8 @@ import {
   Shield, Users, Target, Plus, Pencil, Trash, FileText,
   CheckCircle, Clock, AlertTriangle, LayoutDashboard,
   Newspaper, TrendingUp, X, Save, AlertCircle, Sparkles,
-  Banknote, XCircle
+  Banknote, XCircle, ChevronDown, ChevronUp, User, MapPin,
+  Calendar, Globe, Phone, Info
 } from 'lucide-react';
 
 /* ── Small stat card in header ── */
@@ -59,6 +60,21 @@ const AdminPanel = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [news, setNews] = useState([]);
   const [transfers, setTransfers] = useState([]); // TEAM_001: Estado para transferencias
+  const [expandedPartnerId, setExpandedPartnerId] = useState(null);
+  const [editingPartnerId, setEditingPartnerId] = useState(null);
+  const [editForm, setEditForm] = useState({
+    nombre: '',
+    apellido: '',
+    direccion: '',
+    localidad: '',
+    nacionalidad: '',
+    telefono: '',
+    fecha_nacimiento: '',
+    genero: '',
+    metodo_pago: '',
+    fecha_ultimo_pago: '',
+    observaciones: ''
+  });
 
 
   /* Campaign form */
@@ -111,6 +127,71 @@ const AdminPanel = () => {
       setErrorMsg('Error al cargar la información del panel.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  /* ── Socio editing handlers ── */
+  const startEditPartner = (part) => {
+    setEditingPartnerId(part.numero_asociado);
+    setEditForm({
+      nombre: part.nombre || '',
+      apellido: part.apellido || '',
+      direccion: part.direccion || '',
+      localidad: part.localidad || '',
+      nacionalidad: part.nacionalidad || '',
+      telefono: part.telefono || '',
+      fecha_nacimiento: part.fecha_nacimiento || '',
+      genero: part.genero || '',
+      metodo_pago: part.metodo_pago || '',
+      fecha_ultimo_pago: part.fecha_ultimo_pago || '',
+      observaciones: part.observaciones || ''
+    });
+  };
+
+  const handleSavePartnerDetails = async (id) => {
+    // Validar campos requeridos antes de guardar
+    const {
+      nombre,
+      apellido,
+      direccion,
+      localidad,
+      nacionalidad,
+      telefono,
+      fecha_nacimiento,
+      genero,
+      metodo_pago
+    } = editForm;
+
+    if (
+      !nombre || !nombre.trim() ||
+      !apellido || !apellido.trim() ||
+      !direccion || !direccion.trim() ||
+      !localidad || !localidad.trim() ||
+      !nacionalidad || !nacionalidad.trim() ||
+      !telefono || !telefono.trim() ||
+      !fecha_nacimiento ||
+      !genero ||
+      !metodo_pago
+    ) {
+      setErrorMsg('Todos los campos con asterisco (*) son obligatorios.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      await api.put(`/socios/${id}`, editForm);
+      setSuccessMsg('Datos del socio actualizados correctamente.');
+      setEditingPartnerId(null);
+      loadDashboardData();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.error || 'Error al actualizar los datos del socio.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -599,42 +680,256 @@ const AdminPanel = () => {
                 <p className="text-slate-400 text-sm font-semibold">No hay perfiles de socios registrados.</p>
               </div>
             ) : (
-              <div className="divide-y divide-slate-50">
-                {partners.map(part => (
-                  <div key={part.numero_asociado} className="flex items-center gap-4 p-5 hover:bg-slate-50 transition-colors">
-                    {/* Avatar */}
-                    <div className={`shrink-0 h-10 w-10 rounded-xl flex items-center justify-center font-black text-sm ${
-                      part.estado === 'activo'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-amber-100 text-amber-700'
-                    }`}>
-                      {part.numero_asociado}
-                    </div>
-                    <div className="flex-grow min-w-0">
-                      <p className="text-sm font-bold text-slate-800 truncate">{part.usuario?.email ?? '—'}</p>
-                      <p className="text-[10px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wide">
-                        DNI: {part.dni}
-                      </p>
-                    </div>
-                    <div className="shrink-0">
-                      {part.estado === 'pendiente' ? (
-                        <button
-                          onClick={() => handleApprovePartner(part.numero_asociado)}
-                          disabled={submitting}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
-                        >
-                          <Clock className="h-3 w-3" />
-                          Aprobar
-                        </button>
-                      ) : (
-                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-[11px] font-black uppercase tracking-wider">
-                          <CheckCircle className="h-3 w-3" />
-                          Activo
-                        </span>
+              <div className="divide-y divide-slate-100">
+                {partners.map(part => {
+                  const isExpanded = expandedPartnerId === part.numero_asociado;
+                  return (
+                    <div key={part.numero_asociado} className="border-b border-slate-50 last:border-none">
+                      <div
+                        onClick={() => setExpandedPartnerId(isExpanded ? null : part.numero_asociado)}
+                        className="flex items-center gap-4 p-5 hover:bg-slate-50/80 transition-colors cursor-pointer animate-fade"
+                      >
+                        {/* Avatar / Numero */}
+                        <div className={`shrink-0 h-10 w-10 rounded-xl flex items-center justify-center font-black text-sm ${
+                          part.estado === 'activo'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : part.estado === 'inactivo'
+                            ? 'bg-rose-100 text-rose-700'
+                            : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {part.numero_asociado}
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <p className="text-sm font-bold text-slate-800 truncate">
+                            {part.nombre && part.apellido ? `${part.nombre} ${part.apellido}` : part.usuario?.email ?? '—'}
+                          </p>
+                          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-0.5 text-[10px] text-slate-400 font-semibold uppercase tracking-wide">
+                            <span>DNI: {part.dni}</span>
+                            {part.nombre && part.apellido && <span className="normal-case text-slate-400 font-medium">({part.usuario?.email})</span>}
+                            {part.localidad && <span>• {part.localidad}</span>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0" onClick={e => e.stopPropagation()}>
+                          {part.estado === 'pendiente' ? (
+                            <button
+                              onClick={() => handleApprovePartner(part.numero_asociado)}
+                              disabled={submitting}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                            >
+                              <Clock className="h-3 w-3" />
+                              Aprobar
+                            </button>
+                          ) : part.estado === 'inactivo' ? (
+                            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-[11px] font-black uppercase tracking-wider">
+                              <XCircle className="h-3 w-3" />
+                              Inactivo
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-[11px] font-black uppercase tracking-wider">
+                              <CheckCircle className="h-3 w-3" />
+                              Activo
+                            </span>
+                          )}
+                          <button
+                            onClick={() => setExpandedPartnerId(isExpanded ? null : part.numero_asociado)}
+                            className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                          >
+                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Expanded panel details */}
+                      {isExpanded && (
+                        <div className="px-6 pb-6 pt-2 bg-slate-50/50 border-t border-slate-100 space-y-4">
+                          {editingPartnerId === part.numero_asociado ? (
+                            /* EDIT MODE FORM */
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs animate-fade-down">
+                              {/* Col 1: Datos Personales */}
+                              <div className="space-y-2.5">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                  <User className="h-3.5 w-3.5 text-brand-500" />
+                                  Editar Datos Personales
+                                </h4>
+                                <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre *</label>
+                                    <input type="text" value={editForm.nombre} onChange={e => setEditForm({ ...editForm, nombre: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Apellido *</label>
+                                    <input type="text" value={editForm.apellido} onChange={e => setEditForm({ ...editForm, apellido: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha Nacimiento *</label>
+                                    <input type="date" value={editForm.fecha_nacimiento} onChange={e => setEditForm({ ...editForm, fecha_nacimiento: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Género *</label>
+                                    <select value={editForm.genero} onChange={e => setEditForm({ ...editForm, genero: e.target.value })} className="input-field py-1.5 px-3 text-xs">
+                                      <option value="">Seleccione...</option>
+                                      <option value="masculino">Masculino</option>
+                                      <option value="femenino">Femenino</option>
+                                      <option value="otro">Otro</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nacionalidad *</label>
+                                    <input type="text" value={editForm.nacionalidad} onChange={e => setEditForm({ ...editForm, nacionalidad: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Col 2: Contacto y Ubicación */}
+                              <div className="space-y-2.5">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                  <MapPin className="h-3.5 w-3.5 text-brand-500" />
+                                  Editar Contacto y Ubicación
+                                </h4>
+                                <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Teléfono *</label>
+                                    <input type="text" value={editForm.telefono} onChange={e => setEditForm({ ...editForm, telefono: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Dirección *</label>
+                                    <input type="text" value={editForm.direccion} onChange={e => setEditForm({ ...editForm, direccion: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Localidad *</label>
+                                    <input type="text" value={editForm.localidad} onChange={e => setEditForm({ ...editForm, localidad: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Col 3: Administración */}
+                              <div className="space-y-2.5">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                  <Shield className="h-3.5 w-3.5 text-brand-500" />
+                                  Editar Administración
+                                </h4>
+                                <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Método de Pago *</label>
+                                    <select value={editForm.metodo_pago} onChange={e => setEditForm({ ...editForm, metodo_pago: e.target.value })} className="input-field py-1.5 px-3 text-xs">
+                                      <option value="">Seleccione...</option>
+                                      <option value="transferencia">Transferencia Bancaria</option>
+                                      <option value="efectivo">Efectivo</option>
+                                      <option value="cobrador">Cobrador a Domicilio</option>
+                                      <option value="debito">Débito Automático</option>
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha Último Pago</label>
+                                    <input type="date" value={editForm.fecha_ultimo_pago} onChange={e => setEditForm({ ...editForm, fecha_ultimo_pago: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Observaciones</label>
+                                    <textarea value={editForm.observaciones} onChange={e => setEditForm({ ...editForm, observaciones: e.target.value })} rows={3} className="input-field py-1.5 px-3 text-xs resize-none" placeholder="Notas internas..." />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            /* DISPLAY MODE (Read-only) */
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                              {/* Col 1: Datos Personales */}
+                              <div className="space-y-2.5">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                  <User className="h-3.5 w-3.5 text-brand-500" />
+                                  Datos Personales
+                                </h4>
+                                <div className="space-y-2 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Nombre:</span> {part.nombre || '—'}</p>
+                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Apellido:</span> {part.apellido || '—'}</p>
+                                  <p className="text-slate-600">
+                                    <span className="font-bold text-slate-700">F. Nacimiento:</span>{' '}
+                                    {part.fecha_nacimiento ? new Date(part.fecha_nacimiento + 'T00:00:00').toLocaleDateString('es-AR') : '—'}
+                                  </p>
+                                  <p className="text-slate-600 capitalize"><span className="font-bold text-slate-700">Género:</span> {part.genero || '—'}</p>
+                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Nacionalidad:</span> {part.nacionalidad || '—'}</p>
+                                </div>
+                              </div>
+
+                              {/* Col 2: Contacto y Ubicación */}
+                              <div className="space-y-2.5">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                  <MapPin className="h-3.5 w-3.5 text-brand-500" />
+                                  Contacto y Ubicación
+                                </h4>
+                                <div className="space-y-2 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Teléfono:</span> {part.telefono || '—'}</p>
+                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Dirección:</span> {part.direccion || '—'}</p>
+                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Localidad:</span> {part.localidad || '—'}</p>
+                                </div>
+                              </div>
+
+                              {/* Col 3: Datos Administrativos */}
+                              <div className="space-y-2.5">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                  <Shield className="h-3.5 w-3.5 text-brand-500" />
+                                  Administración
+                                </h4>
+                                <div className="space-y-2 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                  <p className="text-slate-600">
+                                    <span className="font-bold text-slate-700">Método de Pago:</span>{' '}
+                                    <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-bold text-[10px] uppercase tracking-wide capitalize">
+                                      {part.metodo_pago || '—'}
+                                    </span>
+                                  </p>
+                                  <p className="text-slate-600">
+                                    <span className="font-bold text-slate-700">Último Pago:</span>{' '}
+                                    {part.fecha_ultimo_pago ? new Date(part.fecha_ultimo_pago + 'T00:00:00').toLocaleDateString('es-AR') : '—'}
+                                  </p>
+                                  <p className="text-slate-600">
+                                    <span className="font-bold text-slate-700">Alta Sistema:</span>{' '}
+                                    {new Date(part.fecha_alta).toLocaleDateString('es-AR')}
+                                  </p>
+                                  <div className="mt-2 pt-2 border-t border-slate-100 text-slate-500">
+                                    <span className="font-black text-slate-600 text-[10px] uppercase tracking-wider block mb-0.5">Observaciones:</span>
+                                    <p className="italic leading-normal">{part.observaciones || 'Sin observaciones registradas.'}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* ACTION BUTTONS (At the bottom of the card) */}
+                          <div className="flex justify-end gap-2 border-t border-slate-200/60 pt-3">
+                            {editingPartnerId === part.numero_asociado ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingPartnerId(null)}
+                                  disabled={submitting}
+                                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold uppercase tracking-wider rounded-xl text-[10px] transition-colors disabled:opacity-40 animate-fade"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSavePartnerDetails(part.numero_asociado)}
+                                  disabled={submitting}
+                                  className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold uppercase tracking-wider rounded-xl text-[10px] transition-colors disabled:opacity-40 animate-fade"
+                                >
+                                  Guardar Datos
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => startEditPartner(part)}
+                                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold uppercase tracking-wider rounded-xl text-[10px] transition-colors animate-fade"
+                              >
+                                Editar Datos
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -777,6 +1072,7 @@ const AdminPanel = () => {
                       <th className="p-4">Socio (Email)</th>
                       <th className="p-4">Campaña</th>
                       <th className="p-4 text-right">Monto</th>
+                      <th className="p-4">Comprobante</th>
                       <th className="p-4">Fecha Reporte</th>
                       <th className="p-4">Estado</th>
                       <th className="p-4 text-center">Acciones</th>
@@ -789,6 +1085,27 @@ const AdminPanel = () => {
                         <td className="p-4 text-slate-600 font-semibold">{tr.campana?.titulo ?? '—'}</td>
                         <td className="p-4 text-right font-black text-slate-800">
                           ${parseFloat(tr.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="p-4">
+                          <div className="flex flex-col gap-0.5">
+                            {tr.numero_comprobante ? (
+                              <span className="font-bold text-slate-700">{tr.numero_comprobante}</span>
+                            ) : (
+                              <span className="text-slate-400 italic">Sin nro.</span>
+                            )}
+                            {tr.comprobante_url ? (
+                              <a
+                                href={tr.comprobante_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-brand-600 hover:text-brand-800 font-bold underline flex items-center gap-0.5"
+                              >
+                                <FileText className="h-3.5 w-3.5 inline" /> Ver captura
+                              </a>
+                            ) : (
+                              <span className="text-[10px] text-slate-400 font-medium">Sin captura</span>
+                            )}
+                          </div>
                         </td>
                         <td className="p-4 text-slate-400 font-medium">
                           {new Date(tr.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
