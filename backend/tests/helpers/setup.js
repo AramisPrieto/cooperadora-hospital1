@@ -39,7 +39,7 @@ export const initTestDatabase = async () => {
 
 export const resetTestDatabase = async () => {
   // Truncar todas las tablas SQL
-  await sequelize.query('TRUNCATE TABLE "donaciones_transferencia", "perfiles_socios", "campanas_eco", "usuarios" CASCADE;');
+  await sequelize.query('TRUNCATE TABLE "donaciones_transferencia", "perfiles_socios", "campanas_eco", "usuarios", "pagos_cuotas" CASCADE;');
   
   // Limpiar MongoDB
   if (mongoose.connection.readyState !== 0) {

@@ -32,6 +32,42 @@ export const validateRegister = [
     .isInt({ min: 1000000, max: 99999999 }).withMessage('El DNI debe ser un número válido entre 1.000.000 y 99.999.999.')
     .toInt(),
 
+  body('nombre')
+    .notEmpty().withMessage('El nombre es obligatorio.')
+    .isLength({ max: 100 }).withMessage('El nombre no puede superar los 100 caracteres.'),
+
+  body('apellido')
+    .notEmpty().withMessage('El apellido es obligatorio.')
+    .isLength({ max: 100 }).withMessage('El apellido no puede superar los 100 caracteres.'),
+
+  body('direccion')
+    .notEmpty().withMessage('La dirección es obligatoria.')
+    .isLength({ max: 255 }).withMessage('La dirección no puede superar los 255 caracteres.'),
+
+  body('localidad')
+    .notEmpty().withMessage('La localidad es obligatoria.')
+    .isLength({ max: 100 }).withMessage('La localidad no puede superar los 100 caracteres.'),
+
+  body('nacionalidad')
+    .notEmpty().withMessage('La nacionalidad es obligatoria.')
+    .isLength({ max: 100 }).withMessage('La nacionalidad no puede superar los 100 caracteres.'),
+
+  body('telefono')
+    .notEmpty().withMessage('El teléfono es obligatorio.')
+    .isLength({ max: 50 }).withMessage('El teléfono no puede superar los 50 caracteres.'),
+
+  body('fecha_nacimiento')
+    .notEmpty().withMessage('La fecha de nacimiento es obligatoria.')
+    .isISO8601().withMessage('La fecha de nacimiento debe ser una fecha válida (AAAA-MM-DD).'),
+
+  body('genero')
+    .notEmpty().withMessage('El género es obligatorio.')
+    .isIn(['masculino', 'femenino', 'otro']).withMessage('El género debe ser: masculino, femenino u otro.'),
+
+  body('metodo_pago')
+    .notEmpty().withMessage('El método de pago es obligatorio.')
+    .isIn(['transferencia', 'efectivo', 'cobrador', 'debito']).withMessage('El método de pago debe ser: transferencia, efectivo, cobrador o debito.'),
+
   handleValidationErrors,
 ];
 

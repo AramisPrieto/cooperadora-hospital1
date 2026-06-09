@@ -26,6 +26,62 @@ const PerfilSocio = sequelize.define('PerfilSocio', {
     type: DataTypes.ENUM('activo', 'pendiente', 'inactivo'),
     allowNull: false,
     defaultValue: 'pendiente'
+  },
+  nombre: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  apellido: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  direccion: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  nacionalidad: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  telefono: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  fecha_nacimiento: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
+  },
+  genero: {
+    type: DataTypes.ENUM('masculino', 'femenino', 'otro'),
+    allowNull: false
+  },
+  metodo_pago: {
+    type: DataTypes.ENUM('transferencia', 'efectivo', 'cobrador', 'debito'),
+    allowNull: false
+  },
+  fecha_ultimo_pago: {
+    type: DataTypes.DATEONLY,
+    allowNull: true
+  },
+  localidad: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  mp_preapproval_id: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  mp_subscription_status: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  monto_cuota: {
+    type: DataTypes.DECIMAL(12, 2),
+    allowNull: true
+  },
+  observaciones: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   tableName: 'perfiles_socios',

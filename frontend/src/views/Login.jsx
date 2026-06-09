@@ -15,6 +15,17 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  
+  // Nuevos campos de perfil para registro
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
+  const [direccion, setDireccion] = useState('');
+  const [localidad, setLocalidad] = useState('');
+  const [nacionalidad, setNacionalidad] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [fechaNacimiento, setFechaNacimiento] = useState('');
+  const [genero, setGenero] = useState('');
+  const [metodoPago, setMetodoPago] = useState('');
 
   const expired = searchParams.get('expired');
   const redirectCampaign = searchParams.get('redirect') === 'campana';
@@ -38,7 +49,20 @@ const Login = () => {
           navigate('/');
         }
       } else {
-        const res = await api.post('/auth/register', { email, password, dni: parseInt(dni) });
+        const res = await api.post('/auth/register', {
+          email,
+          password,
+          dni: parseInt(dni),
+          nombre: nombre || undefined,
+          apellido: apellido || undefined,
+          direccion: direccion || undefined,
+          localidad: localidad || undefined,
+          nacionalidad: nacionalidad || undefined,
+          telefono: telefono || undefined,
+          fecha_nacimiento: fechaNacimiento || undefined,
+          genero: genero || undefined,
+          metodo_pago: metodoPago || undefined
+        });
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         setSuccessMsg('¡Registro exitoso!');
@@ -168,26 +192,83 @@ const Login = () => {
 
             {/* DNI (sólo registro) */}
             {!isLogin && (
-              <div className="space-y-1.5 animate-fade-up">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  DNI <span className="text-red-500 normal-case font-normal">(Obligatorio para socios)</span>
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                  <input
-                    type="number"
-                    required
-                    value={dni}
-                    onChange={e => setDni(e.target.value)}
-                    placeholder="Sin puntos ej: 30123456"
-                    className="input-field pl-10"
-                  />
+              <>
+                <div className="space-y-1.5 animate-fade-up">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    DNI <span className="text-red-500 normal-case font-normal">(Obligatorio para socios)</span>
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                    <input
+                      type="number"
+                      required
+                      value={dni}
+                      onChange={e => setDni(e.target.value)}
+                      placeholder="Sin puntos ej: 30123456"
+                      className="input-field pl-10"
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-500 flex items-center gap-1 pl-0.5">
+                    <ShieldAlert className="h-3 w-3 text-amber-500 shrink-0" />
+                    El DNI queda registrado permanentemente en el Libro de Asociados.
+                  </p>
                 </div>
-                <p className="text-[10px] text-slate-500 flex items-center gap-1 pl-0.5">
-                  <ShieldAlert className="h-3 w-3 text-amber-500 shrink-0" />
-                  El DNI queda registrado permanentemente en el Libro de Asociados.
-                </p>
-              </div>
+
+                <div className="space-y-4 animate-fade-up border-t border-slate-100 pt-4">
+                  <p className="text-[10px] font-black text-brand-600 uppercase tracking-widest">
+                    Completar Datos de Socio
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nombre *</label>
+                      <input type="text" required value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Juan" className="input-field py-2 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Apellido *</label>
+                      <input type="text" required value={apellido} onChange={e => setApellido(e.target.value)} placeholder="Pérez" className="input-field py-2 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Teléfono *</label>
+                      <input type="text" required value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="2262550000" className="input-field py-2 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Nacionalidad *</label>
+                      <input type="text" required value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} placeholder="Argentino" className="input-field py-2 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Dirección *</label>
+                      <input type="text" required value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Calle 60 1234" className="input-field py-2 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Localidad *</label>
+                      <input type="text" required value={localidad} onChange={e => setLocalidad(e.target.value)} placeholder="Necochea" className="input-field py-2 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">F. Nacimiento *</label>
+                      <input type="date" required value={fechaNacimiento} onChange={e => setFechaNacimiento(e.target.value)} className="input-field py-2 text-sm" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Género *</label>
+                      <select required value={genero} onChange={e => setGenero(e.target.value)} className="input-field py-2 text-sm">
+                        <option value="">Seleccione...</option>
+                        <option value="masculino">Masculino</option>
+                        <option value="femenino">Femenino</option>
+                        <option value="otro">Otro</option>
+                      </select>
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Método de Pago Preferido *</label>
+                      <select required value={metodoPago} onChange={e => setMetodoPago(e.target.value)} className="input-field py-2 text-sm">
+                        <option value="">Seleccione...</option>
+                        <option value="transferencia">Transferencia Bancaria</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="cobrador">Cobrador a Domicilio</option>
+                        <option value="debito">Débito Automático</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Submit */}
