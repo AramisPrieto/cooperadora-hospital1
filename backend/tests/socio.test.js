@@ -16,6 +16,18 @@ let socioUser;
 let anotherSocioUser;
 let socioPerfil;
 
+const baseSocioProfile = {
+  nombre: 'SocioTest',
+  apellido: 'SocioTest',
+  direccion: 'Calle Falsa 123',
+  localidad: 'Necochea',
+  nacionalidad: 'Argentino',
+  telefono: '12345678',
+  fecha_nacimiento: '1990-01-01',
+  genero: 'masculino',
+  metodo_pago: 'transferencia'
+};
+
 beforeAll(async () => {
   await initTestDatabase();
 });
@@ -41,6 +53,7 @@ beforeEach(async () => {
     rol: 'socio'
   });
   socioPerfil = await PerfilSocio.create({
+    ...baseSocioProfile,
     usuario_id_fk: socioUser.id,
     dni: 11223344,
     estado: 'pendiente'
@@ -54,6 +67,7 @@ beforeEach(async () => {
     rol: 'socio'
   });
   await PerfilSocio.create({
+    ...baseSocioProfile,
     usuario_id_fk: anotherSocioUser.id,
     dni: 55667788,
     estado: 'activo'
@@ -135,6 +149,66 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
       expect(res.status).toBe(200);
       expect(res.body.socio).toHaveProperty('estado', 'activo');
     });
+
+    it('debe rechazar (status 400) si un socio intenta actualizar un campo obligatorio a un string vacío', async () => {
+      const res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({
+          nombre: ''
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('debe rechazar (status 400) si un socio intenta actualizar un campo obligatorio a null', async () => {
+      const res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({
+          apellido: null
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('debe rechazar (status 400) si un socio intenta actualizar un campo obligatorio a espacios en blanco', async () => {
+      const res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({
+          direccion: '    '
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('debe rechazar (status 400) si un admin intenta actualizar un campo obligatorio a null', async () => {
+      const res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          nombre: null
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('debe rechazar (status 400) si se intenta actualizar el DNI a un largo inválido', async () => {
+      const res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({
+          dni: 12345
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
   });
 
   describe('Rutas exclusivas de Administrador', () => {
@@ -170,6 +244,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
         .post('/api/socios')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
+          ...baseSocioProfile,
           usuario_id_fk: tempUser.id,
           dni: 99990000,
           estado: 'activo'
@@ -178,6 +253,109 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
       expect(res.status).toBe(201);
       expect(res.body).toHaveProperty('dni', 99990000);
       expect(res.body).toHaveProperty('estado', 'activo');
+    });
+
+    it('POST / debe rechazar (status 400) si falta usuario_id_fk', async () => {
+      const res = await request(app)
+        .post('/api/socios')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          ...baseSocioProfile,
+          dni: 99990001
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('POST / debe rechazar (status 400) si el DNI tiene menos de 7 dígitos', async () => {
+      const salt = await bcrypt.genSalt(10);
+      const userHash = await bcrypt.hash('pass', salt);
+      const tempUser = await Usuario.create({
+        email: 'temp1@test.com',
+        password_hash: userHash,
+        rol: 'socio'
+      });
+
+      const res = await request(app)
+        .post('/api/socios')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          ...baseSocioProfile,
+          usuario_id_fk: tempUser.id,
+          dni: 123456
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('POST / debe rechazar (status 400) si el DNI tiene más de 8 dígitos', async () => {
+      const salt = await bcrypt.genSalt(10);
+      const userHash = await bcrypt.hash('pass', salt);
+      const tempUser = await Usuario.create({
+        email: 'temp2@test.com',
+        password_hash: userHash,
+        rol: 'socio'
+      });
+
+      const res = await request(app)
+        .post('/api/socios')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          ...baseSocioProfile,
+          usuario_id_fk: tempUser.id,
+          dni: 123456789
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('POST / debe rechazar (status 400) si un campo de texto requerido está vacío', async () => {
+      const salt = await bcrypt.genSalt(10);
+      const userHash = await bcrypt.hash('pass', salt);
+      const tempUser = await Usuario.create({
+        email: 'temp3@test.com',
+        password_hash: userHash,
+        rol: 'socio'
+      });
+
+      const res = await request(app)
+        .post('/api/socios')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          ...baseSocioProfile,
+          usuario_id_fk: tempUser.id,
+          dni: 99990002,
+          nombre: ''
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
+    });
+
+    it('POST / debe rechazar (status 400) si un campo de texto requerido tiene solo espacios', async () => {
+      const salt = await bcrypt.genSalt(10);
+      const userHash = await bcrypt.hash('pass', salt);
+      const tempUser = await Usuario.create({
+        email: 'temp4@test.com',
+        password_hash: userHash,
+        rol: 'socio'
+      });
+
+      const res = await request(app)
+        .post('/api/socios')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          ...baseSocioProfile,
+          usuario_id_fk: tempUser.id,
+          dni: 99990003,
+          apellido: '   '
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error');
     });
 
     it('DELETE /:id debe permitir a admin eliminar un perfil de socio', async () => {

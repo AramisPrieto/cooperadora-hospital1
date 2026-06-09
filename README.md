@@ -84,6 +84,7 @@ Ambas respuestas se ensamblan en un único objeto JSON unificado que se envía a
 ### 📋 Prerrequisitos
 Tener instalado en su sistema local:
 * **Node.js** (v18 o superior)
+* **pnpm** (v8 o superior)
 * Una instancia activa de **PostgreSQL** o **MySQL**.
 * Una instancia activa de **MongoDB**.
 
@@ -96,7 +97,7 @@ Tener instalado en su sistema local:
    ```
 2. Instalar todas las dependencias:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Crear el archivo `.env` a partir de la plantilla:
    ```bash
@@ -109,7 +110,7 @@ Tener instalado en su sistema local:
    * `PORT`: Puerto del servidor backend. **Debe ser `5001`** para que el proxy de Vite funcione correctamente.
 5. Iniciar el servidor backend en modo desarrollo (nodemon):
    ```bash
-   npm run dev
+   pnpm dev
    ```
    *El servidor compilará y sincronizará automáticamente las tablas relacionales de SQL y escuchará en el puerto 5001 (`http://localhost:5001`).*
 
@@ -122,11 +123,11 @@ Tener instalado en su sistema local:
    ```
 2. Instalar dependencias del cliente:
    ```bash
-   npm install
+   pnpm install
    ```
 3. Iniciar el servidor de desarrollo de Vite:
    ```bash
-   npm run dev
+   pnpm dev
    ```
    *Vite levantará la aplicación frontend en `http://localhost:3000` con proxy reverso automático hacia el puerto 5001 para evitar bloqueos por CORS.*
 
@@ -275,16 +276,33 @@ git checkout -b develop
 
 ### Versión 1.6.0 — Desarrollo del Panel de Socios en el Backend (Thiago Masson)
 - **Modelo de Control de Cuotas Sociales**:
-  - Creación del modelo relacional [PagoCuota.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/models/PagoCuota.js) en PostgreSQL para registrar el historial de pago de cuotas mensuales de los asociados (mes, año, monto, estado de pago).
-  - Configuración de relaciones y cascada de borrado en [models/index.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/models/index.js).
+  - Creación del modelo relacional [PagoCuota.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PagoCuota.js) en PostgreSQL para registrar el historial de pago de cuotas mensuales de los asociados (mes, año, monto, estado de pago).
+  - Configuración de relaciones y cascada de borrado en [models/index.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/index.js).
 - **Nuevas Rutas y Controladores de Autogestión**:
-  - Implementación de la ruta `GET /api/socios/mi-perfil/cuotas` para consultar el historial de cuotas sociales del socio autenticado en [socioRoutes.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/routes/socioRoutes.js) y [socioController.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/controllers/socioController.js).
-  - Implementación de la ruta `GET /api/donaciones/mis-donaciones` en [donacionRoutes.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/routes/donacionRoutes.js) y su controlador en [donacionController.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/controllers/donacionController.js) para permitir que los socios consulten las transferencias que declararon históricamente.
+  - Implementación de la ruta `GET /api/socios/mi-perfil/cuotas` para consultar el historial de cuotas sociales del socio autenticado en [socioRoutes.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/routes/socioRoutes.js) y [socioController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioController.js).
+  - Implementación de la ruta `GET /api/donaciones/mis-donaciones` en [donacionRoutes.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/routes/donacionRoutes.js) y su controlador en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para permitir que los socios consulten las transferencias que declararon históricamente.
 - **Actualización de Datos de Prueba y Seeds**:
-  - Ajuste en [seed.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/seed.js) para levantar automáticamente un administrador (`admin@cooperadora.org`) y un socio de prueba (`socio@cooperadora.org`) con su perfil activo e historial de cuotas del año 2026.
+  - Ajuste en [seed.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/seed.js) para levantar automáticamente un administrador (`admin@cooperadora.org`) y un socio de prueba (`socio@cooperadora.org`) con su perfil activo e historial de cuotas del año 2026.
 - **Verificación Automatizada**:
-  - Creación de la suite de pruebas automatizadas [socioPanel.test.js](file:///C:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/backend/tests/socioPanel.test.js) que valida el correcto funcionamiento de los endpoints y los mecanismos de bloqueo de peticiones anónimas (Status 401).
+  - Creación de la suite de pruebas automatizadas [socioPanel.test.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/socioPanel.test.js) que valida el correcto funcionamiento de los endpoints y los mecanismos de bloqueo de peticiones anónimas (Status 401).
 
+### Versión 1.7.0 — Integración de Mercado Pago y Gestión de Pagos en Panel de Socios (Aramis Prieto)
+- **Modelo Ampliado de Socios y Base de Datos**:
+  - Ampliación del esquema de [PerfilSocio.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PerfilSocio.js) en PostgreSQL para registrar información de contacto detallada: `nombre`, `apellido`, `direccion`, `nacionalidad`, `telefono`, `fecha_nacimiento`, `genero`, `metodo_pago` ('transferencia', 'efectivo', 'debito'), `fecha_ultimo_pago`, `localidad` y `observaciones`.
+  - Unificación del modelo [PagoCuota.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PagoCuota.js) para integrar los períodos de facturación (`mes`, `anio`) con el registro de transacciones de pago (`metodo_pago`, `mp_payment_id`, `numero_comprobante`, `comprobante_url`), utilizando `socio_numero_asociado` como clave foránea única.
+- **Integración con Mercado Pago para Cuotas Sociales**:
+  - Creación del servicio [mpService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/mpService.js) que se integra con el SDK oficial de Mercado Pago para gestionar suscripciones recurrentes de débito automático.
+  - Implementación de webhooks transaccionales en `/api/webhooks/mercadopago` que procesan notificaciones de tipo `preapproval` (suscripción) y `payment` (captura del cobro mensual), actualizando el estado de la membresía y registrando las transacciones en tiempo real.
+- **Flujo de Pago y Declaración Manual**:
+  - Implementación de endpoints seguros de autogestión en `/api/socios/mi-perfil/pagos/declarar` para que los asociados puedan reportar comprobantes de pago de cuota mediante transferencia bancaria.
+  - Creación de rutas de autogestión de suscripción Mercado Pago (`POST /api/socios/suscripcion/crear` y `POST /api/socios/suscripcion/cancelar`).
+- **Rediseño Premium del Panel de Socio**:
+  - Fusión de las funcionalidades en una interfaz de usuario integrada en [SocioPanel.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/SocioPanel.jsx) dividida en pestañas estéticas y responsivas:
+    - **Mi Resumen**: Permite visualizar la ficha del asociado y actualizar sus datos de contacto y DNI.
+    - **Mis Cuotas**: Integra el historial de períodos mensuales con el historial transaccional de pagos, y ofrece un selector dinámico para pagar a través de débito automático de Mercado Pago, registrar manualmente una transferencia o ver información del cobrador domiciliario.
+    - **Mis Donaciones**: Muestra el registro histórico de aportes hechos a las campañas del hospital.
+- **Pruebas de Integración y Verificación**:
+  - Creación de la suite de pruebas [socioSubscription.test.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/socioSubscription.test.js) que verifica la creación de suscripciones, cancelación, declaraciones manuales y callbacks asíncronos del webhook.
 
 
 

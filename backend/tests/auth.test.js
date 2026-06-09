@@ -16,12 +16,25 @@ afterAll(async () => {
   await closeTestConnections();
 });
 
+const baseRegisterData = {
+  nombre: 'SocioTest',
+  apellido: 'SocioTest',
+  direccion: 'Calle Falsa 123',
+  localidad: 'Necochea',
+  nacionalidad: 'Argentino',
+  telefono: '12345678',
+  fecha_nacimiento: '1990-01-01',
+  genero: 'masculino',
+  metodo_pago: 'transferencia'
+};
+
 describe('Rutas de Autenticación (/api/auth)', () => {
   describe('POST /register', () => {
     it('debe registrar un nuevo usuario socio con perfil pendiente', async () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
+          ...baseRegisterData,
           email: 'socio@test.com',
           password: 'password123',
           dni: 12345678
@@ -40,6 +53,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       await request(app)
         .post('/api/auth/register')
         .send({
+          ...baseRegisterData,
           email: 'socio@test.com',
           password: 'password123',
           dni: 12345678
@@ -49,6 +63,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
+          ...baseRegisterData,
           email: 'socio@test.com',
           password: 'anotherpassword',
           dni: 87654321
@@ -63,6 +78,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       await request(app)
         .post('/api/auth/register')
         .send({
+          ...baseRegisterData,
           email: 'socio1@test.com',
           password: 'password123',
           dni: 12345678
@@ -72,6 +88,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
+          ...baseRegisterData,
           email: 'socio2@test.com',
           password: 'password123',
           dni: 12345678
@@ -85,6 +102,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
+          ...baseRegisterData,
           email: 'invalid-email',
           password: 'password123',
           dni: 12345678
@@ -98,6 +116,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
+          ...baseRegisterData,
           email: 'socio@test.com',
           password: 'short',
           dni: 12345678
@@ -111,6 +130,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
+          ...baseRegisterData,
           email: 'socio@test.com',
           password: 'password123',
           dni: 999
@@ -127,6 +147,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       await request(app)
         .post('/api/auth/register')
         .send({
+          ...baseRegisterData,
           email: 'user@test.com',
           password: 'password123',
           dni: 12345678

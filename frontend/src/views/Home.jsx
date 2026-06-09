@@ -85,6 +85,8 @@ const Home = () => {
   const [donationError, setDonationError] = useState('');
   const [submittingDonation, setSubmittingDonation] = useState(false);
   const [transferAmount, setTransferAmount] = useState('');
+  const [transferNumber, setTransferNumber] = useState('');
+  const [transferReceiptUrl, setTransferReceiptUrl] = useState('');
   const [copiedAlias, setCopiedAlias] = useState(false);
   const [copiedCbu, setCopiedCbu] = useState(false);
 
@@ -158,6 +160,8 @@ const Home = () => {
   const handleCloseModal = () => {
     setSelectedCampaign(null);
     setTransferAmount('');
+    setTransferNumber('');
+    setTransferReceiptUrl('');
     setDonationSuccess('');
     setDonationError('');
   };
@@ -174,10 +178,14 @@ const Home = () => {
     setDonationSuccess('');
     try {
       await api.post(`/donaciones/campanas/${selectedCampaign.id}/donar-transferencia`, {
-        monto: parseFloat(transferAmount)
+        monto: parseFloat(transferAmount),
+        numero_comprobante: transferNumber,
+        comprobante_url: transferReceiptUrl
       });
       setDonationSuccess('¡Muchas gracias por su donación! Pronto le llegará un mail con la confirmación de que nos llegó la transferencia. El impacto en la campaña se verá reflejado una vez que nuestro equipo valide el movimiento bancario.');
       setTransferAmount('');
+      setTransferNumber('');
+      setTransferReceiptUrl('');
     } catch (err) {
       console.error('Error al registrar transferencia:', err);
       setDonationError(err.response?.data?.error || 'Error al procesar la declaración en el servidor.');
@@ -746,40 +754,73 @@ const Home = () => {
                       </div>
                     </div>
 
-                    {/* Declarar monto */}
-                    <div className="space-y-2">
-                      <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider">
-                        Monto de tu aporte
-                      </p>
-                      <div className="flex gap-3">
-                        <div className="relative flex-grow">
-                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm pointer-events-none">$</span>
+                    {/* Declarar detalles de transferencia */}
+                    <div className="space-y-4 pt-2 border-t border-slate-100">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
+                            Monto de tu aporte ($) *
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
+                            <input
+                              type="number"
+                              min="1"
+                              step="any"
+                              value={transferAmount}
+                              onChange={(e) => setTransferAmount(e.target.value)}
+                              placeholder="5000"
+                              className="input-field pl-7 py-2.5 text-sm"
+                              required
+                              disabled={submittingDonation}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
+                            Número de Transacción / Comprobante
+                          </label>
                           <input
-                            type="number"
-                            min="1"
-                            step="any"
-                            value={transferAmount}
-                            onChange={(e) => setTransferAmount(e.target.value)}
-                            placeholder="Ej: $ 5.000"
-                            className="input-field pl-8"
-                            required
+                            type="text"
+                            value={transferNumber}
+                            onChange={(e) => setTransferNumber(e.target.value)}
+                            placeholder="Ej: TXN-1234567"
+                            className="input-field py-2.5 text-sm"
                             disabled={submittingDonation}
                           />
                         </div>
+
+                        <div className="sm:col-span-2">
+                          <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
+                            URL de Captura de Comprobante
+                          </label>
+                          <input
+                            type="url"
+                            value={transferReceiptUrl}
+                            onChange={(e) => setTransferReceiptUrl(e.target.value)}
+                            placeholder="https://ejemplo.com/comprobante.jpg"
+                            className="input-field py-2.5 text-sm"
+                            disabled={submittingDonation}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 pt-2">
                         <button
                           type="button"
                           onClick={handleCloseModal}
                           disabled={submittingDonation}
-                          className="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
+                          className="flex-1 px-4 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
                         >
                           Cerrar
                         </button>
                         <button
                           type="submit"
                           disabled={submittingDonation}
-                          className="btn-brand text-xs py-2.5 px-5 whitespace-nowrap disabled:opacity-50"
+                          className="flex-1 btn-brand text-xs py-3 px-6 whitespace-nowrap disabled:opacity-50 w-full"
                         >
-                          {submittingDonation ? 'Procesando...' : 'Ya transferí'}
+                          {submittingDonation ? 'Procesando...' : 'Reportar Transferencia'}
                         </button>
                       </div>
                     </div>

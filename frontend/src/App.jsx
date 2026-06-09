@@ -7,7 +7,7 @@ import Home from './views/Home';
 import Login from './views/Login';
 import AdminPanel from './views/AdminPanel';
 import SocioPanel from './views/SocioPanel';
-import { Heart, Shield, Github } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 /* Protección de ruta admin */
 const ProtectedRoute = ({ children }) => {
@@ -17,10 +17,11 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-/* Protección de ruta socio/usuario general */
-const ProtectedRouteSocio = ({ children }) => {
+/* Protección de ruta socio */
+const SocioProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
-  if (!token) return <Navigate to="/login" replace />;
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  if (!token || user?.rol !== 'socio') return <Navigate to="/" replace />;
   return children;
 };
 
@@ -28,57 +29,57 @@ function App() {
   return (
     <ReactLenis root>
       <Router>
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
+        <div className="min-h-screen flex flex-col">
+          <Navbar />
 
-        <main className="flex-grow flex flex-col">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminPanel />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mi-panel"
-              element={
-                <ProtectedRouteSocio>
-                  <SocioPanel />
-                </ProtectedRouteSocio>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
+          <main className="flex-grow flex flex-col">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminPanel />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/mi-panel"
+                element={
+                  <SocioProtectedRoute>
+                    <SocioPanel />
+                  </SocioProtectedRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
 
-        {/* ── Footer ── */}
-        <footer className="bg-transparent border-t border-slate-200 mt-auto relative z-10 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              {/* Brand */}
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-brand-50 flex items-center justify-center border border-brand-100">
-                  <Heart className="h-4 w-4 text-brand-600 fill-brand-600" />
+          {/* ── Footer ── */}
+          <footer className="bg-transparent border-t border-slate-200 mt-auto relative z-10 backdrop-blur-sm">
+            <div className="max-w-7xl mx-auto px-4 py-8">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                {/* Brand */}
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-brand-50 flex items-center justify-center border border-brand-100">
+                    <Heart className="h-4 w-4 text-brand-600 fill-brand-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-display font-black text-slate-800">Cooperadora</p>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Hospital Municipal Dr. Emilio Ferreyra</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-display font-black text-slate-800">Cooperadora</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Hospital Municipal Dr. Emilio Ferreyra</p>
-                </div>
+
+                {/* Center text */}
+                <p className="text-xs text-slate-500 text-center font-medium md:mr-auto md:ml-8">
+                  © 2026 Asociación Cooperadora — Necochea, Buenos Aires.
+                </p>
               </div>
-
-              {/* Center text */}
-              <p className="text-xs text-slate-500 text-center font-medium md:mr-auto md:ml-8">
-                © 2026 Asociación Cooperadora — Necochea, Buenos Aires.
-              </p>
             </div>
-          </div>
-        </footer>
-      </div>
-    </Router>
+          </footer>
+        </div>
+      </Router>
     </ReactLenis>
   );
 }

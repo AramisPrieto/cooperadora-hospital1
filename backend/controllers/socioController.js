@@ -67,11 +67,43 @@ export const getMyCuotas = async (req, res) => {
 
 // Crear perfil de socio manualmente (Admin)
 export const createSocio = async (req, res) => {
-  const { usuario_id_fk, dni, estado } = req.body;
+  const {
+    usuario_id_fk,
+    dni,
+    estado,
+    nombre,
+    apellido,
+    direccion,
+    nacionalidad,
+    telefono,
+    fecha_nacimiento,
+    genero,
+    metodo_pago,
+    fecha_ultimo_pago,
+    localidad,
+    observaciones
+  } = req.body;
+
+  if (!usuario_id_fk || !dni || !nombre || !apellido || !direccion || !localidad || !nacionalidad || !telefono || !fecha_nacimiento || !genero || !metodo_pago) {
+    return res.status(400).json({ error: 'Todos los campos de perfil son obligatorios (usuario_id_fk, dni, nombre, apellido, direccion, localidad, nacionalidad, telefono, fecha_nacimiento, genero, metodo_pago).' });
+  }
+
+  const dniInt = parseInt(dni);
+  if (isNaN(dniInt) || dniInt < 1000000 || dniInt > 99999999) {
+    return res.status(400).json({ error: 'El DNI debe ser un número válido de entre 7 y 8 dígitos.' });
+  }
+
+  // Verificar que el resto de los campos de texto no estén vacíos después de hacer trim()
+  const stringFields = { nombre, apellido, direccion, localidad, nacionalidad, telefono };
+  for (const [key, val] of Object.entries(stringFields)) {
+    if (typeof val === 'string' && val.trim() === '') {
+      return res.status(400).json({ error: `El campo ${key} no puede ser un texto vacío.` });
+    }
+  }
 
   try {
     // Validar DNI único
-    const existingDni = await PerfilSocio.findOne({ where: { dni } });
+    const existingDni = await PerfilSocio.findOne({ where: { dni: dniInt } });
     if (existingDni) {
       return res.status(400).json({ error: 'El DNI ingresado ya existe.' });
     }
@@ -84,8 +116,19 @@ export const createSocio = async (req, res) => {
 
     const nuevoSocio = await PerfilSocio.create({
       usuario_id_fk,
-      dni,
-      estado: estado || 'pendiente'
+      dni: dniInt,
+      estado: estado || 'pendiente',
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
+      direccion: direccion.trim(),
+      nacionalidad: nacionalidad.trim(),
+      telefono: telefono.trim(),
+      fecha_nacimiento,
+      genero,
+      metodo_pago,
+      fecha_ultimo_pago,
+      localidad: localidad.trim(),
+      observaciones
     });
 
     return res.status(201).json(nuevoSocio);
@@ -98,7 +141,43 @@ export const createSocio = async (req, res) => {
 // Actualizar perfil de socio (Admin o el propio socio)
 export const updateSocio = async (req, res) => {
   const { id } = req.params; // numero_asociado
-  const { dni, estado } = req.body;
+  const {
+    dni,
+    estado,
+    nombre,
+    apellido,
+    direccion,
+    nacionalidad,
+    telefono,
+    fecha_nacimiento,
+    genero,
+    metodo_pago,
+    fecha_ultimo_pago,
+    localidad,
+    observaciones
+  } = req.body;
+
+  // Validar campos obligatorios si están presentes
+  const requiredStringFields = {
+    nombre: 'Nombre',
+    apellido: 'Apellido',
+    direccion: 'Dirección',
+    localidad: 'Localidad',
+    nacionalidad: 'Nacionalidad',
+    telefono: 'Teléfono',
+    fecha_nacimiento: 'Fecha de nacimiento',
+    genero: 'Género',
+    metodo_pago: 'Método de pago'
+  };
+
+  for (const [key, label] of Object.entries(requiredStringFields)) {
+    if (req.body[key] !== undefined) {
+      const val = req.body[key];
+      if (val === null || (typeof val === 'string' && val.trim() === '')) {
+        return res.status(400).json({ error: `El campo ${label} es obligatorio y no puede estar vacío.` });
+      }
+    }
+  }
 
   try {
     const socio = await PerfilSocio.findByPk(id);
@@ -117,17 +196,35 @@ export const updateSocio = async (req, res) => {
     }
 
     // Validar DNI único si se está modificando
-    if (dni && dni !== socio.dni) {
-      const existingDni = await PerfilSocio.findOne({ where: { dni } });
-      if (existingDni) {
-        return res.status(400).json({ error: 'El DNI ingresado ya está en uso.' });
+    if (dni !== undefined) {
+      const dniInt = parseInt(dni);
+      if (isNaN(dniInt) || dniInt < 1000000 || dniInt > 99999999) {
+        return res.status(400).json({ error: 'El DNI es obligatorio y debe ser un número válido de entre 7 y 8 dígitos.' });
       }
-      socio.dni = dni;
+      if (dniInt !== socio.dni) {
+        const existingDni = await PerfilSocio.findOne({ where: { dni: dniInt } });
+        if (existingDni) {
+          return res.status(400).json({ error: 'El DNI ingresado ya está en uso.' });
+        }
+        socio.dni = dniInt;
+      }
     }
 
     if (estado && req.user.rol === 'admin') {
       socio.estado = estado;
     }
+
+    if (nombre !== undefined) socio.nombre = nombre.trim();
+    if (apellido !== undefined) socio.apellido = apellido.trim();
+    if (direccion !== undefined) socio.direccion = direccion.trim();
+    if (nacionalidad !== undefined) socio.nacionalidad = nacionalidad.trim();
+    if (telefono !== undefined) socio.telefono = telefono.trim();
+    if (fecha_nacimiento !== undefined) socio.fecha_nacimiento = fecha_nacimiento;
+    if (genero !== undefined) socio.genero = genero;
+    if (metodo_pago !== undefined) socio.metodo_pago = metodo_pago;
+    if (fecha_ultimo_pago !== undefined) socio.fecha_ultimo_pago = fecha_ultimo_pago;
+    if (localidad !== undefined) socio.localidad = localidad.trim();
+    if (observaciones !== undefined) socio.observaciones = observaciones;
 
     await socio.save();
 

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
 import {
   User, Heart, CheckCircle, Clock, XCircle,
   CreditCard, Banknote, Calendar, ShieldAlert,
-  Save, AlertCircle, RefreshCw, ChevronRight
+  Save, AlertCircle, RefreshCw, Edit, Copy, Check,
+  ArrowRight, X, Phone, MapPin, FileText
 } from 'lucide-react';
 
 /* ── Tarjeta de estadística pequeña en cabecera ── */
@@ -28,19 +29,38 @@ const TABS = [
 
 const SocioPanel = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState('resumen');
   
   // Datos del socio
   const [profile, setProfile] = useState(null);
   const [cuotas, setCuotas] = useState([]);
   const [donaciones, setDonaciones] = useState([]);
+  const [payments, setPayments] = useState([]);
   
-  // Formularios y estados
-  const [dniInput, setDniInput] = useState('');
+  // Formularios y estados de carga
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
+  const [submittingDniContact, setSubmittingDniContact] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  // Estados de edición del perfil
+  const [dniInput, setDniInput] = useState('');
+  const [telInput, setTelInput] = useState('');
+  const [dirInput, setDirInput] = useState('');
+  const [locInput, setLocInput] = useState('');
+
+  // Formulario de suscripción de Mercado Pago
+  const [subMonto, setSubMonto] = useState('2000');
+  const [submittingSub, setSubmittingSub] = useState(false);
+
+  // Formulario de transferencia manual (para cuotas)
+  const [transferMonto, setTransferMonto] = useState('');
+  const [transferNumber, setTransferNumber] = useState('');
+  const [transferReceiptUrl, setTransferReceiptUrl] = useState('');
+  const [submittingTransfer, setSubmittingTransfer] = useState(false);
+  const [copiedAlias, setCopiedAlias] = useState(false);
+  const [copiedCbu, setCopiedCbu] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user') || 'null');
   const token = localStorage.getItem('token');
@@ -52,6 +72,22 @@ const SocioPanel = () => {
     }
   }, [token, user, navigate]);
 
+  // Verificar si venimos de un callback de suscripción exitoso
+  useEffect(() => {
+    if (searchParams.get('status') === 'sub_callback') {
+      setSuccessMsg('¡Suscripción iniciada correctamente! Los cambios se reflejarán a la brevedad cuando Mercado Pago valide la transacción.');
+      // Limpiar query params
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams]);
+
+  // Limpiar mensaje de éxito después de unos segundos
+  useEffect(() => {
+    if (!successMsg) return;
+    const t = setTimeout(() => setSuccessMsg(''), 5000);
+    return () => clearTimeout(t);
+  }, [successMsg]);
+
   const loadSocioData = async () => {
     setLoading(true);
     setErrorMsg('');
@@ -60,14 +96,21 @@ const SocioPanel = () => {
       const profileRes = await api.get('/socios/mi-perfil');
       setProfile(profileRes.data);
       setDniInput(profileRes.data.dni.toString());
+      setTelInput(profileRes.data.telefono || '');
+      setDirInput(profileRes.data.direccion || '');
+      setLocInput(profileRes.data.localidad || '');
 
-      // 2. Obtener cuotas
+      // 2. Obtener cuotas periódicas (compañeros)
       const cuotasRes = await api.get('/socios/mi-perfil/cuotas');
       setCuotas(cuotasRes.data.cuotas || []);
 
-      // 3. Obtener donaciones
+      // 3. Obtener donaciones a campañas
       const donacionesRes = await api.get('/donaciones/mis-donaciones');
       setDonaciones(donacionesRes.data || []);
+
+      // 4. Obtener pagos/transacciones de cuotas (locales)
+      const paymentsRes = await api.get('/socios/mi-perfil/pagos');
+      setPayments(paymentsRes.data || []);
     } catch (err) {
       console.error(err);
       if (err.response?.status === 404) {
@@ -86,37 +129,121 @@ const SocioPanel = () => {
     }
   }, [token]);
 
-  // Limpiar mensaje de éxito después de unos segundos
-  useEffect(() => {
-    if (!successMsg) return;
-    const t = setTimeout(() => setSuccessMsg(''), 4000);
-    return () => clearTimeout(t);
-  }, [successMsg]);
-
-  // Actualizar DNI
-  const handleUpdateDni = async (e) => {
+  // Actualizar DNI, teléfono, dirección y localidad
+  const handleUpdateProfile = async (e) => {
     e.preventDefault();
     if (!profile) return;
     
-    setSubmitting(true);
+    setSubmittingDniContact(true);
     setErrorMsg('');
     setSuccessMsg('');
 
     try {
       const res = await api.put(`/socios/${profile.numero_asociado}`, {
-        dni: parseInt(dniInput)
+        dni: parseInt(dniInput),
+        telefono: telInput.trim(),
+        direccion: dirInput.trim(),
+        localidad: locInput.trim()
       });
-      setSuccessMsg('DNI actualizado correctamente.');
+      setSuccessMsg('Datos actualizados correctamente.');
       setProfile(res.data.socio);
     } catch (err) {
       console.error(err);
-      setErrorMsg(err.response?.data?.error || 'Error al actualizar el DNI.');
+      setErrorMsg(err.response?.data?.error || 'Error al actualizar los datos.');
     } finally {
-      setSubmitting(false);
+      setSubmittingDniContact(false);
     }
   };
 
-  // Calcular métricas rápidas
+  // Iniciar flujo de suscripción en Mercado Pago
+  const handleSubscribeMP = async (e) => {
+    e.preventDefault();
+    if (!subMonto || isNaN(subMonto) || parseFloat(subMonto) <= 0) {
+      setErrorMsg('Por favor, ingresa un monto válido.');
+      return;
+    }
+    setSubmittingSub(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      const res = await api.post('/socios/suscripcion/crear', { monto: parseFloat(subMonto) });
+      const checkoutUrl = res.data.sandboxInitPoint || res.data.initPoint;
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        setErrorMsg('No se pudo generar la URL de Mercado Pago.');
+        setSubmittingSub(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.error || 'Error al iniciar la suscripción en Mercado Pago.');
+      setSubmittingSub(false);
+    }
+  };
+
+  // Cancelar débito automático
+  const handleCancelSubMP = async () => {
+    if (!window.confirm('¿Seguro que deseas cancelar el débito automático de tu cuota social? Deberás pagar por transferencia u otro medio para mantenerte activo.')) {
+      return;
+    }
+    setLoading(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      await api.post('/socios/suscripcion/cancelar');
+      setSuccessMsg('Suscripción cancelada correctamente. El método de pago preferido se actualizó a Transferencia.');
+      await loadSocioData();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.error || 'Error al cancelar la suscripción.');
+      setLoading(false);
+    }
+  };
+
+  // Declarar transferencia de pago de cuota
+  const handleDeclareTransfer = async (e) => {
+    e.preventDefault();
+    if (!transferMonto || isNaN(transferMonto) || parseFloat(transferMonto) <= 0) {
+      setErrorMsg('Por favor, ingresá un monto válido mayor a 0.');
+      return;
+    }
+    setSubmittingTransfer(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      await api.post('/socios/mi-perfil/pagos/declarar', {
+        monto: parseFloat(transferMonto),
+        numero_comprobante: transferNumber,
+        comprobante_url: transferReceiptUrl
+      });
+      setSuccessMsg('¡Comprobante de cuota registrado! Un administrador verificará el movimiento bancario para aprobar el pago.');
+      setTransferMonto('');
+      setTransferNumber('');
+      setTransferReceiptUrl('');
+      await loadSocioData();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.error || 'Error al registrar la declaración de transferencia.');
+    } finally {
+      setSubmittingTransfer(false);
+    }
+  };
+
+  // Cambiar método de pago preferido
+  const changeMethodTo = async (newMethod) => {
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      const res = await api.put(`/socios/${profile.numero_asociado}`, { metodo_pago: newMethod });
+      setProfile(res.data.socio);
+      setSuccessMsg(`Método de pago cambiado a ${newMethod.toUpperCase()} con éxito.`);
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Error al cambiar el método de pago.');
+    }
+  };
+
+  // Métricas rápidas en cabecera
   const totalDonado = donaciones
     .filter(d => d.estado === 'aprobada')
     .reduce((acc, curr) => acc + parseFloat(curr.monto), 0);
@@ -124,8 +251,20 @@ const SocioPanel = () => {
   const cuotasPagas = cuotas.filter(c => c.estado === 'pagado').length;
   const cuotasPendientes = cuotas.filter(c => c.estado === 'pendiente').length;
 
+  if (loading && !profile) {
+    return (
+      <div className="flex-grow flex items-center justify-center min-h-[60vh] bg-slate-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 border-4 border-slate-200 border-t-brand-500 rounded-full animate-spin" />
+          <p className="text-slate-500 font-medium text-sm">Cargando panel de socio...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-grow bg-slate-50 min-h-screen">
+      
       {/* ── Cabecera del Panel ── */}
       <div className="bg-white border-b border-slate-200 pt-28">
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
@@ -211,10 +350,10 @@ const SocioPanel = () => {
                     Datos de la Asociación
                   </h2>
 
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Número de Asociado</p>
-                      <p className="text-2xl font-display font-black text-slate-800 mt-1">#{profile.numero_asociado}</p>
+                      <p className="text-2xl font-display font-black text-slate-800 mt-1">#{String(profile.numero_asociado).padStart(4, '0')}</p>
                     </div>
 
                     <div>
@@ -237,6 +376,16 @@ const SocioPanel = () => {
                     </div>
 
                     <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Nombre Completo</p>
+                      <p className="text-sm font-semibold text-slate-700 mt-1">{profile.nombre} {profile.apellido}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">DNI / Documento</p>
+                      <p className="text-sm font-semibold text-slate-700 mt-1">{profile.dni}</p>
+                    </div>
+
+                    <div>
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Fecha de Alta</p>
                       <p className="text-sm font-semibold text-slate-700 mt-1">
                         {new Date(profile.fecha_alta).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
@@ -244,8 +393,32 @@ const SocioPanel = () => {
                     </div>
 
                     <div>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">DNI Registrado</p>
-                      <p className="text-sm font-semibold text-slate-700 mt-1">{profile.dni}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Teléfono de Contacto</p>
+                      <p className="text-sm font-semibold text-slate-700 mt-1">{profile.telefono || '—'}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Dirección de Contacto</p>
+                      <p className="text-sm font-semibold text-slate-700 mt-1">{profile.direccion}, {profile.localidad}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Nacionalidad</p>
+                      <p className="text-sm font-semibold text-slate-700 mt-1">{profile.nacionalidad}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Género / Fecha Nacimiento</p>
+                      <p className="text-sm font-semibold text-slate-700 mt-1 capitalize">
+                        {profile.genero} — {profile.fecha_nacimiento ? new Date(profile.fecha_nacimiento).toLocaleDateString('es-AR') : '—'}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Método de Pago Preferido</p>
+                      <p className="text-sm font-semibold text-slate-700 mt-1 uppercase">
+                        {profile.metodo_pago === 'debito' ? 'Débito MP' : profile.metodo_pago}
+                      </p>
                     </div>
                   </div>
 
@@ -260,17 +433,17 @@ const SocioPanel = () => {
                   )}
                 </div>
 
-                {/* Formulario de Modificación de DNI */}
+                {/* Formulario de Modificación de Datos (DNI, Teléfono, Dirección, Localidad) */}
                 <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm">
                   <h2 className="text-lg font-display font-black text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3">
                     <Save className="h-5 w-5 text-brand-600" />
                     Actualizar Datos
                   </h2>
 
-                  <form onSubmit={handleUpdateDni} className="space-y-4">
+                  <form onSubmit={handleUpdateProfile} className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                        Modificar DNI
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        DNI
                       </label>
                       <input
                         type="number"
@@ -280,94 +453,457 @@ const SocioPanel = () => {
                         className="input-field"
                         placeholder="DNI del socio"
                       />
-                      <p className="text-[10px] text-slate-400 leading-normal">
-                        Solo podés actualizar tu DNI en caso de error. Para otros cambios de datos, contactate con administración.
-                      </p>
                     </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        Teléfono
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={telInput}
+                        onChange={e => setTelInput(e.target.value)}
+                        className="input-field"
+                        placeholder="Teléfono de contacto"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        Dirección
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={dirInput}
+                        onChange={e => setDirInput(e.target.value)}
+                        className="input-field"
+                        placeholder="Domicilio"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        Localidad
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={locInput}
+                        onChange={e => setLocInput(e.target.value)}
+                        className="input-field"
+                        placeholder="Localidad"
+                      />
+                    </div>
+
+                    <p className="text-[10px] text-slate-400 leading-normal">
+                      Podés corregir tu DNI, cambiar tu teléfono o tu domicilio de contacto. Para otras modificaciones, contactate con la administración.
+                    </p>
 
                     <button
                       type="submit"
-                      disabled={submitting || dniInput === profile.dni.toString()}
+                      disabled={
+                        submittingDniContact ||
+                        (dniInput === profile.dni.toString() &&
+                         telInput === (profile.telefono || '') &&
+                         dirInput === (profile.direccion || '') &&
+                         locInput === (profile.localidad || ''))
+                      }
                       className="btn-brand w-full py-3 text-xs uppercase tracking-wider shadow-sm disabled:opacity-50"
                     >
-                      {submitting ? 'Guardando...' : 'Actualizar DNI'}
+                      {submittingDniContact ? 'Guardando...' : 'Actualizar Información'}
                     </button>
                   </form>
                 </div>
               </div>
             )}
 
-            {/* ══════════════ TAB: CUOTAS SOCIALES ══════════════ */}
+            {/* ══════════════ TAB: CUOTAS SOCIALES (MASHUP) ══════════════ */}
             {activeTab === 'cuotas' && (
-              <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm animate-fade-up">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                  <div>
-                    <h2 className="text-lg font-display font-black text-slate-800 flex items-center gap-2">
-                      <CreditCard className="h-5 w-5 text-brand-600" />
-                      Historial de Cuotas Sociales
-                    </h2>
-                    <p className="text-xs text-slate-500 mt-1">Visualizá el estado de tus aportaciones de membresía mensual.</p>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-up">
+                
+                {/* COL IZQUIERDA: HISTORIAL DE PERÍODOS Y HISTORIAL DE TRANSACCIONES */}
+                <div className="lg:col-span-7 space-y-6">
+                  
+                  {/* Card 1: Estado de Aportes por Período (compañeros) */}
+                  <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                      <div>
+                        <h2 className="text-lg font-display font-black text-slate-800 flex items-center gap-2">
+                          <CreditCard className="h-5 w-5 text-brand-600" />
+                          Historial de Cuotas Sociales
+                        </h2>
+                        <p className="text-xs text-slate-500 mt-1">Estado de tus aportaciones por período mensual de facturación.</p>
+                      </div>
+                      <div className="flex gap-2 text-[10px] font-bold uppercase tracking-wider">
+                        <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-xl">Pendientes: {cuotasPendientes}</span>
+                        <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl">Pagas: {cuotasPagas}</span>
+                      </div>
+                    </div>
+
+                    {cuotas.length === 0 ? (
+                      <div className="text-center py-12">
+                        <CreditCard className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                        <p className="text-slate-400 text-sm font-semibold">No se encontraron registros de cuotas emitidas.</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                              <th className="p-4">Período</th>
+                              <th className="p-4 text-right">Monto</th>
+                              <th className="p-4">Fecha Pago</th>
+                              <th className="p-4">Estado</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {cuotas.map(cuota => {
+                              const fechaObj = new Date(2026, cuota.mes - 1, 1);
+                              const periodoStr = fechaObj.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+                              return (
+                                <tr key={cuota.id} className="hover:bg-slate-50/50 transition-colors">
+                                  <td className="p-4 font-bold text-slate-700 capitalize">{periodoStr}</td>
+                                  <td className="p-4 text-right font-black text-slate-800">
+                                    ${parseFloat(cuota.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                  </td>
+                                  <td className="p-4 text-slate-400 font-medium">
+                                    {cuota.fecha_pago
+                                      ? new Date(cuota.fecha_pago).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
+                                      : '—'
+                                    }
+                                  </td>
+                                  <td className="p-4">
+                                    {cuota.estado === 'pagado' ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                        <CheckCircle className="h-3 w-3" /> Pagada
+                                      </span>
+                                    ) : cuota.estado === 'pendiente' ? (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 border border-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                        <Clock className="h-3 w-3" /> Pendiente
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 border border-rose-100 text-rose-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                        <XCircle className="h-3 w-3" /> Vencida
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex gap-2 text-xs font-bold uppercase tracking-wider">
-                    <span className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-xl">Pendientes: {cuotasPendientes}</span>
-                    <span className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl">Pagas: {cuotasPagas}</span>
+
+                  {/* Card 2: Historial de Transacciones (locales) */}
+                  <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm">
+                    <div className="border-b border-slate-100 pb-4">
+                      <h2 className="text-lg font-display font-black text-slate-800 flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-brand-600" />
+                        Historial de Transacciones Procesadas
+                      </h2>
+                      <p className="text-xs text-slate-500 mt-1">Registro y estado de cada pago declarado o procesado de forma automática.</p>
+                    </div>
+
+                    {payments.length === 0 ? (
+                      <div className="text-center py-8 text-slate-400">
+                        <Banknote className="h-8 w-8 mx-auto mb-2 text-slate-300" />
+                        <p className="text-xs font-semibold">No se registran transacciones de cuotas aún.</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                              <th className="p-4">Fecha</th>
+                              <th className="p-4 text-right">Monto</th>
+                              <th className="p-4">Método</th>
+                              <th className="p-4">Comprobante / ID</th>
+                              <th className="p-4">Estado</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {payments.map(pago => (
+                              <tr key={pago.id} className="hover:bg-slate-50/50 transition-colors">
+                                <td className="p-4">
+                                  {new Date(pago.fecha_pago).toLocaleDateString('es-AR', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </td>
+                                <td className="p-4 text-right font-black text-slate-800">
+                                  ${parseFloat(pago.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                                </td>
+                                <td className="p-4 uppercase font-bold text-slate-500">
+                                  {pago.metodo_pago === 'debito' ? 'Débito MP' : pago.metodo_pago}
+                                </td>
+                                <td className="p-4 font-mono text-[10px] text-slate-400">
+                                  {pago.mp_payment_id || pago.numero_comprobante || 'N/A'}
+                                </td>
+                                <td className="p-4">
+                                  {pago.estado === 'aprobado' || pago.estado === 'pagado' ? (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase">
+                                      <CheckCircle className="h-3 w-3" /> Aprobado
+                                    </span>
+                                  ) : pago.estado === 'pendiente' ? (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 border border-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase">
+                                      <Clock className="h-3 w-3 animate-pulse" /> Pendiente
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-rose-50 border border-rose-100 text-rose-700 rounded-full text-[10px] font-black uppercase">
+                                      <XCircle className="h-3 w-3" /> Rechazado
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {cuotas.length === 0 ? (
-                  <div className="text-center py-12">
-                    <CreditCard className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-                    <p className="text-slate-400 text-sm font-semibold">No se encontraron registros de cuotas emitidas.</p>
+                {/* COL DERECHA: SELECCIÓN DE MÉTODO DE PAGO Y FORMULARIOS DE PAGO */}
+                <div className="lg:col-span-5 space-y-6">
+                  
+                  {/* Selector y configuración de método de pago */}
+                  <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm">
+                    <h2 className="text-lg font-display font-black text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3">
+                      <CreditCard className="h-5 w-5 text-brand-600" />
+                      Medio de Pago Preferido
+                    </h2>
+
+                    <div className="flex flex-col gap-2">
+                      <p className="text-xs text-slate-500">Seleccioná cómo preferís abonar tu cuota social:</p>
+                      <div className="flex gap-2">
+                        {['debito', 'transferencia', 'cobrador'].map((method) => (
+                          <button
+                            key={method}
+                            type="button"
+                            onClick={() => {
+                              if (method === 'debito' && profile.mp_subscription_status === 'authorized') return;
+                              changeMethodTo(method);
+                            }}
+                            className={`flex-grow text-xs px-2.5 py-2 rounded-xl font-black uppercase tracking-wider border transition-all ${
+                              profile?.metodo_pago === method
+                                ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                            disabled={method === 'debito' && profile.mp_subscription_status === 'authorized'}
+                          >
+                            {method === 'debito' ? 'Débito MP' : method === 'transferencia' ? 'CBU / Alias' : 'Cobrador'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Contenedor dinámico según método preferido */}
+                    
+                    {/* Débito automático (Mercado Pago) */}
+                    {profile?.metodo_pago === 'debito' && (
+                      <div className="bg-gradient-to-br from-blue-50 to-slate-50 border border-blue-100 rounded-2xl p-4 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                            <CreditCard className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-black text-slate-800">Suscripción Mercado Pago</h4>
+                            <p className="text-[10px] text-slate-500">Débito automático mensual de tu cuota.</p>
+                          </div>
+                        </div>
+
+                        {profile.mp_subscription_status === 'authorized' ? (
+                          <div className="space-y-3 bg-white p-4 rounded-xl border border-blue-100 shadow-sm text-xs">
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-500">Estado de suscripción:</span>
+                              <span className="text-emerald-600 font-black uppercase text-[10px] flex items-center gap-1">
+                                <Check className="h-3 w-3" /> Activa
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-500">Monto mensual aportado:</span>
+                              <span className="text-slate-950 font-black">${parseFloat(profile.monto_cuota).toLocaleString('es-AR')}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={handleCancelSubMP}
+                              className="w-full btn-outline text-rose-600 border-rose-200 hover:bg-rose-50 hover:border-rose-300 py-2 justify-center text-xs mt-2"
+                            >
+                              Cancelar Débito Automático
+                            </button>
+                          </div>
+                        ) : (
+                          <form onSubmit={handleSubscribeMP} className="space-y-4">
+                            <div className="space-y-1.5 text-xs">
+                              <label className="block font-bold text-slate-600">
+                                Elegí el monto del aporte mensual ($)
+                              </label>
+                              <div className="relative">
+                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
+                                <input
+                                  type="number"
+                                  min={import.meta.env.VITE_MP_MINIMO_CUOTA || '1000'}
+                                  value={subMonto}
+                                  onChange={(e) => setSubMonto(e.target.value)}
+                                  className="input-field pl-7 py-2 text-xs"
+                                  required
+                                  disabled={submittingSub}
+                                />
+                              </div>
+                              <p className="text-[10px] text-slate-400 leading-normal leading-relaxed">
+                                El monto mínimo es de ${import.meta.env.VITE_MP_MINIMO_CUOTA || '1000'} ARS. Podés ingresar un monto mayor si deseás colaborar más.
+                              </p>
+                            </div>
+
+                            <button
+                              type="submit"
+                              disabled={submittingSub}
+                              className="w-full btn-brand py-2.5 text-xs justify-center uppercase tracking-wider font-bold"
+                            >
+                              <CreditCard className="h-3.5 w-3.5 animate-pulse" />
+                              {submittingSub ? 'Redirigiendo...' : 'Adherirme a Débito Automático'}
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </button>
+                          </form>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Transferencia bancaria */}
+                    {profile?.metodo_pago === 'transferencia' && (
+                      <div className="space-y-4">
+                        {/* CBU/Alias Box */}
+                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3 text-[11px] shadow-sm">
+                          <div className="flex justify-between border-b border-slate-100 pb-1.5">
+                            <span className="text-slate-400">Banco:</span>
+                            <span className="text-slate-800 font-bold">Banco Provincia</span>
+                          </div>
+                          <div className="flex justify-between border-b border-slate-100 pb-1.5">
+                            <span className="text-slate-400">Titular:</span>
+                            <span className="text-slate-800 font-bold">Asoc. Cooperadora Hosp. Ferreyra</span>
+                          </div>
+                          <div className="flex justify-between border-b border-slate-100 pb-1.5">
+                            <span className="text-slate-400">Alias:</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-800 font-bold bg-white px-2 py-0.5 rounded border border-slate-200">cooperadora.hospital.nec</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText('cooperadora.hospital.nec');
+                                  setCopiedAlias(true);
+                                  setTimeout(() => setCopiedAlias(false), 2000);
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors flex items-center justify-center"
+                              >
+                                {copiedAlias ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-400">CBU:</span>
+                            <div className="flex items-center gap-1">
+                              <span className="text-slate-800 font-bold bg-white px-2 py-0.5 rounded border border-slate-200">0140354701354701354701</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText('0140354701354701354701');
+                                  setCopiedCbu(true);
+                                  setTimeout(() => setCopiedCbu(false), 2000);
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors flex items-center justify-center"
+                              >
+                                {copiedCbu ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Declarar pago de cuota */}
+                        <form onSubmit={handleDeclareTransfer} className="bg-white p-4 border border-slate-200 rounded-2xl space-y-3.5 shadow-sm">
+                          <h4 className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                            <Banknote className="h-4 w-4 text-emerald-600" />
+                            Declarar Transferencia de Cuota
+                          </h4>
+                          <div className="space-y-3">
+                            <div className="space-y-1">
+                              <label className="block text-[10px] text-slate-500 font-bold uppercase">
+                                Monto transferido ($) *
+                              </label>
+                              <div className="relative">
+                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={transferMonto}
+                                  onChange={(e) => setTransferMonto(e.target.value)}
+                                  placeholder="2000"
+                                  className="input-field pl-7 py-2 text-xs"
+                                  required
+                                  disabled={submittingTransfer}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] text-slate-500 font-bold uppercase">
+                                Nº Transacción / Comprobante
+                              </label>
+                              <input
+                                type="text"
+                                value={transferNumber}
+                                onChange={(e) => setTransferNumber(e.target.value)}
+                                placeholder="Ej: TXN-54321"
+                                className="input-field py-2 text-xs"
+                                disabled={submittingTransfer}
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <label className="block text-[10px] text-slate-500 font-bold uppercase">
+                                URL de captura de comprobante
+                              </label>
+                              <input
+                                type="url"
+                                value={transferReceiptUrl}
+                                onChange={(e) => setTransferReceiptUrl(e.target.value)}
+                                placeholder="https://imagencomprobante.com/pago.jpg"
+                                className="input-field py-2 text-xs"
+                                disabled={submittingTransfer}
+                              />
+                            </div>
+                          </div>
+
+                          <button
+                            type="submit"
+                            disabled={submittingTransfer}
+                            className="w-full btn-brand py-2 text-xs justify-center mt-2 uppercase tracking-wider font-bold"
+                          >
+                            {submittingTransfer ? 'Registrando...' : 'Declarar Pago'}
+                          </button>
+                        </form>
+                      </div>
+                    )}
+
+                    {/* Cobrador a domicilio */}
+                    {profile?.metodo_pago === 'cobrador' && (
+                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs space-y-3">
+                        <p className="text-slate-600 font-medium leading-relaxed">
+                          Has seleccionado el cobro a través de un cobrador a domicilio. El cobrador pasará por tu domicilio registrado a principios de cada mes.
+                        </p>
+                        <p className="text-slate-400 text-[10px] leading-normal">
+                          Por favor, asegurate de que tu domicilio y tu teléfono de contacto en la pestaña <strong>Mi Resumen</strong> estén actualizados.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-                          <th className="p-4">Período</th>
-                          <th className="p-4 text-right">Monto</th>
-                          <th className="p-4">Fecha Pago</th>
-                          <th className="p-4">Estado</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {cuotas.map(cuota => {
-                          const fechaObj = new Date(2026, cuota.mes - 1, 1);
-                          const periodoStr = fechaObj.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
-                          return (
-                            <tr key={cuota.id} className="hover:bg-slate-50/50 transition-colors">
-                              <td className="p-4 font-bold text-slate-700 capitalize">{periodoStr}</td>
-                              <td className="p-4 text-right font-black text-slate-800">
-                                ${parseFloat(cuota.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                              </td>
-                              <td className="p-4 text-slate-400 font-medium">
-                                {cuota.fecha_pago
-                                  ? new Date(cuota.fecha_pago).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
-                                  : '—'
-                                }
-                              </td>
-                              <td className="p-4">
-                                {cuota.estado === 'pagado' ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-wider">
-                                    <CheckCircle className="h-3 w-3" /> Pagada
-                                  </span>
-                                ) : cuota.estado === 'pendiente' ? (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 border border-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase tracking-wider">
-                                    <Clock className="h-3 w-3" /> Pendiente
-                                  </span>
-                                ) : (
-                                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 border border-rose-100 text-rose-700 rounded-full text-[10px] font-black uppercase tracking-wider">
-                                    <XCircle className="h-3 w-3" /> Vencida
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                </div>
               </div>
             )}
 
