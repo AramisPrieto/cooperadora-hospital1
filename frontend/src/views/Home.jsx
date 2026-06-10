@@ -94,11 +94,10 @@ const Home = () => {
   const [copiedAlias, setCopiedAlias] = useState(false);
   const [copiedCbu, setCopiedCbu] = useState(false);
 
-  const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
   const handleViewCampaignDetail = async (id) => {
-    if (!token) {
+    if (!user) {
       navigate('/login?redirect=campana&id=' + id);
       return;
     }
@@ -139,7 +138,7 @@ const Home = () => {
 
   useEffect(() => {
     const viewId = searchParams.get('view');
-    if (viewId && localStorage.getItem('token')) {
+    if (viewId && localStorage.getItem('user')) {
       api.get(`/campanas/${viewId}`)
         .then(res => setSelectedCampaign(res.data))
         .catch(err => console.error('Error abriendo campaña desde URL:', err));
@@ -241,13 +240,13 @@ const Home = () => {
 
 
   const handleHeroAssociate = () => {
-    if (!token) navigate('/login');
+    if (!user) navigate('/login');
     else if (user?.rol === 'admin') navigate('/admin');
     else scrollTo('campanas-section');
   };
 
   const handleHeroDonate = () => {
-    if (!token) navigate('/login');
+    if (!user) navigate('/login');
     else if (campaigns.length > 0) handleViewCampaignDetail(campaigns[0].id);
     else scrollTo('campanas-section');
   };
@@ -333,7 +332,7 @@ const Home = () => {
                   className="btn-brand px-7 py-4 text-sm"
                 >
                   <Users className="h-4 w-4" />
-                  {token
+                  {user
                     ? (user?.rol === 'admin' ? 'Ir al Panel Admin' : 'Ver Estado de Socio')
                     : 'Quiero Asociarme'}
                   <ChevronRight className="h-4 w-4" />
@@ -418,7 +417,7 @@ const Home = () => {
                       className="w-full btn-brand py-3 text-sm mt-auto"
                     >
                       <Banknote className="h-4 w-4" />
-                      {token ? 'Donar a esta Campaña' : 'Donar / Ver Detalles'}
+                      {user ? 'Donar a esta Campaña' : 'Donar / Ver Detalles'}
                       <ArrowRight className="h-4 w-4" />
                     </button>
                   </>
