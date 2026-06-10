@@ -1,4 +1,4 @@
-import { MercadoPagoConfig, PreApprovalPlan, PreApproval, Preference } from 'mercadopago';
+import { MercadoPagoConfig, PreApproval, Preference } from 'mercadopago';
 
 // Inicializar el cliente de Mercado Pago con el token de acceso
 const getMpClient = () => {
@@ -21,9 +21,10 @@ const getMpClient = () => {
  */
 export const crearSuscripcionSocio = async ({ email, monto, socioId }) => {
   const client = getMpClient();
-  const plan = new PreApprovalPlan(client);
+  const preapproval = new PreApproval(client);
 
   const body = {
+    payer_email: email,
     reason: 'Cuota Socio - Cooperadora Hospital Necochea',
     auto_recurring: {
       frequency: 1,
@@ -31,19 +32,21 @@ export const crearSuscripcionSocio = async ({ email, monto, socioId }) => {
       transaction_amount: parseFloat(monto),
       currency_id: 'ARS'
     },
-    back_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/mi-panel?status=sub_callback`
+    back_url: `${process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001'}/api/socios/mp-redirect`,
+    external_reference: socioId.toString(),
+    notification_url: `${process.env.BACKEND_TUNNEL_URL || process.env.FRONTEND_URL || 'http://localhost:5001'}/api/webhooks/mercadopago`
   };
 
   try {
-    const response = await plan.create({ body });
+    const response = await preapproval.create({ body });
     return {
-      id: response.id, // ID del plan
+      id: response.id, // ID de la suscripción
       init_point: response.init_point,
       sandbox_init_point: response.sandbox_init_point,
       status: response.status
     };
   } catch (error) {
-    console.error('[Mercado Pago Service] Error al crear plan de suscripción:', error);
+    console.error('[Mercado Pago Service] Error al crear suscripción de socio:', error);
     throw error;
   }
 };
@@ -112,15 +115,17 @@ export const crearPreferenciaDonacion = async ({ campanaTitulo, monto, campanaId
       }
     ],
     back_urls: {
-      success: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/?status=donation_success`,
-      failure: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/?status=donation_failure`,
-      pending: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/?status=donation_pending`
+      success: `${process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001'}/api/donaciones/mp-redirect?status=donation_success`,
+      failure: `${process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001'}/api/donaciones/mp-redirect?status=donation_failure`,
+      pending: `${process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001'}/api/donaciones/mp-redirect?status=donation_pending`
     },
     auto_return: 'approved',
-    external_reference: `donation_u${usuarioId}_c${campanaId}`
+    external_reference: `donation_u${usuarioId}_c${campanaId}`,
+    notification_url: `${process.env.BACKEND_TUNNEL_URL || process.env.FRONTEND_URL || 'http://localhost:5001'}/api/webhooks/mercadopago`
   };
 
   try {
+    console.log('Creating MP preference with body:', JSON.stringify(body, null, 2));
     const response = await preference.create({ body });
     return {
       id: response.id,

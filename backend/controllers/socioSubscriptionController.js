@@ -141,6 +141,10 @@ export const declararPagoTransferencia = async (req, res) => {
     return res.status(400).json({ error: 'Por favor, ingrese un monto válido mayor a 0.' });
   }
 
+  if (comprobante_url && !comprobante_url.match(/^https?:\/\/.+/)) {
+    return res.status(400).json({ error: 'La URL del comprobante no es válida.' });
+  }
+
   try {
     const socio = await PerfilSocio.findOne({ where: { usuario_id_fk: usuarioId } });
     if (!socio) {
@@ -172,11 +176,64 @@ export const declararPagoTransferencia = async (req, res) => {
   }
 };
 
+import crypto from 'crypto';
+
 /**
  * Webhook para recibir notificaciones de eventos desde Mercado Pago
  * POST /api/webhooks/mercadopago
  */
 export const webhookMercadoPago = async (req, res) => {
+  const signatureHeader = req.headers['x-signature'];
+  const requestIdHeader = req.headers['x-request-id'];
+
+  // 1. Validar la existencia de las cabeceras de seguridad
+  if (!signatureHeader || !requestIdHeader) {
+    console.warn('⚠️ [Webhook MP] Intento de acceso sin headers de firma.');
+    return res.status(403).json({ error: 'Prohibido. Faltan headers de seguridad de MP.' });
+  }
+
+  // 2. Validar la firma matemática (Solo en producción o si hay Secret configurado)
+  const webhookSecret = process.env.MP_WEBHOOK_SECRET;
+  
+  if (webhookSecret) {
+    try {
+      // Extraer ts (timestamp) y v1 (hash) del header x-signature
+      // Formato: ts=1697040445,v1=9e8...
+      const signatureParts = signatureHeader.split(',');
+      let ts = '';
+      let v1 = '';
+      
+      for (const part of signatureParts) {
+        const [key, value] = part.split('=');
+        if (key.trim() === 'ts') ts = value.trim();
+        if (key.trim() === 'v1') v1 = value.trim();
+      }
+
+      if (!ts || !v1) {
+        return res.status(403).json({ error: 'Firma de webhook malformada.' });
+      }
+
+      // Recrear la plantilla según la documentación de Mercado Pago
+      // manifest = "id;request-id;ts;"
+      const dataId = req.body.data && req.body.data.id ? req.body.data.id : '';
+      const manifest = `id:${dataId};request-id:${requestIdHeader};ts:${ts};`;
+
+      // Calcular el hash HMAC SHA256
+      const hmac = crypto.createHmac('sha256', webhookSecret);
+      hmac.update(manifest);
+      const computedSignature = hmac.digest('hex');
+
+      // Comparar el hash recibido con el calculado
+      if (computedSignature !== v1) {
+        console.error('❌ [Webhook MP] Firma inválida. Posible intento de ataque (Spoofing).');
+        return res.status(403).json({ error: 'Firma inválida.' });
+      }
+    } catch (err) {
+      console.error('Error al validar la firma del webhook:', err);
+      return res.status(500).json({ error: 'Error interno en validación de webhook.' });
+    }
+  }
+
   // Respondemos inmediatamente con 200 OK a Mercado Pago para evitar reintentos duplicados por demora
   res.status(200).send('OK');
 
@@ -342,3 +399,11 @@ export const webhookMercadoPago = async (req, res) => {
     console.error(`❌ [Webhook Mercado Pago Error] Falló al procesar evento de ID ${data.id}:`, error);
   }
 };
+
+// Redireccionar suscripción de socio de vuelta al panel
+export const handleSocioMpRedirect = (req, res) => {
+  const queryParams = new URLSearchParams(req.query).toString();
+  const frontendUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/mi-panel?status=sub_callback&${queryParams}`;
+  res.redirect(frontendUrl);
+};
+

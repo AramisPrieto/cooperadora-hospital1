@@ -10,6 +10,10 @@ export const declararTransferencia = async (req, res) => {
   const { monto, numero_comprobante, comprobante_url } = req.body;
   const usuarioId = req.user.id; // Extraído del token JWT por authenticateJWT
 
+  if (comprobante_url && !comprobante_url.match(/^https?:\/\/.+/)) {
+    return res.status(400).json({ error: 'La URL del comprobante no es válida.' });
+  }
+
   try {
     // Validar existencia de la campaña
     const campana = await CampanaEco.findByPk(campanaId);
@@ -263,3 +267,11 @@ export const crearDonacionMercadoPago = async (req, res) => {
     return res.status(500).json({ error: 'Error interno al iniciar el pago con Mercado Pago.' });
   }
 };
+
+// Redireccionar de vuelta al frontend (desde el túnel HTTPS al localhost HTTP)
+export const handleMpRedirect = (req, res) => {
+  const queryParams = new URLSearchParams(req.query).toString();
+  const frontendUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/?${queryParams}`;
+  res.redirect(frontendUrl);
+};
+

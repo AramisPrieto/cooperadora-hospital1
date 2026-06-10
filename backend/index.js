@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import mongoSanitize from 'express-mongo-sanitize';
 import { connectSQL } from './config/db.js';
@@ -25,7 +26,26 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middlewares globales
-app.use(cors());
+// Configuración estricta de CORS
+const allowedOrigins = [
+  'http://localhost:3000',      // Local
+  'http://localhost:5173',      // Local Vite
+  process.env.FRONTEND_URL      // URL de Producción (Vercel)
+].filter(Boolean); // Filtra los undefined si FRONTEND_URL no está en el .env
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permite peticiones sin origin (como herramientas de testeo local o curl) y orígenes permitidos
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS Policy: Acceso denegado.'));
+    }
+  },
+  credentials: true // Permite envío de cookies/tokens si fuera necesario
+}));
+
+app.use(helmet()); // Añade cabeceras HTTP de seguridad
 app.use(express.json());
 app.use(mongoSanitize());      // Sanitiza req.body/params/query — bloquea NoSQL injection
 app.use('/api', globalLimiter); // Rate limit global: 100 req / 15 min por IP

@@ -27,10 +27,17 @@ export const register = async (req, res) => {
   } = req.body;
 
   try {
-    // Validar si el usuario ya existe
+    // Validar seguridad de la contraseña
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ error: 'La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.' });
+    }
+
+    // Validar si el usuario ya existe (Mitigación de enumeración de usuarios)
     const existingUser = await Usuario.findOne({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ error: 'El email ya se encuentra registrado.' });
+      // Usamos un mensaje genérico para que un atacante no sepa si el correo existía o si falló otra cosa
+      return res.status(400).json({ error: 'Error en el registro. Es posible que los datos ya estén en uso.' });
     }
 
     if (!dni) {

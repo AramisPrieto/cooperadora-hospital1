@@ -12,8 +12,8 @@ const seed = async () => {
     await connectSQL();
     await connectMongoDB();
 
-    // Sincronizar esquemas primero
-    await sequelize.sync({ alter: true });
+    // Sincronizar esquemas primero (recreando las tablas limpias)
+    await sequelize.sync({ force: true });
 
     // Limpiar base de datos (las cascadas limpiarán las relaciones dependientes)
     await DonacionTransferencia.destroy({ where: {} });
@@ -41,7 +41,7 @@ const seed = async () => {
 
     // 2. Crear Socio de Prueba Oficial
     const userSocio = await Usuario.create({
-      email: 'socio@cooperadora.org',
+      email: 'test_user_7385770550601504283@testuser.com',
       password_hash: socioPasswordHash,
       rol: 'socio'
     });
@@ -62,7 +62,7 @@ const seed = async () => {
       localidad: 'Necochea',
       observaciones: 'Socio de prueba del sistema.'
     });
-    console.log(`👤 Seeded Socio Oficial: socio@cooperadora.org / socio123 (Nro Asociado: #${perfilSocioDePrueba.numero_asociado})`);
+    console.log(`👤 Seeded Socio Oficial: test_user_7385770550601504283@testuser.com / socio123 (Nro Asociado: #${perfilSocioDePrueba.numero_asociado})`);
 
     // 3. Crear otros 4 socios de relleno con datos completos
     // Juan (Activo)

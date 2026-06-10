@@ -274,6 +274,8 @@ describe('Rutas de Donaciones y Transferencias (/api/donaciones)', () => {
 
       const res = await request(app)
         .post('/api/webhooks/mercadopago')
+        .set('x-signature', 'ts=123,v1=abc')
+        .set('x-request-id', 'req-123')
         .send({
           type: 'payment',
           data: { id: 77778888 }

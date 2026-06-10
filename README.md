@@ -393,3 +393,13 @@ git checkout -b develop
   - Esto soluciona de raíz el error 400 Bad Request devuelto por las APIs de Preferences y PreApproval de MP, las cuales rechazan estrictamente cualquier URL de retorno que comience con `http://` (como los entornos `localhost`). El flujo ahora dirige al usuario al túnel `https://` y este lo rebota limpiamente a su navegador local reteniendo los parámetros de estado de pago.
 - **Configuración de Semillas (Seed)**:
   - Actualización del usuario semilla de pruebas a `test_user_7385770550601504283@testuser.com` para alinear el ecosistema local y la base de datos de PostgreSQL con el Sandbox del usuario Comprador asignado en Mercado Pago.
+
+### Versión 1.10.0 — Auditoría de Seguridad y Despliegue en Nube (Etapa Final)
+- **Hardening de Seguridad (Mitigación OWASP)**:
+  - **Spoofing y Webhooks**: Implementación de verificación criptográfica (HMAC SHA256) de la cabecera `x-signature` en los webhooks de Mercado Pago para prevenir falsificación de pagos.
+  - **CORS Estricto**: Restricción de orígenes permitidos en la API para aceptar peticiones únicamente del frontend local (`localhost:5173`, `3000`) y del dominio de producción provisto por Vercel.
+  - **Sanitización y SSRF**: Inclusión de cabeceras de seguridad HTTP globales mediante `Helmet` y validación estricta de formato de URLs en la subida de comprobantes de pago.
+  - **Políticas de Contraseña y Enumeración**: Refuerzo de la expresión regular de contraseñas (mínimo 8 caracteres, alfanumérico con mayúsculas) y ofuscación de respuestas en el registro para evitar ataques de enumeración de usuarios.
+- **Preparación para Producción Privada (Staging)**:
+  - Bloqueo por contraseña de acceso directo en el punto de entrada de React (`main.jsx`) para mantener la confidencialidad de la plataforma durante las pruebas en equipo.
+  - El proyecto está ahora preparado para ser hosteado bajo la arquitectura Serverless gratuita: **MongoDB Atlas** (Base de datos), **Render.com** (Node.js API) y **Vercel** (Frontend estático React).
