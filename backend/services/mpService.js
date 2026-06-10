@@ -11,6 +11,10 @@ const getMpClient = () => {
   });
 };
 
+const getBackendUrl = () => {
+  return process.env.BACKEND_URL || process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001';
+};
+
 /**
  * Crea una suscripción recurrente mensual (Pre-aprobación) personalizada para un socio
  * @param {Object} params
@@ -32,9 +36,9 @@ export const crearSuscripcionSocio = async ({ email, monto, socioId }) => {
       transaction_amount: parseFloat(monto),
       currency_id: 'ARS'
     },
-    back_url: `${process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001'}/api/socios/mp-redirect`,
+    back_url: `${getBackendUrl()}/api/socios/mp-redirect`,
     external_reference: socioId.toString(),
-    notification_url: `${process.env.BACKEND_TUNNEL_URL || process.env.FRONTEND_URL || 'http://localhost:5001'}/api/webhooks/mercadopago`
+    notification_url: `${getBackendUrl()}/api/webhooks/mercadopago`
   };
 
   try {
@@ -115,13 +119,13 @@ export const crearPreferenciaDonacion = async ({ campanaTitulo, monto, campanaId
       }
     ],
     back_urls: {
-      success: `${process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001'}/api/donaciones/mp-redirect?status=donation_success`,
-      failure: `${process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001'}/api/donaciones/mp-redirect?status=donation_failure`,
-      pending: `${process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001'}/api/donaciones/mp-redirect?status=donation_pending`
+      success: `${getBackendUrl()}/api/donaciones/mp-redirect?status=donation_success`,
+      failure: `${getBackendUrl()}/api/donaciones/mp-redirect?status=donation_failure`,
+      pending: `${getBackendUrl()}/api/donaciones/mp-redirect?status=donation_pending`
     },
     auto_return: 'approved',
     external_reference: `donation_u${usuarioId}_c${campanaId}`,
-    notification_url: `${process.env.BACKEND_TUNNEL_URL || process.env.FRONTEND_URL || 'http://localhost:5001'}/api/webhooks/mercadopago`
+    notification_url: `${getBackendUrl()}/api/webhooks/mercadopago`
   };
 
   try {
