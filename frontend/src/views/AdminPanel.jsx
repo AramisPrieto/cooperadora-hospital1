@@ -335,7 +335,7 @@ const AdminPanel = () => {
     setErrorMsg(''); setSuccessMsg('');
     const payload = {
       titulo: newsTitulo, cuerpo_html: newsCuerpoHtml,
-      tags: newsTags ? newsTags.split(',').map(t => t.trim().replace(/#/g, '')).filter(Boolean) : [],
+      tags: [],
       fecha: newsFecha || undefined,
     };
     try {
@@ -986,15 +986,9 @@ const AdminPanel = () => {
                     className={`${inputCls} font-mono resize-y`}
                   />
                 </div>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <FormLabel>Tags <span className="normal-case text-slate-400 font-normal">(separados por coma)</span></FormLabel>
-                    <input type="text" value={newsTags} onChange={e => setNewsTags(e.target.value)} className={inputCls} placeholder="equipamiento, pediatría, donación" />
-                  </div>
-                  <div>
-                    <FormLabel>Fecha de Publicación</FormLabel>
-                    <input type="date" value={newsFecha} onChange={e => setNewsFecha(e.target.value)} className={inputCls} />
-                  </div>
+                <div>
+                  <FormLabel>Fecha de Publicación</FormLabel>
+                  <input type="date" value={newsFecha} onChange={e => setNewsFecha(e.target.value)} className={inputCls} />
                 </div>
 
                 <button type="submit" className="btn-brand w-full py-3.5 shine">
@@ -1038,9 +1032,6 @@ const AdminPanel = () => {
                           <span className="text-[10px] text-slate-400 font-semibold">
                             {new Date(n.fecha).toLocaleDateString('es-AR')}
                           </span>
-                          {n.tags?.map((tag, i) => (
-                            <span key={i} className="badge badge-teal">{tag}</span>
-                          ))}
                         </div>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
