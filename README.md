@@ -82,12 +82,17 @@ Ambas respuestas se ensamblan en un único objeto JSON unificado que se envía a
 ## 🚀 Instrucciones para Levantar el Proyecto Localmente
 
 ### 📋 Prerrequisitos
-Tener instalado en su sistema local:
+Tener instalado y configurado en su sistema local:
 * **Node.js** (v18 o superior)
 * **pnpm** (v8 o superior)
-* Una instancia activa de **PostgreSQL** o **MySQL**.
-* Una instancia activa de **MongoDB**.
-* **ngrok** (Recomendado para pruebas del Webhook de Mercado Pago. Si no está instalado, el script de inicio usará un túnel SSH/Pinggy de forma automática como fallback).
+* Una instancia activa de **PostgreSQL** o **MySQL** (o mediante Docker).
+* Una instancia activa de **MongoDB** (o mediante Docker).
+* **ngrok (Recomendado para Pruebas Locales):**
+  - **Instalación:** En macOS usa `brew install ngrok`. En Windows descarga el .exe desde su web oficial.
+  - **Autenticación (Vital):** Debes crear una cuenta gratuita en [ngrok.com](https://ngrok.com) y ejecutar en tu terminal: `ngrok config add-authtoken <TU_TOKEN>`. Esto evita límites de tiempo e interrupciones en el túnel.
+  - **Límites de Uso (Overages):** Las cuentas gratuitas de ngrok tienen cuotas de transferencia mensual. Si superas el límite, ngrok bloqueará el tráfico y el terminal te pedirá habilitar los sobrecargos ("enable overages"). Si esto ocurre, es recomendable crearte otra cuenta gratuita o simplemente desinstalar ngrok temporalmente para que el sistema use el fallback a Pinggy.
+  - **Advertencia de Sitio No Seguro (Browser Warning):** Al entrar a un enlace de ngrok gratuito, la primera vez verás una página de advertencia de abuso (ngrok browser warning). Debes hacer clic en **"Visit Site"** para que ngrok permita el paso continuo de las peticiones hacia el localhost.
+* **Pinggy (Fallback Automático):** Si no tienes `ngrok` instalado o lo quitas del PATH, nuestro script (`start-dev-with-tunnel.js`) abrirá automáticamente un túnel SSH gratuito con Pinggy. *Nota: Los túneles gratuitos de Pinggy expiran a los 60 minutos, momento tras el cual deberás reiniciar el servidor backend para obtener una nueva URL.*
 
 ---
 
