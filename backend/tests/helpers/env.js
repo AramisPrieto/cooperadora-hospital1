@@ -8,7 +8,7 @@ process.env.NODE_ENV = 'test';
 process.env.PORT = '5002'; // Evita pisar el puerto del servidor de desarrollo
 process.env.BYPASS_WEBHOOK_SIGNATURE = 'true'; // Permitir bypass de firmas en webhooks de Mercado Pago durante los tests
 
-if (process.env.DATABASE_URL) {
+if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('render') && !process.env.DATABASE_URL.includes('dpg-')) {
   const urlObj = new URL(process.env.DATABASE_URL);
   if (!urlObj.pathname.endsWith('_test')) {
     urlObj.pathname = urlObj.pathname + '_test';
@@ -18,7 +18,7 @@ if (process.env.DATABASE_URL) {
   process.env.DATABASE_URL = 'postgres://postgres:admin123@localhost:5435/cooperadora_db_test';
 }
 
-if (process.env.MONGODB_URI) {
+if (process.env.MONGODB_URI && !process.env.MONGODB_URI.includes('mongodb+srv') && !process.env.MONGODB_URI.includes('cluster')) {
   const urlObj = new URL(process.env.MONGODB_URI);
   if (!urlObj.pathname.endsWith('_test')) {
     urlObj.pathname = urlObj.pathname + '_test';

@@ -492,4 +492,15 @@ git checkout -b develop
 - **Remoción de Importaciones Inactivas**:
   - Limpieza de importaciones inactivas de `donationLimiter` y `validateDonation` en las rutas de campañas.
 
-
+### Versión 1.14.0 — Proxies de Producción, Sincronización de Sesión e Invalidación de Caché (Antigravity & Aramis Prieto)
+- **Proxy Inverso en Vercel para Cookies Same-Origin**:
+  - Configuración de reglas de reescritura (`rewrites`) en [vercel.json](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/vercel.json) redirigiendo `/api/*` hacia el servidor backend de Render. Esto permite tratar las cookies de sesión `HttpOnly` como cookies de primer origen (*Same-Site*), eludiendo de raíz las restricciones de navegadores modernos que bloquean cookies de terceros cruzadas (`*.vercel.app` a `*.onrender.com`).
+- **Invalidación Proactiva de Caché en Campañas**:
+  - Implementación del helper `flushCache` en [cacheMiddleware.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/middleware/cacheMiddleware.js) para vaciar completamente la caché en memoria al realizar operaciones de escritura.
+  - Vinculación del vaciado de caché en el controlador de campañas ([campanaController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/campanaController.js)), aprobaciones de transferencias ([donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js)) y pagos procesados por Webhook de Mercado Pago ([socioSubscriptionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioSubscriptionController.js)). Esto asegura que la barra de progreso de recaudación y los totales acumulados en la Home pública se actualicen de forma instantánea al ingresar una donación.
+- **Resolución de IP Detrás de Proxies en Backend**:
+  - Activación de `app.set('trust proxy', 1)` en [index.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/index.js) de Express. Permite que el middleware de control de tasa (*Rate Limiter*) lea la IP real del cliente en lugar de la IP de los balanceadores de carga de Render o Vercel.
+- **Rutas y Webhooks Dinámicos en Mercado Pago**:
+  - Refactorización de [mpService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/mpService.js) introduciendo una función auxiliar `getBackendUrl()`. Resuelve de manera jerárquica la variable de entorno `BACKEND_URL`, el túnel dinámico `BACKEND_TUNNEL_URL`, o recurre al puerto local `5001`. Esto flexibiliza el redireccionamiento y notificaciones webhook en diferentes entornos (local, túneles, y producción).
+- **Sincronización Dinámica de Sesión en Navbar**:
+  - Adición de `location.pathname` como dependencia al efecto de sesión de [Navbar.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.jsx) para re-evaluar e impactar instantáneamente el estado del Navbar cuando el usuario navega entre las diferentes vistas de la plataforma.
