@@ -374,7 +374,7 @@ git checkout -b develop
   - Inclusión de 5 campañas con diversos estados financieros y 4 noticias con testimonios e imágenes reales.
   - Ampliación del padrón con 6 socios de prueba interactivos (activos y pendientes) y generación del usuario Sandbox oficial de Mercado Pago para ensayos financieros.
 
-### Versión 1.13.0 — Refactorización, Optimización de Caché y Estabilidad en Pruebas (Antigravity & Aramis Prieto)
+### Versión 1.13.0 — Refactorización, Optimización de Caché y Estabilidad en Pruebas (Aramis Prieto)
 - **Limpieza de Archivos de Bloqueo Redundantes**:
   - Eliminación completa de `package-lock.json` en frontend y backend para delegar de forma exclusiva la gestión de dependencias a `pnpm` y prevenir inconsistencias de dependencias.
 - **Optimización de Serialización en Caché (Mashup)**:
@@ -389,7 +389,7 @@ git checkout -b develop
 - **Remoción de Importaciones Inactivas**:
   - Limpieza de importaciones inactivas de `donationLimiter` y `validateDonation` en las rutas de campañas.
 
-### Versión 1.14.0 — Proxies de Producción, Sincronización de Sesión e Invalidación de Caché (Antigravity & Aramis Prieto)
+### Versión 1.14.0 — Proxies de Producción, Sincronización de Sesión e Invalidación de Caché (Aramis Prieto)
 - **Proxy Inverso en Vercel para Cookies Same-Origin**:
   - Configuración de reglas de reescritura (`rewrites`) en [vercel.json](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/vercel.json) redirigiendo `/api/*` hacia el servidor backend de Render. Esto permite tratar las cookies de sesión `HttpOnly` como cookies de primer origen (*Same-Site*), eludiendo de raíz las restricciones de navegadores modernos que bloquean cookies de terceros cruzadas (`*.vercel.app` a `*.onrender.com`).
 - **Invalidación Proactiva de Caché en Campañas**:
@@ -402,7 +402,7 @@ git checkout -b develop
 - **Sincronización Dinámica de Sesión en Navbar**:
   - Adición de `location.pathname` como dependencia al efecto de sesión de [Navbar.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.jsx) para re-evaluar e impactar instantáneamente el estado del Navbar cuando el usuario navega entre las diferentes vistas de la plataforma.
 
-### Versión 1.15.0 — Consolidación Cloud-Only y Endurecimiento de Seguridad (Antigravity & Aramis Prieto)
+### Versión 1.15.0 — Consolidación Cloud-Only y Endurecimiento de Seguridad (Aramis Prieto)
 - **Desmantelamiento de Infraestructura Local**:
   - Eliminación completa del archivo de configuración `docker-compose.yml` de la raíz del proyecto para descartar la instanciación de servicios locales de bases de datos.
   - Purga total de las secciones explicativas del [README.md](file:///Users/aramisprieto/Documents/cooperadora-hospital1/README.md) sobre despliegue y flujos de pruebas paso a paso en entornos locales (Localhost).
