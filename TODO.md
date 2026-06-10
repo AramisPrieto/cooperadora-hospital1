@@ -9,7 +9,8 @@
 - [ ] agregar panel de socios(ver cuotas pagas,donaciones demas) - THIAGO
 - [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) - ARAMIS
 - [ ] Minimo de donacion (Kevin)
-- [ ] Armar panel de socio hecho en el wireframe 
+- [ ] Armar panel de socio hecho en el wireframe
+- [ ] ver mails que habia echo kevo dejarlos andando
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 ## ✅ Terminado
