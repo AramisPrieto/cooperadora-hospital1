@@ -218,7 +218,53 @@ const seed = async () => {
       },
       obra_status: 'Planeada (Iniciando pronto)'
     });
-    console.log('🏥 Seeded 2 campaigns and details.');
+
+    // Campaña 3
+    const campana3 = await CampanaEco.create({
+      titulo: 'Nueva Ambulancia de Traslado Pediátrico',
+      monto_objetivo: 15000000.00,
+      monto_actual: 4500000.00,
+      fecha_limite: new Date('2026-11-30'),
+      activo: true
+    });
+    await CampanaDetalle.create({
+      campana_id_ref: campana3.id,
+      testimonios: [{ autor: 'Dr. López (Director Médico)', texto: 'Nuestros niños merecen un traslado seguro y rápido en emergencias.' }],
+      galeria_rica: { videos: [], imagenes: ['https://images.unsplash.com/photo-1512426058092-23c218204b73?auto=format&fit=crop&w=600&q=80'] },
+      obra_status: 'Recaudación'
+    });
+
+    // Campaña 4
+    const campana4 = await CampanaEco.create({
+      titulo: 'Insumos Quirúrgicos y Material Descartable',
+      monto_objetivo: 2000000.00,
+      monto_actual: 1800000.00,
+      fecha_limite: new Date('2026-08-01'),
+      activo: true
+    });
+    await CampanaDetalle.create({
+      campana_id_ref: campana4.id,
+      testimonios: [],
+      galeria_rica: { videos: [], imagenes: ['https://images.unsplash.com/photo-1583324113626-70df0f4deaab?auto=format&fit=crop&w=600&q=80'] },
+      obra_status: 'Casi Completada'
+    });
+
+    // Campaña 5
+    const campana5 = await CampanaEco.create({
+      titulo: 'Campaña de Invierno: Frazadas y Calefacción',
+      monto_objetivo: 1200000.00,
+      monto_actual: 1200000.00,
+      fecha_limite: new Date('2026-07-15'),
+      activo: false
+    });
+    await CampanaDetalle.create({
+      campana_id_ref: campana5.id,
+      testimonios: [{ autor: 'Ana María (Enfermera)', texto: 'Gracias a esto, las habitaciones ahora son muy cálidas para nuestros pacientes.' }],
+      galeria_rica: { videos: [], imagenes: ['https://images.unsplash.com/photo-1542485547-fc9bb02422fa?auto=format&fit=crop&w=600&q=80'] },
+      obra_status: 'Finalizada y Entregada'
+    });
+
+    console.log('🏥 Seeded 5 campaigns and details.');
 
     // 7. Noticias (NoSQL MongoDB)
     await NoticiaActualidad.create({
@@ -234,7 +280,22 @@ const seed = async () => {
       tags: ['Equipamiento', 'Guardia', 'Socios'],
       fecha: new Date('2026-05-25')
     });
-    console.log('📰 Seeded 2 news articles.');
+
+    await NoticiaActualidad.create({
+      titulo: 'Reconocimiento a nuestros Socios Vitalicios',
+      cuerpo_html: '<p>Hoy queremos rendir homenaje a todos los vecinos que nos acompañan incondicionalmente desde hace más de 20 años. Su aporte mensual ha construido gran parte de lo que hoy es nuestro Hospital.</p>',
+      tags: ['Socios', 'Comunidad'],
+      fecha: new Date('2026-06-01')
+    });
+
+    await NoticiaActualidad.create({
+      titulo: 'Lanzamiento de nuestra Nueva Plataforma Web',
+      cuerpo_html: '<p>¡Estamos muy felices de anunciar el lanzamiento oficial de nuestra plataforma de autogestión! A partir de hoy, hacer donaciones y pagar cuotas será mucho más fácil, rápido y seguro gracias a Mercado Pago.</p>',
+      tags: ['Tecnología', 'Innovación', 'Noticias'],
+      fecha: new Date('2026-06-10')
+    });
+
+    console.log('📰 Seeded 4 news articles.');
 
     // 8. Crear Donaciones por Transferencia (SQL) vinculadas a los socios Juan y María
     await DonacionTransferencia.create({
