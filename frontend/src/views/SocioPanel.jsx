@@ -63,14 +63,13 @@ const SocioPanel = () => {
   const [copiedCbu, setCopiedCbu] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user') || 'null');
-  const token = localStorage.getItem('token');
 
   // Redirigir si no está autenticado
   useEffect(() => {
-    if (!token || !user) {
+    if (!user) {
       navigate('/login');
     }
-  }, [token, user, navigate]);
+  }, [user, navigate]);
 
   // Verificar si venimos de un callback de suscripción exitoso
   useEffect(() => {
@@ -140,10 +139,8 @@ const SocioPanel = () => {
   };
 
   useEffect(() => {
-    if (token) {
-      loadSocioData();
-    }
-  }, [token]);
+    loadSocioData();
+  }, []);
 
   // Actualizar DNI, teléfono, dirección y localidad
   const handleUpdateProfile = async (e) => {
