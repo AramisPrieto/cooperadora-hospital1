@@ -24,6 +24,7 @@ import { webhookMercadoPago } from './controllers/socioSubscriptionController.js
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1); // Confiar en el proxy reverso (Render/Vercel) para la lectura correcta de IPs en express-rate-limit
 const PORT = process.env.PORT || 5000;
 
 // Middlewares globales
