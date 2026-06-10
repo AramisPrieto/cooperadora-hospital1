@@ -37,7 +37,7 @@ const allowedOrigins = [
 app.use(cors({
   origin: function (origin, callback) {
     // Permite peticiones sin origin (como herramientas de testeo local o curl) y orígenes permitidos
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
       callback(new Error('CORS Policy: Acceso denegado.'));
