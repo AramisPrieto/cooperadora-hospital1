@@ -156,8 +156,53 @@ const seed = async () => {
       localidad: 'Necochea',
       observaciones: 'Solicitó la baja temporal por mudanza.'
     });
+    // Pedro (Activo - donante frecuente)
+    const userPedro = await Usuario.create({
+      email: 'pedro.gomez@email.com',
+      password_hash: socioPasswordHash,
+      rol: 'socio'
+    });
+    await PerfilSocio.create({
+      usuario_id_fk: userPedro.id,
+      dni: 23567890,
+      estado: 'activo',
+      nombre: 'Pedro',
+      apellido: 'Gómez',
+      direccion: 'Calle 4 432',
+      nacionalidad: 'Argentino',
+      telefono: '2262559900',
+      fecha_nacimiento: '1968-11-12',
+      genero: 'masculino',
+      metodo_pago: 'transferencia',
+      fecha_ultimo_pago: '2026-06-05',
+      localidad: 'Necochea',
+      observaciones: 'Donante muy frecuente y participativo.'
+    });
 
-    console.log('👥 Seeded 4 additional mock partners (Juan, María, Carlos, Ana).');
+    // Sofia (Pendiente)
+    const userSofia = await Usuario.create({
+      email: 'sofia.lopez@email.com',
+      password_hash: socioPasswordHash,
+      rol: 'socio'
+    });
+    await PerfilSocio.create({
+      usuario_id_fk: userSofia.id,
+      dni: 41234567,
+      estado: 'pendiente',
+      nombre: 'Sofia',
+      apellido: 'López',
+      direccion: 'Av. 75 1200',
+      nacionalidad: 'Argentina',
+      telefono: '2262551133',
+      fecha_nacimiento: '1998-02-28',
+      genero: 'femenino',
+      metodo_pago: 'debito',
+      fecha_ultimo_pago: null,
+      localidad: 'Necochea',
+      observaciones: 'Falta validar la tarjeta de débito.'
+    });
+
+    console.log('👥 Seeded 6 additional mock partners (Juan, María, Carlos, Ana, Pedro, Sofia).');
 
     // 4. Crear Cuotas Sociales periódicas para el socio de prueba oficial
     await PagoCuota.bulkCreate([
