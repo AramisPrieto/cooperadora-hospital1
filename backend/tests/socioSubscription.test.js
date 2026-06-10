@@ -220,6 +220,8 @@ describe('Rutas de Suscripciones y Pagos de Socios', () => {
 
       const res = await request(app)
         .post('/api/webhooks/mercadopago')
+        .set('x-signature', 'ts=123,v1=abc')
+        .set('x-request-id', 'req-123')
         .send({
           type: 'preapproval',
           data: { id: 'sub_test_12345' }
@@ -245,6 +247,8 @@ describe('Rutas de Suscripciones y Pagos de Socios', () => {
 
       const res = await request(app)
         .post('/api/webhooks/mercadopago')
+        .set('x-signature', 'ts=123,v1=abc')
+        .set('x-request-id', 'req-123')
         .send({
           type: 'payment',
           data: { id: '99998888' }

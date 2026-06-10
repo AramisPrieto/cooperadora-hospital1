@@ -11,13 +11,17 @@ import {
   iniciarSuscripcion,
   cancelarSuscripcion,
   obtenerMiHistorialPagos,
-  declararPagoTransferencia
+  declararPagoTransferencia,
+  handleSocioMpRedirect
 } from '../controllers/socioSubscriptionController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Todas las rutas requieren inicio de sesión con JWT (Cero Anonimato)
+// Ruta de redirección pública de Mercado Pago (debe ir ANTES del middleware JWT)
+router.get('/mp-redirect', handleSocioMpRedirect);
+
+// Todas las rutas siguientes requieren inicio de sesión con JWT (Cero Anonimato)
 router.use(authenticateJWT);
 
 // Autogestión: Ver propio perfil de socio

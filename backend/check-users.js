@@ -1,25 +1,31 @@
-import bcrypt from 'bcryptjs';
-import { connectSQL } from './config/db.js';
-import { Usuario } from './models/index.js';
+import dotenv from 'dotenv';
+import path from 'path';
 
-const checkUsers = async () => {
-  try {
-    await connectSQL();
-    const users = await Usuario.findAll();
-    console.log(`Found ${users.length} users in the database:`);
-    for (const u of users) {
-      const isSocioMatch = await bcrypt.compare('socio123', u.password_hash);
-      const isAdminMatch = await bcrypt.compare('admin123', u.password_hash);
-      console.log(`- Email: ${u.email}`);
-      console.log(`  Role:  ${u.rol}`);
-      console.log(`  Password Match socio123: ${isSocioMatch}`);
-      console.log(`  Password Match admin123: ${isAdminMatch}`);
-    }
-    process.exit(0);
-  } catch (err) {
-    console.error('Error:', err);
-    process.exit(1);
+dotenv.config({ path: '/Users/aramisprieto/Documents/cooperadora-hospital1/backend/.env' });
+
+async function check() {
+  const token = process.env.MP_ACCESS_TOKEN;
+  if (!token) {
+    console.error('No MP_ACCESS_TOKEN found');
+    return;
   }
-};
+  
+  try {
+    const res = await fetch('https://api.mercadopago.com/users/test_user', {
+      headers: {
+        'Authorization': `Bearer ${token.trim()}`
+      }
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      console.log('Test Users:', JSON.stringify(data, null, 2));
+    } else {
+      console.error('Error fetching test users:', res.status, await res.text());
+    }
+  } catch (err) {
+    console.error('Fetch error:', err);
+  }
+}
 
-checkUsers();
+check();
