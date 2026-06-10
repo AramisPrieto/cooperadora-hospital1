@@ -3,6 +3,7 @@ import { crearSuscripcionSocio, cancelarSuscripcionSocio, obtenerSuscripcion } f
 import sequelize from '../config/db.js';
 import { enviarMailAgradecimiento } from '../services/emailService.js';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
+import { flushCache } from '../middleware/cacheMiddleware.js';
 
 // Inicializar SDK para obtener detalles de pago
 const getMpPaymentInstance = () => {
@@ -357,6 +358,8 @@ export const webhookMercadoPago = async (req, res) => {
             await campana.save({ transaction });
 
             await transaction.commit();
+
+            flushCache();
 
             console.log(`✅ [Webhook MP] Donación de $${paymentDetails.transaction_amount} para campaña #${campanaId} registrada con éxito.`);
 

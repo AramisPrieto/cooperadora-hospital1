@@ -3,6 +3,7 @@ import { DonacionTransferencia, CampanaEco, Usuario } from '../models/index.js';
 import sequelize from '../config/db.js';
 import { enviarMailAgradecimiento } from '../services/emailService.js';
 import { crearPreferenciaDonacion } from '../services/mpService.js';
+import { flushCache } from '../middleware/cacheMiddleware.js';
 
 // 1. Declarar una transferencia bancaria (Socio)
 export const declararTransferencia = async (req, res) => {
@@ -145,6 +146,8 @@ export const aprobarTransferencia = async (req, res) => {
     await donacion.save({ transaction });
 
     await transaction.commit();
+
+    flushCache();
 
     // Enviar mail de agradecimiento de forma asíncrona sin bloquear la respuesta de la API
     if (donacion.usuario && donacion.usuario.email) {

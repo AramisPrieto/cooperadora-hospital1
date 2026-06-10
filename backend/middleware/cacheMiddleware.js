@@ -3,6 +3,11 @@ import NodeCache from 'node-cache';
 // stdTTL: Tiempo de vida en segundos (5 minutos por defecto)
 const cache = new NodeCache({ stdTTL: 300 });
 
+export const flushCache = () => {
+  console.log('🧹 [Cache] Vaciando toda la caché por actualización de datos.');
+  cache.flushAll();
+};
+
 export const cacheMiddleware = (req, res, next) => {
   // Solo cacheamos peticiones GET
   if (req.method !== 'GET') {
