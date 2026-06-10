@@ -87,12 +87,7 @@ Tener instalado y configurado en su sistema local:
 * **pnpm** (v8 o superior)
 * Una instancia activa de **PostgreSQL** o **MySQL** (o mediante Docker).
 * Una instancia activa de **MongoDB** (o mediante Docker).
-* **ngrok (Recomendado para Pruebas Locales):**
-  - **Instalación:** En macOS usa `brew install ngrok`. En Windows descarga el .exe desde su web oficial.
-  - **Autenticación (Vital):** Debes crear una cuenta gratuita en [ngrok.com](https://ngrok.com) y ejecutar en tu terminal: `ngrok config add-authtoken <TU_TOKEN>`. Esto evita límites de tiempo e interrupciones en el túnel.
-  - **Límites de Uso (Overages):** Las cuentas gratuitas de ngrok tienen cuotas de transferencia mensual. Si superas el límite, ngrok bloqueará el tráfico y el terminal te pedirá habilitar los sobrecargos ("enable overages"). Si esto ocurre, es recomendable crearte otra cuenta gratuita o simplemente desinstalar ngrok temporalmente para que el sistema use el fallback a Pinggy.
-  - **Advertencia de Sitio No Seguro (Browser Warning):** Al entrar a un enlace de ngrok gratuito, la primera vez verás una página de advertencia de abuso (ngrok browser warning). Debes hacer clic en **"Visit Site"** para que ngrok permita el paso continuo de las peticiones hacia el localhost.
-* **Pinggy (Fallback Automático):** Si no tienes `ngrok` instalado o lo quitas del PATH, nuestro script (`start-dev-with-tunnel.js`) abrirá automáticamente un túnel SSH gratuito con Pinggy. *Nota: Los túneles gratuitos de Pinggy expiran a los 60 minutos, momento tras el cual deberás reiniciar el servidor backend para obtener una nueva URL.*
+
 
 ---
 
@@ -115,15 +110,9 @@ Tener instalado y configurado en su sistema local:
    * `JWT_SECRET`: Llave secreta para firmar tokens (usar una cadena aleatoria larga en producción).
    * `PORT`: Puerto del servidor backend. **Debe ser `5001`** para que el proxy de Vite funcione correctamente.
 5. Iniciar el servidor backend en modo desarrollo:
-   * **Modo desarrollo local simple (sin Webhooks externos):**
-     ```bash
-     pnpm dev
-     ```
-   * **Modo automatizado con túnel (Recomendado para probar Mercado Pago):**
-     ```bash
-     pnpm dev:tunnel
-     ```
-     *Este comando iniciará ngrok en segundo plano, obtendrá la URL pública del túnel y actualizará la variable `BACKEND_TUNNEL_URL` en tu archivo `.env` automáticamente. Si no tienes ngrok, iniciará un túnel SSH con Pinggy de forma transparente.*
+   ```bash
+   pnpm dev
+   ```
 
 ---
 
@@ -155,7 +144,7 @@ Para ejecutar la suite de pruebas unitarias y de integración del backend:
    ```bash
    pnpm test
    ```
-   *Vitest ejecutará los 47 tests secuencialmente garantizando la coherencia y el aislamiento de datos.*
+   *Vitest ejecutará los 79 tests secuencialmente garantizando la coherencia y el aislamiento de datos.*
 
 ---
 
@@ -198,15 +187,52 @@ Mercado Pago envía las notificaciones POST directamente a la URL de Render (ej:
 
 ---
 
+## 📖 Manual de Operaciones en Producción (Cloud)
+
+### 1. Variables de Entorno Necesarias
+Para que el sistema funcione en la nube, es vital configurar correctamente las variables de entorno en los paneles de **Render** (Backend) y **Vercel** (Frontend):
+
+**En Render (Environment):**
+* `DATABASE_URL`: URL externa de la base de datos PostgreSQL de Render.
+* `MONGODB_URI`: URL de conexión al clúster de MongoDB Atlas.
+* `JWT_SECRET`: Llave secreta alfanumérica para generar los tokens de sesión.
+* `MP_ACCESS_TOKEN`: Token de Mercado Pago (Sandbox para pruebas, o el de Producción para cobros reales).
+* Configuración SMTP (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, etc.) para el envío de correos.
+
+**En Vercel (Environment Variables):**
+* `VITE_API_URL`: La URL pública de tu backend en Render (Ej: `https://tu-backend.onrender.com`).
+* `VITE_MP_PUBLIC_KEY`: La clave pública de Mercado Pago (Public Key).
+
+### 2. Inicialización de la Base de Datos Remota (Seeding)
+La primera vez que se sube el backend a Render, la base de datos PostgreSQL estará vacía. Para crear las tablas, el usuario Administrador y el Socio de prueba, sigue estos pasos:
+1. En tu computadora local, edita temporalmente tu `.env` de la carpeta `backend` colocando en `DATABASE_URL` y `MONGODB_URI` los enlaces de tus bases de datos de la nube.
+2. Abre la terminal en la carpeta `backend` y ejecuta: `node seed.js`
+3. Esto conectará tu PC a los servidores remotos y sembrará la información. *(Atención: Si tu base de datos prohíbe conexiones sin SSL, nuestro código de `db.js` fuerza SSL automáticamente si la URL contiene `render.com`).*
+
+### 3. Eliminar el Bloqueo de Acceso (Ir a Producción Real)
+Actualmente, el portal tiene un "candado" (un `prompt` en JavaScript) para evitar que terceros accedan mientras el equipo realiza pruebas cerradas. 
+Cuando el hospital decida lanzar la página de forma oficial al público:
+1. Abre el archivo `frontend/src/main.jsx`.
+2. Borra todo el bloque de código debajo de `// Protección básica para la etapa de desarrollo` que contiene el `prompt()` y el `if (password !== "X9$mK2#vLq7@pW4n")`.
+3. Haz un commit y push a GitHub. Vercel actualizará la página automáticamente y quedará abierta a todo el mundo.
+
+### 4. Transición a Mercado Pago (Dinero Real)
+Cuando estés listo para dejar de simular pagos:
+1. Ve a tu integración en el panel de Mercado Pago y genera tus **Credenciales de Producción**.
+2. Reemplaza el `MP_ACCESS_TOKEN` en Render por el de producción.
+3. Reemplaza el `VITE_MP_PUBLIC_KEY` en Vercel por el de producción.
+4. Reinicia ambos servidores. ¡A partir de ese momento, los cobros irán directo a la cuenta bancaria de la Cooperadora!
+
+---
+
 ### 📖 Tutorial de Pruebas Paso a Paso
 
-#### Paso A: Configurar el Túnel y Ejecutar la App
+#### Paso A: Ejecutar la App en Local
 1.  Asegúrate de tener tus bases de datos activas (`docker-compose up -d`).
-2.  En una terminal, ve a la carpeta `backend` e inicia la aplicación con el túnel automatizado:
+2.  En una terminal, ve a la carpeta `backend` e inicia la aplicación:
     ```bash
-    pnpm dev:tunnel
+    pnpm dev
     ```
-    *El script detectará automáticamente si tienes `ngrok` instalado. Si no lo tienes, iniciará un túnel SSH gratuito con Pinggy de forma transparente. Observa la consola, verás un mensaje verde indicando la URL pública del Webhook.*
 3.  En otra terminal, ve a la carpeta `frontend` e inicia la aplicación React:
     ```bash
     pnpm dev
@@ -404,40 +430,3 @@ git checkout -b develop
   - Bloqueo por contraseña de acceso directo en el punto de entrada de React (`main.jsx`) para mantener la confidencialidad de la plataforma durante las pruebas en equipo.
   - El proyecto está ahora preparado para ser hosteado bajo la arquitectura Serverless gratuita: **MongoDB Atlas** (Base de datos), **Render.com** (Node.js API) y **Vercel** (Frontend estático React).
 
----
-
-## 📖 Manual de Operaciones en Producción (Cloud)
-
-### 1. Variables de Entorno Necesarias
-Para que el sistema funcione en la nube, es vital configurar correctamente las variables de entorno en los paneles de **Render** (Backend) y **Vercel** (Frontend):
-
-**En Render (Environment):**
-* `DATABASE_URL`: URL externa de la base de datos PostgreSQL de Render.
-* `MONGODB_URI`: URL de conexión al clúster de MongoDB Atlas.
-* `JWT_SECRET`: Llave secreta alfanumérica para generar los tokens de sesión.
-* `MP_ACCESS_TOKEN`: Token de Mercado Pago (Sandbox para pruebas, o el de Producción para cobros reales).
-* Configuración SMTP (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, etc.) para el envío de correos.
-
-**En Vercel (Environment Variables):**
-* `VITE_API_URL`: La URL pública de tu backend en Render (Ej: `https://tu-backend.onrender.com`).
-* `VITE_MP_PUBLIC_KEY`: La clave pública de Mercado Pago (Public Key).
-
-### 2. Inicialización de la Base de Datos Remota (Seeding)
-La primera vez que se sube el backend a Render, la base de datos PostgreSQL estará vacía. Para crear las tablas, el usuario Administrador y el Socio de prueba, sigue estos pasos:
-1. En tu computadora local, edita temporalmente tu `.env` de la carpeta `backend` colocando en `DATABASE_URL` y `MONGODB_URI` los enlaces de tus bases de datos de la nube.
-2. Abre la terminal en la carpeta `backend` y ejecuta: `node seed.js`
-3. Esto conectará tu PC a los servidores remotos y sembrará la información. *(Atención: Si tu base de datos prohíbe conexiones sin SSL, nuestro código de `db.js` fuerza SSL automáticamente si la URL contiene `render.com`).*
-
-### 3. Eliminar el Bloqueo de Acceso (Ir a Producción Real)
-Actualmente, el portal tiene un "candado" (un `prompt` en JavaScript) para evitar que terceros accedan mientras el equipo realiza pruebas cerradas. 
-Cuando el hospital decida lanzar la página de forma oficial al público:
-1. Abre el archivo `frontend/src/main.jsx`.
-2. Borra todo el bloque de código debajo de `// Protección básica para la etapa de desarrollo` que contiene el `prompt()` y el `if (password !== "X9$mK2#vLq7@pW4n")`.
-3. Haz un commit y push a GitHub. Vercel actualizará la página automáticamente y quedará abierta a todo el mundo.
-
-### 4. Transición a Mercado Pago (Dinero Real)
-Cuando estés listo para dejar de simular pagos:
-1. Ve a tu integración en el panel de Mercado Pago y genera tus **Credenciales de Producción**.
-2. Reemplaza el `MP_ACCESS_TOKEN` en Render por el de producción.
-3. Reemplaza el `VITE_MP_PUBLIC_KEY` en Vercel por el de producción.
-4. Reinicia ambos servidores. ¡A partir de ese momento, los cobros irán directo a la cuenta bancaria de la Cooperadora!
