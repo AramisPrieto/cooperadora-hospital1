@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import mongoSanitize from 'express-mongo-sanitize';
+import cookieParser from 'cookie-parser';
 import { connectSQL } from './config/db.js';
 import { connectMongoDB } from './config/mongo.js';
 import sequelize from './config/db.js';
@@ -47,6 +48,7 @@ app.use(cors({
 
 app.use(helmet()); // Añade cabeceras HTTP de seguridad
 app.use(express.json());
+app.use(cookieParser()); // Para leer cookies de sesión
 app.use(mongoSanitize());      // Sanitiza req.body/params/query — bloquea NoSQL injection
 app.use('/api', globalLimiter); // Rate limit global: 100 req / 15 min por IP
 
@@ -58,11 +60,13 @@ if (process.env.NODE_ENV === 'development') {
   });
 }
 
+import { cacheMiddleware } from './middleware/cacheMiddleware.js';
+
 // Montar Rutas de la API
 app.use('/api/auth', authRoutes);
 app.use('/api/socios', socioRoutes);
-app.use('/api/campanas', campanaRoutes);
-app.use('/api/noticias', noticiaRoutes);
+app.use('/api/campanas', cacheMiddleware, campanaRoutes);
+app.use('/api/noticias', cacheMiddleware, noticiaRoutes);
 app.use('/api/donaciones', donacionRoutes); // TEAM_001: Montamos las rutas en /api/donaciones
 app.post('/api/webhooks/mercadopago', webhookMercadoPago); // Webhook público para Mercado Pago
 

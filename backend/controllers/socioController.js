@@ -1,12 +1,46 @@
 import { PerfilSocio, Usuario, PagoCuota } from '../models/index.js';
+import { Op } from 'sequelize';
 
-// Obtener todos los perfiles de socios (Solo Admin)
+// Obtener todos los perfiles de socios (Solo Admin - Soporta Paginación y Búsqueda)
 export const getAllSocios = async (req, res) => {
+  const { limit, page, search } = req.query;
   try {
-    const socios = await PerfilSocio.findAll({
-      include: [{ model: Usuario, as: 'usuario', attributes: ['email', 'rol'] }]
+    // Si no se proveen parámetros, retornamos la lista completa para mantener retrocompatibilidad
+    if (!limit && !page && !search) {
+      const socios = await PerfilSocio.findAll({
+        include: [{ model: Usuario, as: 'usuario', attributes: ['email', 'rol'] }],
+        order: [['numero_asociado', 'ASC']]
+      });
+      return res.json(socios);
+    }
+
+    const parsedLimit = parseInt(limit || '20', 10);
+    const parsedPage = parseInt(page || '1', 10);
+
+    const whereCondition = search
+      ? {
+          [Op.or]: [
+            { nombre: { [Op.iLike]: `%${search}%` } },
+            { apellido: { [Op.iLike]: `%${search}%` } },
+            { dni: parseInt(search) || 0 }
+          ]
+        }
+      : {};
+
+    const { count, rows: socios } = await PerfilSocio.findAndCountAll({
+      where: whereCondition,
+      include: [{ model: Usuario, as: 'usuario', attributes: ['email', 'rol'] }],
+      limit: parsedLimit,
+      offset: (parsedPage - 1) * parsedLimit,
+      order: [['numero_asociado', 'ASC']]
     });
-    return res.json(socios);
+
+    return res.json({
+      socios,
+      total: count,
+      totalPages: Math.ceil(count / parsedLimit),
+      currentPage: parsedPage
+    });
   } catch (error) {
     console.error('Error al obtener socios:', error);
     return res.status(500).json({ error: 'Error al obtener los socios registrados.' });

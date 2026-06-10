@@ -6,11 +6,12 @@ export const getAllNoticias = async (req, res) => {
   try {
     let query = {};
     if (search) {
+      const escapedSearch = search.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
       query = {
         $or: [
-          { titulo: { $regex: search, $options: 'i' } },
-          { cuerpo_html: { $regex: search, $options: 'i' } },
-          { tags: { $regex: search, $options: 'i' } }
+          { titulo: { $regex: escapedSearch, $options: 'i' } },
+          { cuerpo_html: { $regex: escapedSearch, $options: 'i' } },
+          { tags: { $regex: escapedSearch, $options: 'i' } }
         ]
       };
     }

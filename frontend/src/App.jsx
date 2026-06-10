@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ReactLenis } from 'lenis/react'; // TEAM_001: Wrapper oficial para React
 
 import Navbar from './components/Navbar';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Heart } from 'lucide-react';
 
 const Home = lazy(() => import('./views/Home'));
@@ -10,21 +11,7 @@ const Login = lazy(() => import('./views/Login'));
 const AdminPanel = lazy(() => import('./views/AdminPanel'));
 const SocioPanel = lazy(() => import('./views/SocioPanel'));
 
-/* Protección de ruta admin */
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
-  if (!token || user?.rol !== 'admin') return <Navigate to="/" replace />;
-  return children;
-};
-
-/* Protección de ruta socio */
-const SocioProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
-  if (!token || user?.rol !== 'socio') return <Navigate to="/" replace />;
-  return children;
-};
+// Eliminadas funciones ProtectedRoute y SocioProtectedRoute inline
 
 function App() {
   useEffect(() => {
@@ -55,7 +42,7 @@ function App() {
                 <Route
                   path="/admin"
                   element={
-                    <ProtectedRoute>
+                    <ProtectedRoute allowedRoles={['admin']}>
                       <AdminPanel />
                     </ProtectedRoute>
                   }
@@ -63,9 +50,9 @@ function App() {
                 <Route
                   path="/mi-panel"
                   element={
-                    <SocioProtectedRoute>
+                    <ProtectedRoute allowedRoles={['socio', 'admin']}>
                       <SocioPanel />
-                    </SocioProtectedRoute>
+                    </ProtectedRoute>
                   }
                 />
                 <Route path="*" element={<Navigate to="/" replace />} />

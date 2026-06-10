@@ -192,11 +192,12 @@ export const webhookMercadoPago = async (req, res) => {
     return res.status(403).json({ error: 'Prohibido. Faltan headers de seguridad de MP.' });
   }
 
-  // 2. Validar la firma matemática (Obligatoria en producción para evitar Spoofing y Replay)
+  // 2. Validar la firma matemática
   const webhookSecret = process.env.MP_WEBHOOK_SECRET;
+  const bypassSignature = process.env.BYPASS_WEBHOOK_SIGNATURE === 'true';
   
-  if (process.env.NODE_ENV === 'production' && !webhookSecret) {
-    console.error('❌ ERROR CRÍTICO DE CONFIGURACIÓN: MP_WEBHOOK_SECRET no está configurado en producción.');
+  if (!webhookSecret && !bypassSignature) {
+    console.error('❌ ERROR CRÍTICO DE CONFIGURACIÓN: MP_WEBHOOK_SECRET no está configurado y no se ha activado BYPASS_WEBHOOK_SIGNATURE.');
     return res.status(500).json({ error: 'Error interno de configuración de seguridad.' });
   }
 
@@ -246,7 +247,7 @@ export const webhookMercadoPago = async (req, res) => {
       return res.status(500).json({ error: 'Error interno en validación de webhook.' });
     }
   } else {
-    console.warn('⚠️ Webhook recibido sin validación de firmas (MP_WEBHOOK_SECRET ausente en desarrollo).');
+    console.warn('⚠️ Webhook recibido sin validación de firmas (MP_WEBHOOK_SECRET ausente, BYPASS_WEBHOOK_SIGNATURE activado).');
   }
 
   // Respondemos inmediatamente con 200 OK a Mercado Pago para evitar reintentos duplicados por demora

@@ -12,16 +12,19 @@ if (!JWT_SECRET) {
 
 // Middleware principal de autenticación
 export const authenticateJWT = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  let token = req.cookies.token; // Prioridad a la cookie
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({
-      error: 'Acceso denegado',
-      message: 'Token de autenticación no provisto o con formato inválido.'
-    });
+  // Fallback opcional por si el token viene en header de todos modos (para compatibilidad temporal)
+  if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
   }
 
-  const token = authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({
+      error: 'Acceso denegado',
+      message: 'Token de autenticación no provisto.'
+    });
+  }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);

@@ -132,15 +132,17 @@ export const updateCampana = async (req, res) => {
   const { id } = req.params;
   const { titulo, monto_objetivo, monto_actual, fecha_limite, activo, es_campana_del_mes, testimonios, galeria_rica, obra_status } = req.body;
 
-  try {
-    // Validar montos no negativos
-    if (monto_objetivo < 0 || monto_actual < 0) {
-      return res.status(400).json({ error: 'Los montos económicos no pueden ser negativos.' });
-    }
+  if (monto_objetivo < 0 || (monto_actual && monto_actual < 0)) {
+    return res.status(400).json({ error: 'Los montos económicos no pueden ser negativos.' });
+  }
 
-    // 1. Buscar en SQL
-    const sqlCampana = await CampanaEco.findByPk(id);
+  const transaction = await sequelize.transaction();
+
+  try {
+    // 1. Buscar en SQL con la transacción
+    const sqlCampana = await CampanaEco.findByPk(id, { transaction });
     if (!sqlCampana) {
+      await transaction.rollback();
       return res.status(404).json({ error: 'Campaña relacional no encontrada.' });
     }
 
@@ -152,18 +154,17 @@ export const updateCampana = async (req, res) => {
     if (activo !== undefined) sqlCampana.activo = activo;
     if (es_campana_del_mes !== undefined) {
       if (es_campana_del_mes === true) {
-        await CampanaEco.update({ es_campana_del_mes: false }, { where: {} });
+        await CampanaEco.update({ es_campana_del_mes: false }, { where: {}, transaction });
         sqlCampana.es_campana_del_mes = true;
       } else {
         sqlCampana.es_campana_del_mes = false;
       }
     }
-    await sqlCampana.save();
+    await sqlCampana.save({ transaction });
 
     // 2. Buscar y actualizar en MongoDB
     let nosqlCampana = await CampanaDetalle.findOne({ campana_id_ref: parseInt(id) });
     if (!nosqlCampana) {
-      // Si por alguna razón no existía su parte NoSQL, la creamos reactivamente
       nosqlCampana = new CampanaDetalle({ campana_id_ref: sqlCampana.id });
     }
 
@@ -171,6 +172,9 @@ export const updateCampana = async (req, res) => {
     if (galeria_rica !== undefined) nosqlCampana.galeria_rica = galeria_rica;
     if (obra_status !== undefined) nosqlCampana.obra_status = obra_status;
     await nosqlCampana.save();
+
+    // Confirmar transacción SQL si todo salió bien
+    await transaction.commit();
 
     return res.json({
       message: 'Campaña actualizada exitosamente en bases híbridas.',
@@ -181,6 +185,7 @@ export const updateCampana = async (req, res) => {
     });
 
   } catch (error) {
+    await transaction.rollback();
     console.error('Error al actualizar campaña:', error);
     return res.status(500).json({ error: 'Error al actualizar la campaña.' });
   }
@@ -189,21 +194,26 @@ export const updateCampana = async (req, res) => {
 // 5. ELIMINAR CAMPAÑA (Solo Admin - SQL + NoSQL)
 export const deleteCampana = async (req, res) => {
   const { id } = req.params;
+  const transaction = await sequelize.transaction();
 
   try {
-    const sqlCampana = await CampanaEco.findByPk(id);
+    const sqlCampana = await CampanaEco.findByPk(id, { transaction });
     if (!sqlCampana) {
+      await transaction.rollback();
       return res.status(404).json({ error: 'Campaña relacional no encontrada.' });
     }
 
     // 1. Eliminar SQL
-    await sqlCampana.destroy();
+    await sqlCampana.destroy({ transaction });
 
     // 2. Eliminar NoSQL correspondiente
     await CampanaDetalle.deleteOne({ campana_id_ref: parseInt(id) });
 
+    await transaction.commit();
+
     return res.json({ message: 'Campaña y sus detalles eliminados de ambas bases de datos.' });
   } catch (error) {
+    await transaction.rollback();
     console.error('Error al eliminar campaña:', error);
     return res.status(500).json({ error: 'Error al eliminar la campaña.' });
   }

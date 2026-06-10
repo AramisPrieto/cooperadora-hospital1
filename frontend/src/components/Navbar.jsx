@@ -3,14 +3,30 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, LogOut, User, Menu, X, Heart } from 'lucide-react';
 import { useLenis } from 'lenis/react';
 
+import api from '../api/axios';
+
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('inicio');
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      try {
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        setIsAuthenticated(true);
+      } catch (error) {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    };
+    fetchSession();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -43,10 +59,15 @@ const Navbar = () => {
 
   useEffect(() => { setMobileOpen(false); }, [location]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+      setUser(null);
+      setIsAuthenticated(false);
+      navigate('/');
+    } catch (error) {
+      console.error('Error al cerrar sesión', error);
+    }
   };
 
   const initials = user?.email?.charAt(0).toUpperCase() ?? 'U';
@@ -97,13 +118,13 @@ const Navbar = () => {
             <ScrollLink to="campanas-section" active={activeSection === 'campanas-section'}>Campañas</ScrollLink>
             <ScrollLink to="obras-section" active={activeSection === 'obras-section'}>Obras Concretadas</ScrollLink>
             <ScrollLink to="noticias-section" active={activeSection === 'noticias-section'}>Noticias</ScrollLink>
-            {token && isAdmin && (
+            {isAuthenticated && isAdmin && (
               <NavLink to="/admin" active={location.pathname === '/admin'}>
                 <Shield className="h-4 w-4" />
                 Panel Admin
               </NavLink>
             )}
-            {token && !isAdmin && (
+            {isAuthenticated && !isAdmin && (
               <NavLink to="/mi-panel" active={location.pathname === '/mi-panel'}>
                 <User className="h-4 w-4" />
                 Mi Panel
@@ -113,7 +134,7 @@ const Navbar = () => {
 
           {/* ── Desktop Auth ── */}
           <div className="hidden md:flex items-center gap-4">
-            {token ? (
+            {isAuthenticated ? (
               <div className="flex items-center gap-4 border-l border-slate-200 pl-4">
                 {/* Chip usuario */}
                 <div className="flex items-center gap-3">
@@ -176,18 +197,18 @@ const Navbar = () => {
             <MobileScrollLink to="campanas-section" active={activeSection === 'campanas-section'} setMobileOpen={setMobileOpen}>Campañas Activas</MobileScrollLink>
             <MobileScrollLink to="obras-section" active={activeSection === 'obras-section'} setMobileOpen={setMobileOpen}>Obras Concretadas</MobileScrollLink>
             <MobileScrollLink to="noticias-section" active={activeSection === 'noticias-section'} setMobileOpen={setMobileOpen}>Noticias</MobileScrollLink>
-            {token && isAdmin && (
+            {isAuthenticated && isAdmin && (
               <MobileNavLink to="/admin" active={location.pathname === '/admin'}>
                 Panel Administrativo
               </MobileNavLink>
             )}
-            {token && !isAdmin && (
+            {isAuthenticated && !isAdmin && (
               <MobileNavLink to="/mi-panel" active={location.pathname === '/mi-panel'}>
                 Mi Panel de Socio
               </MobileNavLink>
             )}
             <div className="pt-4 border-t border-slate-100 mt-4 space-y-3">
-              {token ? (
+              {isAuthenticated ? (
                 <>
                   <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-xl border border-slate-100">
                     <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black shrink-0 ${isAdmin ? 'bg-slate-800 text-white' : 'bg-brand-100 text-brand-700'}`}>
