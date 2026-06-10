@@ -12,6 +12,7 @@
 - [ ] Armar panel de socio hecho en el wireframe
 - [ ] ver mails que habia echo kevo dejarlos andando
 - [ ] revisar scrols
+- [ ] Cambiar la forma en que se agregan los comprobantes (de URL a Archivo).
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 ## ✅ Terminado
