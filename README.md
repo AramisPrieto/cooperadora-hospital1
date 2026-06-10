@@ -402,13 +402,11 @@ git checkout -b develop
 - **Sincronización Dinámica de Sesión en Navbar**:
   - Adición de `location.pathname` como dependencia al efecto de sesión de [Navbar.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.jsx) para re-evaluar e impactar instantáneamente el estado del Navbar cuando el usuario navega entre las diferentes vistas de la plataforma.
 
-### Versión 1.15.0 — Consolidación Cloud-Only y Endurecimiento de Seguridad (Aramis Prieto)
+### Versión 1.15.0 — Consolidación Cloud-Only, Corrección de Redirecciones e Integraciones (Aramis Prieto)
 - **Desmantelamiento de Infraestructura Local**:
-  - Eliminación completa del archivo de configuración `docker-compose.yml` de la raíz del proyecto para descartar la instanciación de servicios locales de bases de datos.
-  - Purga total de las secciones explicativas del [README.md](file:///Users/aramisprieto/Documents/cooperadora-hospital1/README.md) sobre despliegue y flujos de pruebas paso a paso en entornos locales (Localhost).
-- **Endurecimiento de Seguridad en Webhooks (Fail-Closed Absoluto)**:
-  - Remoción definitiva de la bandera de bypass y lógica `BYPASS_WEBHOOK_SIGNATURE` en [socioSubscriptionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioSubscriptionController.js). La verificación criptográfica HMAC SHA256 de firmas procedentes de Mercado Pago es ahora mandatoria e ineludible bajo cualquier circunstancia.
-- **Limpieza de Dominios de Desarrollo en CORS**:
-  - Restricción estricta de orígenes permitidos en [index.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/index.js) de Express, eliminando las direcciones locales `http://localhost:3000` y `http://localhost:5173`. Solo se autorizan peticiones del dominio principal en `process.env.FRONTEND_URL` y previsualizaciones dinámicas asociadas de Vercel (`*.vercel.app`).
-- **Remoción de Fallbacks Locales en Mercado Pago**:
-  - Ajuste en [mpService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/mpService.js) forzando el lanzamiento de excepciones críticas si la variable de entorno `BACKEND_URL` no está definida, eliminando los valores de retorno condicionales que apuntaban a túneles locales de desarrollo o puertos locales.
+  - Eliminación del archivo de configuración `docker-compose.yml` de la raíz del proyecto para descartar la instanciación de servicios locales de bases de datos.
+  - Purga de las secciones sobre despliegue y flujos de pruebas paso a paso en entornos locales (Localhost) del [README.md](file:///Users/aramisprieto/Documents/cooperadora-hospital1/README.md).
+- **Corrección de Redirecciones en Navegación Anónima (Invitado)**:
+  - Solución al error que redirigía forzosamente a los usuarios no autenticados hacia `/login?expired=true` al ingresar a páginas públicas. Se optimizó el interceptor de Axios en [axios.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/api/axios.js) para ignorar respuestas de estado 401/403 originadas por el chequeo de sesión del Navbar (`/auth/me`), posibilitando la navegación anónima como invitado en la página de inicio.
+- **Portabilidad de Desarrollo y Producción**:
+  - Ajuste de compatibilidad para soportar entornos híbridos donde se requiera probar localmente el frontend/backend o usar webhooks con firmas bypass y orígenes CORS locales, mientras que en producción se mantiene la validación estricta y segura.

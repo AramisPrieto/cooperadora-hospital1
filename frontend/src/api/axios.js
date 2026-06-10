@@ -23,8 +23,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Evitar bucle infinito si ya está en login
-      if (!window.location.pathname.includes('/login')) {
+      const requestUrl = error.config?.url || '';
+      // No disparamos 'auth-expired' si el fallo proviene de '/auth/me' (es la verificación 
+      // especulativa de sesión para el Navbar) ni si ya estamos en la página de login.
+      if (!requestUrl.includes('/auth/me') && !window.location.pathname.includes('/login')) {
         window.dispatchEvent(new Event('auth-expired'));
       }
     }
