@@ -79,75 +79,6 @@ Ambas respuestas se ensamblan en un único objeto JSON unificado que se envía a
 
 ---
 
-## 🚀 Instrucciones para Levantar el Proyecto Localmente
-
-### 📋 Prerrequisitos
-Tener instalado y configurado en su sistema local:
-* **Node.js** (v18 o superior)
-* **pnpm** (v8 o superior)
-* Una instancia activa de **PostgreSQL** o **MySQL** (o mediante Docker).
-* Una instancia activa de **MongoDB** (o mediante Docker).
-
-
----
-
-### 🔧 Paso 1: Configurar el Backend
-1. Navegar a la carpeta del backend:
-   ```bash
-   cd backend
-   ```
-2. Instalar todas las dependencias:
-   ```bash
-   pnpm install
-   ```
-3. Crear el archivo `.env` a partir de la plantilla:
-   ```bash
-   cp .env.example .env
-   ```
-4. Configurar las variables de entorno dentro del archivo `.env` recién creado:
-   * `DATABASE_URL`: URI de conexión a su base SQL (ej: `postgres://usuario:pass@localhost:5432/cooperadora_db`).
-   * `MONGODB_URI`: URI de conexión a su MongoDB (ej: `mongodb://localhost:27017/cooperadora_nosql`).
-   * `JWT_SECRET`: Llave secreta para firmar tokens (usar una cadena aleatoria larga en producción).
-   * `PORT`: Puerto del servidor backend. **Debe ser `5001`** para que el proxy de Vite funcione correctamente.
-5. Iniciar el servidor backend en modo desarrollo:
-   ```bash
-   pnpm dev
-   ```
-
----
-
-### 🎨 Paso 2: Configurar el Frontend
-1. Abrir otra terminal y navegar al directorio del frontend:
-   ```bash
-   cd frontend
-   ```
-2. Instalar dependencias del cliente:
-   ```bash
-   pnpm install
-   ```
-3. Iniciar el servidor de desarrollo de Vite:
-   ```bash
-   pnpm dev
-   ```
-   *Vite levantará la aplicación frontend en `http://localhost:3000` con proxy reverso automático hacia el puerto 5001 para evitar bloqueos por CORS.*
-
----
-
-### 🧪 Paso 3: Ejecutar las Pruebas Automatizadas
-Para ejecutar la suite de pruebas unitarias y de integración del backend:
-1. Asegurar que los contenedores de base de datos estén corriendo (`docker-compose up -d`). El helper de pruebas creará y limpiará automáticamente las bases de datos de prueba (`cooperadora_db_test` y `cooperadora_nosql_test`).
-2. Navegar a la carpeta del backend:
-   ```bash
-   cd backend
-   ```
-3. Ejecutar las pruebas:
-   ```bash
-   pnpm test
-   ```
-   *Vitest ejecutará los 79 tests secuencialmente garantizando la coherencia y el aislamiento de datos.*
-
----
-
 ## 🔐 Seguridad: Gestión de Roles de Administrador
 
 El endpoint público `POST /api/auth/register` **siempre crea usuarios con rol `socio`**. No es posible auto-asignarse el rol `admin` desde el formulario de registro.
@@ -222,40 +153,6 @@ Cuando estés listo para dejar de simular pagos:
 2. Reemplaza el `MP_ACCESS_TOKEN` en Render por el de producción.
 3. Reemplaza el `VITE_MP_PUBLIC_KEY` en Vercel por el de producción.
 4. Reinicia ambos servidores. ¡A partir de ese momento, los cobros irán directo a la cuenta bancaria de la Cooperadora!
-
----
-
-### 📖 Tutorial de Pruebas Paso a Paso
-
-#### Paso A: Ejecutar la App en Local
-1.  Asegúrate de tener tus bases de datos activas (`docker-compose up -d`).
-2.  En una terminal, ve a la carpeta `backend` e inicia la aplicación:
-    ```bash
-    pnpm dev
-    ```
-3.  En otra terminal, ve a la carpeta `frontend` e inicia la aplicación React:
-    ```bash
-    pnpm dev
-    ```
-    *Abre la aplicación en tu navegador en [http://localhost:3000](http://localhost:3000).*
-
-#### Paso B: Probar Suscripción de Socio (Débito Automático)
-1.  Inicia sesión en el portal web local con el usuario: `test_user_7385770550601504283@testuser.com` / `socio123`.
-2.  Dirígete a tu panel de socio haciendo clic en **"Mi Panel"** y luego ve a la pestaña **"Mis Cuotas"**.
-3.  En "Medio de Pago Preferido", haz clic en el botón **"Débito MP"**.
-4.  Ingresa un monto para tu suscripción mensual (mínimo $1000) y haz clic en **"Adherirme a Débito Automático"**.
-5.  Serás redirigido a la pasarela de Mercado Pago. Allí, inicia sesión con la cuenta Sandbox del Comprador (`TESTUSER7385770550601504283` / `5ZPkJK3MJX`).
-6.  Selecciona una tarjeta de crédito de prueba (puedes usar cualquier código de seguridad, ej. 123) y aprueba la suscripción.
-7.  El proxy te devolverá a `http://localhost:3000/mi-panel`. En la consola del backend verás llegar el Webhook `preapproval`, confirmando la adhesión.
-
-#### Paso C: Probar Donaciones Únicas (Preferences)
-1.  En la Home, dirígete a las campañas activas y haz clic en **"Donar / Ver Detalles"**.
-2.  Selecciona el método de pago **"Mercado Pago"**, ingresa un monto mayor a 0 y haz clic en **"Donar con Mercado Pago"**.
-3.  Al ser redirigido a MP, nuevamente inicia sesión con el Comprador Sandbox y paga con una tarjeta de prueba.
-4.  Serás retornado automáticamente a la Home local mostrando una alerta verde de éxito.
-5.  El Webhook de tipo `payment` llegará al backend, la donación se registrará y el monto de la campaña subirá en tiempo real.
-
----
 
 ## 🛠️ Comandos Git Utilizados (Estructura de Trabajo)
 Para mantener un orden profesional en el repositorio, la estructura de ramas se inicia en `develop`:
@@ -504,3 +401,14 @@ git checkout -b develop
   - Refactorización de [mpService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/mpService.js) introduciendo una función auxiliar `getBackendUrl()`. Resuelve de manera jerárquica la variable de entorno `BACKEND_URL`, el túnel dinámico `BACKEND_TUNNEL_URL`, o recurre al puerto local `5001`. Esto flexibiliza el redireccionamiento y notificaciones webhook en diferentes entornos (local, túneles, y producción).
 - **Sincronización Dinámica de Sesión en Navbar**:
   - Adición de `location.pathname` como dependencia al efecto de sesión de [Navbar.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.jsx) para re-evaluar e impactar instantáneamente el estado del Navbar cuando el usuario navega entre las diferentes vistas de la plataforma.
+
+### Versión 1.15.0 — Consolidación Cloud-Only y Endurecimiento de Seguridad (Antigravity & Aramis Prieto)
+- **Desmantelamiento de Infraestructura Local**:
+  - Eliminación completa del archivo de configuración `docker-compose.yml` de la raíz del proyecto para descartar la instanciación de servicios locales de bases de datos.
+  - Purga total de las secciones explicativas del [README.md](file:///Users/aramisprieto/Documents/cooperadora-hospital1/README.md) sobre despliegue y flujos de pruebas paso a paso en entornos locales (Localhost).
+- **Endurecimiento de Seguridad en Webhooks (Fail-Closed Absoluto)**:
+  - Remoción definitiva de la bandera de bypass y lógica `BYPASS_WEBHOOK_SIGNATURE` en [socioSubscriptionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioSubscriptionController.js). La verificación criptográfica HMAC SHA256 de firmas procedentes de Mercado Pago es ahora mandatoria e ineludible bajo cualquier circunstancia.
+- **Limpieza de Dominios de Desarrollo en CORS**:
+  - Restricción estricta de orígenes permitidos en [index.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/index.js) de Express, eliminando las direcciones locales `http://localhost:3000` y `http://localhost:5173`. Solo se autorizan peticiones del dominio principal en `process.env.FRONTEND_URL` y previsualizaciones dinámicas asociadas de Vercel (`*.vercel.app`).
+- **Remoción de Fallbacks Locales en Mercado Pago**:
+  - Ajuste en [mpService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/mpService.js) forzando el lanzamiento de excepciones críticas si la variable de entorno `BACKEND_URL` no está definida, eliminando los valores de retorno condicionales que apuntaban a túneles locales de desarrollo o puertos locales.

@@ -12,7 +12,12 @@ const getMpClient = () => {
 };
 
 const getBackendUrl = () => {
-  return process.env.BACKEND_URL || process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001';
+  const backendUrl = process.env.BACKEND_URL;
+  if (!backendUrl) {
+    console.error('❌ ERROR CRÍTICO: La variable de entorno BACKEND_URL no está configurada.');
+    throw new Error('BACKEND_URL no está configurada.');
+  }
+  return backendUrl;
 };
 
 /**
