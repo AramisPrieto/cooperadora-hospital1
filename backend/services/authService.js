@@ -72,7 +72,6 @@ export const registerUserService = async (userData) => {
     // Validar DNI único dentro de la transacción
     const existingDni = await PerfilSocio.findOne({ where: { dni }, transaction });
     if (existingDni) {
-      await transaction.rollback();
       const error = new Error('Error en el registro. Verifique que sus datos sean correctos o intente recuperar su cuenta si ya estaba registrado.');
       error.status = 400;
       throw error;

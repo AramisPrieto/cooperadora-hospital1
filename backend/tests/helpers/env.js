@@ -6,6 +6,7 @@ dotenv.config();
 // Sobrescribir variables de entorno para usar bases de datos de test dedicadas
 process.env.NODE_ENV = 'test';
 process.env.PORT = '5002'; // Evita pisar el puerto del servidor de desarrollo
+process.env.BYPASS_WEBHOOK_SIGNATURE = 'true'; // Permitir bypass de firmas en webhooks de Mercado Pago durante los tests
 
 if (process.env.DATABASE_URL) {
   const urlObj = new URL(process.env.DATABASE_URL);
@@ -26,3 +27,4 @@ if (process.env.MONGODB_URI) {
 } else {
   process.env.MONGODB_URI = 'mongodb://localhost:27017/cooperadora_nosql_test';
 }
+

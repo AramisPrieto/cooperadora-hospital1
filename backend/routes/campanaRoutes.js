@@ -7,8 +7,6 @@ import {
   deleteCampana
 } from '../controllers/campanaController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
-import { donationLimiter } from '../middleware/rateLimiter.js';
-import { validateDonation } from '../middleware/validators.js';
 
 const router = express.Router();
 

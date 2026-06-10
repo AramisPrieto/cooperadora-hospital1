@@ -36,6 +36,9 @@ export const getCampanaById = async (req, res) => {
       return res.status(404).json({ error: 'Campaña no encontrada en la base de datos relacional.' });
     }
 
+    // Convertir a objeto plano para evitar problemas de clonación de Mongoose en la caché
+    const nosqlObj = nosqlData ? nosqlData.toObject() : null;
+
     // Fusión de Datos (Mashup) en un único objeto JSON unificado
     const campanaMashup = {
       id: sqlData.id,
@@ -48,11 +51,11 @@ export const getCampanaById = async (req, res) => {
       createdAt: sqlData.createdAt,
       updatedAt: sqlData.updatedAt,
       // Datos provenientes de NoSQL MongoDB
-      detalles: nosqlData ? {
-        testimonios: nosqlData.testimonios,
-        galeria_rica: nosqlData.galeria_rica,
-        obra_status: nosqlData.obra_status,
-        mongoId: nosqlData._id
+      detalles: nosqlObj ? {
+        testimonios: nosqlObj.testimonios,
+        galeria_rica: nosqlObj.galeria_rica,
+        obra_status: nosqlObj.obra_status,
+        mongoId: nosqlObj._id
       } : {
         testimonios: [],
         galeria_rica: { videos: [], imagenes: [] },

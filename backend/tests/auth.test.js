@@ -36,12 +36,14 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .send({
           ...baseRegisterData,
           email: 'socio@test.com',
-          password: 'password123',
+          password: 'Password123',
           dni: 12345678
         });
 
       expect(res.status).toBe(201);
-      expect(res.body).toHaveProperty('token');
+      expect(res.headers['set-cookie']).toBeDefined();
+      const hasTokenCookie = res.headers['set-cookie'].some(cookie => cookie.startsWith('token='));
+      expect(hasTokenCookie).toBe(true);
       expect(res.body.user).toHaveProperty('email', 'socio@test.com');
       expect(res.body.user).toHaveProperty('rol', 'socio');
       expect(res.body.user.perfil).toHaveProperty('dni', 12345678);
@@ -55,7 +57,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .send({
           ...baseRegisterData,
           email: 'socio@test.com',
-          password: 'password123',
+          password: 'Password123',
           dni: 12345678
         });
 
@@ -65,12 +67,12 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .send({
           ...baseRegisterData,
           email: 'socio@test.com',
-          password: 'anotherpassword',
+          password: 'Anotherpassword123',
           dni: 87654321
         });
 
       expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('error', 'El email ya se encuentra registrado.');
+      expect(res.body).toHaveProperty('error', 'Error en el registro. Verifique que sus datos sean correctos o intente recuperar su cuenta si ya estaba registrado.');
     });
 
     it('debe fallar si el DNI ya existe', async () => {
@@ -80,7 +82,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .send({
           ...baseRegisterData,
           email: 'socio1@test.com',
-          password: 'password123',
+          password: 'Password123',
           dni: 12345678
         });
 
@@ -90,12 +92,12 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .send({
           ...baseRegisterData,
           email: 'socio2@test.com',
-          password: 'password123',
+          password: 'Password123',
           dni: 12345678
         });
 
       expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('error', 'El DNI provisto ya está registrado para otro socio.');
+      expect(res.body).toHaveProperty('error', 'Error en el registro. Verifique que sus datos sean correctos o intente recuperar su cuenta si ya estaba registrado.');
     });
 
     it('debe fallar si el email no es válido', async () => {
@@ -104,7 +106,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .send({
           ...baseRegisterData,
           email: 'invalid-email',
-          password: 'password123',
+          password: 'Password123',
           dni: 12345678
         });
 
@@ -126,13 +128,41 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       expect(res.body.error).toContain('La contraseña debe tener al menos 8 caracteres');
     });
 
-    it('debe fallar si el DNI no está en rango válido', async () => {
+    it('debe fallar si la contraseña no contiene mayúsculas', async () => {
       const res = await request(app)
         .post('/api/auth/register')
         .send({
           ...baseRegisterData,
           email: 'socio@test.com',
           password: 'password123',
+          dni: 12345678
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.');
+    });
+
+    it('debe fallar si la contraseña no contiene números', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          ...baseRegisterData,
+          email: 'socio@test.com',
+          password: 'Password',
+          dni: 12345678
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.');
+    });
+
+    it('debe fallar si el DNI no está en rango válido', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          ...baseRegisterData,
+          email: 'socio@test.com',
+          password: 'Password123',
           dni: 999
         });
 
@@ -149,7 +179,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .send({
           ...baseRegisterData,
           email: 'user@test.com',
-          password: 'password123',
+          password: 'Password123',
           dni: 12345678
         });
     });
@@ -159,11 +189,13 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .post('/api/auth/login')
         .send({
           email: 'user@test.com',
-          password: 'password123'
+          password: 'Password123'
         });
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('token');
+      expect(res.headers['set-cookie']).toBeDefined();
+      const hasTokenCookie = res.headers['set-cookie'].some(cookie => cookie.startsWith('token='));
+      expect(hasTokenCookie).toBe(true);
       expect(res.body).toHaveProperty('message', 'Inicio de sesión exitoso.');
       expect(res.body.user).toHaveProperty('email', 'user@test.com');
     });
@@ -173,7 +205,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .post('/api/auth/login')
         .send({
           email: 'user@test.com',
-          password: 'wrongpassword'
+          password: 'Wrongpassword123'
         });
 
       expect(res.status).toBe(401);
@@ -185,7 +217,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .post('/api/auth/login')
         .send({
           email: 'nonexistent@test.com',
-          password: 'password123'
+          password: 'Password123'
         });
 
       expect(res.status).toBe(401);
