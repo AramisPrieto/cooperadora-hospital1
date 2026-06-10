@@ -467,4 +467,14 @@ git checkout -b develop
 - **Optimización de Pintura y Rendimiento de Scroll**:
   - Reemplazo del comportamiento `background-attachment: fixed` sobre el body en [index.css](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/index.css) por un pseudo-elemento fijo en el viewport. Esto elimina la rasterización repetitiva durante el desplazamiento y soluciona el lag visual al hacer scroll.
 
+### Versión 1.12.0 — Estabilidad de Producción y Datos de Prueba Avanzados (Aramis Prieto)
+- **Resolución de SPA Routing en Vercel**:
+  - Implementación del archivo de configuración `vercel.json` con reglas de reescritura (`rewrites`) globales hacia `index.html`. Esto previene de forma definitiva el error `404 NOT_FOUND` nativo de Vercel al recargar sub-rutas protegidas de la aplicación React.
+- **Tolerancia a Entornos de Preview (CORS)**:
+  - Modificación de los orígenes permitidos (CORS) en el backend de Render para aceptar peticiones provenientes de dominios dinámicos de Vercel (`*.vercel.app`), garantizando que cualquier Preview Deployment funcione en perfecta integración con la base de datos de producción sin ser bloqueado.
+- **Inyección de Datos (Seed) Avanzada**:
+  - Refactorización de `seed.js` para automatizar la creación de una base de datos de prueba rica y realista en la nube.
+  - Inclusión de 5 campañas con diversos estados financieros y 4 noticias con testimonios e imágenes reales.
+  - Ampliación del padrón con 6 socios de prueba interactivos (activos y pendientes) y generación del usuario Sandbox oficial de Mercado Pago para ensayos financieros.
+
 
