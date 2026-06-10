@@ -13,6 +13,7 @@
 - [ ] ver mails que habia echo kevo dejarlos andando
 - [ ] revisar scrols
 - [ ] Cambiar la forma en que se agregan los comprobantes (de URL a Archivo).
+- [ ] descripcion campaña
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 ## ✅ Terminado
