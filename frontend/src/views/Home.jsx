@@ -185,8 +185,8 @@ const Home = () => {
   // TEAM_001: Envía al backend la declaración de la transferencia del socio
   const handleDeclareTransfer = async (e) => {
     e.preventDefault();
-    if (!transferAmount || isNaN(transferAmount) || parseFloat(transferAmount) <= 0) {
-      setDonationError('Por favor, ingresá un monto válido mayor a 0.');
+    if (!transferAmount || isNaN(transferAmount) || parseFloat(transferAmount) < 1000) {
+      setDonationError('El monto mínimo para donar es $1.000.');
       return;
     }
     setSubmittingDonation(true);
@@ -213,8 +213,8 @@ const Home = () => {
   // Iniciar el flujo de donación online con Mercado Pago
   const handleDonationMP = async (e) => {
     e.preventDefault();
-    if (!transferAmount || isNaN(transferAmount) || parseFloat(transferAmount) <= 0) {
-      setDonationError('Por favor, ingresá un monto válido mayor a 0.');
+    if (!transferAmount || isNaN(transferAmount) || parseFloat(transferAmount) < 1000) {
+      setDonationError('El monto mínimo para donar es $1.000.');
       return;
     }
     setSubmittingDonation(true);
@@ -826,7 +826,7 @@ const Home = () => {
                               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
                               <input
                                 type="number"
-                                min="1"
+                                min="1000"
                                 step="any"
                                 value={transferAmount}
                                 onChange={(e) => setTransferAmount(e.target.value)}
@@ -898,7 +898,7 @@ const Home = () => {
                             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
                             <input
                               type="number"
-                              min="1"
+                              min="1000"
                               step="any"
                               value={transferAmount}
                               onChange={(e) => setTransferAmount(e.target.value)}

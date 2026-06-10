@@ -25,7 +25,7 @@ export const iniciarSuscripcion = async (req, res) => {
     return res.status(400).json({ error: 'El monto especificado no es válido.' });
   }
 
-  const minimo = parseFloat(process.env.MP_MINIMO_CUOTA || '1000');
+  const minimo = parseFloat(process.env.MP_MINIMO_CUOTA || '2000');
   if (parseFloat(monto) < minimo) {
     return res.status(400).json({ error: `El monto mínimo de la suscripción es de $${minimo} ARS.` });
   }

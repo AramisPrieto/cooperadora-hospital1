@@ -15,6 +15,7 @@ import {
   handleSocioMpRedirect
 } from '../controllers/socioSubscriptionController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import { validateSocio, validateDeclararPago } from '../middleware/validators.js';
 
 const router = express.Router();
 
@@ -34,18 +35,18 @@ router.get('/mi-perfil/cuotas', getMyCuotas);
 router.get('/mi-perfil/pagos', obtenerMiHistorialPagos);
 
 // Autogestión: Declarar pago de cuota por transferencia
-router.post('/mi-perfil/pagos/declarar', declararPagoTransferencia);
+router.post('/mi-perfil/pagos/declarar', validateDeclararPago, declararPagoTransferencia);
 
 // Autogestión: Gestión de suscripción Mercado Pago
 router.post('/suscripcion/crear', iniciarSuscripcion);
 router.post('/suscripcion/cancelar', cancelarSuscripcion);
 
 // Autogestión / Admin: Actualizar perfil de socio (Socio edita su DNI, Admin edita todo y estado)
-router.put('/:id', updateSocio);
+router.put('/:id', validateSocio, updateSocio);
 
 // Rutas exclusivas de Administrador
 router.get('/', authorizeRoles('admin'), getAllSocios);
-router.post('/', authorizeRoles('admin'), createSocio);
+router.post('/', authorizeRoles('admin'), validateSocio, createSocio);
 router.delete('/:id', authorizeRoles('admin'), deleteSocio);
 
 export default router;

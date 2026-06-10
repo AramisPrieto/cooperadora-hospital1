@@ -97,14 +97,14 @@ describe('Rutas de Donaciones y Transferencias (/api/donaciones)', () => {
       expect(res.body.donacion).toHaveProperty('campana_id', testCampana.id);
     });
 
-    it('debe fallar si el monto es menor o igual a 0', async () => {
+    it('debe fallar si el monto es menor a 1000', async () => {
       const res = await request(app)
         .post(`/api/donaciones/campanas/${testCampana.id}/donar-transferencia`)
         .set('Authorization', `Bearer ${socioToken}`)
-        .send({ monto: 0 });
+        .send({ monto: 500 });
 
       expect(res.status).toBe(400);
-      expect(res.body.error).toContain('monto debe ser un número mayor a 0');
+      expect(res.body.error).toContain('monto mínimo para donar es $1.000');
     });
 
     it('debe fallar si el monto supera los $10.000.000', async () => {
@@ -121,7 +121,7 @@ describe('Rutas de Donaciones y Transferencias (/api/donaciones)', () => {
       const res = await request(app)
         .post('/api/donaciones/campanas/99999/donar-transferencia')
         .set('Authorization', `Bearer ${socioToken}`)
-        .send({ monto: 500 });
+        .send({ monto: 1500 });
 
       expect(res.status).toBe(404);
       expect(res.body).toHaveProperty('error', 'La campaña especificada no existe.');
@@ -137,7 +137,7 @@ describe('Rutas de Donaciones y Transferencias (/api/donaciones)', () => {
       const res = await request(app)
         .post(`/api/donaciones/campanas/${inactiveCampana.id}/donar-transferencia`)
         .set('Authorization', `Bearer ${socioToken}`)
-        .send({ monto: 500 });
+        .send({ monto: 1500 });
 
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty('error', 'No se pueden realizar donaciones a campañas inactivas.');
@@ -152,7 +152,7 @@ describe('Rutas de Donaciones y Transferencias (/api/donaciones)', () => {
       const res = await request(app)
         .post(`/api/donaciones/campanas/${testCampana.id}/donar-transferencia`)
         .set('Authorization', `Bearer ${socioToken}`)
-        .send({ monto: 100 });
+        .send({ monto: 1500 });
 
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty('error', 'La campaña ya ha alcanzado su objetivo de recaudación.');
@@ -167,6 +167,26 @@ describe('Rutas de Donaciones y Transferencias (/api/donaciones)', () => {
 
       expect(res.status).toBe(400);
       expect(res.body.error).toContain('El monto donado supera el límite restante de la campaña.');
+    });
+
+    it('debe fallar si el numero_comprobante contiene enlaces o URLs', async () => {
+      const res = await request(app)
+        .post(`/api/donaciones/campanas/${testCampana.id}/donar-transferencia`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({ monto: 1500, numero_comprobante: 'https://badlink.com' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('No se permiten enlaces o URLs');
+    });
+
+    it('debe fallar si el comprobante_url contiene etiquetas HTML o scripts', async () => {
+      const res = await request(app)
+        .post(`/api/donaciones/campanas/${testCampana.id}/donar-transferencia`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({ monto: 1500, comprobante_url: 'https://ok.com/<script>alert(1)</script>' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('No se permiten etiquetas HTML o scripts');
     });
   });
 

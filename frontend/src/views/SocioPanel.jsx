@@ -171,8 +171,9 @@ const SocioPanel = () => {
   // Iniciar flujo de suscripción en Mercado Pago
   const handleSubscribeMP = async (e) => {
     e.preventDefault();
-    if (!subMonto || isNaN(subMonto) || parseFloat(subMonto) <= 0) {
-      setErrorMsg('Por favor, ingresa un monto válido.');
+    const minimo = parseFloat(import.meta.env.VITE_MP_MINIMO_CUOTA || '2000');
+    if (!subMonto || isNaN(subMonto) || parseFloat(subMonto) < minimo) {
+      setErrorMsg(`El monto mínimo de la suscripción es de $${minimo} ARS.`);
       return;
     }
     setSubmittingSub(true);
@@ -204,7 +205,7 @@ const SocioPanel = () => {
     setSuccessMsg('');
     try {
       await api.post('/socios/suscripcion/cancelar');
-      setSuccessMsg('Suscripción cancelada correctamente. El método de pago preferido se actualizó a Transferencia.');
+      setSuccessMsg('Tu suscripción de débito automático ha sido cancelada con éxito.');
       await loadSocioData();
     } catch (err) {
       console.error(err);
@@ -216,8 +217,9 @@ const SocioPanel = () => {
   // Declarar transferencia de pago de cuota
   const handleDeclareTransfer = async (e) => {
     e.preventDefault();
-    if (!transferMonto || isNaN(transferMonto) || parseFloat(transferMonto) <= 0) {
-      setErrorMsg('Por favor, ingresá un monto válido mayor a 0.');
+    const minimo = parseFloat(import.meta.env.VITE_MP_MINIMO_CUOTA || '2000');
+    if (!transferMonto || isNaN(transferMonto) || parseFloat(transferMonto) < minimo) {
+      setErrorMsg(`El monto mínimo de la suscripción/cuota es de $${minimo} ARS.`);
       return;
     }
     setSubmittingTransfer(true);
@@ -838,7 +840,7 @@ const SocioPanel = () => {
                                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
                                 <input
                                   type="number"
-                                  min={import.meta.env.VITE_MP_MINIMO_CUOTA || '1000'}
+                                  min={import.meta.env.VITE_MP_MINIMO_CUOTA || '2000'}
                                   value={subMonto}
                                   onChange={(e) => setSubMonto(e.target.value)}
                                   className="input-field pl-7 py-2 text-xs"
@@ -847,7 +849,7 @@ const SocioPanel = () => {
                                 />
                               </div>
                               <p className="text-[10px] text-slate-400 leading-normal leading-relaxed">
-                                El monto mínimo es de ${import.meta.env.VITE_MP_MINIMO_CUOTA || '1000'} ARS. Podés ingresar un monto mayor si deseás colaborar más.
+                                El monto mínimo es de ${import.meta.env.VITE_MP_MINIMO_CUOTA || '2000'} ARS. Podés ingresar un monto mayor si deseás colaborar más.
                               </p>
                             </div>
 
@@ -929,7 +931,7 @@ const SocioPanel = () => {
                                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
                                 <input
                                   type="number"
-                                  min="1"
+                                  min={import.meta.env.VITE_MP_MINIMO_CUOTA || '2000'}
                                   value={transferMonto}
                                   onChange={(e) => setTransferMonto(e.target.value)}
                                   placeholder="2000"
