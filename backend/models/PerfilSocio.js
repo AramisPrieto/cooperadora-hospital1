@@ -95,7 +95,18 @@ const PerfilSocio = sequelize.define('PerfilSocio', {
 }, {
   tableName: 'perfiles_socios',
   timestamps: true,
-  underscored: true
+  underscored: true,
+  indexes: [
+    {
+      name: 'idx_perfil_socio_usuario_id_fk',
+      fields: ['usuario_id_fk']
+    },
+    {
+      name: 'idx_perfil_socio_dni',
+      unique: true,
+      fields: ['dni']
+    }
+  ]
 });
 
 export default PerfilSocio;

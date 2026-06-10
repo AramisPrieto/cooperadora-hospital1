@@ -669,6 +669,7 @@ const Home = () => {
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-dark-900/70 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}
+          data-lenis-prevent
         >
           <div className="bg-white w-full sm:rounded-3xl sm:max-w-2xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up">
 

@@ -447,5 +447,17 @@ git checkout -b develop
   - Sincronización de log de contraseñas de desarrollo de `socio123` a `SocioCoop2026!` en [update-email.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/update-email.js) para evitar confusiones de desarrollo.
 - **Accesibilidad y SEO**:
   - Adición de `aria-label` descriptivos en [CampaignCard.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/CampaignCard.jsx) y etiquetas meta Open Graph en [index.html](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/index.html).
+- **Seguridad y Mitigación de ReDoS (Denegación de Servicio)**:
+  - Sanitización y escape de caracteres especiales de expresiones regulares en las búsquedas en [noticiaController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/noticiaController.js) para prevenir ataques de Catastrophic Backtracking.
+- **Robustez en Webhooks de Mercado Pago**:
+  - Fortalecimiento de la verificación de firmas criptográficas para fallar de forma segura si no se ha configurado la variable de entorno `MP_WEBHOOK_SECRET` y no está explícitamente activada la bandera de bypass para testing local.
+- **Garantías de Consistencia y Transacciones Distribuidas**:
+  - Implementación de transacciones de Sequelize en la edición y borrado de campañas en [campanaController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/campanaController.js) para asegurar la consistencia y reversión eventual entre PostgreSQL y MongoDB Atlas.
+- **Paginación y Optimización de Listados**:
+  - Paginación y búsqueda optimizada de socios en [socioController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioController.js) con soporte de retrocompatibilidad.
+- **Indexación y Optimización de Base de Datos**:
+  - Creación de índices en [PerfilSocio.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PerfilSocio.js) y [PagoCuota.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PagoCuota.js) para optimizar búsquedas por clave y filtrado de periodos.
+- **Navegación e Interacción UX (Lenis)**:
+  - Adición de `data-lenis-prevent` en el modal flotante de detalles de la campaña en [Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx) para solucionar fugas de desplazamiento.
 
 

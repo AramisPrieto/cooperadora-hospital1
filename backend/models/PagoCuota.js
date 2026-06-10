@@ -58,7 +58,18 @@ const PagoCuota = sequelize.define('PagoCuota', {
 }, {
   tableName: 'pagos_cuotas',
   timestamps: true,
-  underscored: true
+  underscored: true,
+  indexes: [
+    {
+      name: 'idx_pago_cuota_socio_periodo',
+      fields: ['socio_numero_asociado', 'anio', 'mes']
+    },
+    {
+      name: 'idx_pago_cuota_mp_payment_id',
+      unique: true,
+      fields: ['mp_payment_id']
+    }
+  ]
 });
 
 export default PagoCuota;
