@@ -40,8 +40,7 @@ const Login = () => {
     try {
       if (isLogin) {
         const res = await api.post('/auth/login', { email, password });
-        // Token se maneja vía cookie automáticamente
-        // localStorage no es necesario para el token ni usuario, usaremos /me en ProtectedRoute
+        localStorage.setItem('user', JSON.stringify(res.data.user));
         setSuccessMsg('¡Sesión iniciada con éxito!');
         if (redirectCampaign && campaignId) {
           navigate('/?view=' + campaignId);
@@ -63,7 +62,7 @@ const Login = () => {
           genero: genero || undefined,
           metodo_pago: metodoPago || undefined
         });
-        // Token se maneja vía cookie
+        localStorage.setItem('user', JSON.stringify(res.data.user));
         setSuccessMsg('¡Registro exitoso!');
         navigate('/');
       }

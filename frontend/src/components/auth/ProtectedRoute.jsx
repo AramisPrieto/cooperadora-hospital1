@@ -12,7 +12,7 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
         const response = await api.get('/auth/me');
         setIsAuthenticated(true);
         setUserRole(response.data.user.rol);
-        // Opcional: Actualizar el contexto de usuario aquí si usas uno
+        localStorage.setItem('user', JSON.stringify(response.data.user));
       } catch (error) {
         console.error("Error validando sesión:", error);
         setIsAuthenticated(false);
