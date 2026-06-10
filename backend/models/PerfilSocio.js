@@ -79,6 +79,15 @@ const PerfilSocio = sequelize.define('PerfilSocio', {
     type: DataTypes.DECIMAL(12, 2),
     allowNull: true
   },
+  cant_cambios_metodo_pago: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
+  mes_ultimo_cambio_metodo_pago: {
+    type: DataTypes.STRING(7),
+    allowNull: true
+  },
   observaciones: {
     type: DataTypes.TEXT,
     allowNull: true

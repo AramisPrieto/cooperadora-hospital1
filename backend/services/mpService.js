@@ -1,4 +1,4 @@
-import { MercadoPagoConfig, PreApprovalPlan, PreApproval } from 'mercadopago';
+import { MercadoPagoConfig, PreApprovalPlan, PreApproval, Preference } from 'mercadopago';
 
 // Inicializar el cliente de Mercado Pago con el token de acceso
 const getMpClient = () => {
@@ -84,6 +84,51 @@ export const cancelarSuscripcionSocio = async (preapprovalId) => {
     });
   } catch (error) {
     console.error(`[Mercado Pago Service] Error al cancelar la suscripción ${preapprovalId}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Crea una preferencia de pago único en Mercado Pago para una donación a campaña
+ * @param {Object} params
+ * @param {string} params.campanaTitulo - Título de la campaña
+ * @param {number} params.monto - Monto a donar
+ * @param {string|number} params.campanaId - ID de la campaña
+ * @param {string|number} params.usuarioId - ID del usuario donante
+ * @returns {Promise<Object>} Datos de la preferencia creada (incluye init_point)
+ */
+export const crearPreferenciaDonacion = async ({ campanaTitulo, monto, campanaId, usuarioId }) => {
+  const client = getMpClient();
+  const preference = new Preference(client);
+
+  const body = {
+    items: [
+      {
+        id: campanaId.toString(),
+        title: `Donación Campaña - ${campanaTitulo.substring(0, 50)}`,
+        quantity: 1,
+        unit_price: parseFloat(monto),
+        currency_id: 'ARS'
+      }
+    ],
+    back_urls: {
+      success: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/?status=donation_success`,
+      failure: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/?status=donation_failure`,
+      pending: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/?status=donation_pending`
+    },
+    auto_return: 'approved',
+    external_reference: `donation_u${usuarioId}_c${campanaId}`
+  };
+
+  try {
+    const response = await preference.create({ body });
+    return {
+      id: response.id,
+      initPoint: response.init_point,
+      sandboxInitPoint: response.sandbox_init_point
+    };
+  } catch (error) {
+    console.error('[Mercado Pago Service] Error al crear preferencia de donación:', error);
     throw error;
   }
 };
