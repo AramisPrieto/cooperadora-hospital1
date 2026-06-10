@@ -291,22 +291,7 @@ const Home = () => {
 
             {/* Left: text */}
             <div className="lg:col-span-7 space-y-8">
-              {/* Logo + badge */}
-              <div className="flex items-center gap-4 animate-fade-up">
-                <img
-                  src="/logo.png"
-                  alt="Logo Cooperadora"
-                  className="h-16 w-16 object-contain rounded-2xl shadow-sm border border-slate-100 bg-white p-1"
-                  onError={e => { e.target.style.display = 'none'; }}
-                />
-                <div>
-                  <div className="badge badge-red mb-1">
-                    <Heart className="h-3 w-3 fill-current" />
-                    Desde 1953 — Necochea, Buenos Aires
-                  </div>
-                  <p className="text-slate-500 text-xs font-medium">Asociación Cooperadora del Hospital Municipal</p>
-                </div>
-              </div>
+
 
               {/* Headline */}
               <div className="animate-fade-up-delay-1">
