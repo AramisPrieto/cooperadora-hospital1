@@ -195,55 +195,60 @@ export const webhookMercadoPago = async (req, res) => {
 
   // 2. Validar la firma matemática
   const webhookSecret = process.env.MP_WEBHOOK_SECRET;
+  const bypassSignature = process.env.BYPASS_WEBHOOK_SIGNATURE === 'true';
   
-  if (!webhookSecret) {
-    console.error('❌ ERROR CRÍTICO DE CONFIGURACIÓN: MP_WEBHOOK_SECRET no está configurado.');
+  if (!webhookSecret && !bypassSignature) {
+    console.error('❌ ERROR CRÍTICO DE CONFIGURACIÓN: MP_WEBHOOK_SECRET no está configurado y no se ha activado BYPASS_WEBHOOK_SIGNATURE.');
     return res.status(500).json({ error: 'Error interno de configuración de seguridad.' });
   }
 
-  try {
-    // Extraer ts (timestamp) y v1 (hash) del header x-signature
-    const signatureParts = signatureHeader.split(',');
-    let ts = '';
-    let v1 = '';
-    
-    for (const part of signatureParts) {
-      const [key, value] = part.split('=');
-      if (key.trim() === 'ts') ts = value.trim();
-      if (key.trim() === 'v1') v1 = value.trim();
+  if (webhookSecret) {
+    try {
+      // Extraer ts (timestamp) y v1 (hash) del header x-signature
+      const signatureParts = signatureHeader.split(',');
+      let ts = '';
+      let v1 = '';
+      
+      for (const part of signatureParts) {
+        const [key, value] = part.split('=');
+        if (key.trim() === 'ts') ts = value.trim();
+        if (key.trim() === 'v1') v1 = value.trim();
+      }
+
+      if (!ts || !v1) {
+        return res.status(403).json({ error: 'Firma de webhook malformada.' });
+      }
+
+      // Mitigación de Replay Attacks: Validar antigüedad de ts
+      const timestampMs = parseInt(ts, 10) * 1000;
+      const currentServerTimeMs = Date.now();
+      const MAX_ALLOWED_DRIFT_MS = 5 * 60 * 1000; // 5 minutos
+
+      if (Math.abs(currentServerTimeMs - timestampMs) > MAX_ALLOWED_DRIFT_MS) {
+        console.warn(`❌ [Webhook MP] Replay Attack detectado o timestamp expirado. Diferencia: ${Math.abs(currentServerTimeMs - timestampMs)}ms`);
+        return res.status(403).json({ error: 'Petición expirada (Timestamp fuera de límite).' });
+      }
+
+      // Recrear la plantilla según la documentación de Mercado Pago
+      const dataId = req.body.data && req.body.data.id ? req.body.data.id : '';
+      const manifest = `id:${dataId};request-id:${requestIdHeader};ts:${ts};`;
+
+      // Calcular el hash HMAC SHA256
+      const hmac = crypto.createHmac('sha256', webhookSecret);
+      hmac.update(manifest);
+      const computedSignature = hmac.digest('hex');
+
+      // Comparar el hash recibido con el calculado
+      if (computedSignature !== v1) {
+        console.error('❌ [Webhook MP] Firma inválida. Posible intento de ataque (Spoofing).');
+        return res.status(403).json({ error: 'Firma inválida.' });
+      }
+    } catch (err) {
+      console.error('Error al validar la firma del webhook:', err);
+      return res.status(500).json({ error: 'Error interno en validación de webhook.' });
     }
-
-    if (!ts || !v1) {
-      return res.status(403).json({ error: 'Firma de webhook malformada.' });
-    }
-
-    // Mitigación de Replay Attacks: Validar antigüedad de ts
-    const timestampMs = parseInt(ts, 10) * 1000;
-    const currentServerTimeMs = Date.now();
-    const MAX_ALLOWED_DRIFT_MS = 5 * 60 * 1000; // 5 minutos
-
-    if (Math.abs(currentServerTimeMs - timestampMs) > MAX_ALLOWED_DRIFT_MS) {
-      console.warn(`❌ [Webhook MP] Replay Attack detectado o timestamp expirado. Diferencia: ${Math.abs(currentServerTimeMs - timestampMs)}ms`);
-      return res.status(403).json({ error: 'Petición expirada (Timestamp fuera de límite).' });
-    }
-
-    // Recrear la plantilla según la documentación de Mercado Pago
-    const dataId = req.body.data && req.body.data.id ? req.body.data.id : '';
-    const manifest = `id:${dataId};request-id:${requestIdHeader};ts:${ts};`;
-
-    // Calcular el hash HMAC SHA256
-    const hmac = crypto.createHmac('sha256', webhookSecret);
-    hmac.update(manifest);
-    const computedSignature = hmac.digest('hex');
-
-    // Comparar el hash recibido con el calculado
-    if (computedSignature !== v1) {
-      console.error('❌ [Webhook MP] Firma inválida. Posible intento de ataque (Spoofing).');
-      return res.status(403).json({ error: 'Firma inválida.' });
-    }
-  } catch (err) {
-    console.error('Error al validar la firma del webhook:', err);
-    return res.status(500).json({ error: 'Error interno en validación de webhook.' });
+  } else {
+    console.warn('⚠️ Webhook recibido sin validación de firmas (MP_WEBHOOK_SECRET ausente, BYPASS_WEBHOOK_SIGNATURE activado).');
   }
 
   // Respondemos inmediatamente con 200 OK a Mercado Pago para evitar reintentos duplicados por demora

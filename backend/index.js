@@ -30,19 +30,21 @@ const PORT = process.env.PORT || 5000;
 // Middlewares globales
 // Configuración estricta de CORS
 const allowedOrigins = [
+  'http://localhost:3000',      // Local
+  'http://localhost:5173',      // Local Vite
   process.env.FRONTEND_URL      // URL de Producción (Vercel)
 ].filter(Boolean); // Filtra los undefined si FRONTEND_URL no está en el .env
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Permite peticiones del origen configurado y subdominios dinámicos de Vercel
+    // Permite peticiones sin origin (como herramientas de testeo local o curl) y orígenes permitidos
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
       callback(new Error('CORS Policy: Acceso denegado.'));
     }
   },
-  credentials: true // Permite envío de cookies/tokens
+  credentials: true // Permite envío de cookies/tokens si fuera necesario
 }));
 
 app.use(helmet()); // Añade cabeceras HTTP de seguridad
