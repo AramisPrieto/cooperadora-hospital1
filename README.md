@@ -82,11 +82,17 @@ Ambas respuestas se ensamblan en un único objeto JSON unificado que se envía a
 ## 🚀 Instrucciones para Levantar el Proyecto Localmente
 
 ### 📋 Prerrequisitos
-Tener instalado en su sistema local:
+Tener instalado y configurado en su sistema local:
 * **Node.js** (v18 o superior)
 * **pnpm** (v8 o superior)
-* Una instancia activa de **PostgreSQL** o **MySQL**.
-* Una instancia activa de **MongoDB**.
+* Una instancia activa de **PostgreSQL** o **MySQL** (o mediante Docker).
+* Una instancia activa de **MongoDB** (o mediante Docker).
+* **ngrok (Recomendado para Pruebas Locales):**
+  - **Instalación:** En macOS usa `brew install ngrok`. En Windows descarga el .exe desde su web oficial.
+  - **Autenticación (Vital):** Debes crear una cuenta gratuita en [ngrok.com](https://ngrok.com) y ejecutar en tu terminal: `ngrok config add-authtoken <TU_TOKEN>`. Esto evita límites de tiempo e interrupciones en el túnel.
+  - **Límites de Uso (Overages):** Las cuentas gratuitas de ngrok tienen cuotas de transferencia mensual. Si superas el límite, ngrok bloqueará el tráfico y el terminal te pedirá habilitar los sobrecargos ("enable overages"). Si esto ocurre, es recomendable crearte otra cuenta gratuita o simplemente desinstalar ngrok temporalmente para que el sistema use el fallback a Pinggy.
+  - **Advertencia de Sitio No Seguro (Browser Warning):** Al entrar a un enlace de ngrok gratuito, la primera vez verás una página de advertencia de abuso (ngrok browser warning). Debes hacer clic en **"Visit Site"** para que ngrok permita el paso continuo de las peticiones hacia el localhost.
+* **Pinggy (Fallback Automático):** Si no tienes `ngrok` instalado o lo quitas del PATH, nuestro script (`start-dev-with-tunnel.js`) abrirá automáticamente un túnel SSH gratuito con Pinggy. *Nota: Los túneles gratuitos de Pinggy expiran a los 60 minutos, momento tras el cual deberás reiniciar el servidor backend para obtener una nueva URL.*
 
 ---
 
@@ -108,11 +114,16 @@ Tener instalado en su sistema local:
    * `MONGODB_URI`: URI de conexión a su MongoDB (ej: `mongodb://localhost:27017/cooperadora_nosql`).
    * `JWT_SECRET`: Llave secreta para firmar tokens (usar una cadena aleatoria larga en producción).
    * `PORT`: Puerto del servidor backend. **Debe ser `5001`** para que el proxy de Vite funcione correctamente.
-5. Iniciar el servidor backend en modo desarrollo (nodemon):
-   ```bash
-   pnpm dev
-   ```
-   *El servidor compilará y sincronizará automáticamente las tablas relacionales de SQL y escuchará en el puerto 5001 (`http://localhost:5001`).*
+5. Iniciar el servidor backend en modo desarrollo:
+   * **Modo desarrollo local simple (sin Webhooks externos):**
+     ```bash
+     pnpm dev
+     ```
+   * **Modo automatizado con túnel (Recomendado para probar Mercado Pago):**
+     ```bash
+     pnpm dev:tunnel
+     ```
+     *Este comando iniciará ngrok en segundo plano, obtendrá la URL pública del túnel y actualizará la variable `BACKEND_TUNNEL_URL` en tu archivo `.env` automáticamente. Si no tienes ngrok, iniciará un túnel SSH con Pinggy de forma transparente.*
 
 ---
 
@@ -161,6 +172,62 @@ VALUES ('admin@cooperadora.org', '$2a$10$...hash...', 'admin');
 ```
 
 > **Nota:** Para generar el `password_hash` se puede usar un script Node.js con `bcryptjs` o una herramienta online de bcrypt. Nunca almacenar contraseñas en texto plano.
+
+---
+
+## 💳 Pruebas de Integración con Mercado Pago y Túneles Locales
+
+Para verificar de forma interactiva y real el flujo de cobros de cuotas de socios (suscripciones) y aportes a obras (donaciones únicas) sin usar dinero real, el proyecto cuenta con un sistema de túneles dinámicos (Ngrok/Pinggy) y un proxy de retorno seguro.
+
+### 🔐 Por qué usamos Túneles y Proxies de Retorno
+1. **Webhooks Locales:** Mercado Pago necesita enviar notificaciones POST cuando un pago se aprueba. Como tu servidor local (`localhost`) no es accesible desde internet, el script `pnpm dev:tunnel` crea una URL pública (`https://....ngrok-free.app`) y la envía a MP para que los webhooks lleguen a tu máquina.
+2. **Proxy de Retorno Seguro (Bypass HTTP):** Mercado Pago exige estrictamente que las URLs de retorno (`back_urls`) usen HTTPS. Como el frontend de desarrollo corre en `http://localhost:3000`, configuramos el backend para recibir los retornos de MP en el túnel HTTPS y hacer una redirección interna (HTTP 302) de vuelta a tu frontend local sin violar las políticas de seguridad de MP.
+
+### 🔑 Cuentas de Prueba (Sandbox)
+Es vital distinguir entre la cuenta para iniciar sesión en tu portal local, y la cuenta para pagar dentro de Mercado Pago:
+
+*   **Cuenta del Portal Local (El Socio):**
+    *   *Email:* `test_user_7385770550601504283@testuser.com`
+    *   *Contraseña:* `socio123`
+    *   *(Esta cuenta ya viene generada al correr `node seed.js`)*
+*   **Cuenta de Mercado Pago (El Comprador Sandbox):** Cuando seas redirigido al checkout de MP, debes iniciar sesión con esta cuenta ficticia para simular el pago:
+    *   *Usuario:* `TESTUSER7385770550601504283`
+    *   *Contraseña:* `5ZPkJK3MJX`
+*   **Cuenta del Vendedor (Interna):**
+    *   *Usuario:* `TESTUSER6351276384387938890` (Generó el `MP_ACCESS_TOKEN` del `.env`)
+
+---
+
+### 📖 Tutorial de Pruebas Paso a Paso
+
+#### Paso A: Configurar el Túnel y Ejecutar la App
+1.  Asegúrate de tener tus bases de datos activas (`docker-compose up -d`).
+2.  En una terminal, ve a la carpeta `backend` e inicia la aplicación con el túnel automatizado:
+    ```bash
+    pnpm dev:tunnel
+    ```
+    *El script detectará automáticamente si tienes `ngrok` instalado. Si no lo tienes, iniciará un túnel SSH gratuito con Pinggy de forma transparente. Observa la consola, verás un mensaje verde indicando la URL pública del Webhook.*
+3.  En otra terminal, ve a la carpeta `frontend` e inicia la aplicación React:
+    ```bash
+    pnpm dev
+    ```
+    *Abre la aplicación en tu navegador en [http://localhost:3000](http://localhost:3000).*
+
+#### Paso B: Probar Suscripción de Socio (Débito Automático)
+1.  Inicia sesión en el portal web local con el usuario: `test_user_7385770550601504283@testuser.com` / `socio123`.
+2.  Dirígete a tu panel de socio haciendo clic en **"Mi Panel"** y luego ve a la pestaña **"Mis Cuotas"**.
+3.  En "Medio de Pago Preferido", haz clic en el botón **"Débito MP"**.
+4.  Ingresa un monto para tu suscripción mensual (mínimo $1000) y haz clic en **"Adherirme a Débito Automático"**.
+5.  Serás redirigido a la pasarela de Mercado Pago. Allí, inicia sesión con la cuenta Sandbox del Comprador (`TESTUSER7385770550601504283` / `5ZPkJK3MJX`).
+6.  Selecciona una tarjeta de crédito de prueba (puedes usar cualquier código de seguridad, ej. 123) y aprueba la suscripción.
+7.  El proxy te devolverá a `http://localhost:3000/mi-panel`. En la consola del backend verás llegar el Webhook `preapproval`, confirmando la adhesión.
+
+#### Paso C: Probar Donaciones Únicas (Preferences)
+1.  En la Home, dirígete a las campañas activas y haz clic en **"Donar / Ver Detalles"**.
+2.  Selecciona el método de pago **"Mercado Pago"**, ingresa un monto mayor a 0 y haz clic en **"Donar con Mercado Pago"**.
+3.  Al ser redirigido a MP, nuevamente inicia sesión con el Comprador Sandbox y paga con una tarjeta de prueba.
+4.  Serás retornado automáticamente a la Home local mostrando una alerta verde de éxito.
+5.  El Webhook de tipo `payment` llegará al backend, la donación se registrará y el monto de la campaña subirá en tiempo real.
 
 ---
 
@@ -306,13 +373,23 @@ git checkout -b develop
 
 ### Versión 1.8.0 — Control de Método de Pago y Donaciones con Mercado Pago (Grupo Cooperadora)
 - **Control de Cambios de Método de Pago**:
-  - Adición de las columnas `cant_cambios_metodo_pago` y `mes_ultimo_cambio_metodo_pago` en [PerfilSocio.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PerfilSocio.js).
-  - Implementación de validaciones a nivel de backend en [socioController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioController.js) para limitar las actualizaciones de método de pago a un máximo de 3 por mes para los socios. Los administradores están exentos de esta restricción.
-  - Inclusión de diálogos de confirmación del navegador (`window.confirm`) en el panel de socios de [SocioPanel.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/SocioPanel.jsx) antes de actualizar el medio de pago, capturando y desplegando adecuadamente los errores de validación HTTP 400.
+  - Adición de las columnas `cant_cambios_metodo_pago` y `mes_ultimo_cambio_metodo_pago` en `PerfilSocio.js`.
+  - Implementación de validaciones a nivel de backend en `socioController.js` para limitar las actualizaciones de método de pago a un máximo de 3 por mes para los socios. Los administradores están exentos de esta restricción.
+  - Inclusión de diálogos de confirmación del navegador (`window.confirm`) en el panel de socios de `SocioPanel.jsx` antes de actualizar el medio de pago, capturando y desplegando adecuadamente los errores de validación HTTP 400.
 - **Donaciones en Línea para Campañas**:
-  - Integración del botón y pestaña de pago online con **Mercado Pago** en el modal de detalles de campañas en [Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx), incluyendo redirecciones seguras y alertas globales de éxito o fallo (`donation_success`/`donation_failure`).
-  - Creación del endpoint `POST /api/donaciones/campanas/:id/donar-mp` y su correspondiente controlador en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para generar preferencias de pago seguro.
-  - Ampliación del webhook de Mercado Pago en [socioSubscriptionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioSubscriptionController.js) para detectar transacciones con formato de referencia externa `donation_u{userId}_c{campanaId}`, registrar aportes confirmados, actualizar de forma segura y concurrente el monto acumulado de la campaña con bloqueo de fila (`LOCK.UPDATE`), y despachar correos electrónicos SMTP de agradecimiento.
+  - Integración del botón y pestaña de pago online con **Mercado Pago** en el modal de detalles de campañas en `Home.jsx`, incluyendo redirecciones seguras y alertas globales de éxito o fallo (`donation_success`/`donation_failure`).
+  - Creación del endpoint `POST /api/donaciones/campanas/:id/donar-mp` y su correspondiente controlador en `donacionController.js` para generar preferencias de pago seguro.
+  - Ampliación del webhook de Mercado Pago en `socioSubscriptionController.js` para detectar transacciones con formato de referencia externa `donation_u{userId}_c{campanaId}`, registrar aportes confirmados, actualizar de forma segura y concurrente el monto acumulado de la campaña con bloqueo de fila (`LOCK.UPDATE`), y despachar correos electrónicos SMTP de agradecimiento.
 - **Robustez de Entorno y Pruebas**:
-  - Incorporación de 6 nuevas pruebas de integración automatizadas en las suites [socio.test.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/socio.test.js) and [donacion.test.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/donacion.test.js), elevando a 79 el total de casos exitosos.
-  - Configuración de la directiva `server.allowedHosts: true` en [vite.config.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/vite.config.js) para facilitar el testeo remoto y compatibilidad con túneles HTTPS de desarrollo.
+  - Incorporación de 6 nuevas pruebas de integración automatizadas en las suites `socio.test.js` and `donacion.test.js`, elevando a 79 el total de casos exitosos.
+  - Configuración de la directiva `server.allowedHosts: true` en `vite.config.js` para facilitar el testeo remoto y compatibilidad con túneles HTTPS de desarrollo.
+
+### Versión 1.9.0 — Túneles Dinámicos y Proxy de Retorno Seguro para Mercado Pago (Aramis Prieto)
+- **Automatización de Túneles Locales**:
+  - Creación del script avanzado de inicialización `start-dev-with-tunnel.js` para levantar ngrok o túneles SSH de Pinggy de manera dinámica.
+  - Auto-inyección de la variable de entorno `BACKEND_TUNNEL_URL` en ejecución para habilitar el enrutamiento bidireccional instantáneo de Webhooks en local.
+- **Bypass de Restricciones HTTPS (Return Proxy)**:
+  - Implementación de controladores públicos (`handleMpRedirect` y `handleSocioMpRedirect`) que actúan como pasarelas de retorno HTTP 302 seguras.
+  - Esto soluciona de raíz el error 400 Bad Request devuelto por las APIs de Preferences y PreApproval de MP, las cuales rechazan estrictamente cualquier URL de retorno que comience con `http://` (como los entornos `localhost`). El flujo ahora dirige al usuario al túnel `https://` y este lo rebota limpiamente a su navegador local reteniendo los parámetros de estado de pago.
+- **Configuración de Semillas (Seed)**:
+  - Actualización del usuario semilla de pruebas a `test_user_7385770550601504283@testuser.com` para alinear el ecosistema local y la base de datos de PostgreSQL con el Sandbox del usuario Comprador asignado en Mercado Pago.
