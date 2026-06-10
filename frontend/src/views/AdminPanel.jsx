@@ -335,7 +335,7 @@ const AdminPanel = () => {
     setErrorMsg(''); setSuccessMsg('');
     const payload = {
       titulo: newsTitulo, cuerpo_html: newsCuerpoHtml,
-      tags: newsTags ? newsTags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      tags: newsTags ? newsTags.split(',').map(t => t.trim().replace(/#/g, '')).filter(Boolean) : [],
       fecha: newsFecha || undefined,
     };
     try {
@@ -1039,7 +1039,7 @@ const AdminPanel = () => {
                             {new Date(n.fecha).toLocaleDateString('es-AR')}
                           </span>
                           {n.tags?.map((tag, i) => (
-                            <span key={i} className="badge badge-teal">#{tag}</span>
+                            <span key={i} className="badge badge-teal">{tag}</span>
                           ))}
                         </div>
                       </div>
