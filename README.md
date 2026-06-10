@@ -477,4 +477,19 @@ git checkout -b develop
   - Inclusión de 5 campañas con diversos estados financieros y 4 noticias con testimonios e imágenes reales.
   - Ampliación del padrón con 6 socios de prueba interactivos (activos y pendientes) y generación del usuario Sandbox oficial de Mercado Pago para ensayos financieros.
 
+### Versión 1.13.0 — Refactorización, Optimización de Caché y Estabilidad en Pruebas (Antigravity & Aramis Prieto)
+- **Limpieza de Archivos de Bloqueo Redundantes**:
+  - Eliminación completa de `package-lock.json` en frontend y backend para delegar de forma exclusiva la gestión de dependencias a `pnpm` y prevenir inconsistencias de dependencias.
+- **Optimización de Serialización en Caché (Mashup)**:
+  - Conversión a objeto plano de los detalles NoSQL mediante `.toObject()` en el controlador de campañas antes de estructurar el JSON. Esto previene errores en tiempo de ejecución (`TypeError`) al intentar clonar estructuras complejas de Mongoose en la caché.
+- **Robustez en Transacciones y Rollbacks**:
+  - Corrección de la doble llamada a `transaction.rollback()` en el servicio de registro al rechazar DNI duplicados, garantizando códigos de respuesta HTTP 400 y eliminando falsos positivos de errores internos 500.
+- **Estabilidad de la Suite de Tests**:
+  - Actualización de los tests de autenticación para comprobar la inyección del token JWT en cabeceras a través de cookies `HttpOnly` (`set-cookie`) en lugar de buscar la propiedad en el cuerpo de la respuesta JSON.
+  - Sincronización de credenciales de prueba con las directivas de contraseñas robustas (mayúsculas y números obligatorios).
+  - Inclusión de 2 nuevos tests en `auth.test.js` para validar el rechazo de contraseñas que violan el formato seguro (sin mayúsculas o sin números).
+  - Integración de `BYPASS_WEBHOOK_SIGNATURE` para posibilitar flujos de pruebas de webhook locales sin requerir firmas válidas de producción.
+- **Remoción de Importaciones Inactivas**:
+  - Limpieza de importaciones inactivas de `donationLimiter` y `validateDonation` en las rutas de campañas.
+
 
