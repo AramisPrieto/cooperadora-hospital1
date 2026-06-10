@@ -304,6 +304,15 @@ git checkout -b develop
 - **Pruebas de Integración y Verificación**:
   - Creación de la suite de pruebas [socioSubscription.test.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/socioSubscription.test.js) que verifica la creación de suscripciones, cancelación, declaraciones manuales y callbacks asíncronos del webhook.
 
-
-
-
+### Versión 1.8.0 — Control de Método de Pago y Donaciones con Mercado Pago (Grupo Cooperadora)
+- **Control de Cambios de Método de Pago**:
+  - Adición de las columnas `cant_cambios_metodo_pago` y `mes_ultimo_cambio_metodo_pago` en [PerfilSocio.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PerfilSocio.js).
+  - Implementación de validaciones a nivel de backend en [socioController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioController.js) para limitar las actualizaciones de método de pago a un máximo de 3 por mes para los socios. Los administradores están exentos de esta restricción.
+  - Inclusión de diálogos de confirmación del navegador (`window.confirm`) en el panel de socios de [SocioPanel.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/SocioPanel.jsx) antes de actualizar el medio de pago, capturando y desplegando adecuadamente los errores de validación HTTP 400.
+- **Donaciones en Línea para Campañas**:
+  - Integración del botón y pestaña de pago online con **Mercado Pago** en el modal de detalles de campañas en [Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx), incluyendo redirecciones seguras y alertas globales de éxito o fallo (`donation_success`/`donation_failure`).
+  - Creación del endpoint `POST /api/donaciones/campanas/:id/donar-mp` y su correspondiente controlador en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para generar preferencias de pago seguro.
+  - Ampliación del webhook de Mercado Pago en [socioSubscriptionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioSubscriptionController.js) para detectar transacciones con formato de referencia externa `donation_u{userId}_c{campanaId}`, registrar aportes confirmados, actualizar de forma segura y concurrente el monto acumulado de la campaña con bloqueo de fila (`LOCK.UPDATE`), y despachar correos electrónicos SMTP de agradecimiento.
+- **Robustez de Entorno y Pruebas**:
+  - Incorporación de 6 nuevas pruebas de integración automatizadas en las suites [socio.test.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/socio.test.js) and [donacion.test.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/donacion.test.js), elevando a 79 el total de casos exitosos.
+  - Configuración de la directiva `server.allowedHosts: true` en [vite.config.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/vite.config.js) para facilitar el testeo remoto y compatibilidad con túneles HTTPS de desarrollo.

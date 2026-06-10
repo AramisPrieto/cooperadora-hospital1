@@ -2,6 +2,7 @@
 import { DonacionTransferencia, CampanaEco, Usuario } from '../models/index.js';
 import sequelize from '../config/db.js';
 import { enviarMailAgradecimiento } from '../services/emailService.js';
+import { crearPreferenciaDonacion } from '../services/mpService.js';
 
 // 1. Declarar una transferencia bancaria (Socio)
 export const declararTransferencia = async (req, res) => {
@@ -211,5 +212,54 @@ export const getMyDonaciones = async (req, res) => {
   } catch (error) {
     console.error('Error al obtener donaciones del socio:', error);
     return res.status(500).json({ error: 'Error interno al listar las donaciones del socio.' });
+  }
+};
+
+// 6. Iniciar donación con Mercado Pago (Socio)
+export const crearDonacionMercadoPago = async (req, res) => {
+  const { id: campanaId } = req.params;
+  const { monto } = req.body;
+  const usuarioId = req.user.id;
+
+  if (!monto || isNaN(monto) || parseFloat(monto) <= 0) {
+    return res.status(400).json({ error: 'Por favor, ingrese un monto válido mayor a 0.' });
+  }
+
+  try {
+    // Validar existencia de la campaña
+    const campana = await CampanaEco.findByPk(campanaId);
+    if (!campana) {
+      return res.status(404).json({ error: 'La campaña especificada no existe.' });
+    }
+
+    if (!campana.activo) {
+      return res.status(400).json({ error: 'No se pueden realizar donaciones a campañas inactivas.' });
+    }
+
+    // Validar si la campaña ya alcanzó su objetivo
+    if (parseFloat(campana.monto_actual) >= parseFloat(campana.monto_objetivo)) {
+      return res.status(400).json({ error: 'La campaña ya ha alcanzado su objetivo de recaudación.' });
+    }
+
+    // Validar que el monto no exceda el restante
+    const restante = parseFloat(campana.monto_objetivo) - parseFloat(campana.monto_actual);
+    if (parseFloat(monto) > restante) {
+      return res.status(400).json({ 
+        error: `El monto donado supera el límite restante de la campaña. El saldo máximo a donar es $${restante.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.` 
+      });
+    }
+
+    // Crear preferencia en Mercado Pago
+    const preference = await crearPreferenciaDonacion({
+      campanaTitulo: campana.titulo,
+      monto: parseFloat(monto),
+      campanaId: parseInt(campanaId),
+      usuarioId
+    });
+
+    return res.json(preference);
+  } catch (error) {
+    console.error('Error al iniciar donación Mercado Pago:', error);
+    return res.status(500).json({ error: 'Error interno al iniciar el pago con Mercado Pago.' });
   }
 };

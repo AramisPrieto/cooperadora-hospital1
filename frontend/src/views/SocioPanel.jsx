@@ -94,23 +94,39 @@ const SocioPanel = () => {
     try {
       // 1. Obtener perfil
       const profileRes = await api.get('/socios/mi-perfil');
-      setProfile(profileRes.data);
-      setDniInput(profileRes.data.dni.toString());
-      setTelInput(profileRes.data.telefono || '');
-      setDirInput(profileRes.data.direccion || '');
-      setLocInput(profileRes.data.localidad || '');
+      const profileData = profileRes.data;
+      setProfile(profileData);
+      setDniInput(profileData && profileData.dni ? profileData.dni.toString() : '');
+      setTelInput(profileData && profileData.telefono ? profileData.telefono : '');
+      setDirInput(profileData && profileData.direccion ? profileData.direccion : '');
+      setLocInput(profileData && profileData.localidad ? profileData.localidad : '');
 
       // 2. Obtener cuotas periódicas (compañeros)
-      const cuotasRes = await api.get('/socios/mi-perfil/cuotas');
-      setCuotas(cuotasRes.data.cuotas || []);
+      try {
+        const cuotasRes = await api.get('/socios/mi-perfil/cuotas');
+        setCuotas(cuotasRes.data.cuotas || []);
+      } catch (cuotaErr) {
+        console.error('Error al cargar cuotas:', cuotaErr);
+        setCuotas([]);
+      }
 
       // 3. Obtener donaciones a campañas
-      const donacionesRes = await api.get('/donaciones/mis-donaciones');
-      setDonaciones(donacionesRes.data || []);
+      try {
+        const donacionesRes = await api.get('/donaciones/mis-donaciones');
+        setDonaciones(donacionesRes.data || []);
+      } catch (donacionErr) {
+        console.error('Error al cargar donaciones:', donacionErr);
+        setDonaciones([]);
+      }
 
       // 4. Obtener pagos/transacciones de cuotas (locales)
-      const paymentsRes = await api.get('/socios/mi-perfil/pagos');
-      setPayments(paymentsRes.data || []);
+      try {
+        const paymentsRes = await api.get('/socios/mi-perfil/pagos');
+        setPayments(paymentsRes.data || []);
+      } catch (paymentErr) {
+        console.error('Error al cargar pagos:', paymentErr);
+        setPayments([]);
+      }
     } catch (err) {
       console.error(err);
       if (err.response?.status === 404) {
@@ -231,6 +247,11 @@ const SocioPanel = () => {
 
   // Cambiar método de pago preferido
   const changeMethodTo = async (newMethod) => {
+    const confirmChange = window.confirm(`¿Estás seguro de que deseas cambiar tu método de pago preferido a ${
+      newMethod === 'debito' ? 'Débito Automático Mercado Pago' : newMethod === 'transferencia' ? 'Transferencia (CBU/Alias)' : 'Cobrador a Domicilio'
+    }?`);
+    if (!confirmChange) return;
+
     setErrorMsg('');
     setSuccessMsg('');
     try {
@@ -239,17 +260,22 @@ const SocioPanel = () => {
       setSuccessMsg(`Método de pago cambiado a ${newMethod.toUpperCase()} con éxito.`);
     } catch (err) {
       console.error(err);
-      setErrorMsg('Error al cambiar el método de pago.');
+      setErrorMsg(err.response?.data?.error || 'Error al cambiar el método de pago.');
     }
   };
 
   // Métricas rápidas en cabecera
-  const totalDonado = donaciones
+  const totalDonado = (donaciones || [])
     .filter(d => d.estado === 'aprobada')
     .reduce((acc, curr) => acc + parseFloat(curr.monto), 0);
 
-  const cuotasPagas = cuotas.filter(c => c.estado === 'pagado').length;
-  const cuotasPendientes = cuotas.filter(c => c.estado === 'pendiente').length;
+  // Filtrar cuotas para sólo procesar cuotas periódicas emitidas reales
+  const periodicCuotas = (cuotas || []).filter(c => c.mes !== null && c.mes !== undefined && c.anio !== null && c.anio !== undefined);
+  const cuotasPagas = periodicCuotas.filter(c => c.estado === 'pagado').length;
+  const cuotasPendientes = periodicCuotas.filter(c => c.estado === 'pendiente').length;
+
+  // Filtrar transacciones para sólo mostrar pagos reales (excluyendo facturas/cuotas impagas sin procesar)
+  const actualPayments = (payments || []).filter(p => p.fecha_pago !== null || p.metodo_pago !== null);
 
   if (loading && !profile) {
     return (
@@ -291,25 +317,27 @@ const SocioPanel = () => {
           </div>
 
           {/* Selector de Pestañas */}
-          <div className="flex gap-1 border-t border-slate-100 pt-4">
-            {TABS.map(tab => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 ${
-                    activeTab === tab.id
-                      ? 'bg-brand-50 text-brand-700 shadow-sm border border-brand-100'
-                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+          {profile && (
+            <div className="flex gap-1 border-t border-slate-100 pt-4">
+              {TABS.map(tab => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 ${
+                      activeTab === tab.id
+                        ? 'bg-brand-50 text-brand-700 shadow-sm border border-brand-100'
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -337,10 +365,23 @@ const SocioPanel = () => {
           <div className="flex justify-center py-20">
             <div className="h-10 w-10 border-4 border-slate-200 border-t-brand-500 rounded-full animate-spin" />
           </div>
+        ) : !profile ? (
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-4 max-w-xl mx-auto shadow-sm animate-fade-up">
+            <div className="h-16 w-16 bg-slate-50 border border-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
+              <User className="h-8 w-8" />
+            </div>
+            <h2 className="text-xl font-display font-black text-slate-800">Perfil de Socio no Asignado</h2>
+            <p className="text-slate-500 text-xs leading-relaxed max-w-md mx-auto">
+              Tu cuenta de usuario <span className="font-bold text-slate-700">{user?.email}</span> aún no tiene un perfil de socio asociado en el Libro de Registro de la Cooperadora.
+            </p>
+            <p className="text-slate-400 text-[11px] leading-relaxed max-w-md mx-auto">
+              Si acabás de registrarte, por favor aguardá a que un administrador valide y vincule tu perfil, o ponete en contacto con la administración.
+            </p>
+          </div>
         ) : (
           <>
             {/* ══════════════ TAB: RESUMEN / MI PERFIL ══════════════ */}
-            {activeTab === 'resumen' && profile && (
+            {activeTab === 'resumen' && (
               <div className="grid md:grid-cols-3 gap-6 animate-fade-up">
                 
                 {/* Card de Información del Socio */}
@@ -417,7 +458,10 @@ const SocioPanel = () => {
                       <div>
                         <p className="text-[9px] text-slate-400 font-black uppercase tracking-wider leading-none">Fecha de Alta</p>
                         <p className="text-slate-800 font-semibold mt-1">
-                          {new Date(profile.fecha_alta).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                          {profile?.fecha_alta
+                            ? new Date(profile.fecha_alta).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })
+                            : '—'
+                          }
                         </p>
                       </div>
                     </div>
@@ -550,10 +594,10 @@ const SocioPanel = () => {
                       type="submit"
                       disabled={
                         submittingDniContact ||
-                        (dniInput === profile.dni.toString() &&
-                         telInput === (profile.telefono || '') &&
-                         dirInput === (profile.direccion || '') &&
-                         locInput === (profile.localidad || ''))
+                        (dniInput === (profile?.dni ? profile.dni.toString() : '') &&
+                         telInput === (profile?.telefono || '') &&
+                         dirInput === (profile?.direccion || '') &&
+                         locInput === (profile?.localidad || ''))
                       }
                       className="btn-brand w-full py-3 text-xs uppercase tracking-wider shadow-sm disabled:opacity-50"
                     >
@@ -587,7 +631,7 @@ const SocioPanel = () => {
                       </div>
                     </div>
 
-                    {cuotas.length === 0 ? (
+                    {periodicCuotas.length === 0 ? (
                       <div className="text-center py-12">
                         <CreditCard className="h-10 w-10 text-slate-200 mx-auto mb-3" />
                         <p className="text-slate-400 text-sm font-semibold">No se encontraron registros de cuotas emitidas.</p>
@@ -604,8 +648,8 @@ const SocioPanel = () => {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
-                            {cuotas.map(cuota => {
-                              const fechaObj = new Date(2026, cuota.mes - 1, 1);
+                            {periodicCuotas.map(cuota => {
+                              const fechaObj = new Date(cuota.anio, cuota.mes - 1, 1);
                               const periodoStr = fechaObj.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
                               return (
                                 <tr key={cuota.id} className="hover:bg-slate-50/50 transition-colors">
@@ -653,7 +697,7 @@ const SocioPanel = () => {
                       <p className="text-xs text-slate-500 mt-1">Registro y estado de cada pago declarado o procesado de forma automática.</p>
                     </div>
 
-                    {payments.length === 0 ? (
+                    {actualPayments.length === 0 ? (
                       <div className="text-center py-8 text-slate-400">
                         <Banknote className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                         <p className="text-xs font-semibold">No se registran transacciones de cuotas aún.</p>
@@ -671,16 +715,19 @@ const SocioPanel = () => {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
-                            {payments.map(pago => (
+                            {actualPayments.map(pago => (
                               <tr key={pago.id} className="hover:bg-slate-50/50 transition-colors">
                                 <td className="p-4">
-                                  {new Date(pago.fecha_pago).toLocaleDateString('es-AR', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}
+                                  {pago.fecha_pago
+                                    ? new Date(pago.fecha_pago).toLocaleDateString('es-AR', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })
+                                    : '—'
+                                  }
                                 </td>
                                 <td className="p-4 text-right font-black text-slate-800">
                                   ${parseFloat(pago.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}

@@ -1,9 +1,43 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { initTestDatabase, resetTestDatabase, closeTestConnections } from './helpers/setup.js';
 import app from '../index.js';
 import { Usuario, CampanaEco, DonacionTransferencia } from '../models/index.js';
+
+let mockDonationExternalRef = 'donation_u1_c1';
+
+vi.mock('../services/mpService.js', () => {
+  return {
+    crearPreferenciaDonacion: vi.fn().mockImplementation(({ campanaTitulo, monto, campanaId, usuarioId }) => {
+      mockDonationExternalRef = `donation_u${usuarioId}_c${campanaId}`;
+      return Promise.resolve({
+        id: 'pref_test_12345',
+        initPoint: 'https://sandbox.mercadopago.com.ar/test-checkout-donation',
+        sandboxInitPoint: 'https://sandbox.mercadopago.com.ar/test-checkout-donation'
+      });
+    })
+  };
+});
+
+vi.mock('mercadopago', async () => {
+  const actual = await vi.importActual('mercadopago');
+  return {
+    ...actual,
+    MercadoPagoConfig: class {},
+    Payment: class {
+      get() {
+        return Promise.resolve({
+          id: 77778888,
+          status: 'approved',
+          transaction_amount: 1500,
+          external_reference: mockDonationExternalRef,
+          date_approved: '2026-06-09T18:00:00.000Z'
+        });
+      }
+    }
+  };
+});
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
@@ -219,6 +253,48 @@ describe('Rutas de Donaciones y Transferencias (/api/donaciones)', () => {
 
       const dbCampana = await CampanaEco.findByPk(testCampana.id);
       expect(parseFloat(dbCampana.monto_actual)).toBe(2000.00);
+    });
+  });
+
+  describe('Donación con Mercado Pago y Webhook', () => {
+    it('debe crear una preferencia de pago en Mercado Pago exitosamente', async () => {
+      const res = await request(app)
+        .post(`/api/donaciones/campanas/${testCampana.id}/donar-mp`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({ monto: 1500 });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('id', 'pref_test_12345');
+      expect(res.body).toHaveProperty('initPoint', 'https://sandbox.mercadopago.com.ar/test-checkout-donation');
+    });
+
+    it('debe registrar la donación e incrementar el monto de la campaña al recibir la notificación del webhook', async () => {
+      // Registrar que la donación actual es de socioUser en testCampana
+      mockDonationExternalRef = `donation_u${socioUser.id}_c${testCampana.id}`;
+
+      const res = await request(app)
+        .post('/api/webhooks/mercadopago')
+        .send({
+          type: 'payment',
+          data: { id: 77778888 }
+        });
+
+      expect(res.status).toBe(200);
+
+      // Esperar brevemente para que termine de procesar el async background webhook
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // La donación debe haberse registrado en base de datos
+      const dbDonacion = await DonacionTransferencia.findOne({
+        where: { numero_comprobante: '77778888' }
+      });
+      expect(dbDonacion).not.toBeNull();
+      expect(dbDonacion.estado).toBe('aprobada');
+      expect(parseFloat(dbDonacion.monto)).toBe(1500);
+
+      // El acumulado de la campaña debe haberse incrementado por $1500 (2000 + 1500 = 3500)
+      const dbCampana = await CampanaEco.findByPk(testCampana.id);
+      expect(parseFloat(dbCampana.monto_actual)).toBe(3500.00);
     });
   });
 });

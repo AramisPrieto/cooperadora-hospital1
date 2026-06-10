@@ -1,5 +1,7 @@
-import { PerfilSocio, PagoCuota, Usuario } from '../models/index.js';
+import { PerfilSocio, PagoCuota, Usuario, DonacionTransferencia, CampanaEco } from '../models/index.js';
 import { crearSuscripcionSocio, cancelarSuscripcionSocio, obtenerSuscripcion } from '../services/mpService.js';
+import sequelize from '../config/db.js';
+import { enviarMailAgradecimiento } from '../services/emailService.js';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
 
 // Inicializar SDK para obtener detalles de pago
@@ -223,17 +225,87 @@ export const webhookMercadoPago = async (req, res) => {
       console.log(`✅ [Webhook MP] Estado de suscripción del socio #${socioId} actualizado a "${subDetails.status}".`);
     }
 
-    // CASO B: Recaudación de un pago recurrente exitoso (Payment)
+    // CASO B: Recaudación de un pago recurrente exitoso o donación única (Payment)
     if (type === 'payment') {
       const paymentInstance = getMpPaymentInstance();
       const paymentDetails = await paymentInstance.get({ id: data.id });
 
-      const socioId = paymentDetails.external_reference;
-      if (!socioId) {
+      const extRef = paymentDetails.external_reference;
+      if (!extRef) {
         console.log(`ℹ️ [Webhook MP] Pago ${data.id} no posee external_reference (no pertenece al flujo de socios o es una donación).`);
         return;
       }
 
+      // SUB-CASO B1: Donación a Campaña
+      if (extRef.startsWith('donation_')) {
+        const parts = extRef.split('_'); // ['donation', 'u2', 'c1']
+        const usuarioId = parseInt(parts[1].substring(1)); // Extract 2 from 'u2'
+        const campanaId = parseInt(parts[2].substring(1)); // Extract 1 from 'c1'
+
+        if (paymentDetails.status === 'approved') {
+          const transaction = await sequelize.transaction();
+          try {
+            // Verificar si la donación ya fue registrada anteriormente
+            const donacionExistente = await DonacionTransferencia.findOne({
+              where: { numero_comprobante: data.id.toString() }
+            });
+            if (donacionExistente) {
+              console.log(`ℹ [Webhook MP] La donación ${data.id} ya se encuentra registrada.`);
+              await transaction.rollback();
+              return;
+            }
+
+            const campana = await CampanaEco.findByPk(campanaId, { transaction, lock: transaction.LOCK.UPDATE });
+            if (!campana) {
+              console.warn(`⚠️ [Webhook MP] Campaña con ID ${campanaId} no encontrada para registrar donación.`);
+              await transaction.rollback();
+              return;
+            }
+
+            const usuario = await Usuario.findByPk(usuarioId, { transaction });
+            if (!usuario) {
+              console.warn(`⚠️ [Webhook MP] Usuario con ID ${usuarioId} no encontrado para registrar donación.`);
+              await transaction.rollback();
+              return;
+            }
+
+            // Registrar donación en SQL
+            await DonacionTransferencia.create({
+              usuario_id: usuarioId,
+              campana_id: campanaId,
+              monto: paymentDetails.transaction_amount,
+              estado: 'aprobada',
+              numero_comprobante: data.id.toString(),
+              comprobante_url: '' // Mercado Pago payment
+            }, { transaction });
+
+            // Actualizar monto recaudado
+            campana.monto_actual = parseFloat(campana.monto_actual) + parseFloat(paymentDetails.transaction_amount);
+            await campana.save({ transaction });
+
+            await transaction.commit();
+
+            console.log(`✅ [Webhook MP] Donación de $${paymentDetails.transaction_amount} para campaña #${campanaId} registrada con éxito.`);
+
+            // Enviar mail agradecimiento de forma asincrónica
+            enviarMailAgradecimiento({
+              email: usuario.email,
+              monto: paymentDetails.transaction_amount,
+              campanaTitulo: campana.titulo
+            }).catch(err => {
+              console.error('Error al enviar email de agradecimiento por donación MP:', err);
+            });
+
+          } catch (err) {
+            await transaction.rollback();
+            console.error('Error al procesar la donación en la transacción del webhook:', err);
+          }
+        }
+        return;
+      }
+
+      // SUB-CASO B2: Pago de cuota de socio
+      const socioId = extRef;
       if (paymentDetails.status === 'approved') {
         const socio = await PerfilSocio.findByPk(socioId);
         if (!socio) {

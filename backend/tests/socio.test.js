@@ -209,6 +209,93 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty('error');
     });
+
+    it('debe permitir a un socio cambiar su método de pago hasta 3 veces en el mes actual', async () => {
+      // 1er cambio
+      let res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({ metodo_pago: 'debito' });
+      expect(res.status).toBe(200);
+      expect(res.body.socio.metodo_pago).toBe('debito');
+      expect(res.body.socio.cant_cambios_metodo_pago).toBe(1);
+
+      // 2do cambio
+      res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({ metodo_pago: 'transferencia' });
+      expect(res.status).toBe(200);
+      expect(res.body.socio.metodo_pago).toBe('transferencia');
+      expect(res.body.socio.cant_cambios_metodo_pago).toBe(2);
+
+      // 3er cambio
+      res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({ metodo_pago: 'cobrador' });
+      expect(res.status).toBe(200);
+      expect(res.body.socio.metodo_pago).toBe('cobrador');
+      expect(res.body.socio.cant_cambios_metodo_pago).toBe(3);
+    });
+
+    it('debe denegar (status 400) cuando un socio intenta cambiar su método de pago por 4ta vez en el mes actual', async () => {
+      // Forzar contador a 3 en el mes actual
+      const currentMonth = new Date().toISOString().substring(0, 7);
+      await socioPerfil.update({
+        cant_cambios_metodo_pago: 3,
+        mes_ultimo_cambio_metodo_pago: currentMonth,
+        metodo_pago: 'debito'
+      });
+
+      const res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({ metodo_pago: 'transferencia' });
+
+      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('error', 'No podés cambiar tu método de pago más de 3 veces en el mismo mes.');
+    });
+
+    it('debe permitir a un administrador cambiar el método de pago de un socio sin límites', async () => {
+      const currentMonth = new Date().toISOString().substring(0, 7);
+      await socioPerfil.update({
+        cant_cambios_metodo_pago: 3,
+        mes_ultimo_cambio_metodo_pago: currentMonth,
+        metodo_pago: 'debito'
+      });
+
+      const res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ metodo_pago: 'transferencia' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.socio.metodo_pago).toBe('transferencia');
+      // No debería incrementar para el admin
+      expect(res.body.socio.cant_cambios_metodo_pago).toBe(3);
+    });
+
+    it('debe reiniciar el contador si el mes cambia', async () => {
+      // Simular que el último cambio fue en el mes pasado
+      const pastMonth = '2025-05';
+      await socioPerfil.update({
+        cant_cambios_metodo_pago: 3,
+        mes_ultimo_cambio_metodo_pago: pastMonth,
+        metodo_pago: 'debito'
+      });
+
+      const res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({ metodo_pago: 'transferencia' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.socio.metodo_pago).toBe('transferencia');
+      expect(res.body.socio.cant_cambios_metodo_pago).toBe(1);
+      const currentMonth = new Date().toISOString().substring(0, 7);
+      expect(res.body.socio.mes_ultimo_cambio_metodo_pago).toBe(currentMonth);
+    });
   });
 
   describe('Rutas exclusivas de Administrador', () => {

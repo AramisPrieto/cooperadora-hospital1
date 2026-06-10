@@ -221,7 +221,21 @@ export const updateSocio = async (req, res) => {
     if (telefono !== undefined) socio.telefono = telefono.trim();
     if (fecha_nacimiento !== undefined) socio.fecha_nacimiento = fecha_nacimiento;
     if (genero !== undefined) socio.genero = genero;
-    if (metodo_pago !== undefined) socio.metodo_pago = metodo_pago;
+    if (metodo_pago !== undefined && metodo_pago !== socio.metodo_pago) {
+      if (req.user.rol !== 'admin') {
+        const currentMonth = new Date().toISOString().substring(0, 7); // YYYY-MM
+        if (socio.mes_ultimo_cambio_metodo_pago === currentMonth) {
+          if (socio.cant_cambios_metodo_pago >= 3) {
+            return res.status(400).json({ error: 'No podés cambiar tu método de pago más de 3 veces en el mismo mes.' });
+          }
+          socio.cant_cambios_metodo_pago += 1;
+        } else {
+          socio.mes_ultimo_cambio_metodo_pago = currentMonth;
+          socio.cant_cambios_metodo_pago = 1;
+        }
+      }
+      socio.metodo_pago = metodo_pago;
+    }
     if (fecha_ultimo_pago !== undefined) socio.fecha_ultimo_pago = fecha_ultimo_pago;
     if (localidad !== undefined) socio.localidad = localidad.trim();
     if (observaciones !== undefined) socio.observaciones = observaciones;
