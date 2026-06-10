@@ -26,7 +26,7 @@ const Navbar = () => {
       }
     };
     fetchSession();
-  }, []);
+  }, [location.pathname]);
 
   useEffect(() => {
     const onScroll = () => {
