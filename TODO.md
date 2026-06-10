@@ -11,6 +11,7 @@
 - [ ] Minimo de donacion (Kevin)
 - [ ] Armar panel de socio hecho en el wireframe
 - [ ] ver mails que habia echo kevo dejarlos andando
+- [ ] revisar scrols
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 ## ✅ Terminado
