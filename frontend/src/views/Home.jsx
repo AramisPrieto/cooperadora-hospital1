@@ -325,26 +325,7 @@ const Home = () => {
                 Desde la Cooperadora del Hospital Municipal <strong className="text-slate-800">«Dr. Emilio Ferreyra»</strong> canalizamos la buena voluntad de la comunidad de Necochea y Quequén para equipar y mejorar nuestra salud pública.
               </p>
 
-              {/* CTA buttons */}
-              <div className="flex flex-wrap gap-4 animate-fade-up-delay-3">
-                <button
-                  onClick={handleHeroAssociate}
-                  className="btn-brand px-7 py-4 text-sm"
-                >
-                  <Users className="h-4 w-4" />
-                  {user
-                    ? (user?.rol === 'admin' ? 'Ir al Panel Admin' : 'Ver Estado de Socio')
-                    : 'Quiero Asociarme'}
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => scrollTo('noticias-section')}
-                  className="btn-accent px-7 py-4 text-sm"
-                >
-                  <Newspaper className="h-4 w-4" />
-                  Ver Noticias
-                </button>
-              </div>
+
             </div>
 
             {/* Right: Featured campaign card */}
@@ -440,17 +421,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════
-          2. STATS STRIP
-      ════════════════════════════════════════ */}
-      <section className="bg-white border-b border-slate-100 py-10 px-4">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatItem value="+70 años" label="Al servicio de la comunidad" icon={Heart} color="bg-brand-600" />
-          <StatItem value="100%" label="Transparencia en cada aporte" icon={TrendingUp} color="bg-emerald-600" />
-          <StatItem value="2" label="Campañas activas" icon={Target} color="bg-slate-800" />
-          <StatItem value="Necochea" label="Hospital Emilio Ferreyra" icon={FileText} color="bg-sky-600" />
-        </div>
-      </section>
+
 
       {/* ════════════════════════════════════════
           3. CAMPAIGNS SECTION
