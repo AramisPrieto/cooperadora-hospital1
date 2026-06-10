@@ -6,8 +6,14 @@ const createAdmin = async () => {
   try {
     await connectSQL();
 
-    const email = 'admin@cooperadora.org';
-    const password = 'admin123';
+    const email = process.env.ADMIN_EMAIL || 'admin@cooperadora.org';
+    const password = process.env.ADMIN_PASSWORD;
+
+    if (!password) {
+      console.error('❌ Error: Debes definir la variable de entorno ADMIN_PASSWORD para poder registrar un usuario administrativo.');
+      process.exit(1);
+    }
+
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
@@ -21,8 +27,8 @@ const createAdmin = async () => {
     });
 
     console.log('✅ Admin creado exitosamente:');
-    console.log('   Email:    admin@cooperadora.org');
-    console.log('   Password: admin123');
+    console.log(`   Email:    ${email}`);
+    console.log('   Password: [CONFIGURED IN ENVIRONMENT]');
     console.log('   ID:       ', user.id);
     process.exit(0);
   } catch (err) {

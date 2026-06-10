@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Target, TrendingUp, Calendar, ArrowRight, Clock } from 'lucide-react';
 
 /* Paleta de gradientes para el header de la card */
@@ -100,6 +101,7 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
 
           <button
             onClick={() => onClickDetail(id)}
+            aria-label={`Ver más detalles sobre la campaña: ${titulo}`}
             className="flex items-center gap-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 hover:text-brand-800 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border border-brand-200/50 hover:border-brand-300 transition-all duration-200 group/btn"
           >
             Ver más
@@ -109,6 +111,17 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
       </div>
     </div>
   );
+};
+
+CampaignCard.propTypes = {
+  campaign: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    titulo: PropTypes.string.isRequired,
+    monto_objetivo: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    monto_actual: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+    fecha_limite: PropTypes.string
+  }).isRequired,
+  onClickDetail: PropTypes.func.isRequired
 };
 
 export default CampaignCard;

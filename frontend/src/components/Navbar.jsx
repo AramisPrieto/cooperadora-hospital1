@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, LogOut, User, Menu, X, Heart } from 'lucide-react';
+import { useLenis } from 'lenis/react';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -245,14 +246,25 @@ const MobileNavLink = ({ to, active, onClick, children }) => (
 const ScrollLink = ({ to, active, children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const lenis = useLenis();
 
   const handleScroll = (e) => {
     e.preventDefault();
     if (location.pathname !== '/') {
       navigate('/');
-      setTimeout(() => document.getElementById(to)?.scrollIntoView({ behavior: 'smooth' }), 300);
+      setTimeout(() => {
+        const el = document.getElementById(to);
+        if (el) {
+          if (lenis) lenis.scrollTo(el, { offset: -80, duration: 1.4 });
+          else el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
     } else {
-      document.getElementById(to)?.scrollIntoView({ behavior: 'smooth' });
+      const el = document.getElementById(to);
+      if (el) {
+        if (lenis) lenis.scrollTo(el, { offset: -80, duration: 1.4 });
+        else el.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
@@ -268,15 +280,26 @@ const ScrollLink = ({ to, active, children }) => {
 const MobileScrollLink = ({ to, active, setMobileOpen, children }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const lenis = useLenis();
 
   const handleScroll = (e) => {
     e.preventDefault();
     setMobileOpen(false);
     if (location.pathname !== '/') {
       navigate('/');
-      setTimeout(() => document.getElementById(to)?.scrollIntoView({ behavior: 'smooth' }), 300);
+      setTimeout(() => {
+        const el = document.getElementById(to);
+        if (el) {
+          if (lenis) lenis.scrollTo(el, { offset: -80, duration: 1.4 });
+          else el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
     } else {
-      document.getElementById(to)?.scrollIntoView({ behavior: 'smooth' });
+      const el = document.getElementById(to);
+      if (el) {
+        if (lenis) lenis.scrollTo(el, { offset: -80, duration: 1.4 });
+        else el.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 

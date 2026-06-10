@@ -2,7 +2,7 @@ import NoticiaActualidad from '../models/NoticiaActualidad.js';
 
 // Obtener todas las noticias (Público)
 export const getAllNoticias = async (req, res) => {
-  const { search } = req.query; // Soporta filtro de búsqueda
+  const { search, limit = 10, page = 1 } = req.query; // Soporta filtro de búsqueda y paginación
   try {
     let query = {};
     if (search) {
@@ -14,7 +14,14 @@ export const getAllNoticias = async (req, res) => {
         ]
       };
     }
-    const noticias = await NoticiaActualidad.find(query).sort({ fecha: -1 });
+    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = parseInt(page, 10);
+
+    const noticias = await NoticiaActualidad.find(query)
+      .sort({ fecha: -1 })
+      .limit(parsedLimit)
+      .skip((parsedPage - 1) * parsedLimit);
+
     return res.json(noticias);
   } catch (error) {
     console.error('Error al obtener noticias:', error);

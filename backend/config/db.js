@@ -10,16 +10,32 @@ if (!dbUrl) {
   process.exit(1);
 }
 
+const sslOptions = () => {
+  if (process.env.NODE_ENV !== 'production' && !dbUrl.includes('render.com')) {
+    return false;
+  }
+  if (process.env.DB_CA_CERT) {
+    return {
+      require: true,
+      rejectUnauthorized: true,
+      ca: [process.env.DB_CA_CERT]
+    };
+  }
+  console.warn('⚠️ Advertencia: Conectando a la DB con cifrado SSL pero sin validación de firmas de certificados (rejectUnauthorized: false).');
+  return {
+    require: true,
+    rejectUnauthorized: false
+  };
+};
+
 // Inicializar Sequelize con la URL provista
 const sequelize = new Sequelize(dbUrl, {
   dialectOptions: {
-    ssl: (process.env.NODE_ENV === 'production' || dbUrl.includes('render.com')) ? {
-      require: true,
-      rejectUnauthorized: false
-    } : false
+    ssl: sslOptions()
   },
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
 });
+
 
 export const connectSQL = async () => {
   try {

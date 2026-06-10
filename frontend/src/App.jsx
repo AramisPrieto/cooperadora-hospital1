@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ReactLenis } from 'lenis/react'; // TEAM_001: Wrapper oficial para React
 
 import Navbar from './components/Navbar';
-import Home from './views/Home';
-import Login from './views/Login';
-import AdminPanel from './views/AdminPanel';
-import SocioPanel from './views/SocioPanel';
 import { Heart } from 'lucide-react';
+
+const Home = lazy(() => import('./views/Home'));
+const Login = lazy(() => import('./views/Login'));
+const AdminPanel = lazy(() => import('./views/AdminPanel'));
+const SocioPanel = lazy(() => import('./views/SocioPanel'));
 
 /* Protección de ruta admin */
 const ProtectedRoute = ({ children }) => {
@@ -26,6 +27,16 @@ const SocioProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login?expired=true';
+    };
+    window.addEventListener('auth-expired', handleAuthExpired);
+    return () => window.removeEventListener('auth-expired', handleAuthExpired);
+  }, []);
+
   return (
     <ReactLenis root>
       <Router>
@@ -33,27 +44,33 @@ function App() {
           <Navbar />
 
           <main className="flex-grow flex flex-col">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute>
-                    <AdminPanel />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/mi-panel"
-                element={
-                  <SocioProtectedRoute>
-                    <SocioPanel />
-                  </SocioProtectedRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <Suspense fallback={
+              <div className="flex items-center justify-center min-h-[50vh]">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-600"></div>
+              </div>
+            }>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminPanel />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/mi-panel"
+                  element={
+                    <SocioProtectedRoute>
+                      <SocioPanel />
+                    </SocioProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
           </main>
 
           {/* ── Footer ── */}

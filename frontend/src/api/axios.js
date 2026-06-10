@@ -26,12 +26,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Si el servidor indica token inválido o expirado, limpiar y redirigir
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
       // Evitar bucle infinito si ya está en login
       if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login?expired=true';
+        window.dispatchEvent(new Event('auth-expired'));
       }
     }
     return Promise.reject(error);

@@ -2,10 +2,15 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Usuario, PerfilSocio } from '../models/index.js';
 import dotenv from 'dotenv';
+import sequelize from '../config/db.js';
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('FATAL ERROR: JWT_SECRET is not defined in environment variables.');
+}
+
 
 // Registro de nuevos usuarios
 export const register = async (req, res) => {
@@ -48,28 +53,29 @@ export const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
-    // Crear el usuario — rol siempre 'socio', los admins se crean desde la base de datos
-    const user = await Usuario.create({
-      email,
-      password_hash,
-      rol: 'socio'
-    });
-
+    // Crear el usuario y perfil dentro de una transacción transaccional
+    let user;
     let perfil = null;
-    // Crear automáticamente el perfil de socio
-    {
-      // Validar DNI único
-      const existingDni = await PerfilSocio.findOne({ where: { dni } });
+    const transaction = await sequelize.transaction();
+
+    try {
+      user = await Usuario.create({
+        email,
+        password_hash,
+        rol: 'socio'
+      }, { transaction });
+
+      // Validar DNI único dentro de la transacción
+      const existingDni = await PerfilSocio.findOne({ where: { dni }, transaction });
       if (existingDni) {
-        // Borrar el usuario creado para mantener integridad
-        await user.destroy();
+        await transaction.rollback();
         return res.status(400).json({ error: 'El DNI provisto ya está registrado para otro socio.' });
       }
 
       perfil = await PerfilSocio.create({
         usuario_id_fk: user.id,
         dni,
-        estado: 'pendiente', // Por defecto ingresa como pendiente de aprobación física
+        estado: 'pendiente',
         nombre,
         apellido,
         direccion,
@@ -81,8 +87,14 @@ export const register = async (req, res) => {
         fecha_ultimo_pago,
         localidad,
         observaciones
-      });
+      }, { transaction });
+
+      await transaction.commit();
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
     }
+
 
     // Generar token JWT
     const token = jwt.sign(

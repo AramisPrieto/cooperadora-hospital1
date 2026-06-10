@@ -21,7 +21,7 @@ async function run() {
     user.email = newEmail.trim();
     await user.save();
     console.log(`\n✅ Email del socio de prueba actualizado exitosamente a: ${newEmail}`);
-    console.log(`👉 Ahora puedes iniciar sesión con ese email y la misma contraseña ("socio123") para probar.`);
+    console.log(`👉 Ahora puedes iniciar sesión con ese email y la misma contraseña ("SocioCoop2026!") para probar.`);
     process.exit(0);
   } catch (err) {
     console.error('❌ Error al actualizar el email:', err);

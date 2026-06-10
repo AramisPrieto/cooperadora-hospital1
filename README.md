@@ -430,3 +430,22 @@ git checkout -b develop
   - Bloqueo por contraseña de acceso directo en el punto de entrada de React (`main.jsx`) para mantener la confidencialidad de la plataforma durante las pruebas en equipo.
   - El proyecto está ahora preparado para ser hosteado bajo la arquitectura Serverless gratuita: **MongoDB Atlas** (Base de datos), **Render.com** (Node.js API) y **Vercel** (Frontend estático React).
 
+### Versión 1.11.0 — Parches de Seguridad Críticos, Optimización y Accesibilidad (Aramis Prieto)
+- **Seguridad Crítica (Fail-Closed en Webhooks)**:
+  - Modificación de la verificación de firmas criptográficas de Mercado Pago en [socioSubscriptionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioSubscriptionController.js) para forzar un esquema fail-closed. El servidor ahora detiene el procesamiento en producción si falta la variable de entorno `MP_WEBHOOK_SECRET`.
+- **Prevención de Replay Attacks**:
+  - Implementación de validación de antigüedad de timestamp (`ts`) en las firmas de webhook de Mercado Pago, rechazando peticiones que excedan una tolerancia horaria de 5 minutos.
+- **Transaccionalidad en Inserción de Campañas y Registro**:
+  - Envolvimos la creación en PostgreSQL y MongoDB dentro de transacciones Sequelize en [campanaController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/campanaController.js) y [authController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/authController.js). Si ocurre un fallo en MongoDB o perfiles, la transacción se deshace (`rollback`) previniendo datos huérfanos.
+- **Rendimiento y Code Splitting**:
+  - Aplicación de importación perezosa (`React.lazy` y `<Suspense>`) en [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx) para los paneles de administración y socio, disminuyendo significativamente la carga del bundle JavaScript inicial.
+  - Implementación de paginación (`limit` y `page`) en los listados de noticias y campañas para evitar sobrecarga en la base de datos y la red.
+- **Eliminación de Adaptadores Redundantes**:
+  - Desinstalación completa de `mysql2` en el backend para aligerar las dependencias en producción.
+- **Robustez en Rutas Portables y Mensajes**:
+  - Corrección de la ruta absoluta local en [check-users.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/check-users.js) por resoluciones dinámicas portables con ESM path.
+  - Sincronización de log de contraseñas de desarrollo de `socio123` a `SocioCoop2026!` en [update-email.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/update-email.js) para evitar confusiones de desarrollo.
+- **Accesibilidad y SEO**:
+  - Adición de `aria-label` descriptivos en [CampaignCard.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/CampaignCard.jsx) y etiquetas meta Open Graph en [index.html](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/index.html).
+
+

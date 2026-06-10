@@ -192,13 +192,17 @@ export const webhookMercadoPago = async (req, res) => {
     return res.status(403).json({ error: 'Prohibido. Faltan headers de seguridad de MP.' });
   }
 
-  // 2. Validar la firma matemática (Solo en producción o si hay Secret configurado)
+  // 2. Validar la firma matemática (Obligatoria en producción para evitar Spoofing y Replay)
   const webhookSecret = process.env.MP_WEBHOOK_SECRET;
   
+  if (process.env.NODE_ENV === 'production' && !webhookSecret) {
+    console.error('❌ ERROR CRÍTICO DE CONFIGURACIÓN: MP_WEBHOOK_SECRET no está configurado en producción.');
+    return res.status(500).json({ error: 'Error interno de configuración de seguridad.' });
+  }
+
   if (webhookSecret) {
     try {
       // Extraer ts (timestamp) y v1 (hash) del header x-signature
-      // Formato: ts=1697040445,v1=9e8...
       const signatureParts = signatureHeader.split(',');
       let ts = '';
       let v1 = '';
@@ -213,8 +217,17 @@ export const webhookMercadoPago = async (req, res) => {
         return res.status(403).json({ error: 'Firma de webhook malformada.' });
       }
 
+      // Mitigación de Replay Attacks: Validar antigüedad de ts
+      const timestampMs = parseInt(ts, 10) * 1000;
+      const currentServerTimeMs = Date.now();
+      const MAX_ALLOWED_DRIFT_MS = 5 * 60 * 1000; // 5 minutos
+
+      if (Math.abs(currentServerTimeMs - timestampMs) > MAX_ALLOWED_DRIFT_MS) {
+        console.warn(`❌ [Webhook MP] Replay Attack detectado o timestamp expirado. Diferencia: ${Math.abs(currentServerTimeMs - timestampMs)}ms`);
+        return res.status(403).json({ error: 'Petición expirada (Timestamp fuera de límite).' });
+      }
+
       // Recrear la plantilla según la documentación de Mercado Pago
-      // manifest = "id;request-id;ts;"
       const dataId = req.body.data && req.body.data.id ? req.body.data.id : '';
       const manifest = `id:${dataId};request-id:${requestIdHeader};ts:${ts};`;
 
@@ -232,6 +245,8 @@ export const webhookMercadoPago = async (req, res) => {
       console.error('Error al validar la firma del webhook:', err);
       return res.status(500).json({ error: 'Error interno en validación de webhook.' });
     }
+  } else {
+    console.warn('⚠️ Webhook recibido sin validación de firmas (MP_WEBHOOK_SECRET ausente en desarrollo).');
   }
 
   // Respondemos inmediatamente con 200 OK a Mercado Pago para evitar reintentos duplicados por demora

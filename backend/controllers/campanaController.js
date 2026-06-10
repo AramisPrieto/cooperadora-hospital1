@@ -4,9 +4,15 @@ import sequelize from '../config/db.js';
 
 // 1. OBTENER TODAS LAS CAMPAÑAS (SQL Básicas - Públicas para Home)
 export const getAllCampanas = async (req, res) => {
+  const { limit = 10, page = 1 } = req.query;
   try {
+    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = parseInt(page, 10);
+
     const campanas = await CampanaEco.findAll({
-      where: { activo: true }
+      where: { activo: true },
+      limit: parsedLimit,
+      offset: (parsedPage - 1) * parsedLimit
     });
     return res.json(campanas);
   } catch (error) {
@@ -66,15 +72,17 @@ export const getCampanaById = async (req, res) => {
 export const createCampana = async (req, res) => {
   const { titulo, monto_objetivo, monto_actual, fecha_limite, es_campana_del_mes, testimonios, galeria_rica, obra_status } = req.body;
 
-  try {
-    // Validar montos económicos no negativos
-    if (monto_objetivo < 0 || (monto_actual && monto_actual < 0)) {
-      return res.status(400).json({ error: 'Los montos económicos no pueden ser negativos.' });
-    }
+  if (monto_objetivo < 0 || (monto_actual && monto_actual < 0)) {
+    return res.status(400).json({ error: 'Los montos económicos no pueden ser negativos.' });
+  }
 
-    // Si se establece como campaña del mes, desactivar las demás
+  // Iniciamos una transacción en SQL
+  const transaction = await sequelize.transaction();
+
+  try {
+    // Si se establece como campaña del mes, desactivar las demás dentro de la transacción
     if (es_campana_del_mes === true) {
-      await CampanaEco.update({ es_campana_del_mes: false }, { where: {} });
+      await CampanaEco.update({ es_campana_del_mes: false }, { where: {}, transaction });
     }
 
     // 1. Guardar progreso financiero en SQL (Transaccional)
@@ -85,27 +93,37 @@ export const createCampana = async (req, res) => {
       fecha_limite,
       activo: true,
       es_campana_del_mes: es_campana_del_mes || false
-    });
+    }, { transaction });
 
     // 2. Guardar detalles enriquecidos y multimedia en NoSQL (MongoDB)
-    const nosqlCampana = await CampanaDetalle.create({
-      campana_id_ref: sqlCampana.id,
-      testimonios: testimonios || [],
-      galeria_rica: galeria_rica || { videos: [], imagenes: [] },
-      obra_status: obra_status || 'Planeada'
-    });
+    try {
+      const nosqlCampana = await CampanaDetalle.create({
+        campana_id_ref: sqlCampana.id,
+        testimonios: testimonios || [],
+        galeria_rica: galeria_rica || { videos: [], imagenes: [] },
+        obra_status: obra_status || 'Planeada'
+      });
 
-    return res.status(201).json({
-      message: 'Campaña creada exitosamente en ambas bases de datos.',
-      campana: {
-        ...sqlCampana.toJSON(),
-        detalles: nosqlCampana
-      }
-    });
+      // Confirmar la transacción SQL una vez que MongoDB también se completó
+      await transaction.commit();
+
+      return res.status(201).json({
+        message: 'Campaña creada exitosamente en ambas bases de datos.',
+        campana: {
+          ...sqlCampana.toJSON(),
+          detalles: nosqlCampana
+        }
+      });
+    } catch (mongoError) {
+      console.error('Error al insertar en MongoDB. Revirtiendo transacción SQL:', mongoError);
+      throw new Error('Fallo al registrar detalles de la campaña en NoSQL (MongoDB).');
+    }
 
   } catch (error) {
+    // Revertir cambios en SQL ante cualquier error
+    await transaction.rollback();
     console.error('Error al crear campaña:', error);
-    return res.status(500).json({ error: 'Error interno del servidor al crear la campaña.' });
+    return res.status(500).json({ error: error.message || 'Error interno del servidor al crear la campaña.' });
   }
 };
 
