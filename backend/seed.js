@@ -28,8 +28,8 @@ const seed = async () => {
 
     // 0. Encriptar contraseñas
     const salt = await bcrypt.genSalt(10);
-    const adminPasswordHash = await bcrypt.hash('admin123', salt);
-    const socioPasswordHash = await bcrypt.hash('socio123', salt);
+    const adminPasswordHash = await bcrypt.hash('AdminCoop2026!', salt);
+    const socioPasswordHash = await bcrypt.hash('SocioCoop2026!', salt);
 
     // 1. Crear Admin
     const adminUser = await Usuario.create({
@@ -37,7 +37,7 @@ const seed = async () => {
       password_hash: adminPasswordHash,
       rol: 'admin'
     });
-    console.log('👤 Seeded Admin: admin@cooperadora.org / admin123');
+    console.log('👤 Seeded Admin: admin@cooperadora.org / AdminCoop2026!');
 
     // 2. Crear Socio de Prueba Oficial
     const userSocio = await Usuario.create({
@@ -62,7 +62,7 @@ const seed = async () => {
       localidad: 'Necochea',
       observaciones: 'Socio de prueba del sistema.'
     });
-    console.log(`👤 Seeded Socio Oficial: test_user_7385770550601504283@testuser.com / socio123 (Nro Asociado: #${perfilSocioDePrueba.numero_asociado})`);
+    console.log(`👤 Seeded Socio Oficial: test_user_7385770550601504283@testuser.com / SocioCoop2026! (Nro Asociado: #${perfilSocioDePrueba.numero_asociado})`);
 
     // 3. Crear otros 4 socios de relleno con datos completos
     // Juan (Activo)

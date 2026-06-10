@@ -175,21 +175,21 @@ VALUES ('admin@cooperadora.org', '$2a$10$...hash...', 'admin');
 
 ---
 
-## 💳 Pruebas de Integración con Mercado Pago y Túneles Locales
+## 🚀 Despliegue en la Nube (Arquitectura de Producción)
 
-Para verificar de forma interactiva y real el flujo de cobros de cuotas de socios (suscripciones) y aportes a obras (donaciones únicas) sin usar dinero real, el proyecto cuenta con un sistema de túneles dinámicos (Ngrok/Pinggy) y un proxy de retorno seguro.
+El proyecto está diseñado para ejecutarse en entornos Cloud Native modernos con la siguiente infraestructura:
 
-### 🔐 Por qué usamos Túneles y Proxies de Retorno
-1. **Webhooks Locales:** Mercado Pago necesita enviar notificaciones POST cuando un pago se aprueba. Como tu servidor local (`localhost`) no es accesible desde internet, el script `pnpm dev:tunnel` crea una URL pública (`https://....ngrok-free.app`) y la envía a MP para que los webhooks lleguen a tu máquina.
-2. **Proxy de Retorno Seguro (Bypass HTTP):** Mercado Pago exige estrictamente que las URLs de retorno (`back_urls`) usen HTTPS. Como el frontend de desarrollo corre en `http://localhost:3000`, configuramos el backend para recibir los retornos de MP en el túnel HTTPS y hacer una redirección interna (HTTP 302) de vuelta a tu frontend local sin violar las políticas de seguridad de MP.
+1. **Frontend (Vercel):** Hospedaje estático global ultrarrápido para la aplicación React (Vite).
+2. **Backend (Render):** Web Service de Node.js alojando la API REST de Express.
+3. **Base de Datos SQL (Render PostgreSQL):** Almacenamiento transaccional ACID seguro y protegido.
+4. **Base de Datos NoSQL (MongoDB Atlas):** Almacenamiento en la nube (AWS/GCP) para esquemas flexibles.
 
-### 🔑 Cuentas de Prueba (Sandbox)
-Es vital distinguir entre la cuenta para iniciar sesión en tu portal local, y la cuenta para pagar dentro de Mercado Pago:
+### 🌐 Webhooks de Mercado Pago (Producción)
+Con la arquitectura en la nube, **ya no se requiere el uso de túneles locales (Ngrok/Pinggy)**. El backend desplegado en Render proporciona una URL HTTPS nativa y permanente.
+Mercado Pago envía las notificaciones POST directamente a la URL de Render (ej: `https://[TU-APP].onrender.com/api/webhooks/mercadopago`), y los proxies de retorno (`back_urls`) redirigen transparentemente al frontend en Vercel.
 
-*   **Cuenta del Portal Local (El Socio):**
-    *   *Email:* `test_user_7385770550601504283@testuser.com`
-    *   *Contraseña:* `socio123`
-    *   *(Esta cuenta ya viene generada al correr `node seed.js`)*
+*   **Contraseña Global de Acceso (Staging/Nube):** `X9$mK2#vLq7@pW4n` *(Se solicita en un recuadro al abrir la web para evitar accesos públicos)*
+*(Nota: Las cuentas locales de prueba no han sido provistas en esta versión de producción hasta que se ejecute la inicialización de la base de datos).*
 *   **Cuenta de Mercado Pago (El Comprador Sandbox):** Cuando seas redirigido al checkout de MP, debes iniciar sesión con esta cuenta ficticia para simular el pago:
     *   *Usuario:* `TESTUSER7385770550601504283`
     *   *Contraseña:* `5ZPkJK3MJX`

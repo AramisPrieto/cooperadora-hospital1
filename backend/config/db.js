@@ -13,7 +13,7 @@ if (!dbUrl) {
 // Inicializar Sequelize con la URL provista
 const sequelize = new Sequelize(dbUrl, {
   dialectOptions: {
-    ssl: process.env.NODE_ENV === 'production' ? {
+    ssl: (process.env.NODE_ENV === 'production' || dbUrl.includes('render.com')) ? {
       require: true,
       rejectUnauthorized: false
     } : false
