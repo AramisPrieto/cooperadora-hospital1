@@ -459,5 +459,12 @@ git checkout -b develop
   - Creación de índices en [PerfilSocio.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PerfilSocio.js) y [PagoCuota.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PagoCuota.js) para optimizar búsquedas por clave y filtrado de periodos.
 - **Navegación e Interacción UX (Lenis)**:
   - Adición de `data-lenis-prevent` en el modal flotante de detalles de la campaña en [Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx) para solucionar fugas de desplazamiento.
+- **Configuración de Despliegue Cross-Origin (Vercel + Render)**:
+  - Configuración de la URL de la API en [axios.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/api/axios.js) de forma dinámica utilizando `VITE_API_URL` para evitar errores 404 en producción.
+  - Ajuste de cookies HttpOnly en [authController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/authController.js) en producción, cambiando a `sameSite: 'none'` y `secure: true` para habilitar la compartición de sesiones entre dominios cruzados.
+- **Resolución de Errores de Construcción (Vite/Rollup)**:
+  - Eliminación de la importación y validación de `prop-types` en [CampaignCard.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/CampaignCard.jsx), solucionando el error de resolución de módulos y permitiendo compilar el bundle estático en Vercel de forma exitosa.
+- **Optimización de Pintura y Rendimiento de Scroll**:
+  - Reemplazo del comportamiento `background-attachment: fixed` sobre el body en [index.css](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/index.css) por un pseudo-elemento fijo en el viewport. Esto elimina la rasterización repetitiva durante el desplazamiento y soluciona el lag visual al hacer scroll.
 
 
