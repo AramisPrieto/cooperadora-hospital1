@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Shield, LogOut, User, Menu, X, Heart } from 'lucide-react';
+import { Shield, LogOut, User, Menu, X, Heart, Target } from 'lucide-react';
 import { useLenis } from 'lenis/react';
 
 import api from '../api/axios';
@@ -115,7 +115,7 @@ const Navbar = () => {
             >
               Inicio
             </NavLink>
-            <ScrollLink to="campanas-section" active={activeSection === 'campanas-section'}>Campañas</ScrollLink>
+            <NavLink to="/campanas" active={location.pathname === '/campanas'}>Campañas</NavLink>
             <ScrollLink to="obras-section" active={activeSection === 'obras-section'}>Obras Concretadas</ScrollLink>
             <ScrollLink to="noticias-section" active={activeSection === 'noticias-section'}>Noticias</ScrollLink>
             {isAuthenticated && isAdmin && (
@@ -194,7 +194,7 @@ const Navbar = () => {
             >
               Inicio
             </MobileNavLink>
-            <MobileScrollLink to="campanas-section" active={activeSection === 'campanas-section'} setMobileOpen={setMobileOpen}>Campañas Activas</MobileScrollLink>
+            <MobileNavLink to="/campanas" active={location.pathname === '/campanas'} onClick={() => setMobileOpen(false)}>Campañas</MobileNavLink>
             <MobileScrollLink to="obras-section" active={activeSection === 'obras-section'} setMobileOpen={setMobileOpen}>Obras Concretadas</MobileScrollLink>
             <MobileScrollLink to="noticias-section" active={activeSection === 'noticias-section'} setMobileOpen={setMobileOpen}>Noticias</MobileScrollLink>
             {isAuthenticated && isAdmin && (

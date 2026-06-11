@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
+import FileUpload from '../components/FileUpload';
 import {
   User, Heart, CheckCircle, Clock, XCircle,
   CreditCard, Banknote, Calendar, ShieldAlert,
@@ -957,16 +958,11 @@ const SocioPanel = () => {
                             </div>
 
                             <div className="space-y-1">
-                              <label className="block text-[10px] text-slate-500 font-bold uppercase">
-                                URL de captura de comprobante
-                              </label>
-                              <input
-                                type="url"
+                              <FileUpload
+                                tipo="comprobante"
                                 value={transferReceiptUrl}
-                                onChange={(e) => setTransferReceiptUrl(e.target.value)}
-                                placeholder="https://imagencomprobante.com/pago.jpg"
-                                className="input-field py-2 text-xs"
-                                disabled={submittingTransfer}
+                                onChange={setTransferReceiptUrl}
+                                label="Comprobante de Transferencia"
                               />
                             </div>
                           </div>

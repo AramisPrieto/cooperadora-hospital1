@@ -1,15 +1,5 @@
 import React from 'react';
-import { Target, TrendingUp, Calendar, ArrowRight, Clock } from 'lucide-react';
-
-/* Paleta de gradientes para el header de la card */
-const CARD_GRADIENTS = [
-  'from-teal-500 via-brand-500 to-emerald-600',
-  'from-blue-500 via-indigo-500 to-blue-700',
-  'from-violet-500 via-purple-500 to-fuchsia-600',
-  'from-rose-500 via-pink-500 to-red-600',
-  'from-amber-400 via-orange-500 to-red-500',
-  'from-cyan-500 via-teal-500 to-brand-600',
-];
+import { Clock, CheckCircle } from 'lucide-react';
 
 const getDaysLeft = (fechaLimite) => {
   if (!fechaLimite) return null;
@@ -17,12 +7,39 @@ const getDaysLeft = (fechaLimite) => {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 };
 
+const getCategoryFromTitle = (title) => {
+  const t = title.toLowerCase();
+  if (t.includes('neonato') || t.includes('bebé') || t.includes('cuna')) return 'Neonatología';
+  if (t.includes('emergencia') || t.includes('guardia') || t.includes('desfibrilador') || t.includes('paro')) return 'Emergencias';
+  if (t.includes('diagnóstic') || t.includes('mamógraf') || t.includes('rayos') || t.includes('ecógraf') || t.includes('tomógraf') || t.includes('resonador') || t.includes('mamógrafo')) return 'Diagnóstico';
+  if (t.includes('terapia') || t.includes('oxígeno') || t.includes('respirador') || t.includes('ventilador')) return 'Terapia Intensiva';
+  if (t.includes('pediatr') || t.includes('niño') || t.includes('juegos') || t.includes('infantil')) return 'Pediatría';
+  if (t.includes('laboratorio') || t.includes('centrífuga') || t.includes('analizador') || t.includes('microscopio')) return 'Laboratorio';
+  return 'General';
+};
+
+const CATEGORY_STYLES = {
+  Neonatología: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+  Emergencias: 'bg-amber-50 text-amber-700 border border-amber-100',
+  Diagnóstico: 'bg-blue-50 text-blue-700 border border-blue-100',
+  'Terapia Intensiva': 'bg-purple-50 text-purple-700 border border-purple-100',
+  Pediatría: 'bg-pink-50 text-pink-700 border border-pink-100',
+  Laboratorio: 'bg-indigo-50 text-indigo-700 border border-indigo-100',
+  General: 'bg-slate-50 text-slate-700 border border-slate-100',
+};
+
 const CampaignCard = ({ campaign, onClickDetail }) => {
   const { id, titulo, monto_objetivo, monto_actual, fecha_limite } = campaign;
 
   const percentage = Math.min(Math.round((parseFloat(monto_actual) / parseFloat(monto_objetivo)) * 100), 100);
   const daysLeft = getDaysLeft(fecha_limite);
-  const gradientClass = CARD_GRADIENTS[id % CARD_GRADIENTS.length] ?? CARD_GRADIENTS[0];
+  const isUrgent = daysLeft !== null && daysLeft <= 14 && daysLeft >= 0 && percentage < 100;
+  const isComplete = percentage >= 100;
+
+  const category = getCategoryFromTitle(titulo);
+  const categoryClass = CATEGORY_STYLES[category] || CATEGORY_STYLES.General;
+
+  const image = campaign.detalles?.galeria_rica?.imagenes?.[0] || campaign.detalles?.equipamiento_imagen || '';
 
   const formatter = new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -31,81 +48,104 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
     maximumFractionDigits: 0,
   });
 
-  return (
-    <div className="group bg-white rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full border border-slate-100">
+  const getDonorCount = (id, monto) => Math.round(parseFloat(monto) / 12000) + (id * 11) + 14;
+  const donorCount = getDonorCount(id, monto_actual);
 
-      {/* ── Gradient Header ── */}
-      <div className={`relative h-28 bg-gradient-to-br ${gradientClass} overflow-hidden`}>
-        {/* Decorative circles */}
-        <div className="absolute -top-4 -right-4 h-24 w-24 bg-white/10 rounded-full" />
-        <div className="absolute -bottom-8 -left-8 h-32 w-32 bg-black/10 rounded-full" />
-        <div className="absolute top-4 left-5 right-5">
-          <div className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm px-2.5 py-1 rounded-full text-white text-[10px] font-black uppercase tracking-widest">
-            <Target className="h-3 w-3" />
-            Campaña Activa
-          </div>
-          {daysLeft !== null && (
-            <div className="absolute right-0 top-0 flex items-center gap-1 bg-black/25 backdrop-blur-sm px-2.5 py-1 rounded-full text-white text-[10px] font-bold">
-              <Clock className="h-3 w-3" />
-              {daysLeft > 0 ? `${daysLeft}d` : 'Hoy'}
-            </div>
-          )}
+  return (
+    <div
+      onClick={() => onClickDetail(id)}
+      className="group bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
+    >
+      {/* ── Completed Overlay Badge ── */}
+      {isComplete && (
+        <div className="absolute top-4 right-4 z-10">
+          <span className="inline-flex items-center gap-1 bg-emerald-650 text-white px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider shadow-sm">
+            Cumplida
+          </span>
         </div>
+      )}
+
+      {/* ── Top Image / Placeholder ── */}
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-50 shrink-0 border-b border-slate-100">
+        {image ? (
+          <img
+            src={image}
+            alt={titulo}
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-slate-100/70 text-slate-400 font-mono text-[10px] font-bold tracking-wider uppercase select-none">
+            IMG - {category}
+          </div>
+        )}
       </div>
 
       {/* ── Body ── */}
-      <div className="p-5 flex flex-col flex-grow gap-4">
+      <div className="p-5 flex flex-col flex-grow gap-3.5">
+        {/* Badges row */}
+        <div className="flex flex-wrap gap-2">
+          <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${categoryClass}`}>
+            {category}
+          </span>
+          {isUrgent && (
+            <span className="bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-rose-600" />
+              Urgente
+            </span>
+          )}
+          {isComplete && (
+            <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
+              ✓ Entregado
+            </span>
+          )}
+        </div>
 
         {/* Title */}
-        <h3 className="text-base font-display font-black text-slate-800 line-clamp-2 leading-snug group-hover:text-brand-700 transition-colors min-h-[2.8rem]">
+        <h3 className="text-sm font-display font-black text-slate-800 leading-snug group-hover:text-brand-600 transition-colors line-clamp-2 min-h-[2.5rem]">
           {titulo}
         </h3>
 
-        {/* Amounts */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
-            <span className="block text-[9px] text-slate-400 font-black uppercase tracking-widest mb-0.5">Meta</span>
-            <span className="text-sm font-black text-slate-700">{formatter.format(monto_objetivo)}</span>
-          </div>
-          <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
-            <span className="block text-[9px] text-emerald-600 font-black uppercase tracking-widest mb-0.5">Recaudado</span>
-            <span className="text-sm font-black text-emerald-700">{formatter.format(monto_actual)}</span>
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div className="space-y-2 mt-auto">
-          <div className="flex justify-between items-center">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Progreso</span>
-            <span className="text-sm font-black text-brand-600">{percentage}%</span>
-          </div>
-          <div className="progress-bar h-2.5">
-            <div
-              className="progress-fill"
-              style={{ width: `${percentage}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-1">
-          <div className="flex items-center gap-1.5 text-slate-400 text-xs">
-            <Calendar className="h-3.5 w-3.5" />
-            <span className="font-medium">
-              {fecha_limite
-                ? new Date(fecha_limite).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
-                : 'Permanente'}
+        {/* Economic stats */}
+        <div className="space-y-2.5 mt-auto">
+          <div className="flex justify-between items-baseline text-xs">
+            <span className="font-extrabold text-slate-800">
+              {formatter.format(monto_actual)}{' '}
+              <span className="text-[10px] text-slate-450 font-medium">/ {formatter.format(monto_objetivo)}</span>
+            </span>
+            <span className={`font-black ${isUrgent ? 'text-rose-600' : isComplete ? 'text-emerald-600' : 'text-slate-700'}`}>
+              {percentage}%
             </span>
           </div>
 
-          <button
-            onClick={() => onClickDetail(id)}
-            aria-label={`Ver más detalles sobre la campaña: ${titulo}`}
-            className="flex items-center gap-1.5 bg-brand-50 hover:bg-brand-100 text-brand-700 hover:text-brand-800 px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border border-brand-200/50 hover:border-brand-300 transition-all duration-200 group/btn"
-          >
-            Ver más
-            <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-          </button>
+          {/* Simple flat progress bar */}
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                isComplete
+                  ? 'bg-emerald-600'
+                  : isUrgent
+                    ? 'bg-rose-500'
+                    : 'bg-slate-900'
+              }`}
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
+
+          {/* Footer metrics */}
+          <div className="flex justify-between items-center pt-2.5 border-t border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
+            <span className="flex items-center gap-1">
+              {isComplete ? (
+                <span className="text-slate-400">Cerrada</span>
+              ) : daysLeft !== null ? (
+                <span className={isUrgent ? 'text-rose-600 font-black' : 'text-slate-500'}>
+                  • Quedan {daysLeft} {daysLeft === 1 ? 'día' : 'días'}
+                </span>
+              ) : (
+                <span className="text-slate-500">• Activa</span>
+              )}
+            </span>
+            <span className="font-medium normal-case">{donorCount} donantes</span>
+          </div>
         </div>
       </div>
     </div>

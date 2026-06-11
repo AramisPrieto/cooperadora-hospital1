@@ -18,6 +18,10 @@ const noticiaActualidadSchema = new mongoose.Schema({
     type: [String],
     default: []
   },
+  imagen_url: {
+    type: String,
+    default: ''
+  },
   fecha: {
     type: Date,
     default: Date.now

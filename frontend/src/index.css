@@ -82,7 +82,7 @@
     @apply w-full bg-slate-100 rounded-full overflow-hidden;
   }
   .progress-fill {
-    @apply bg-accent-500 rounded-full transition-all duration-1000 ease-out;
+    @apply bg-accent-500 rounded-full h-full transition-all duration-1000 ease-out;
   }
 }
 
@@ -109,5 +109,12 @@ html.lenis, html.lenis body {
 
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
+}
+
+/* ── ANIMACIONES ADICIONALES ── */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 

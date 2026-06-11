@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
-import { useLenis } from 'lenis/react'; // TEAM_001: Importamos el hook de Lenis
+import { useLenis } from 'lenis/react';
 import api from '../api/axios';
+import FileUpload from '../components/FileUpload';
 
 import CampaignCard from '../components/CampaignCard';
 import {
   Newspaper, Heart, Search, FileText, Users, Target,
   TrendingUp, ArrowRight, X, CheckCircle, AlertCircle,
-  ChevronRight, Banknote, Calendar, Sparkles, Copy, Check
+  ChevronRight, Banknote, Calendar, Sparkles, Copy, Check,
+  Flame, Trophy, SlidersHorizontal, Info
 } from 'lucide-react';
 
 
@@ -73,13 +75,19 @@ const Home = () => {
     else el.scrollIntoView({ behavior: 'smooth' });
   };
   const [campaigns, setCampaigns] = useState([]);
-
   const [news, setNews] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [selectedNews, setSelectedNews] = useState(null); // News detail modal state
   const [errorMsg, setErrorMsg] = useState('');
+
+  // States for campaign search and filters
+  const [campaignSearchInput, setCampaignSearchInput] = useState('');
+  const [campaignActiveSort, setCampaignActiveSort] = useState(null);
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false);
+  const campaignDebounceRef = useRef(null);
 
   const [donationMethod, setDonationMethod] = useState('transferencia');
   const [globalSuccessMsg, setGlobalSuccessMsg] = useState('');
@@ -96,32 +104,36 @@ const Home = () => {
 
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-  const handleViewCampaignDetail = async (id) => {
-    if (!user) {
-      navigate('/login?redirect=campana&id=' + id);
-      return;
-    }
-    try {
-      setErrorMsg('');
-      const res = await api.get(`/campanas/${id}`);
-      setSelectedCampaign(res.data);
-    } catch (err) {
-      console.error(err);
-      setErrorMsg('No se pudieron obtener los detalles enriquecidos de esta campaña.');
-    }
+  const handleViewCampaignDetail = (id) => {
+    navigate(`/campanas/${id}`);
   };
 
+  const fetchCampaigns = useCallback(async (search = '', sort = null) => {
+    setLoadingCampaigns(true);
+    try {
+      const params = new URLSearchParams({ all: 'true' });
+      if (search.trim()) params.set('search', search.trim());
+      if (sort) params.set('sort', sort);
+      const res = await api.get(`/campanas?${params.toString()}`);
+      setCampaigns(res.data);
+    } catch (err) {
+      console.error('Error cargando campañas:', err);
+    } finally {
+      setLoadingCampaigns(false);
+    }
+  }, []);
+
+  // Fetch campaign list with debounce
   useEffect(() => {
-    const fetchCampaigns = async () => {
-      try {
-        const res = await api.get('/campanas');
-        setCampaigns(res.data);
-      } catch (err) {
-        console.error('Error cargando campañas:', err);
-      } finally {
-        setLoadingCampaigns(false);
-      }
-    };
+    clearTimeout(campaignDebounceRef.current);
+    campaignDebounceRef.current = setTimeout(() => {
+      fetchCampaigns(campaignSearchInput, campaignActiveSort);
+    }, 350);
+    return () => clearTimeout(campaignDebounceRef.current);
+  }, [campaignSearchInput, campaignActiveSort, fetchCampaigns]);
+
+  // Fetch news list
+  useEffect(() => {
     const fetchNews = async () => {
       try {
         const res = await api.get('/noticias');
@@ -132,7 +144,6 @@ const Home = () => {
         setLoadingNews(false);
       }
     };
-    fetchCampaigns();
     fetchNews();
   }, []);
 
@@ -158,6 +169,24 @@ const Home = () => {
       setSearchParams(newParams, { replace: true });
     }
   }, [searchParams]);
+
+  // Lock scroll when a campaign or news detail modal is open
+  useEffect(() => {
+    if (!lenis) return;
+    if (selectedCampaign || selectedNews) {
+      lenis.stop();
+      document.body.style.overflow = 'hidden';
+    } else {
+      lenis.start();
+      document.body.style.overflow = '';
+    }
+    return () => {
+      if (lenis) {
+        lenis.start();
+      }
+      document.body.style.overflow = '';
+    };
+  }, [selectedCampaign, selectedNews, lenis]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -369,9 +398,9 @@ const Home = () => {
                         <span className="text-slate-500 font-bold">Progreso de la obra</span>
                         <span className="text-accent-600 font-black">{heroPct}%</span>
                       </div>
-                      <div className="progress-bar h-2.5">
+                      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                         <div
-                          className="progress-fill h-full"
+                          className="h-full bg-accent-500 rounded-full transition-all duration-1000 ease-out"
                           style={{ width: `${heroPct}%` }}
                         />
                       </div>
@@ -453,6 +482,96 @@ const Home = () => {
             {errorMsg}
           </div>
         )}
+
+        {/* Campaign Search and Hamburger Filters */}
+        <div className="mb-8 flex flex-col sm:flex-row gap-3 items-center justify-between">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={campaignSearchInput}
+              onChange={(e) => setCampaignSearchInput(e.target.value)}
+              placeholder="Buscar campaña por nombre..."
+              className="w-full pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-2xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400 transition-all font-medium shadow-sm"
+            />
+            {campaignSearchInput && (
+              <button
+                onClick={() => setCampaignSearchInput('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="relative self-end sm:self-auto">
+            <button
+              onClick={() => setIsFilterMenuOpen(!isFilterMenuOpen)}
+              className={`flex items-center gap-2 px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all ${
+                campaignActiveSort ? 'border-brand-500 ring-2 ring-brand-100 text-brand-700' : ''
+              }`}
+              title="Filtrar y Ordenar"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span className="hidden sm:inline">Ordenar</span>
+              {campaignActiveSort && (
+                <span className="h-2 w-2 rounded-full bg-brand-600 animate-pulse" />
+              )}
+            </button>
+
+            {isFilterMenuOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-30"
+                  onClick={() => setIsFilterMenuOpen(false)}
+                />
+                <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-2xl shadow-xl z-40 p-3 animate-fade-in transform origin-top-right">
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-wider px-2.5 pb-2 mb-1.5 border-b border-slate-100 flex justify-between items-center">
+                    <span>Ordenar campañas</span>
+                    {campaignActiveSort && (
+                      <button
+                        onClick={() => { setCampaignActiveSort(null); setIsFilterMenuOpen(false); }}
+                        className="text-brand-600 hover:underline capitalize font-bold"
+                      >
+                        Limpiar
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    {[
+                      { key: 'urgente', label: 'Más urgentes', icon: Flame, desc: 'Fecha límite más cercana' },
+                      { key: 'cercana', label: 'Cerca de la meta', icon: TrendingUp, desc: 'Mayor % completado' },
+                      { key: 'mayor_meta', label: 'Mayor meta', icon: Trophy, desc: 'Objetivo más costoso' }
+                    ].map((opt) => {
+                      const Icon = opt.icon;
+                      const isActive = campaignActiveSort === opt.key;
+                      return (
+                        <button
+                          key={opt.key}
+                          onClick={() => {
+                            setCampaignActiveSort(isActive ? null : opt.key);
+                            setIsFilterMenuOpen(false);
+                          }}
+                          className={`w-full flex items-start gap-3 p-2.5 rounded-xl text-left transition-all ${
+                            isActive
+                              ? 'bg-brand-50 border border-brand-100 text-brand-700 font-bold'
+                              : 'hover:bg-slate-50 border border-transparent text-slate-600'
+                          }`}
+                        >
+                          <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${isActive ? 'text-brand-600' : 'text-slate-400'}`} />
+                          <div>
+                            <div className="text-xs font-black uppercase tracking-wider">{opt.label}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5 font-medium">{opt.desc}</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
 
         {loadingCampaigns ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -582,7 +701,11 @@ const Home = () => {
               {news.map((noti, idx) => {
                 const grad = NEWS_COLORS[idx % NEWS_COLORS.length];
                 return (
-                  <article key={noti._id} className="card group overflow-hidden rounded-3xl flex flex-col">
+                  <article
+                    key={noti._id}
+                    onClick={() => setSelectedNews(noti)}
+                    className="card group overflow-hidden rounded-3xl flex flex-col cursor-pointer hover:border-brand-200 transition-all"
+                  >
                     {/* Colored header strip */}
                     <div className={`h-2 bg-gradient-to-r ${grad}`} />
 
@@ -605,6 +728,14 @@ const Home = () => {
                         className="text-sm text-slate-600 font-light leading-relaxed line-clamp-4 flex-grow"
                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(noti.cuerpo_html) }}
                       />
+
+                      {/* Read more footer */}
+                      <div className="flex justify-end pt-2 border-t border-slate-50 mt-1">
+                        <span className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-brand-600 group-hover:text-brand-700">
+                          Leer noticia
+                          <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                        </span>
+                      </div>
                     </div>
                   </article>
                 );
@@ -619,14 +750,13 @@ const Home = () => {
       ════════════════════════════════════════ */}
       {selectedCampaign && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-dark-900/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}
-          data-lenis-prevent
         >
-          <div className="bg-white w-full sm:rounded-3xl sm:max-w-2xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up">
+          <div className="bg-white w-full sm:rounded-3xl sm:max-w-2xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up max-h-[90vh] sm:max-h-[85vh] flex flex-col">
 
             {/* Modal header */}
-            <div className="bg-slate-50 border-b border-slate-200 p-6">
+            <div className="bg-slate-50 border-b border-slate-200 p-6 shrink-0">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-2">
                   <span className="badge badge-red">
@@ -646,11 +776,11 @@ const Home = () => {
               </div>
             </div>
 
-            {/* Modal body */}
-            <div className="p-6 space-y-5 max-h-[50vh] overflow-y-auto">
-
-              {/* Financial grid */}
-              <div>
+            {/* Scrollable content wrapper */}
+            <div className="overflow-y-auto flex-grow" data-lenis-prevent>
+              {/* Modal body */}
+              <div className="p-6 space-y-5">
+                <div>
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3 flex items-center gap-1.5">
                   <div className="h-0.5 w-4 bg-brand-400 rounded-full" />
                   Información de Recaudación
@@ -677,10 +807,44 @@ const Home = () => {
                     <span className="text-slate-500">Progreso colectivo</span>
                     <span className="text-brand-600">{modalPct}%</span>
                   </div>
-                  <div className="progress-bar h-3">
-                    <div className="progress-fill" style={{ width: `${modalPct}%` }} />
+                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden relative shadow-inner">
+                    <div
+                      className="h-full bg-accent-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
+                      style={{ width: `${modalPct}%` }}
+                    />
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.25)_50%,transparent_100%)] w-full translate-x-[-100%] animate-[shimmer_2.5s_infinite]" />
                   </div>
                 </div>
+
+                {/* Información del Equipo Médico */}
+                {selectedCampaign.detalles?.equipamiento_info && (
+                  <div className="mt-5 border-t border-slate-100 pt-4 space-y-3">
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-1.5">
+                      <Info className="h-3.5 w-3.5 text-teal-600" />
+                      Equipo Médico a Adquirir
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-teal-50/20 rounded-2xl p-4 border border-teal-100/80 shadow-sm hover:shadow-md transition-shadow group">
+                      {selectedCampaign.detalles.equipamiento_imagen && (
+                        <div className="aspect-[4/3] rounded-xl overflow-hidden border border-slate-200 bg-white sm:col-span-1 shadow-inner relative">
+                          <img
+                            src={selectedCampaign.detalles.equipamiento_imagen}
+                            alt="Aparato"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        </div>
+                      )}
+                      <div className={selectedCampaign.detalles.equipamiento_imagen ? "sm:col-span-2 space-y-1.5" : "sm:col-span-3 space-y-1.5"}>
+                        <span className="inline-block text-[9px] text-teal-700 font-black uppercase tracking-wider bg-teal-50 border border-teal-100 px-2 py-0.5 rounded">
+                          Especificación Técnica
+                        </span>
+                        <p className="text-xs font-black text-slate-800 leading-tight">Equipo: {selectedCampaign.titulo}</p>
+                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                          {selectedCampaign.detalles.equipamiento_info}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -835,16 +999,11 @@ const Home = () => {
                           </div>
 
                           <div className="sm:col-span-2">
-                            <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
-                              URL de Captura de Comprobante
-                            </label>
-                            <input
-                              type="url"
+                            <FileUpload
+                              tipo="comprobante"
                               value={transferReceiptUrl}
-                              onChange={(e) => setTransferReceiptUrl(e.target.value)}
-                              placeholder="https://ejemplo.com/comprobante.jpg"
-                              className="input-field py-2.5 text-sm"
-                              disabled={submittingDonation}
+                              onChange={setTransferReceiptUrl}
+                              label="Comprobante de transferencia (opcional)"
                             />
                           </div>
                         </div>
@@ -914,6 +1073,81 @@ const Home = () => {
                   )}
                 </>
               )}
+            </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ════════════════════════════════════════
+          4.5 NEWS DETAIL MODAL
+      ════════════════════════════════════════ */}
+      {selectedNews && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setSelectedNews(null); }}
+        >
+          <div className="bg-white w-full sm:rounded-3xl sm:max-w-2xl shadow-2xl overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up flex flex-col max-h-[85vh] sm:max-h-[75vh]">
+            
+            {/* Modal header */}
+            <div className="bg-slate-50 border-b border-slate-200 p-6 flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                  <Calendar className="h-3 w-3" />
+                  {new Date(selectedNews.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </div>
+                <h3 className="text-xl sm:text-2xl font-display font-black text-slate-900 leading-tight">
+                  {selectedNews.titulo}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedNews(null)}
+                className="shrink-0 h-8 w-8 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors shadow-sm"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Modal body */}
+            <div className="p-6 overflow-y-auto space-y-4 flex-grow" data-lenis-prevent>
+              {/* Optional News Image */}
+              {selectedNews.imagen_url && (
+                <div className="aspect-[16/9] rounded-2xl overflow-hidden border border-slate-200 shadow-sm mb-4">
+                  <img
+                    src={selectedNews.imagen_url}
+                    alt={selectedNews.titulo}
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.target.style.display = 'none'; }}
+                  />
+                </div>
+              )}
+
+              {/* Tags */}
+              {selectedNews.tags && selectedNews.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pb-2">
+                  {selectedNews.tags.map(tag => (
+                    <span key={tag} className="badge badge-slate">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Body Content */}
+              <div
+                className="text-sm text-slate-700 font-light leading-relaxed prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedNews.cuerpo_html) }}
+              />
+            </div>
+
+            {/* Modal footer */}
+            <div className="border-t border-slate-100 bg-slate-50 p-4 flex justify-end">
+              <button
+                onClick={() => setSelectedNews(null)}
+                className="btn-accent px-6 py-2.5 text-xs font-black uppercase tracking-wider"
+              >
+                Cerrar
+              </button>
             </div>
 
           </div>

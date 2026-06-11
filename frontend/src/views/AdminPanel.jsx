@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import FileUpload from '../components/FileUpload';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LabelList
 } from 'recharts';
@@ -89,6 +90,8 @@ const AdminPanel = () => {
   const [imagenUrl, setImagenUrl] = useState('');
   const [obraStatus, setObraStatus] = useState('Planeada');
   const [esCampanaDelMes, setEsCampanaDelMes] = useState(false);
+  const [equipamientoInfo, setEquipamientoInfo] = useState('');
+  const [equipamientoImagen, setEquipamientoImagen] = useState('');
 
   /* News form */
   const [showNewsForm, setShowNewsForm] = useState(false);
@@ -97,6 +100,7 @@ const AdminPanel = () => {
   const [newsCuerpoHtml, setNewsCuerpoHtml] = useState('');
   const [newsTags, setNewsTags] = useState('');
   const [newsFecha, setNewsFecha] = useState('');
+  const [newsImagenUrl, setNewsImagenUrl] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -272,6 +276,8 @@ const AdminPanel = () => {
       fecha_limite: fechaLimite || null,
       es_campana_del_mes: esCampanaDelMes,
       testimonios, galeria_rica, obra_status: obraStatus,
+      equipamiento_info: equipamientoInfo,
+      equipamiento_imagen: equipamientoImagen,
     };
     try {
       if (editingCampaignId) {
@@ -294,6 +300,8 @@ const AdminPanel = () => {
     setFechaLimite(''); setTestimoniosText('');
     setTestimoniosAutor(''); setImagenUrl(''); setObraStatus('Planeada');
     setEsCampanaDelMes(false);
+    setEquipamientoInfo('');
+    setEquipamientoImagen('');
   };
 
   const handleEditCampaign = async (id) => {
@@ -309,6 +317,8 @@ const AdminPanel = () => {
       setImagenUrl(d.detalles.galeria_rica.imagenes?.[0] ?? '');
       setObraStatus(d.detalles.obra_status ?? 'Planeada');
       setEsCampanaDelMes(d.es_campana_del_mes ?? false);
+      setEquipamientoInfo(d.detalles?.equipamiento_info ?? '');
+      setEquipamientoImagen(d.detalles?.equipamiento_imagen ?? '');
       setShowCampaignForm(true);
     } catch (err) {
       setErrorMsg('No se pudieron recuperar los detalles de la campaña.');
@@ -337,6 +347,7 @@ const AdminPanel = () => {
       titulo: newsTitulo, cuerpo_html: newsCuerpoHtml,
       tags: [],
       fecha: newsFecha || undefined,
+      imagen_url: newsImagenUrl || undefined,
     };
     try {
       if (editingNewsId) {
@@ -355,7 +366,7 @@ const AdminPanel = () => {
 
   const resetNewsForm = () => {
     setShowNewsForm(false); setEditingNewsId(null);
-    setNewsTitulo(''); setNewsCuerpoHtml(''); setNewsTags(''); setNewsFecha('');
+    setNewsTitulo(''); setNewsCuerpoHtml(''); setNewsTags(''); setNewsFecha(''); setNewsImagenUrl('');
   };
 
   const handleEditNews = (n) => {
@@ -363,6 +374,7 @@ const AdminPanel = () => {
     setNewsCuerpoHtml(n.cuerpo_html);
     setNewsTags(n.tags?.join(', ') ?? '');
     setNewsFecha(n.fecha ? n.fecha.split('T')[0] : '');
+    setNewsImagenUrl(n.imagen_url || '');
     setShowNewsForm(true); setErrorMsg('');
   };
 
@@ -593,9 +605,40 @@ const AdminPanel = () => {
                       <FormLabel>Testimonio (Autor)</FormLabel>
                       <input type="text" value={testimoniosAutor} onChange={e => setTestimoniosAutor(e.target.value)} className={inputCls} placeholder="Dr. Juan Gómez" />
                     </div>
-                    <div className="md:col-span-2">
-                      <FormLabel>URL de Imagen (Galería)</FormLabel>
-                      <input type="url" value={imagenUrl} onChange={e => setImagenUrl(e.target.value)} className={inputCls} placeholder="https://imagenes.hospital/foto.jpg" />
+                  <div className="md:col-span-2">
+                      <FileUpload
+                        tipo="imagen"
+                        value={imagenUrl}
+                        onChange={setImagenUrl}
+                        label="Imagen de la Campaña (Galería)"
+                      />
+                    </div>
+                    
+                    {/* Equipamiento fields */}
+                    <div className="md:col-span-2 border-t border-violet-200/50 pt-4 mt-2">
+                      <p className="text-[10px] font-black text-violet-700 uppercase tracking-widest flex items-center gap-1.5 mb-4">
+                        <Info className="h-3.5 w-3.5 text-violet-600" />
+                        Información del Equipo Médico
+                      </p>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <FormLabel>Información / Utilidad del Equipo</FormLabel>
+                          <textarea
+                            value={equipamientoInfo}
+                            onChange={e => setEquipamientoInfo(e.target.value)}
+                            className={`${inputCls} min-h-[100px] py-3`}
+                            placeholder="Ej: Este respirador de alta frecuencia servirá para la sala de neonatología..."
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <FileUpload
+                            tipo="imagen"
+                            value={equipamientoImagen}
+                            onChange={setEquipamientoImagen}
+                            label="Imagen del aparato a adquirir"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -654,7 +697,7 @@ const AdminPanel = () => {
                             <span className="text-emerald-600">Recaudado: ${parseFloat(camp.monto_actual).toLocaleString('es-AR')}</span>
                           </div>
                           <div className="mt-1.5 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                            <div className="progress-fill h-full" style={{ width: `${pct}%` }} />
+                            <div className="h-full bg-accent-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${pct}%` }} />
                           </div>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
@@ -990,6 +1033,13 @@ const AdminPanel = () => {
                   <FormLabel>Fecha de Publicación</FormLabel>
                   <input type="date" value={newsFecha} onChange={e => setNewsFecha(e.target.value)} className={inputCls} />
                 </div>
+
+                <FileUpload
+                  tipo="imagen"
+                  value={newsImagenUrl}
+                  onChange={setNewsImagenUrl}
+                  label="Imagen de portada (opcional)"
+                />
 
                 <button type="submit" className="btn-brand w-full py-3.5 shine">
                   <Save className="h-4 w-4" />

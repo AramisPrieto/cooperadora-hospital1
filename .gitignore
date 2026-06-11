@@ -31,3 +31,6 @@ yarn-error.log*
 ##Specs
 .specs/
 .teams/
+
+# Uploaded files
+backend/uploads/

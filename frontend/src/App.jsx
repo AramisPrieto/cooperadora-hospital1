@@ -10,6 +10,8 @@ const Home = lazy(() => import('./views/Home'));
 const Login = lazy(() => import('./views/Login'));
 const AdminPanel = lazy(() => import('./views/AdminPanel'));
 const SocioPanel = lazy(() => import('./views/SocioPanel'));
+const CampaignSearch = lazy(() => import('./views/CampaignSearch'));
+const CampaignDetail = lazy(() => import('./views/CampaignDetail'));
 
 // Eliminadas funciones ProtectedRoute y SocioProtectedRoute inline
 
@@ -39,6 +41,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/campanas" element={<CampaignSearch />} />
+                <Route path="/campanas/:id" element={<CampaignDetail />} />
                 <Route
                   path="/admin"
                   element={

@@ -47,7 +47,7 @@ export const getNoticiaById = async (req, res) => {
 
 // Crear noticia (Solo Admin)
 export const createNoticia = async (req, res) => {
-  const { titulo, cuerpo_html, multimedia, tags, fecha } = req.body;
+  const { titulo, cuerpo_html, multimedia, tags, fecha, imagen_url } = req.body;
 
   try {
     const nuevaNoticia = await NoticiaActualidad.create({
@@ -55,7 +55,8 @@ export const createNoticia = async (req, res) => {
       cuerpo_html,
       multimedia: multimedia || [],
       tags: tags || [],
-      fecha: fecha || Date.now()
+      fecha: fecha || Date.now(),
+      imagen_url: imagen_url || ''
     });
     return res.status(201).json(nuevaNoticia);
   } catch (error) {
@@ -67,7 +68,7 @@ export const createNoticia = async (req, res) => {
 // Actualizar noticia (Solo Admin)
 export const updateNoticia = async (req, res) => {
   const { id } = req.params;
-  const { titulo, cuerpo_html, multimedia, tags, fecha } = req.body;
+  const { titulo, cuerpo_html, multimedia, tags, fecha, imagen_url } = req.body;
 
   try {
     const noticia = await NoticiaActualidad.findById(id);
@@ -80,6 +81,7 @@ export const updateNoticia = async (req, res) => {
     if (multimedia !== undefined) noticia.multimedia = multimedia;
     if (tags !== undefined) noticia.tags = tags;
     if (fecha !== undefined) noticia.fecha = fecha;
+    if (imagen_url !== undefined) noticia.imagen_url = imagen_url;
 
     await noticia.save();
     return res.json({ message: 'Noticia actualizada correctamente.', noticia });

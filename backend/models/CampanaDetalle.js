@@ -21,6 +21,14 @@ const campanaDetalleSchema = new mongoose.Schema({
     type: String,
     required: true,
     default: 'Planeada'
+  },
+  equipamiento_info: {
+    type: String,
+    default: ''
+  },
+  equipamiento_imagen: {
+    type: String,
+    default: ''
   }
 }, {
   collection: 'campanas_detalle',

@@ -4,10 +4,14 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import mongoSanitize from 'express-mongo-sanitize';
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { connectSQL } from './config/db.js';
 import { connectMongoDB } from './config/mongo.js';
 import sequelize from './config/db.js';
 import { globalLimiter } from './middleware/rateLimiter.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Importar modelos para asegurar que Sequelize los registre
 import './models/index.js';
@@ -17,8 +21,9 @@ import authRoutes from './routes/authRoutes.js';
 import socioRoutes from './routes/socioRoutes.js';
 import campanaRoutes from './routes/campanaRoutes.js';
 import noticiaRoutes from './routes/noticiaRoutes.js';
-import donacionRoutes from './routes/donacionRoutes.js'; // TEAM_001: Importamos las rutas de transferencias
-import { webhookMercadoPago } from './controllers/socioSubscriptionController.js'; // Importamos el webhook público
+import donacionRoutes from './routes/donacionRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
+import { webhookMercadoPago } from './controllers/socioSubscriptionController.js';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -47,7 +52,9 @@ app.use(cors({
   credentials: true // Permite envío de cookies/tokens si fuera necesario
 }));
 
-app.use(helmet()); // Añade cabeceras HTTP de seguridad
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+})); // Añade cabeceras HTTP de seguridad y permite cargar imágenes desde otros dominios (CORS/CORP)
 app.use(express.json());
 app.use(cookieParser()); // Para leer cookies de sesión
 app.use(mongoSanitize());      // Sanitiza req.body/params/query — bloquea NoSQL injection
@@ -63,13 +70,17 @@ if (process.env.NODE_ENV === 'development') {
 
 import { cacheMiddleware } from './middleware/cacheMiddleware.js';
 
+// Servir archivos subidos estáticamente
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Montar Rutas de la API
 app.use('/api/auth', authRoutes);
 app.use('/api/socios', socioRoutes);
 app.use('/api/campanas', cacheMiddleware, campanaRoutes);
 app.use('/api/noticias', cacheMiddleware, noticiaRoutes);
-app.use('/api/donaciones', donacionRoutes); // TEAM_001: Montamos las rutas en /api/donaciones
-app.post('/api/webhooks/mercadopago', webhookMercadoPago); // Webhook público para Mercado Pago
+app.use('/api/donaciones', donacionRoutes);
+app.use('/api/uploads', uploadRoutes);
+app.post('/api/webhooks/mercadopago', webhookMercadoPago);
 
 
 // Ruta de estado de la API (Pública)

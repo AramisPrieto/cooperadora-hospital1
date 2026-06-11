@@ -1,21 +1,61 @@
-import { CampanaEco } from '../models/index.js';
+import { CampanaEco, DonacionTransferencia } from '../models/index.js';
 import CampanaDetalle from '../models/CampanaDetalle.js';
 import sequelize from '../config/db.js';
+import { Op } from 'sequelize';
 import { flushCache } from '../middleware/cacheMiddleware.js';
 
-// 1. OBTENER TODAS LAS CAMPAÑAS (SQL Básicas - Públicas para Home)
+// 1. OBTENER TODAS LAS CAMPAÑAS (SQL Básicas - Públicas)
+// ?sort=urgente|cercana|mayor_meta  ?search=texto  ?limit=N  ?page=N  ?all=true
 export const getAllCampanas = async (req, res) => {
-  const { limit = 10, page = 1 } = req.query;
+  const { limit = 10, page = 1, sort, search, all } = req.query;
   try {
-    const parsedLimit = parseInt(limit, 10);
+    const parsedLimit = all === 'true' ? 1000 : parseInt(limit, 10);
     const parsedPage = parseInt(page, 10);
 
+    // Filtro de búsqueda por título
+    const where = { activo: true };
+    if (search && search.trim()) {
+      where.titulo = { [Op.like]: `%${search.trim()}%` };
+    }
+
+    // Ordenamiento
+    let order = [['created_at', 'DESC']];
+    if (sort === 'urgente') {
+      // Campañas con fecha_limite más próxima primero (nulls al final)
+      order = [
+        [sequelize.literal('CASE WHEN fecha_limite IS NULL THEN 1 ELSE 0 END'), 'ASC'],
+        ['fecha_limite', 'ASC']
+      ];
+    } else if (sort === 'cercana') {
+      // Mayor porcentaje completado (monto_actual / monto_objetivo) DESC
+      order = [[sequelize.literal('(monto_actual / NULLIF(monto_objetivo, 0))'), 'DESC']];
+    } else if (sort === 'mayor_meta') {
+      order = [['monto_objetivo', 'DESC']];
+    }
+
     const campanas = await CampanaEco.findAll({
-      where: { activo: true },
+      where,
+      order,
       limit: parsedLimit,
       offset: (parsedPage - 1) * parsedLimit
     });
-    return res.json(campanas);
+
+    // Obtener detalles NoSQL en lote desde MongoDB
+    const ids = campanas.map(c => c.id);
+    const detallesList = await CampanaDetalle.find({ campana_id_ref: { $in: ids } });
+
+    // Fusionar detalles con su respectiva campaña relacional
+    const campanasWithDetalles = campanas.map(c => {
+      const details = detallesList.find(d => d.campana_id_ref === c.id);
+      return {
+        ...c.toJSON(),
+        detalles: details
+          ? details.toObject()
+          : { testimonios: [], galeria_rica: { imagenes: [], videos: [] }, obra_status: 'Planeada', equipamiento_info: '', equipamiento_imagen: '' }
+      };
+    });
+
+    return res.json(campanasWithDetalles);
   } catch (error) {
     console.error('Error al obtener campañas:', error);
     return res.status(500).json({ error: 'Error al obtener la lista de campañas.' });
@@ -56,11 +96,15 @@ export const getCampanaById = async (req, res) => {
         testimonios: nosqlObj.testimonios,
         galeria_rica: nosqlObj.galeria_rica,
         obra_status: nosqlObj.obra_status,
+        equipamiento_info: nosqlObj.equipamiento_info || '',
+        equipamiento_imagen: nosqlObj.equipamiento_imagen || '',
         mongoId: nosqlObj._id
       } : {
         testimonios: [],
         galeria_rica: { videos: [], imagenes: [] },
-        obra_status: 'No especificado (Sin detalles de campaña)'
+        obra_status: 'No especificado (Sin detalles de campaña)',
+        equipamiento_info: '',
+        equipamiento_imagen: ''
       }
     };
 
@@ -74,7 +118,7 @@ export const getCampanaById = async (req, res) => {
 
 // 3. CREAR CAMPAÑA (Solo Admin - SQL + NoSQL)
 export const createCampana = async (req, res) => {
-  const { titulo, monto_objetivo, monto_actual, fecha_limite, es_campana_del_mes, testimonios, galeria_rica, obra_status } = req.body;
+  const { titulo, monto_objetivo, monto_actual, fecha_limite, es_campana_del_mes, testimonios, galeria_rica, obra_status, equipamiento_info, equipamiento_imagen } = req.body;
 
   if (monto_objetivo < 0 || (monto_actual && monto_actual < 0)) {
     return res.status(400).json({ error: 'Los montos económicos no pueden ser negativos.' });
@@ -105,7 +149,9 @@ export const createCampana = async (req, res) => {
         campana_id_ref: sqlCampana.id,
         testimonios: testimonios || [],
         galeria_rica: galeria_rica || { videos: [], imagenes: [] },
-        obra_status: obra_status || 'Planeada'
+        obra_status: obra_status || 'Planeada',
+        equipamiento_info: equipamiento_info || '',
+        equipamiento_imagen: equipamiento_imagen || ''
       });
 
       // Confirmar la transacción SQL una vez que MongoDB también se completó
@@ -136,7 +182,7 @@ export const createCampana = async (req, res) => {
 // 4. ACTUALIZAR CAMPAÑA (Solo Admin - SQL + NoSQL)
 export const updateCampana = async (req, res) => {
   const { id } = req.params;
-  const { titulo, monto_objetivo, monto_actual, fecha_limite, activo, es_campana_del_mes, testimonios, galeria_rica, obra_status } = req.body;
+  const { titulo, monto_objetivo, monto_actual, fecha_limite, activo, es_campana_del_mes, testimonios, galeria_rica, obra_status, equipamiento_info, equipamiento_imagen } = req.body;
 
   if (monto_objetivo < 0 || (monto_actual && monto_actual < 0)) {
     return res.status(400).json({ error: 'Los montos económicos no pueden ser negativos.' });
@@ -177,6 +223,8 @@ export const updateCampana = async (req, res) => {
     if (testimonios !== undefined) nosqlCampana.testimonios = testimonios;
     if (galeria_rica !== undefined) nosqlCampana.galeria_rica = galeria_rica;
     if (obra_status !== undefined) nosqlCampana.obra_status = obra_status;
+    if (equipamiento_info !== undefined) nosqlCampana.equipamiento_info = equipamiento_info;
+    if (equipamiento_imagen !== undefined) nosqlCampana.equipamiento_imagen = equipamiento_imagen;
     await nosqlCampana.save();
 
     // Confirmar transacción SQL si todo salió bien
@@ -230,3 +278,39 @@ export const deleteCampana = async (req, res) => {
 };
 
 
+// 6. ÚLTIMOS DONANTES DE UNA CAMPAÑA (Público - datos enmascarados)
+export const getDonantes = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const donaciones = await DonacionTransferencia.findAll({
+      where: { campana_id: parseInt(id), estado: 'aprobada' },
+      order: [['updated_at', 'DESC']],
+      limit: 8,
+      attributes: ['monto', 'updated_at']
+    });
+
+    const INICIALES = ['M.S.', 'A.', 'F.G.', 'L.G.', 'P.R.', 'C.M.', 'J.L.', 'R.A.'];
+    const donantes = donaciones.map((d, idx) => ({
+      iniciales: INICIALES[idx % INICIALES.length],
+      monto: parseFloat(d.monto),
+      timeAgo: getTimeAgo(d.updated_at)
+    }));
+
+    return res.json({ donantes, total: donaciones.length });
+  } catch (error) {
+    console.error('Error al obtener donantes:', error);
+    return res.status(500).json({ error: 'Error al obtener donantes.' });
+  }
+};
+
+function getTimeAgo(date) {
+  const now = new Date();
+  const diff = now - new Date(date);
+  const mins = Math.floor(diff / 60000);
+  const hrs = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (mins < 60) return `hace ${mins}m`;
+  if (hrs < 24) return `hace ${hrs}h`;
+  if (days === 1) return 'ayer';
+  return `hace ${days}d`;
+}

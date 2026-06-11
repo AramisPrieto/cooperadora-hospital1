@@ -2,6 +2,7 @@ import express from 'express';
 import {
   getAllCampanas,
   getCampanaById,
+  getDonantes,
   createCampana,
   updateCampana,
   deleteCampana
@@ -10,11 +11,14 @@ import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Obtener todas las campañas basicas para Home (Público)
+// Obtener todas las campañas — ?sort=urgente|cercana|mayor_meta &search=texto &all=true (Público)
 router.get('/', getAllCampanas);
 
-// Ver campaña individual completa: requiere JWT (Cero Anonimato para interactuar con detalles de campaña)
-router.get('/:id', authenticateJWT, getCampanaById);
+// Ver campaña individual completa (Público)
+router.get('/:id', getCampanaById);
+
+// Últimos donantes de una campaña (Público - datos enmascarados)
+router.get('/:id/donantes', getDonantes);
 
 // Rutas de administración de campañas (Solo Admin)
 router.post('/', authenticateJWT, authorizeRoles('admin'), createCampana);
