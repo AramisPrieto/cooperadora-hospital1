@@ -176,6 +176,7 @@ const Login = () => {
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Ingrese su contraseña"
                   className="input-field pl-10 pr-11"
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                 />
                 <button
                   type="button"
@@ -186,6 +187,11 @@ const Login = () => {
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {!isLogin && (
+                <p className="text-[10px] text-slate-500 pl-0.5 mt-1">
+                  Debe tener al menos 8 caracteres, una mayúscula y un número.
+                </p>
+              )}
             </div>
 
             {/* DNI (sólo registro) */}

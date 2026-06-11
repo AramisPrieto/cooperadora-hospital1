@@ -33,7 +33,7 @@ export const registerUserService = async (userData) => {
   } = userData;
 
   // Validar seguridad de la contraseña
-  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
   if (!passwordRegex.test(password)) {
     const error = new Error('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.');
     error.status = 400;
