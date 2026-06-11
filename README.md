@@ -1,14 +1,17 @@
 # 🏥 Cooperadora del Hospital Municipal "Dr. Emilio Ferreyra" (Necochea)
+
 ### Trabajo Final Integrador (TFI) — Programación IV (Etapa 4)
+
 **Universidad Tecnológica Nacional (UTN) — Extensión Áulica Necochea**
 
 ---
 
 ## 👥 Integrantes del Grupo
-* **Aramis Prieto**
-* **Kevin Nielsen**
-* **Thiago Masson**
-* **Santiago Ialungo**
+
+- **Aramis Prieto**
+- **Kevin Nielsen**
+- **Thiago Masson**
+- **Santiago Ialungo**
 
 **Profesor:** Ing. Hernández Gauna, Jorge G.
 
@@ -19,10 +22,11 @@
 Este proyecto consiste en el diseño e implementación de un portal web integral y seguro para la **Asociación Cooperadora del Hospital Municipal de Necochea**. Su objetivo es digitalizar la captación y administración de socios, visibilizar de forma transparente el destino de las donaciones por medio de campañas de recaudación y publicar novedades institucionales.
 
 ### 🔄 Historial de Etapas Desarrolladas:
-* **Etapa 1: Investigación y Análisis:** Análisis situacional de la institución, diagnóstico de las necesidades de centralización y digitalización de pagos, estructuración del modelo de navegación y definición del público objetivo (vecinos de Necochea y Quequén).
-* **Etapa 2: Diseño de Wireframes:** Creación de maquetas estáticas en HTML que definen la jerarquía visual de la plataforma (Home, Login, Área Restringida y Buscador).
-* **Etapa 3: Análisis de Datos y Arquitectura de Backend:** Diseño del esquema híbrido de datos, análisis de alternativas de persistencia (SQL relacional y NoSQL documental) y definición técnica de la comunicación mediante APIs seguras.
-* **Etapa 4: Diseño e Implementación de las API y Prototipo (Etapa Final):** Desarrollo del backend y frontend del portal web interactivo con persistencia híbrida, seguridad JWT y rate limiters, panel administrativo, flujo de aprobación de transferencias bancarias, y envío de correos SMTP. Para un desglose de todos los cambios de esta etapa y su evolución cronológica por versión, consulte la sección **[Historial de Cambios](#-historial-de-cambios)**.
+
+- **Etapa 1: Investigación y Análisis:** Análisis situacional de la institución, diagnóstico de las necesidades de centralización y digitalización de pagos, estructuración del modelo de navegación y definición del público objetivo (vecinos de Necochea y Quequén).
+- **Etapa 2: Diseño de Wireframes:** Creación de maquetas estáticas en HTML que definen la jerarquía visual de la plataforma (Home, Login, Área Restringida y Buscador).
+- **Etapa 3: Análisis de Datos y Arquitectura de Backend:** Diseño del esquema híbrido de datos, análisis de alternativas de persistencia (SQL relacional y NoSQL documental) y definición técnica de la comunicación mediante APIs seguras.
+- **Etapa 4: Diseño e Implementación de las API y Prototipo (Etapa Final):** Desarrollo del backend y frontend del portal web interactivo con persistencia híbrida, seguridad JWT y rate limiters, panel administrativo, flujo de aprobación de transferencias bancarias, y envío de correos SMTP. Para un desglose de todos los cambios de esta etapa y su evolución cronológica por versión, consulte la sección **[Historial de Cambios](#-historial-de-cambios)**.
 
 ---
 
@@ -35,13 +39,13 @@ graph TD
     Cliente[Cliente: React App] -->|HTTPS + JWT| Backend[API Gateway: Node/Express]
     Backend -->|Transaccional ACID| SQL[(SQL: PostgreSQL / MySQL)]
     Backend -->|Esquema Flexible| NoSQL[(NoSQL: MongoDB)]
-    
+
     subgraph Base SQL
         SQL -->|Tabla| users[usuarios]
         SQL -->|Tabla| members[perfiles_socios]
         SQL -->|Tabla| campaigns[campanas_eco]
     end
-    
+
     subgraph Base NoSQL
         NoSQL -->|Colección| news[noticias_actualidad]
         NoSQL -->|Colección| enrich[campanas_detalle]
@@ -49,15 +53,19 @@ graph TD
 ```
 
 ### 1. Motor Relacional (SQL: PostgreSQL / MySQL)
+
 Resguarda los datos sensibles que exigen trazabilidad estricta y consistencia **ACID**:
-* **`usuarios`**: Credenciales de acceso (emails únicos, contraseñas hasheadas con `bcryptjs` y roles `admin` o `socio`).
-* **`perfiles_socios`**: Datos obligatorios del Libro Registro de Asociados (DNI únicos, fechas de alta y estado de aprobación).
-* **`campanas_eco`**: Control de metas financieras (monto objetivo y monto acumulado real no negativos).
+
+- **`usuarios`**: Credenciales de acceso (emails únicos, contraseñas hasheadas con `bcryptjs` y roles `admin` o `socio`).
+- **`perfiles_socios`**: Datos obligatorios del Libro Registro de Asociados (DNI únicos, fechas de alta y estado de aprobación).
+- **`campanas_eco`**: Control de metas financieras (monto objetivo y monto acumulado real no negativos).
 
 ### 2. Motor Documental (NoSQL: MongoDB con Mongoose)
+
 Almacena documentos de formato libre de alta carga multimedia:
-* **`noticias_actualidad`**: Publicaciones con galerías fotográficas, videos y tags dinámicos.
-* **`campanas_detalle`**: Complemento de narrativa enriquecida para campañas (testimonios, estado de ejecución de obras y arrays de videos/imágenes) vinculados dinámicamente mediante `campana_id_ref`.
+
+- **`noticias_actualidad`**: Publicaciones con galerías fotográficas, videos y tags dinámicos.
+- **`campanas_detalle`**: Complemento de narrativa enriquecida para campañas (testimonios, estado de ejecución de obras y arrays de videos/imágenes) vinculados dinámicamente mediante `campana_id_ref`.
 
 ### ⚛️ Transacciones ACID y Concurrencia en Donaciones
 
@@ -71,7 +79,9 @@ El endpoint `POST /api/campanas/:id/donar` utiliza una transacción SQL con **bl
 Esto evita la condición de carrera donde dos donaciones simultáneas leen el mismo valor y sobreescriben la suma del otro.
 
 ### 🔄 Fusión Sincrónica: Data Mashup
+
 Cuando un usuario ingresa a ver los detalles de una campaña completa (`GET /api/campanas/:id`), el backend utiliza `Promise.all` para ejecutar de manera paralela y sincrónica dos consultas:
+
 1. Una consulta por clave primaria en SQL para obtener las finanzas de `campanas_eco`.
 2. Una consulta documental en MongoDB para obtener la narrativa multimedia de `campanas_detalle`.
 
@@ -105,57 +115,69 @@ El proyecto está diseñado para ejecutarse en entornos Cloud Native modernos co
 4. **Base de Datos NoSQL (MongoDB Atlas):** Almacenamiento en la nube (AWS/GCP) para esquemas flexibles.
 
 ### 🌐 Webhooks de Mercado Pago (Producción)
+
 Con la arquitectura en la nube, **ya no se requiere el uso de túneles locales (Ngrok/Pinggy)**. El backend desplegado en Render proporciona una URL HTTPS nativa y permanente.
 Mercado Pago envía las notificaciones POST directamente a la URL de Render (ej: `https://[TU-APP].onrender.com/api/webhooks/mercadopago`), y los proxies de retorno (`back_urls`) redirigen transparentemente al frontend en Vercel.
 
-*   **Contraseña Global de Acceso (Staging/Nube):** `X9$mK2#vLq7@pW4n` *(Se solicita en un recuadro al abrir la web para evitar accesos públicos)*
-*(Nota: Las cuentas locales de prueba no han sido provistas en esta versión de producción hasta que se ejecute la inicialización de la base de datos).*
-*   **Cuenta de Mercado Pago (El Comprador Sandbox):** Cuando seas redirigido al checkout de MP, debes iniciar sesión con esta cuenta ficticia para simular el pago:
-    *   *Usuario:* `TESTUSER7385770550601504283`
-    *   *Contraseña:* `5ZPkJK3MJX`
-*   **Cuenta del Vendedor (Interna):**
-    *   *Usuario:* `TESTUSER6351276384387938890` (Generó el `MP_ACCESS_TOKEN` del `.env`)
+- **Contraseña Global de Acceso (Staging/Nube):** `X9$mK2#vLq7@pW4n` _(Se solicita en un recuadro al abrir la web para evitar accesos públicos)_
+  _(Nota: Las cuentas locales de prueba no han sido provistas en esta versión de producción hasta que se ejecute la inicialización de la base de datos)._
+- **Cuenta de Mercado Pago (El Comprador Sandbox):** Cuando seas redirigido al checkout de MP, debes iniciar sesión con esta cuenta ficticia para simular el pago:
+  - _Usuario:_ `TESTUSER7385770550601504283`
+  - _Contraseña:_ `5ZPkJK3MJX`
+- **Cuenta del Vendedor (Interna):**
+  - _Usuario:_ `TESTUSER6351276384387938890` (Generó el `MP_ACCESS_TOKEN` del `.env`)
 
 ---
 
 ## 📖 Manual de Operaciones en Producción (Cloud)
 
 ### 1. Variables de Entorno Necesarias
+
 Para que el sistema funcione en la nube, es vital configurar correctamente las variables de entorno en los paneles de **Render** (Backend) y **Vercel** (Frontend):
 
 **En Render (Environment):**
-* `DATABASE_URL`: URL externa de la base de datos PostgreSQL de Render.
-* `MONGODB_URI`: URL de conexión al clúster de MongoDB Atlas.
-* `JWT_SECRET`: Llave secreta alfanumérica para generar los tokens de sesión.
-* `MP_ACCESS_TOKEN`: Token de Mercado Pago (Sandbox para pruebas, o el de Producción para cobros reales).
-* Configuración SMTP (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, etc.) para el envío de correos.
+
+- `DATABASE_URL`: URL externa de la base de datos PostgreSQL de Render.
+- `MONGODB_URI`: URL de conexión al clúster de MongoDB Atlas.
+- `JWT_SECRET`: Llave secreta alfanumérica para generar los tokens de sesión.
+- `MP_ACCESS_TOKEN`: Token de Mercado Pago (Sandbox para pruebas, o el de Producción para cobros reales).
+- Configuración SMTP (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, etc.) para el envío de correos.
 
 **En Vercel (Environment Variables):**
-* `VITE_API_URL`: La URL pública de tu backend en Render (Ej: `https://tu-backend.onrender.com`).
-* `VITE_MP_PUBLIC_KEY`: La clave pública de Mercado Pago (Public Key).
+
+- `VITE_API_URL`: La URL pública de tu backend en Render (Ej: `https://tu-backend.onrender.com`).
+- `VITE_MP_PUBLIC_KEY`: La clave pública de Mercado Pago (Public Key).
 
 ### 2. Inicialización de la Base de Datos Remota (Seeding)
+
 La primera vez que se sube el backend a Render, la base de datos PostgreSQL estará vacía. Para crear las tablas, el usuario Administrador y el Socio de prueba, sigue estos pasos:
+
 1. En tu computadora local, edita temporalmente tu `.env` de la carpeta `backend` colocando en `DATABASE_URL` y `MONGODB_URI` los enlaces de tus bases de datos de la nube.
 2. Abre la terminal en la carpeta `backend` y ejecuta: `node seed.js`
-3. Esto conectará tu PC a los servidores remotos y sembrará la información. *(Atención: Si tu base de datos prohíbe conexiones sin SSL, nuestro código de `db.js` fuerza SSL automáticamente si la URL contiene `render.com`).*
+3. Esto conectará tu PC a los servidores remotos y sembrará la información. _(Atención: Si tu base de datos prohíbe conexiones sin SSL, nuestro código de `db.js` fuerza SSL automáticamente si la URL contiene `render.com`)._
 
 ### 3. Eliminar el Bloqueo de Acceso (Ir a Producción Real)
-Actualmente, el portal tiene un "candado" (un `prompt` en JavaScript) para evitar que terceros accedan mientras el equipo realiza pruebas cerradas. 
+
+Actualmente, el portal tiene un "candado" (un `prompt` en JavaScript) para evitar que terceros accedan mientras el equipo realiza pruebas cerradas.
 Cuando el hospital decida lanzar la página de forma oficial al público:
+
 1. Abre el archivo `frontend/src/main.jsx`.
 2. Borra todo el bloque de código debajo de `// Protección básica para la etapa de desarrollo` que contiene el `prompt()` y el `if (password !== "X9$mK2#vLq7@pW4n")`.
 3. Haz un commit y push a GitHub. Vercel actualizará la página automáticamente y quedará abierta a todo el mundo.
 
 ### 4. Transición a Mercado Pago (Dinero Real)
+
 Cuando estés listo para dejar de simular pagos:
+
 1. Ve a tu integración en el panel de Mercado Pago y genera tus **Credenciales de Producción**.
 2. Reemplaza el `MP_ACCESS_TOKEN` en Render por el de producción.
 3. Reemplaza el `VITE_MP_PUBLIC_KEY` en Vercel por el de producción.
 4. Reinicia ambos servidores. ¡A partir de ese momento, los cobros irán directo a la cuenta bancaria de la Cooperadora!
 
 ## 🛠️ Comandos Git Utilizados (Estructura de Trabajo)
+
 Para mantener un orden profesional en el repositorio, la estructura de ramas se inicia en `develop`:
+
 ```bash
 # Inicializar repositorio local
 git init
@@ -175,6 +197,7 @@ git checkout -b develop
 ## 📋 Historial de Cambios
 
 ### Versión 1.0.0 — Prototipo e APIs de la Etapa 4 (Aramis Prieto)
+
 - **Persistencia Híbrida SQL/NoSQL**:
   - Implementación del motor relacional PostgreSQL (`usuarios`, `perfiles_socios`, `campanas_eco`) para consistencia transaccional y el motor documental MongoDB (`noticias_actualidad`, `campanas_detalle`) para datos estructurados flexibles y multimedia.
   - Creación del mecanismo **Data Mashup** sincrónico mediante `Promise.all` para fusionar y retornar en una sola llamada el estado financiero (SQL) y el contenido enriquecido (NoSQL) de las campañas.
@@ -187,6 +210,7 @@ git checkout -b develop
   - Protección de concurrencia y doble clic en el Panel Administrativo deshabilitando botones de acción de forma dinámica.
 
 ### Versión 1.0.1 — Entorno pnpm, Logo Oficial y Noticias (Thiago Masson)
+
 - **Migración a pnpm**:
   - Transición completa del monorrepo al gestor de paquetes `pnpm` para agilizar descargas y garantizar la consistencia en el árbol de dependencias.
 - **Branding Institucional**:
@@ -196,25 +220,29 @@ git checkout -b develop
   - Renderizado HTML enriquecido de artículos sanitizado con **DOMPurify** en el cliente para prevenir inyecciones de código malicioso XSS.
 
 ### Versión 1.0.2 — Fusión e Integración en Rama Principal (Aramis Prieto)
+
 - **Consolidación de Producción**:
   - Fusión e integración de los primeros desarrollos estables acumulados de `develop` hacia la rama principal `main` (Pull Request #1) para establecer la línea base funcional del proyecto.
 
 ### Versión 1.0.3 — Seguimiento de Tareas (TODO.md) (Aramis Prieto & Thiago Masson)
+
 - **Coordinación de Equipo**:
   - Creación y actualización del archivo de seguimiento [TODO.md](file:///Users/aramisprieto/Documents/cooperadora-hospital1/TODO.md) en la raíz del proyecto para organizar de manera transparente el backlog de tareas pendientes, en curso y finalizadas.
   - Registro de requerimientos prioritarios como la validación de PDFs de etapas previas, límites de donación para campañas completadas, diseño del panel administrativo y selección mensual de campañas de recaudación.
 
 ### Versión 1.0.4 — Rediseño Estético Clínico y Scroll-Spy (Santiago Ialungo)
+
 - **Renovación Estética de UI/UX**:
   - Transición de un diseño oscuro de desarrollo a una interfaz moderna, limpia y netamente profesional orientada a la salud.
   - Paleta de color optimizada: base clara en `slate-50`, acentos rojos institucionales (`brand-600`) y verde esmeralda clínico (`accent-600`).
   - Textura visual mediante un patrón lineal que emula una cuadrícula de electrocardiograma (ECG) en el fondo.
 - **Navegación e Interacción**:
-  - Detección de lectura en Navbar (*Scroll-Spy*) para destacar dinámicamente la sección activa de la vista actual.
+  - Detección de lectura en Navbar (_Scroll-Spy_) para destacar dinámicamente la sección activa de la vista actual.
   - Integración de Lenis para un scroll inercial suave sin tirones.
   - Rediseño de indicadores financieros, contadores y optimización de gráficos en el Panel Administrativo.
 
 ### Versión 1.1.0 — Checkout de Transferencias y Corrección de Scroll (Kevin Nielsen)
+
 - **Donaciones por Transferencia Bancaria**:
   - Creación de la tabla relacional [DonacionTransferencia.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/DonacionTransferencia.js) en PostgreSQL para auditar transferencias declaradas.
   - Implementación de rutas y controladores para la declaración segura de transferencias en `/api/donaciones`.
@@ -227,6 +255,7 @@ git checkout -b develop
   - Parametrización en [docker-compose.yml](file:///Users/aramisprieto/Documents/cooperadora-hospital1/docker-compose.yml) usando variables locales para mayor portabilidad de infraestructura.
 
 ### Versión 1.2.0 — Seguridad Backend e Inputs (Kevin Nielsen)
+
 - **Rate Limiting por IP**:
   - Configuración de políticas de control de tasa en [rateLimiter.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/middleware/rateLimiter.js): 100 peticiones globales cada 15 min, 10 intentos de autenticación cada 15 min, y 5 donaciones por hora.
 - **Validación de Datos Entrantes**:
@@ -237,10 +266,12 @@ git checkout -b develop
   - Ajuste del helper de desplazamiento con offset negativo de `-80px` para impedir que el Navbar fije tapase el título de la sección de destino.
 
 ### Versión 1.2.1 — Registro de Cierre de Sesión (Kevin Nielsen)
+
 - **Auditoría e Historial de Accesos**:
   - Registro de eventos específicos de cierre de sesión (`TEAM_002`) en logs para seguimiento de la sesión del usuario operador en el panel de administración.
 
 ### Versión 1.3.0 — Simplificación de Donaciones y Peticiones Directas (Kevin Nielsen)
+
 - **Eliminación de Donación Simulada**:
   - Remoción total del método de pago directo con tarjeta simulada de crédito en frontend y backend para concentrar la contabilidad en transferencias auditables directas.
   - Eliminación de controladores y rutas obsoletas como `POST /api/campanas/:id/donar` en [campanaController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/campanaController.js).
@@ -248,6 +279,7 @@ git checkout -b develop
   - Adición formal de archivos de bloqueo `pnpm-lock.yaml` en las carpetas de frontend y backend para consolidar entornos de ejecución idénticos e impedir desajustes en versiones de paquetes instalados.
 
 ### Versión 1.4.0 — Servicio de Correo y Agradecimientos Automatizados (Kevin Nielsen)
+
 - **Integración del Módulo SMTP**:
   - Integración de `nodemailer` en el backend para envío de correos electrónicos.
   - Configuración y parametrización de variables SMTP en el archivo de entorno mediante la actualización de [backend/.env.example](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/.env.example).
@@ -257,6 +289,7 @@ git checkout -b develop
   - Conexión asíncrona en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para despachar el correo de forma no bloqueante inmediatamente al confirmarse la transacción de la donación.
 
 ### Versión 1.5.0 — Límites de Campaña y Suite de Pruebas Automatizadas (Aramis Prieto)
+
 - **Validación del Límite de Recaudación en Campañas**:
   - Implementación de reglas de negocio en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js) para evitar sobre-donaciones. Bloquea la declaración e impide la aprobación de transferencias que superen el monto objetivo restante de la campaña.
 - **Suite de Pruebas Automatizadas con Vitest y Supertest**:
@@ -265,6 +298,7 @@ git checkout -b develop
   - Exclusión de rate limiting en modo test en [rateLimiter.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/middleware/rateLimiter.js) para evitar bloqueos por solicitudes frecuentes.
 
 ### Versión 1.6.0 — Desarrollo del Panel de Socios en el Backend (Thiago Masson)
+
 - **Modelo de Control de Cuotas Sociales**:
   - Creación del modelo relacional [PagoCuota.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PagoCuota.js) en PostgreSQL para registrar el historial de pago de cuotas mensuales de los asociados (mes, año, monto, estado de pago).
   - Configuración de relaciones y cascada de borrado en [models/index.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/index.js).
@@ -277,6 +311,7 @@ git checkout -b develop
   - Creación de la suite de pruebas automatizadas [socioPanel.test.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/socioPanel.test.js) que valida el correcto funcionamiento de los endpoints y los mecanismos de bloqueo de peticiones anónimas (Status 401).
 
 ### Versión 1.7.0 — Integración de Mercado Pago y Gestión de Pagos en Panel de Socios (Aramis Prieto)
+
 - **Modelo Ampliado de Socios y Base de Datos**:
   - Ampliación del esquema de [PerfilSocio.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PerfilSocio.js) en PostgreSQL para registrar información de contacto detallada: `nombre`, `apellido`, `direccion`, `nacionalidad`, `telefono`, `fecha_nacimiento`, `genero`, `metodo_pago` ('transferencia', 'efectivo', 'debito'), `fecha_ultimo_pago`, `localidad` y `observaciones`.
   - Unificación del modelo [PagoCuota.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/PagoCuota.js) para integrar los períodos de facturación (`mes`, `anio`) con el registro de transacciones de pago (`metodo_pago`, `mp_payment_id`, `numero_comprobante`, `comprobante_url`), utilizando `socio_numero_asociado` como clave foránea única.
@@ -295,6 +330,7 @@ git checkout -b develop
   - Creación de la suite de pruebas [socioSubscription.test.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/tests/socioSubscription.test.js) que verifica la creación de suscripciones, cancelación, declaraciones manuales y callbacks asíncronos del webhook.
 
 ### Versión 1.8.0 — Control de Método de Pago y Donaciones con Mercado Pago (Grupo Cooperadora)
+
 - **Control de Cambios de Método de Pago**:
   - Adición de las columnas `cant_cambios_metodo_pago` y `mes_ultimo_cambio_metodo_pago` en `PerfilSocio.js`.
   - Implementación de validaciones a nivel de backend en `socioController.js` para limitar las actualizaciones de método de pago a un máximo de 3 por mes para los socios. Los administradores están exentos de esta restricción.
@@ -308,6 +344,7 @@ git checkout -b develop
   - Configuración de la directiva `server.allowedHosts: true` en `vite.config.js` para facilitar el testeo remoto y compatibilidad con túneles HTTPS de desarrollo.
 
 ### Versión 1.9.0 — Túneles Dinámicos y Proxy de Retorno Seguro para Mercado Pago (Aramis Prieto)
+
 - **Automatización de Túneles Locales**:
   - Creación del script avanzado de inicialización `start-dev-with-tunnel.js` para levantar ngrok o túneles SSH de Pinggy de manera dinámica.
   - Auto-inyección de la variable de entorno `BACKEND_TUNNEL_URL` en ejecución para habilitar el enrutamiento bidireccional instantáneo de Webhooks en local.
@@ -318,6 +355,7 @@ git checkout -b develop
   - Actualización del usuario semilla de pruebas a `test_user_7385770550601504283@testuser.com` para alinear el ecosistema local y la base de datos de PostgreSQL con el Sandbox del usuario Comprador asignado en Mercado Pago.
 
 ### Versión 1.10.0 — Auditoría de Seguridad y Despliegue en Nube (Etapa Final)
+
 - **Hardening de Seguridad (Mitigación OWASP)**:
   - **Spoofing y Webhooks**: Implementación de verificación criptográfica (HMAC SHA256) de la cabecera `x-signature` en los webhooks de Mercado Pago para prevenir falsificación de pagos.
   - **CORS Estricto**: Restricción de orígenes permitidos en la API para aceptar peticiones únicamente del frontend local (`localhost:5173`, `3000`) y del dominio de producción provisto por Vercel.
@@ -328,6 +366,7 @@ git checkout -b develop
   - El proyecto está ahora preparado para ser hosteado bajo la arquitectura Serverless gratuita: **MongoDB Atlas** (Base de datos), **Render.com** (Node.js API) y **Vercel** (Frontend estático React).
 
 ### Versión 1.11.0 — Parches de Seguridad Críticos, Optimización y Accesibilidad (Aramis Prieto)
+
 - **Seguridad Crítica (Fail-Closed en Webhooks)**:
   - Modificación de la verificación de firmas criptográficas de Mercado Pago en [socioSubscriptionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioSubscriptionController.js) para forzar un esquema fail-closed. El servidor ahora detiene el procesamiento en producción si falta la variable de entorno `MP_WEBHOOK_SECRET`.
 - **Prevención de Replay Attacks**:
@@ -365,6 +404,7 @@ git checkout -b develop
   - Reemplazo del comportamiento `background-attachment: fixed` sobre el body en [index.css](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/index.css) por un pseudo-elemento fijo en el viewport. Esto elimina la rasterización repetitiva durante el desplazamiento y soluciona el lag visual al hacer scroll.
 
 ### Versión 1.12.0 — Estabilidad de Producción y Datos de Prueba Avanzados (Aramis Prieto)
+
 - **Resolución de SPA Routing en Vercel**:
   - Implementación del archivo de configuración `vercel.json` con reglas de reescritura (`rewrites`) globales hacia `index.html`. Esto previene de forma definitiva el error `404 NOT_FOUND` nativo de Vercel al recargar sub-rutas protegidas de la aplicación React.
 - **Tolerancia a Entornos de Preview (CORS)**:
@@ -375,6 +415,7 @@ git checkout -b develop
   - Ampliación del padrón con 6 socios de prueba interactivos (activos y pendientes) y generación del usuario Sandbox oficial de Mercado Pago para ensayos financieros.
 
 ### Versión 1.13.0 — Refactorización, Optimización de Caché y Estabilidad en Pruebas (Aramis Prieto)
+
 - **Limpieza de Archivos de Bloqueo Redundantes**:
   - Eliminación completa de `package-lock.json` en frontend y backend para delegar de forma exclusiva la gestión de dependencias a `pnpm` y prevenir inconsistencias de dependencias.
 - **Optimización de Serialización en Caché (Mashup)**:
@@ -390,19 +431,21 @@ git checkout -b develop
   - Limpieza de importaciones inactivas de `donationLimiter` y `validateDonation` en las rutas de campañas.
 
 ### Versión 1.14.0 — Proxies de Producción, Sincronización de Sesión e Invalidación de Caché (Aramis Prieto)
+
 - **Proxy Inverso en Vercel para Cookies Same-Origin**:
-  - Configuración de reglas de reescritura (`rewrites`) en [vercel.json](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/vercel.json) redirigiendo `/api/*` hacia el servidor backend de Render. Esto permite tratar las cookies de sesión `HttpOnly` como cookies de primer origen (*Same-Site*), eludiendo de raíz las restricciones de navegadores modernos que bloquean cookies de terceros cruzadas (`*.vercel.app` a `*.onrender.com`).
+  - Configuración de reglas de reescritura (`rewrites`) en [vercel.json](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/vercel.json) redirigiendo `/api/*` hacia el servidor backend de Render. Esto permite tratar las cookies de sesión `HttpOnly` como cookies de primer origen (_Same-Site_), eludiendo de raíz las restricciones de navegadores modernos que bloquean cookies de terceros cruzadas (`*.vercel.app` a `*.onrender.com`).
 - **Invalidación Proactiva de Caché en Campañas**:
   - Implementación del helper `flushCache` en [cacheMiddleware.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/middleware/cacheMiddleware.js) para vaciar completamente la caché en memoria al realizar operaciones de escritura.
   - Vinculación del vaciado de caché en el controlador de campañas ([campanaController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/campanaController.js)), aprobaciones de transferencias ([donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js)) y pagos procesados por Webhook de Mercado Pago ([socioSubscriptionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioSubscriptionController.js)). Esto asegura que la barra de progreso de recaudación y los totales acumulados en la Home pública se actualicen de forma instantánea al ingresar una donación.
 - **Resolución de IP Detrás de Proxies en Backend**:
-  - Activación de `app.set('trust proxy', 1)` en [index.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/index.js) de Express. Permite que el middleware de control de tasa (*Rate Limiter*) lea la IP real del cliente en lugar de la IP de los balanceadores de carga de Render o Vercel.
+  - Activación de `app.set('trust proxy', 1)` en [index.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/index.js) de Express. Permite que el middleware de control de tasa (_Rate Limiter_) lea la IP real del cliente en lugar de la IP de los balanceadores de carga de Render o Vercel.
 - **Rutas y Webhooks Dinámicos en Mercado Pago**:
   - Refactorización de [mpService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/mpService.js) introduciendo una función auxiliar `getBackendUrl()`. Resuelve de manera jerárquica la variable de entorno `BACKEND_URL`, el túnel dinámico `BACKEND_TUNNEL_URL`, o recurre al puerto local `5001`. Esto flexibiliza el redireccionamiento y notificaciones webhook en diferentes entornos (local, túneles, y producción).
 - **Sincronización Dinámica de Sesión en Navbar**:
   - Adición de `location.pathname` como dependencia al efecto de sesión de [Navbar.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.jsx) para re-evaluar e impactar instantáneamente el estado del Navbar cuando el usuario navega entre las diferentes vistas de la plataforma.
 
 ### Versión 1.15.0 — Consolidación Cloud-Only, Corrección de Redirecciones e Integraciones (Aramis Prieto)
+
 - **Desmantelamiento de Infraestructura Local**:
   - Eliminación del archivo de configuración `docker-compose.yml` de la raíz del proyecto para descartar la instanciación de servicios locales de bases de datos.
   - Purga de las secciones sobre despliegue y flujos de pruebas paso a paso en entornos locales (Localhost) del [README.md](file:///Users/aramisprieto/Documents/cooperadora-hospital1/README.md).
@@ -410,3 +453,7 @@ git checkout -b develop
   - Solución al error que redirigía forzosamente a los usuarios no autenticados hacia `/login?expired=true` al ingresar a páginas públicas. Se optimizó el interceptor de Axios en [axios.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/api/axios.js) para ignorar respuestas de estado 401/403 originadas por el chequeo de sesión del Navbar (`/auth/me`), posibilitando la navegación anónima como invitado en la página de inicio.
 - **Portabilidad de Desarrollo y Producción**:
   - Ajuste de compatibilidad para soportar entornos híbridos donde se requiera probar localmente el frontend/backend o usar webhooks con firmas bypass y orígenes CORS locales, mientras que en producción se mantiene la validación estricta y segura.
+
+s
+
+sss
