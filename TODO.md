@@ -10,10 +10,12 @@
 - [ ] Cambiar la forma en que se agregan los comprobantes (de URL a Archivo).
 - [ ] descripcion campaña
 - [ ] hacer lo de mi foto de wpp
+- [ ] agregar en gestion de socios el cambio a "inactivo" (THIAGO)
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 - [ ] añadir carrusel (THIAGO)
 - [ ] añadir footer wireframe (THIAGO)
+- [ ] agregar en gestion de socios el cambio a "inactivo" (THIAGO)
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
 - [x] Vincular el frontend con el backend
