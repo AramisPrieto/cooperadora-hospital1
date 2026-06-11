@@ -27,3 +27,5 @@
 - [x] Armar panel de socio hecho en el wireframe
 - [x] agregar panel de socios(ver cuotas pagas,donaciones demas) - THIAGO
 
+- [x] actualizar verfcer
+
