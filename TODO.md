@@ -10,6 +10,7 @@
 - [ ] Cambiar la forma en que se agregan los comprobantes (de URL a Archivo).
 - [ ] descripcion campaña
 - [ ] hacer lo de mi foto de wpp
+- [ ] añadir carrusel
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 ## ✅ Terminado
