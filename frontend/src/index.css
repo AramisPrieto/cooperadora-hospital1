@@ -38,6 +38,10 @@
     @apply flex items-center justify-center gap-2 bg-white text-slate-800 font-bold rounded-xl border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 hover:shadow-md transition-all duration-300;
   }
 
+  .btn-outline {
+    @apply flex items-center justify-center gap-2 bg-white font-bold rounded-xl border shadow-sm transition-all duration-300;
+  }
+
   /* ── FONDOS ESTRUCTURALES ── */
   .hero-bg {
     @apply bg-white relative;

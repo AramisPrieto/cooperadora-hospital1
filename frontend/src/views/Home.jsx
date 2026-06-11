@@ -630,10 +630,10 @@ const Home = () => {
                     </p>
                     <button
                       onClick={() => handleViewCampaignDetail(camp.id)}
-                      className="w-full mt-auto btn-outline text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300"
+                      className="w-full mt-auto btn-outline text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 py-2.5 text-xs font-black uppercase tracking-widest"
                     >
                       <Search className="h-4 w-4" />
-                      Ver Galería y Detalles
+                      Ver Detalles
                     </button>
                   </div>
                 </div>
