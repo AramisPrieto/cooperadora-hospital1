@@ -12,7 +12,6 @@
 - [ ] hacer lo de mi foto de wpp
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
-- [ ] añadir carrusel (THIAGO)
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
 - [x] Vincular el frontend con el backend
@@ -27,6 +26,7 @@
 - [x] agregar panel de socios(ver cuotas pagas,donaciones demas) - THIAGO
 - [x] añadir footer wireframe (THIAGO)
 - [x] agregar en gestion de socios el cambio a "inactivo" (THIAGO)
+- [x] añadir carrusel (THIAGO)
 
 - [x] actualizar verfcer
 
