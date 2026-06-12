@@ -10,12 +10,9 @@
 - [ ] Cambiar la forma en que se agregan los comprobantes (de URL a Archivo).
 - [ ] descripcion campaña
 - [ ] hacer lo de mi foto de wpp
-- [ ] agregar en gestion de socios el cambio a "inactivo" (THIAGO)
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 - [ ] añadir carrusel (THIAGO)
-- [ ] añadir footer wireframe (THIAGO)
-- [ ] agregar en gestion de socios el cambio a "inactivo" (THIAGO)
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
 - [x] Vincular el frontend con el backend
@@ -28,6 +25,8 @@
 - [x] Minimo de donacion (Kevin)
 - [x] Armar panel de socio hecho en el wireframe
 - [x] agregar panel de socios(ver cuotas pagas,donaciones demas) - THIAGO
+- [x] añadir footer wireframe (THIAGO)
+- [x] agregar en gestion de socios el cambio a "inactivo" (THIAGO)
 
 - [x] actualizar verfcer
 
