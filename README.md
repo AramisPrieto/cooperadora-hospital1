@@ -453,7 +453,17 @@ git checkout -b develop
   - Solución al error que redirigía forzosamente a los usuarios no autenticados hacia `/login?expired=true` al ingresar a páginas públicas. Se optimizó el interceptor de Axios en [axios.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/api/axios.js) para ignorar respuestas de estado 401/403 originadas por el chequeo de sesión del Navbar (`/auth/me`), posibilitando la navegación anónima como invitado en la página de inicio.
 - **Portabilidad de Desarrollo y Producción**:
   - Ajuste de compatibilidad para soportar entornos híbridos donde se requiera probar localmente el frontend/backend o usar webhooks con firmas bypass y orígenes CORS locales, mientras que en producción se mantiene la validación estricta y segura.
+  
+### Versión 1.16.0 — Gestión de Socios Inactivos, Iconos de Contacto y Carrusel de Campañas (Thiago Masson)
 
-s
-
-sss
+- **Gestión de Socios Inactivos**:
+  - Generalización de la función de aprobación a `handleUpdatePartnerStatus` en [AdminPanel.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/AdminPanel.jsx) para soportar de manera flexible la desactivación (estado `'inactivo'`) y reactivación (estado `'activo'`) de los socios directamente en la grilla del panel de administración.
+  - Implementación de confirmación obligatoria (`window.confirm`) antes de desactivar o rechazar un socio.
+  - Botonera dinámica en la grilla de socios al lado de sus badges de estado correspondientes.
+- **Iconos de Contacto en el Footer**:
+  - Reemplazo de los datos escritos de contacto por un bloque de botones de iconos dinámicos y estilizados (`Mail`, `Phone`, `MapPin`) con tooltips interactivos y hover al color de la marca en [Footer.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/components/Footer.jsx).
+  - Integración de scroll suave dinámico con Lenis y re-scroll en transiciones de ruta para corregir el comportamiento de los enlaces del footer.
+- **Carrusel de Campañas Activas**:
+  - Conversión de la tarjeta destacados fija de la Home en un carrusel interactivo en [Home.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/Home.jsx) para mostrar todas las campañas activas.
+  - Soporte para gestos táctiles deslizando (`swipe`) en móviles, animación fluida de opacidad en la transición de cambio de campaña, flechas de navegación lateral visibles en celulares (y con hover de grupo en escritorio) y dots indicadores de progreso en la parte inferior.
+  - Actualización del botón de donaciones en el Hero para redirigir dinámicamente a la campaña que se esté visualizando en el slide activo.

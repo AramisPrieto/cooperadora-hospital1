@@ -9,7 +9,7 @@ import CampaignCard from '../components/CampaignCard';
 import {
   Newspaper, Heart, Search, FileText, Users, Target,
   TrendingUp, ArrowRight, X, CheckCircle, AlertCircle,
-  ChevronRight, Banknote, Calendar, Sparkles, Copy, Check,
+  ChevronRight, ChevronLeft, Banknote, Calendar, Sparkles, Copy, Check,
   Flame, Trophy, SlidersHorizontal, Info
 } from 'lucide-react';
 
@@ -92,6 +92,11 @@ const Home = () => {
   const [donationMethod, setDonationMethod] = useState('transferencia');
   const [globalSuccessMsg, setGlobalSuccessMsg] = useState('');
   const [globalErrorMsg, setGlobalErrorMsg] = useState('');
+
+  /* ── Carousel states ── */
+  const [activeCampaignIndex, setActiveCampaignIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+  const [touchStartX, setTouchStartX] = useState(null);
 
   const [donationSuccess, setDonationSuccess] = useState('');
   const [donationError, setDonationError] = useState('');
@@ -274,17 +279,56 @@ const Home = () => {
     else scrollTo('campanas-section');
   };
 
-  const handleHeroDonate = () => {
-    if (!user) navigate('/login');
-    else if (campaigns.length > 0) handleViewCampaignDetail(campaigns[0].id);
-    else scrollTo('campanas-section');
-  };
-
-
   /* ── Computed Data ── */
   const activeCampaigns = campaigns.filter(c => parseFloat(c.monto_actual) < parseFloat(c.monto_objetivo));
   const completedCampaigns = campaigns.filter(c => parseFloat(c.monto_actual) >= parseFloat(c.monto_objetivo));
-  const featuredCampaign = activeCampaigns.find(c => c.es_campana_del_mes) || activeCampaigns[0] || null;
+  const currentHeroCampaign = activeCampaigns[activeCampaignIndex] || null;
+
+  const handleHeroDonate = () => {
+    if (!user) navigate('/login');
+    else if (currentHeroCampaign) handleViewCampaignDetail(currentHeroCampaign.id);
+    else scrollTo('campanas-section');
+  };
+
+  /* ── Carousel Handlers ── */
+  const handleCampaignChange = (newIndex) => {
+    setFade(false);
+    setTimeout(() => {
+      setActiveCampaignIndex(newIndex);
+      setFade(true);
+    }, 150);
+  };
+
+  const handleNextCampaign = () => {
+    if (activeCampaigns.length <= 1) return;
+    handleCampaignChange((activeCampaignIndex + 1) % activeCampaigns.length);
+  };
+
+  const handlePrevCampaign = () => {
+    if (activeCampaigns.length <= 1) return;
+    handleCampaignChange((activeCampaignIndex - 1 + activeCampaigns.length) % activeCampaigns.length);
+  };
+
+  const handleTouchStart = (e) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStartX) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diffX = touchStartX - touchEndX;
+    if (diffX > 50) {
+      handleNextCampaign();
+    } else if (diffX < -50) {
+      handlePrevCampaign();
+    }
+    setTouchStartX(null);
+  };
+
+  // Reset index when campaigns list length changes
+  useEffect(() => {
+    setActiveCampaignIndex(0);
+  }, [activeCampaigns.length]);
 
   const formatter = new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -293,8 +337,8 @@ const Home = () => {
     maximumFractionDigits: 0,
   });
 
-  const heroPct = featuredCampaign
-    ? Math.min(100, Math.round((parseFloat(featuredCampaign.monto_actual) / parseFloat(featuredCampaign.monto_objetivo)) * 100))
+  const heroPct = currentHeroCampaign
+    ? Math.min(100, Math.round((parseFloat(currentHeroCampaign.monto_actual) / parseFloat(currentHeroCampaign.monto_objetivo)) * 100))
     : 0;
 
   const modalPct = selectedCampaign
@@ -342,27 +386,64 @@ const Home = () => {
 
             </div>
 
-            {/* Right: Featured campaign card */}
-            <div className="lg:col-span-5 animate-fade-up-delay-2">
-              <div className="bg-white rounded-3xl p-6 shadow-card border border-slate-200 relative overflow-hidden flex flex-col">
+            {/* Right: Featured campaign card / Carousel */}
+            <div className="lg:col-span-5 animate-fade-up-delay-2 animate-fade">
+              <div
+                onTouchStart={handleTouchStart}
+                onTouchEnd={handleTouchEnd}
+                className="bg-white rounded-3xl p-6 shadow-card border border-slate-200 relative overflow-hidden flex flex-col group min-h-[360px]"
+              >
+                {/* Navigation Arrows for Carousel */}
+                {!loadingCampaigns && activeCampaigns.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevCampaign}
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/95 border border-slate-200/80 shadow-md flex items-center justify-center text-slate-600 hover:text-brand-600 hover:border-brand-100 transition-all duration-200 hover:scale-105 active:scale-95 z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:outline-none"
+                      aria-label="Campaña anterior"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={handleNextCampaign}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white/95 border border-slate-200/80 shadow-md flex items-center justify-center text-slate-600 hover:text-brand-600 hover:border-brand-100 transition-all duration-200 hover:scale-105 active:scale-95 z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:outline-none"
+                      aria-label="Siguiente campaña"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
+
                 {/* Top badge */}
-                <div className="absolute top-4 right-4">
-                  <span className="badge badge-red">
-                    <Sparkles className="h-3 w-3" />
-                    Destacada
-                  </span>
-                </div>
+                {!loadingCampaigns && currentHeroCampaign && (
+                  <div className="absolute top-4 right-4 z-10">
+                    {currentHeroCampaign.es_campana_del_mes ? (
+                      <span className="badge badge-red animate-pulse">
+                        <Sparkles className="h-3 w-3" />
+                        Destacada
+                      </span>
+                    ) : (
+                      <span className="badge badge-teal">
+                        <Flame className="h-3 w-3" />
+                        Activa
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 <div className="mb-4">
                   <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">
-                    Campaña Activa del Mes
+                    {activeCampaigns.length > 1
+                      ? `Campañas Activas (${activeCampaignIndex + 1}/${activeCampaigns.length})`
+                      : 'Campaña Activa del Mes'}
                   </p>
                   {loadingCampaigns ? (
                     <div className="h-6 w-3/4 bg-slate-100 rounded-full mt-2 animate-pulse" />
-                  ) : featuredCampaign ? (
-                    <p className="text-slate-900 font-black text-lg mt-1.5 leading-snug line-clamp-2">
-                      {featuredCampaign.titulo}
-                    </p>
+                  ) : currentHeroCampaign ? (
+                    <div className={`transition-all duration-200 ${fade ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-1 scale-[0.99]'}`}>
+                      <p className="text-slate-900 font-black text-lg mt-1.5 leading-snug line-clamp-2 pr-16">
+                        {currentHeroCampaign.titulo}
+                      </p>
+                    </div>
                   ) : (
                     <p className="text-slate-400 text-sm mt-1.5 italic">Sin campañas activas</p>
                   )}
@@ -374,20 +455,20 @@ const Home = () => {
                     <div className="h-3 bg-slate-100 rounded-full" />
                     <div className="h-10 bg-slate-100 rounded-xl" />
                   </div>
-                ) : featuredCampaign ? (
-                  <>
+                ) : currentHeroCampaign ? (
+                  <div className={`flex-grow flex flex-col transition-all duration-200 ${fade ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-1 scale-[0.99]'}`}>
                     {/* Amounts grid */}
                     <div className="grid grid-cols-2 gap-3 mb-4">
                       <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                         <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">Meta</p>
                         <p className="text-slate-900 font-black text-sm leading-none">
-                          {formatter.format(featuredCampaign.monto_objetivo)}
+                          {formatter.format(currentHeroCampaign.monto_objetivo)}
                         </p>
                       </div>
                       <div className="bg-accent-50 rounded-2xl p-4 border border-accent-100">
                         <p className="text-[9px] text-accent-700 font-black uppercase tracking-widest mb-1">Recaudado</p>
                         <p className="text-accent-700 font-black text-sm leading-none">
-                          {formatter.format(featuredCampaign.monto_actual)}
+                          {formatter.format(currentHeroCampaign.monto_actual)}
                         </p>
                       </div>
                     </div>
@@ -409,15 +490,31 @@ const Home = () => {
                     {/* CTA donate */}
                     <button
                       onClick={handleHeroDonate}
-                      className="w-full btn-brand py-3 text-sm mt-auto"
+                      className="w-full btn-brand py-3 text-sm mt-auto shadow-sm"
                     >
                       <Banknote className="h-4 w-4" />
                       {user ? 'Donar a esta Campaña' : 'Donar / Ver Detalles'}
                       <ArrowRight className="h-4 w-4" />
                     </button>
-                  </>
+
+                    {/* Carousel Dots */}
+                    {activeCampaigns.length > 1 && (
+                      <div className="flex justify-center gap-1.5 mt-4">
+                        {activeCampaigns.map((_, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleCampaignChange(idx)}
+                            className={`h-1.5 rounded-full transition-all duration-300 ${
+                              idx === activeCampaignIndex ? 'w-4 bg-brand-500' : 'w-1.5 bg-slate-200 hover:bg-slate-300'
+                            }`}
+                            aria-label={`Ir a campaña ${idx + 1}`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ) : (
-                  <div className="text-center py-8">
+                  <div className="text-center py-8 my-auto">
                     <Target className="h-10 w-10 text-slate-600 mx-auto mb-2" />
                     <p className="text-slate-400 text-sm">El equipo prepara nuevas iniciativas.</p>
                   </div>
@@ -742,6 +839,67 @@ const Home = () => {
               })}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          4.2 HACETE SOCIO BANNER (CTA)
+      ════════════════════════════════════════ */}
+      <section className="bg-slate-100 py-12 px-4 border-t border-slate-200/60">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-slate-950 rounded-[2rem] p-8 md:p-12 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+            {/* Background elements for premium look */}
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-900/10 rounded-full blur-[100px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
+            
+            {/* Left Column: Title, description, button */}
+            <div className="relative z-10 space-y-6 max-w-xl text-left">
+              <span className="text-brand-500 font-extrabold text-xs uppercase tracking-widest block">
+                Hacete socio
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-display font-black leading-tight text-white">
+                $4.500 al mes. <br />
+                Equipamiento todo el año.
+              </h2>
+              <p className="text-slate-400 text-sm leading-relaxed font-medium">
+                Tu cuota mensual financia el plan operativo del hospital de manera previsible.
+                Recibís comprobantes legales y podés deducir Ganancias.
+              </p>
+              <button
+                onClick={() => {
+                  if (!user) {
+                    navigate('/login?mode=register');
+                  } else if (user?.rol === 'admin') {
+                    navigate('/admin');
+                  } else {
+                    navigate('/mi-panel');
+                  }
+                }}
+                className="btn-brand bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all inline-flex items-center gap-2 text-sm shadow-md"
+              >
+                Asociarme ahora
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Right Column: Benefits list */}
+            <div className="relative z-10 w-full md:w-auto shrink-0 md:max-w-xs space-y-4">
+              {[
+                "Comprobantes legales descargables",
+                "Cancelás cuando quieras",
+                "Auditoría externa anual",
+                "Voto en Asamblea Anual"
+              ].map((benefit, idx) => (
+                <div key={idx} className="flex items-center gap-3">
+                  <div className="h-5 w-5 rounded-full bg-brand-600 flex items-center justify-center shrink-0 shadow-sm">
+                    <Check className="h-3.5 w-3.5 text-white stroke-[3px]" />
+                  </div>
+                  <span className="text-slate-200 text-sm font-bold tracking-wide">
+                    {benefit}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

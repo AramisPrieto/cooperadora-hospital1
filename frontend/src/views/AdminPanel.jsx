@@ -210,15 +210,20 @@ const AdminPanel = () => {
     return () => clearTimeout(t);
   }, [successMsg]);
 
-  /* ── Approve partner ── */
-  const handleApprovePartner = async (num) => {
+  /* ── Update partner status ── */
+  const handleUpdatePartnerStatus = async (num, newStatus) => {
+    if (newStatus === 'inactivo' && !window.confirm('¿Seguro que desea desactivar/rechazar a este socio?')) return;
     setSubmitting(true);
     try {
-      await api.put(`/socios/${num}`, { estado: 'activo' });
-      setSuccessMsg('Socio aprobado y activo en el Libro Registro.');
+      await api.put(`/socios/${num}`, { estado: newStatus });
+      setSuccessMsg(
+        newStatus === 'activo'
+          ? 'Socio activado/aprobado correctamente.'
+          : 'Socio desactivado correctamente.'
+      );
       loadDashboardData();
     } catch (err) {
-      setErrorMsg('Error al actualizar el estado del socio.');
+      setErrorMsg(err.response?.data?.error || 'Error al actualizar el estado del socio.');
     } finally {
       setSubmitting(false);
     }
@@ -777,24 +782,54 @@ const AdminPanel = () => {
                         </div>
                         <div className="flex items-center gap-3 shrink-0" onClick={e => e.stopPropagation()}>
                           {part.estado === 'pendiente' ? (
-                            <button
-                              onClick={() => handleApprovePartner(part.numero_asociado)}
-                              disabled={submitting}
-                              className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
-                            >
-                              <Clock className="h-3 w-3" />
-                              Aprobar
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleUpdatePartnerStatus(part.numero_asociado, 'activo')}
+                                disabled={submitting}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                                Aprobar
+                              </button>
+                              <button
+                                onClick={() => handleUpdatePartnerStatus(part.numero_asociado, 'inactivo')}
+                                disabled={submitting}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <XCircle className="h-3 w-3" />
+                                Rechazar
+                              </button>
+                            </div>
                           ) : part.estado === 'inactivo' ? (
-                            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-[11px] font-black uppercase tracking-wider">
-                              <XCircle className="h-3 w-3" />
-                              Inactivo
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-[11px] font-black uppercase tracking-wider">
+                                <XCircle className="h-3 w-3" />
+                                Inactivo
+                              </span>
+                              <button
+                                onClick={() => handleUpdatePartnerStatus(part.numero_asociado, 'activo')}
+                                disabled={submitting}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                                Activar
+                              </button>
+                            </div>
                           ) : (
-                            <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-[11px] font-black uppercase tracking-wider">
-                              <CheckCircle className="h-3 w-3" />
-                              Activo
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-[11px] font-black uppercase tracking-wider">
+                                <CheckCircle className="h-3 w-3" />
+                                Activo
+                              </span>
+                              <button
+                                onClick={() => handleUpdatePartnerStatus(part.numero_asociado, 'inactivo')}
+                                disabled={submitting}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-[11px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <XCircle className="h-3 w-3" />
+                                Desactivar
+                              </button>
+                            </div>
                           )}
                           <button
                             onClick={() => setExpandedPartnerId(isExpanded ? null : part.numero_asociado)}
