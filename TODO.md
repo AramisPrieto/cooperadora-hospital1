@@ -1,15 +1,11 @@
 # 📋 Plan de Trabajo y Pendientes
 ## 🚀 Prioridades Actuales
 ## 🛠️ Tareas por Hacer (Backlog)
-- [ ] Validar los PDFs de las etapas del proyecto
-- [ ] arreglar agregar imagenes, elegir imagen background (Kevin)
-- [ ] hacer wireframes como en el boceto(02 · Buscador de campañas,03 · Detalle de campaña,04 · Noticias y logros)
+- [ ] hacer wireframes
 - [ ] quitar # en noticias
 - [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) - ARAMIS
 - [ ] ver mails que habia echo kevo dejarlos andando
-- [ ] Cambiar la forma en que se agregan los comprobantes (de URL a Archivo).
-- [ ] descripcion campaña
-- [ ] hacer lo de mi foto de wpp
+- [ ] probar ia diseño hacer prueba
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 ## ✅ Terminado
