@@ -11,7 +11,7 @@
 - **Aramis Prieto**
 - **Kevin Nielsen**
 - **Thiago Masson**
-- **Santiago Ialungo**
+- **Santiago Ialun**
 
 **Profesor:** Ing. Hernández Gauna, Jorge G.
 
