@@ -11,7 +11,7 @@
 - **Aramis Prieto**
 - **Kevin Nielsen**
 - **Thiago Masson**
-- **Santiago Ialun**
+- **Santiago Ialungo**
 
 **Profesor:** Ing. Hernández Gauna, Jorge G.
 
@@ -64,7 +64,7 @@ Resguarda los datos sensibles que exigen trazabilidad estricta y consistencia **
 
 Almacena documentos de formato libre de alta carga multimedia:
 
-- **`noticias_actualidad`**: Publicaciones con galerías fotográficas, videos y tags dinámicos.
+- **`noticias_actualidad`**: Publicaciones con galerías fotográficas, videos y contenido enriquecido.
 - **`campanas_detalle`**: Complemento de narrativa enriquecida para campañas (testimonios, estado de ejecución de obras y arrays de videos/imágenes) vinculados dinámicamente mediante `campana_id_ref`.
 
 ### ⚛️ Transacciones ACID y Concurrencia en Donaciones
@@ -493,11 +493,19 @@ git checkout -b develop
 - **Prevención de Layout Shift (CLS)**:
   - Adición de propiedades físicas estáticas `width={48}` y `height={48}` a la etiqueta del logotipo en [Navbar.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/components/Navbar.jsx) para reservar espacio de renderizado de antemano y evitar saltos de cabecera en la carga.
 
-### Versión 1.19.0 — Migración a Gmail SMTP para Envío de Correos (Kevo Jensen & Aramis Prieto)
+### Versión 1.19.0 — Migración a Gmail SMTP para Envío de Correos (Kevin Nielsen & Aramis Prieto)
 
 - **Integración de Gmail SMTP**:
   - Reemplazo del simulador Ethereal Email por el servidor de correo de Google (`smtp.gmail.com` en puerto `465` con SSL habilitado `SMTP_SECURE=true`).
   - Configuración y validación del flujo de envío seguro usando Contraseñas de Aplicación (App Passwords) de Google para la cuenta de Gmail autenticada.
   - Sincronización del remitente (`EMAIL_FROM`) con la cuenta de Gmail para evitar rebotes de correo o clasificación como spam.
+
+### Versión 1.20.0 — Re-hosting en Render y Respaldo de Base de Datos (Aramis Prieto)
+
+- **Re-hosting del Backend en Render**:
+  - Migración y re-hospedaje de la API de Node.js a un nuevo servicio web en Render (`cooperadora-backend.onrender.com`), tras la pérdida de acceso a la cuenta Render original.
+  - Actualización de las reglas de redirección (`rewrites`) en el archivo `vercel.json` del frontend para apuntar al nuevo dominio del backend y conservar la funcionalidad de sesión integrada.
+- **Respaldo de Base de Datos en Producción**:
+  - Resguardo preventivo del estado previo de la base de datos PostgreSQL en `backend/old_db_backup.json` (conteniendo las tablas de campañas, donaciones, perfiles de socios y usuarios) para garantizar la integridad e impedir la pérdida de datos históricos.
 
 
