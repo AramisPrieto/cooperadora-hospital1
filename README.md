@@ -453,8 +453,20 @@ git checkout -b develop
   - Solución al error que redirigía forzosamente a los usuarios no autenticados hacia `/login?expired=true` al ingresar a páginas públicas. Se optimizó el interceptor de Axios en [axios.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/api/axios.js) para ignorar respuestas de estado 401/403 originadas por el chequeo de sesión del Navbar (`/auth/me`), posibilitando la navegación anónima como invitado en la página de inicio.
 - **Portabilidad de Desarrollo y Producción**:
   - Ajuste de compatibilidad para soportar entornos híbridos donde se requiera probar localmente el frontend/backend o usar webhooks con firmas bypass y orígenes CORS locales, mientras que en producción se mantiene la validación estricta y segura.
-  
-### Versión 1.16.0 — Gestión de Socios Inactivos, Iconos de Contacto y Carrusel de Campañas (Thiago Masson)
+
+### Versión 1.16.0 — Nueva Vista de Campañas y Rediseño Premium de Detalles (Santiago Ialungo)
+
+- **Página Independiente de Búsqueda de Campañas**:
+  - Creación de [CampaignSearch.jsx](file:///c:/Users/Santiago/Desktop/cooperadora-hospital1/frontend/src/views/CampaignSearch.jsx) bajo la ruta `/campanas`, ofreciendo un panel dinámico con buscador textual y filtros interactivos por categoría (Equipamiento, Insumos Quirúrgicos, Material Descartable, etc.).
+- **Rediseño Completo de Detalle de Campaña**:
+  - Implementación de un layout premium de dos columnas en [CampaignDetail.jsx](file:///c:/Users/Santiago/Desktop/cooperadora-hospital1/frontend/src/views/CampaignDetail.jsx) para la ruta `/campanas/:id`.
+  - Eliminación de secciones obsoletas ("Detalle del equipo" / especificaciones técnicas y la línea de tiempo) y optimización del espaciado superior (`pt-24`) para evitar superposición con el Navbar.
+  - Reemplazo de la sección "¿Por qué este equipo?" por "Descripción", sincronizada dinámicamente con la propiedad `equipamiento_info` provista por los administradores.
+- **Soporte de Carga de Archivos y Exclusiones de Git**:
+  - Ajuste en `uploadController.js` para devolver URLs absolutas basadas en el host de la solicitud, permitiendo la resolución correcta de imágenes.
+  - Configuración de `.gitignore` para omitir la carpeta de subidas local `backend/uploads/`, previniendo commits accidentales de pruebas locales de imágenes.
+
+### Versión 1.17.0 — Gestión de Socios Inactivos, Iconos de Contacto y Carrusel de Campañas (Thiago Masson)
 
 - **Gestión de Socios Inactivos**:
   - Generalización de la función de aprobación a `handleUpdatePartnerStatus` en [AdminPanel.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/AdminPanel.jsx) para soportar de manera flexible la desactivación (estado `'inactivo'`) y reactivación (estado `'activo'`) de los socios directamente en la grilla del panel de administración.
