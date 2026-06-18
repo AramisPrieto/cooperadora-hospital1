@@ -28,6 +28,13 @@ const CATEGORY_STYLES = {
   General: 'bg-slate-50 text-slate-700 border border-slate-100',
 };
 
+const formatter = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
 const CampaignCard = ({ campaign, onClickDetail }) => {
   const { id, titulo, monto_objetivo, monto_actual, fecha_limite } = campaign;
 
@@ -40,13 +47,6 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
   const categoryClass = CATEGORY_STYLES[category] || CATEGORY_STYLES.General;
 
   const image = campaign.detalles?.galeria_rica?.imagenes?.[0] || campaign.detalles?.equipamiento_imagen || '';
-
-  const formatter = new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
 
   const getDonorCount = (id, monto) => Math.round(parseFloat(monto) / 12000) + (id * 11) + 14;
   const donorCount = getDonorCount(id, monto_actual);
@@ -71,6 +71,7 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
           <img
             src={image}
             alt={titulo}
+            loading="lazy"
             className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
           />
         ) : (
@@ -152,4 +153,4 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
   );
 };
 
-export default CampaignCard;
+export default React.memo(CampaignCard);

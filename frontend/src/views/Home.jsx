@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useLenis } from 'lenis/react';
@@ -63,6 +63,13 @@ const NEWS_COLORS = [
   'from-rose-400 to-pink-600',
   'from-blue-400 to-indigo-600',
 ];
+
+const formatter = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: 'ARS',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
 
 const Home = () => {
   const navigate = useNavigate();
@@ -280,8 +287,14 @@ const Home = () => {
   };
 
   /* ── Computed Data ── */
-  const activeCampaigns = campaigns.filter(c => parseFloat(c.monto_actual) < parseFloat(c.monto_objetivo));
-  const completedCampaigns = campaigns.filter(c => parseFloat(c.monto_actual) >= parseFloat(c.monto_objetivo));
+  const activeCampaigns = useMemo(() =>
+    campaigns.filter(c => parseFloat(c.monto_actual) < parseFloat(c.monto_objetivo)),
+    [campaigns]
+  );
+  const completedCampaigns = useMemo(() =>
+    campaigns.filter(c => parseFloat(c.monto_actual) >= parseFloat(c.monto_objetivo)),
+    [campaigns]
+  );
   const currentHeroCampaign = activeCampaigns[activeCampaignIndex] || null;
 
   const handleHeroDonate = () => {
@@ -330,12 +343,7 @@ const Home = () => {
     setActiveCampaignIndex(0);
   }, [activeCampaigns.length]);
 
-  const formatter = new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
+
 
   const heroPct = currentHeroCampaign
     ? Math.min(100, Math.round((parseFloat(currentHeroCampaign.monto_actual) / parseFloat(currentHeroCampaign.monto_objetivo)) * 100))
@@ -561,7 +569,7 @@ const Home = () => {
           <div className="mb-6 flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold rounded-2xl animate-fade-up">
             <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600" />
             <span className="flex-grow">{globalSuccessMsg}</span>
-            <button onClick={() => setGlobalSuccessMsg('')} className="text-emerald-400 hover:text-emerald-600 text-xs font-bold shrink-0">✕</button>
+            <button onClick={() => setGlobalSuccessMsg('')} aria-label="Cerrar mensaje de éxito" className="text-emerald-400 hover:text-emerald-600 text-xs font-bold shrink-0">✕</button>
           </div>
         )}
 
@@ -569,7 +577,7 @@ const Home = () => {
           <div className="mb-6 flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold rounded-2xl animate-fade-up">
             <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />
             <span className="flex-grow">{globalErrorMsg}</span>
-            <button onClick={() => setGlobalErrorMsg('')} className="text-rose-400 hover:text-rose-600 text-xs font-bold shrink-0">✕</button>
+            <button onClick={() => setGlobalErrorMsg('')} aria-label="Cerrar mensaje de error" className="text-rose-400 hover:text-rose-600 text-xs font-bold shrink-0">✕</button>
           </div>
         )}
 
@@ -986,7 +994,7 @@ const Home = () => {
                         <div className="aspect-[4/3] rounded-xl overflow-hidden border border-slate-200 bg-white sm:col-span-1 shadow-inner relative">
                           <img
                             src={selectedCampaign.detalles.equipamiento_imagen}
-                            alt="Aparato"
+                            alt={`Imagen de ${selectedCampaign.titulo}`}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
@@ -1274,22 +1282,14 @@ const Home = () => {
                   <img
                     src={selectedNews.imagen_url}
                     alt={selectedNews.titulo}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
                 </div>
               )}
 
-              {/* Tags */}
-              {selectedNews.tags && selectedNews.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pb-2">
-                  {selectedNews.tags.map(tag => (
-                    <span key={tag} className="badge badge-slate">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              )}
+
 
               {/* Body Content */}
               <div

@@ -100,6 +100,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="p-2.5 bg-slate-900 hover:bg-brand-600 text-slate-400 hover:text-white rounded-xl transition-all shadow-sm border border-slate-800"
                 title="Calle 56 Nº 2877, Necochea"
+                aria-label="Ubicación en Google Maps de la Cooperadora"
               >
                 <MapPin className="h-5 w-5" />
               </a>
@@ -107,6 +108,7 @@ const Footer = () => {
                 href="tel:1234567890"
                 className="p-2.5 bg-slate-900 hover:bg-brand-600 text-slate-400 hover:text-white rounded-xl transition-all shadow-sm border border-slate-800"
                 title="1234567890"
+                aria-label="Llamar por teléfono a la Cooperadora"
               >
                 <Phone className="h-5 w-5" />
               </a>
@@ -114,6 +116,7 @@ const Footer = () => {
                 href="mailto:[EMAIL_ADDRESS]"
                 className="p-2.5 bg-slate-900 hover:bg-brand-600 text-slate-400 hover:text-white rounded-xl transition-all shadow-sm border border-slate-800"
                 title="[EMAIL_ADDRESS]"
+                aria-label="Enviar correo electrónico a la Cooperadora"
               >
                 <Mail className="h-5 w-5" />
               </a>

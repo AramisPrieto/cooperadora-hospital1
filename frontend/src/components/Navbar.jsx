@@ -88,6 +88,8 @@ const Navbar = () => {
             <img
               src="/logo.png"
               alt="Logo Cooperadora Hospital Necochea"
+              width={48}
+              height={48}
               className="h-12 w-12 object-contain"
               onError={e => { e.target.style.display = 'none'; }}
             />
