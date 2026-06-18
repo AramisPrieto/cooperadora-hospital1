@@ -2,12 +2,12 @@
 ## 🚀 Prioridades Actuales
 ## 🛠️ Tareas por Hacer (Backlog)
 - [ ] hacer wireframes
-- [ ] quitar # en noticias
 - [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) - ARAMIS
 - [ ] ver mails que habia echo kevo dejarlos andando
 - [ ] probar ia diseño hacer prueba
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
+- [ ] quitar # en noticias (THIAGO)
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
 - [x] Vincular el frontend con el backend
