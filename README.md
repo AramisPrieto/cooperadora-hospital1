@@ -480,7 +480,7 @@ git checkout -b develop
   - Soporte para gestos táctiles deslizando (`swipe`) en móviles, animación fluida de opacidad en la transición de cambio de campaña, flechas de navegación lateral visibles en celulares (y con hover de grupo en escritorio) y dots indicadores de progreso en la parte inferior.
   - Actualización del botón de donaciones en el Hero para redirigir dinámicamente a la campaña que se esté visualizando en el slide activo.
 
-### Versión 1.17.0 — Auditoría de Frontend, Optimización de Rendimiento y Accesibilidad (Grupo Cooperadora)
+### Versión 1.18.0 — Auditoría de Frontend, Optimización de Rendimiento y Accesibilidad (Thiago Masson)
 
 - **Optimización de Rendimiento y Renderizado (React)**:
   - Memoización del filtrado de listados en [Home.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/Home.jsx) (`activeCampaigns` y `completedCampaigns`) usando `useMemo` para evitar re-cálculos costosos en cada ciclo de renderizado.
