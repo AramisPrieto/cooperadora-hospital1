@@ -72,7 +72,7 @@ const Footer = () => {
                 <button onClick={(e) => handleScrollTo(e, 'obras-section')} className="hover:text-white transition-colors text-left font-bold">Obras Concretadas</button>
               </li>
               <li>
-                <button onClick={(e) => handleScrollTo(e, 'noticias-section')} className="hover:text-white transition-colors text-left font-bold">Noticias</button>
+                <Link to="/noticias" className="hover:text-white transition-colors">Noticias</Link>
               </li>
             </ul>
           </div>

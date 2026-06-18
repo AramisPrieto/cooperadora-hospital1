@@ -119,7 +119,7 @@ const Navbar = () => {
             </NavLink>
             <NavLink to="/campanas" active={location.pathname === '/campanas'}>Campañas</NavLink>
             <ScrollLink to="obras-section" active={activeSection === 'obras-section'}>Obras Concretadas</ScrollLink>
-            <ScrollLink to="noticias-section" active={activeSection === 'noticias-section'}>Noticias</ScrollLink>
+            <NavLink to="/noticias" active={location.pathname === '/noticias'}>Noticias</NavLink>
             {isAuthenticated && isAdmin && (
               <NavLink to="/admin" active={location.pathname === '/admin'}>
                 <Shield className="h-4 w-4" />
@@ -198,7 +198,7 @@ const Navbar = () => {
             </MobileNavLink>
             <MobileNavLink to="/campanas" active={location.pathname === '/campanas'} onClick={() => setMobileOpen(false)}>Campañas</MobileNavLink>
             <MobileScrollLink to="obras-section" active={activeSection === 'obras-section'} setMobileOpen={setMobileOpen}>Obras Concretadas</MobileScrollLink>
-            <MobileScrollLink to="noticias-section" active={activeSection === 'noticias-section'} setMobileOpen={setMobileOpen}>Noticias</MobileScrollLink>
+            <MobileNavLink to="/noticias" active={location.pathname === '/noticias'} onClick={() => setMobileOpen(false)}>Noticias</MobileNavLink>
             {isAuthenticated && isAdmin && (
               <MobileNavLink to="/admin" active={location.pathname === '/admin'}>
                 Panel Administrativo
