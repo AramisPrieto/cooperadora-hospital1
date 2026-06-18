@@ -269,7 +269,7 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
             <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Donar a</p>
             <h3 className="text-lg font-display font-black text-slate-900 leading-snug">{campaign.titulo}</h3>
           </div>
-          <button onClick={onClose} className="h-8 w-8 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors shadow-sm">
+          <button onClick={onClose} aria-label="Cerrar modal de donación" className="h-8 w-8 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors shadow-sm">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -332,7 +332,7 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
                       <span className="text-slate-400 font-medium">Alias:</span>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-100">cooperadora.hospital.nec</span>
-                        <button type="button" onClick={() => { navigator.clipboard.writeText('cooperadora.hospital.nec'); setCopiedAlias(true); setTimeout(() => setCopiedAlias(false), 2000); }} className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors">
+                        <button type="button" onClick={() => { navigator.clipboard.writeText('cooperadora.hospital.nec'); setCopiedAlias(true); setTimeout(() => setCopiedAlias(false), 2000); }} aria-label="Copiar alias de la Cooperadora" className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors">
                           {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
                         </button>
                       </div>
@@ -342,7 +342,7 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
                       <span className="text-slate-400 font-medium">CBU:</span>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-100">0140354701354701354701</span>
-                        <button type="button" onClick={() => { navigator.clipboard.writeText('0140354701354701354701'); setCopiedCbu(true); setTimeout(() => setCopiedCbu(false), 2000); }} className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors">
+                        <button type="button" onClick={() => { navigator.clipboard.writeText('0140354701354701354701'); setCopiedCbu(true); setTimeout(() => setCopiedCbu(false), 2000); }} aria-label="Copiar CBU de la Cooperadora" className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors">
                           {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
                         </button>
                       </div>

@@ -467,3 +467,17 @@ git checkout -b develop
   - Conversión de la tarjeta destacados fija de la Home en un carrusel interactivo en [Home.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/Home.jsx) para mostrar todas las campañas activas.
   - Soporte para gestos táctiles deslizando (`swipe`) en móviles, animación fluida de opacidad en la transición de cambio de campaña, flechas de navegación lateral visibles en celulares (y con hover de grupo en escritorio) y dots indicadores de progreso en la parte inferior.
   - Actualización del botón de donaciones en el Hero para redirigir dinámicamente a la campaña que se esté visualizando en el slide activo.
+
+### Versión 1.17.0 — Auditoría de Frontend, Optimización de Rendimiento y Accesibilidad (Grupo Cooperadora)
+
+- **Optimización de Rendimiento y Renderizado (React)**:
+  - Memoización del filtrado de listados en [Home.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/Home.jsx) (`activeCampaigns` y `completedCampaigns`) usando `useMemo` para evitar re-cálculos costosos en cada ciclo de renderizado.
+  - Envolvimiento del componente [CampaignCard.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/components/CampaignCard.jsx) con `React.memo` para omitir re-renders de tarjetas cuando el listado de campañas se actualiza pero los datos de la campaña no han cambiado.
+  - Extracción de la instanciación de `Intl.NumberFormat` fuera de las vistas y componentes ([CampaignCard.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/components/CampaignCard.jsx) y [Home.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/Home.jsx)) a constantes estáticas del módulo, eliminando la sobrecarga computacional de su creación repetida.
+  - Configuración de `loading="lazy"` en las imágenes de tarjetas y modales para posponer la carga de recursos de red hasta que entren en el viewport del usuario.
+- **Mejoras de Accesibilidad (a11y) y Semántica**:
+  - Incorporación de atributos `aria-label` descriptivos a todos los botones interactivos e iconos sin texto de la aplicación en [Footer.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/components/Footer.jsx) (enlaces de redes/contacto), [CampaignDetail.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/CampaignDetail.jsx) (cerrar modal, copiar alias y copiar CBU), y [Home.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/Home.jsx) (cerrar alertas y mensajes).
+  - Mejora semántica en los atributos `alt` de las imágenes de especificaciones técnicas de equipamientos médicos para evitar descriptores mudos como `"Aparato"`.
+- **Prevención de Layout Shift (CLS)**:
+  - Adición de propiedades físicas estáticas `width={48}` y `height={48}` a la etiqueta del logotipo en [Navbar.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/components/Navbar.jsx) para reservar espacio de renderizado de antemano y evitar saltos de cabecera en la carga.
+

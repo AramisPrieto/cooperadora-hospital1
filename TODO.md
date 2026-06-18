@@ -4,7 +4,7 @@
 - [ ] Validar los PDFs de las etapas del proyecto
 - [ ] arreglar agregar imagenes, elegir imagen background (Kevin)
 - [ ] hacer wireframes como en el boceto(02 · Buscador de campañas,03 · Detalle de campaña,04 · Noticias y logros)
-- [ ] quitar # en noticias
+
 - [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) - ARAMIS
 - [ ] ver mails que habia echo kevo dejarlos andando
 - [ ] Cambiar la forma en que se agregan los comprobantes (de URL a Archivo).
@@ -27,6 +27,7 @@
 - [x] añadir footer wireframe (THIAGO)
 - [x] agregar en gestion de socios el cambio a "inactivo" (THIAGO)
 - [x] añadir carrusel (THIAGO)
+- [x] quitar # en noticias
 
 - [x] actualizar verfcer
 
