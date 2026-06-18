@@ -479,3 +479,11 @@ git checkout -b develop
   - Conversión de la tarjeta destacados fija de la Home en un carrusel interactivo en [Home.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/Home.jsx) para mostrar todas las campañas activas.
   - Soporte para gestos táctiles deslizando (`swipe`) en móviles, animación fluida de opacidad en la transición de cambio de campaña, flechas de navegación lateral visibles en celulares (y con hover de grupo en escritorio) y dots indicadores de progreso en la parte inferior.
   - Actualización del botón de donaciones en el Hero para redirigir dinámicamente a la campaña que se esté visualizando en el slide activo.
+
+### Versión 1.18.0 — Migración a Gmail SMTP para Envío de Correos (Kevo Jensen & Aramis Prieto)
+
+- **Integración de Gmail SMTP**:
+  - Reemplazo del simulador Ethereal Email por el servidor de correo de Google (`smtp.gmail.com` en puerto `465` con SSL habilitado `SMTP_SECURE=true`).
+  - Configuración y validación del flujo de envío seguro usando Contraseñas de Aplicación (App Passwords) de Google para la cuenta de Gmail autenticada.
+  - Sincronización del remitente (`EMAIL_FROM`) con la cuenta de Gmail para evitar rebotes de correo o clasificación como spam.
+
