@@ -62,8 +62,6 @@ const NewsSearch = () => {
   const [activeCategory, setActiveCategory] = useState('Todas');
   const [activeSort, setActiveSort] = useState('recientes');
   const [currentPage, setCurrentPage] = useState(1);
-  const debounceRef = useRef(null);
-
   // Reset page when category, search input, active sort, or underlying news change
   useEffect(() => {
     setCurrentPage(1);
@@ -83,18 +81,18 @@ const NewsSearch = () => {
     }
   }, []);
 
-  // Initial load
+  // Carga inicial y búsqueda con debounce
   useEffect(() => {
-    fetchNews('');
-  }, [fetchNews]);
+    if (searchInput === '') {
+      fetchNews('');
+      return;
+    }
 
-  // Search with debounce
-  useEffect(() => {
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
+    const timer = setTimeout(() => {
       fetchNews(searchInput);
     }, 350);
-    return () => clearTimeout(debounceRef.current);
+
+    return () => clearTimeout(timer);
   }, [searchInput, fetchNews]);
 
   const handleClearSearch = () => {
