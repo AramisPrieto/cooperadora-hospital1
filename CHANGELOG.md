@@ -456,7 +456,7 @@
   - Instalación e integración de los paquetes de monitoreo oficiales `@vercel/analytics` y `@vercel/speed-insights` en el frontend React.
   - Inicialización de los componentes `<Analytics />` y `<SpeedInsights />` en la raíz [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx) para recopilar métricas de visitas, Core Web Vitals y rendimiento real de carga del portal de manera automatizada en producción.
 
-### 2026-06-19 - Mejoras de Interfaz y Panel Administrativo
+### Versión 1.31.0 - Mejoras de Interfaz y Panel Administrativo
 - **Nacionalidad y Localidad en Registro**:
   - Reemplazo de los campos de texto libre por etiquetas `<select>` en el registro de la aplicación y en el formulario del panel administrativo, unificando criterios y garantizando la recolección de localidades correctas.
 - **Gestión de Cuotas Sociales**:
