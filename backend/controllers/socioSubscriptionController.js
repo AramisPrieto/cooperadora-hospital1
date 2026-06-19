@@ -50,7 +50,8 @@ export const iniciarSuscripcion = async (req, res) => {
     const mpSubscription = await crearSuscripcionSocio({
       email: socio.usuario.email,
       monto: parseFloat(monto),
-      socioId: socio.numero_asociado
+      socioId: socio.numero_asociado,
+      frontendUrl: req.body.frontend_url
     });
 
     // Guardar los datos en el perfil del socio con estado pendiente
@@ -421,8 +422,10 @@ export const webhookMercadoPago = async (req, res) => {
 
 // Redireccionar suscripción de socio de vuelta al panel
 export const handleSocioMpRedirect = (req, res) => {
-  const queryParams = new URLSearchParams(req.query).toString();
-  const frontendUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/mi-panel?status=sub_callback&${queryParams}`;
+  const frontendHost = req.query.frontend_url || process.env.FRONTEND_URL || 'http://localhost:3000';
+  const cleanParams = new URLSearchParams(req.query);
+  cleanParams.delete('frontend_url');
+  const frontendUrl = `${frontendHost}/mi-panel?status=sub_callback&${cleanParams.toString()}`;
   res.redirect(frontendUrl);
 };
 

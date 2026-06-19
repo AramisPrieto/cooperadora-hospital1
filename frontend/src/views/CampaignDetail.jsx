@@ -232,7 +232,10 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
     }
     setSubmitting(true); setError('');
     try {
-      const res = await api.post(`/donaciones/campanas/${campaign.id}/donar-mp`, { monto: parseFloat(amount) });
+      const res = await api.post(`/donaciones/campanas/${campaign.id}/donar-mp`, {
+        monto: parseFloat(amount),
+        frontend_url: window.location.origin
+      });
       const url = res.data.sandboxInitPoint || res.data.initPoint;
       if (url) window.location.href = url;
       else setError('No se pudo generar la URL de Mercado Pago.');

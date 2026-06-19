@@ -153,7 +153,10 @@ const SocioPanel = () => {
     setErrorMsg('');
     setSuccessMsg('');
     try {
-      const res = await api.post('/socios/suscripcion/crear', { monto: parseFloat(monto) });
+      const res = await api.post('/socios/suscripcion/crear', {
+        monto: parseFloat(monto),
+        frontend_url: window.location.origin
+      });
       const checkoutUrl = res.data.sandboxInitPoint || res.data.initPoint;
       if (checkoutUrl) {
         window.location.href = checkoutUrl;

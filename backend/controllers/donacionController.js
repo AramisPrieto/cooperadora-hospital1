@@ -266,7 +266,8 @@ export const crearDonacionMercadoPago = async (req, res) => {
       campanaTitulo: campana.titulo,
       monto: parseFloat(monto),
       campanaId: parseInt(campanaId),
-      usuarioId
+      usuarioId,
+      frontendUrl: req.body.frontend_url
     });
 
     return res.json(preference);
@@ -278,8 +279,10 @@ export const crearDonacionMercadoPago = async (req, res) => {
 
 // Redireccionar de vuelta al frontend (desde el túnel HTTPS al localhost HTTP)
 export const handleMpRedirect = (req, res) => {
-  const queryParams = new URLSearchParams(req.query).toString();
-  const frontendUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/?${queryParams}`;
+  const frontendHost = req.query.frontend_url || process.env.FRONTEND_URL || 'http://localhost:3000';
+  const cleanParams = new URLSearchParams(req.query);
+  cleanParams.delete('frontend_url');
+  const frontendUrl = `${frontendHost}/?${cleanParams.toString()}`;
   res.redirect(frontendUrl);
 };
 

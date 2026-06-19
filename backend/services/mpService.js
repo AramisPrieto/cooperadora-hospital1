@@ -29,9 +29,13 @@ const getBackendUrl = () => {
  * @param {string|number} params.socioId - ID/Número de asociado del socio
  * @returns {Promise<Object>} Datos de la suscripción creada (incluye init_point)
  */
-export const crearSuscripcionSocio = async ({ email, monto, socioId }) => {
+export const crearSuscripcionSocio = async ({ email, monto, socioId, frontendUrl }) => {
   const client = getMpClient();
   const preapproval = new PreApproval(client);
+
+  const backUrl = frontendUrl
+    ? `${getBackendUrl()}/api/socios/mp-redirect?frontend_url=${encodeURIComponent(frontendUrl)}`
+    : `${getBackendUrl()}/api/socios/mp-redirect`;
 
   const body = {
     payer_email: email,
@@ -42,7 +46,7 @@ export const crearSuscripcionSocio = async ({ email, monto, socioId }) => {
       transaction_amount: parseFloat(monto),
       currency_id: 'ARS'
     },
-    back_url: `${getBackendUrl()}/api/socios/mp-redirect`,
+    back_url: backUrl,
     external_reference: socioId.toString(),
     notification_url: `${getBackendUrl()}/api/webhooks/mercadopago`
   };
@@ -110,9 +114,19 @@ export const cancelarSuscripcionSocio = async (preapprovalId) => {
  * @param {string|number} params.usuarioId - ID del usuario donante
  * @returns {Promise<Object>} Datos de la preferencia creada (incluye init_point)
  */
-export const crearPreferenciaDonacion = async ({ campanaTitulo, monto, campanaId, usuarioId }) => {
+export const crearPreferenciaDonacion = async ({ campanaTitulo, monto, campanaId, usuarioId, frontendUrl }) => {
   const client = getMpClient();
   const preference = new Preference(client);
+
+  const successUrl = frontendUrl
+    ? `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=success&frontend_url=${encodeURIComponent(frontendUrl)}`
+    : `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=success`;
+  const failureUrl = frontendUrl
+    ? `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=failure&frontend_url=${encodeURIComponent(frontendUrl)}`
+    : `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=failure`;
+  const pendingUrl = frontendUrl
+    ? `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=pending&frontend_url=${encodeURIComponent(frontendUrl)}`
+    : `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=pending`;
 
   const body = {
     items: [
@@ -125,9 +139,9 @@ export const crearPreferenciaDonacion = async ({ campanaTitulo, monto, campanaId
       }
     ],
     back_urls: {
-      success: `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=success`,
-      failure: `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=failure`,
-      pending: `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=pending`
+      success: successUrl,
+      failure: failureUrl,
+      pending: pendingUrl
     },
     auto_return: 'approved',
     external_reference: `donation_u${usuarioId}_c${campanaId}`,

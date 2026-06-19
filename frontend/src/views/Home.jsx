@@ -271,7 +271,8 @@ const Home = () => {
     setDonationSuccess('');
     try {
       const res = await api.post(`/donaciones/campanas/${selectedCampaign.id}/donar-mp`, {
-        monto: parseFloat(transferAmount)
+        monto: parseFloat(transferAmount),
+        frontend_url: window.location.origin
       });
       const checkoutUrl = res.data.sandboxInitPoint || res.data.initPoint;
       if (checkoutUrl) {
