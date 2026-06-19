@@ -15,14 +15,15 @@ import {
 } from 'lucide-react';
 
 
+/* ── Stat item ── */
 const StatItem = ({ value, label, icon: Icon, color }) => (
-  <div className="flex items-center gap-5 bg-white p-6 rounded-3xl border border-slate-250 shadow-sm animate-fade-up transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 group">
-    <div className={`h-12 w-12 flex items-center justify-center rounded-2xl shrink-0 transition-all duration-300 group-hover:scale-115 shadow-inner ${color}`}>
-      <Icon className="h-5 w-5" />
+  <div className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm animate-fade-up transition-all duration-300 hover:shadow-md hover:-translate-y-1">
+    <div className={`h-12 w-12 flex items-center justify-center rounded-xl shrink-0 ${color}`}>
+      <Icon className="h-6 w-6 text-white" />
     </div>
-    <div className="text-left">
-      <div className="text-2xl font-display font-black text-slate-800 leading-none mb-1.5">{value}</div>
-      <div className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider leading-snug">{label}</div>
+    <div>
+      <div className="text-2xl font-display font-black text-slate-800 leading-none mb-1">{value}</div>
+      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-snug">{label}</div>
     </div>
   </div>
 );
@@ -387,7 +388,7 @@ const Home = () => {
               <div
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
-                className="bg-white rounded-[2rem] p-8 shadow-card-hover border border-slate-200/80 relative overflow-hidden flex flex-col group min-h-[380px] hover:border-brand-200/60 transition-all duration-500 text-left"
+                className="bg-white rounded-3xl p-6 shadow-card border border-slate-200 relative overflow-hidden flex flex-col group min-h-[360px]"
               >
                 {/* Navigation Arrows for Carousel */}
                 {!loadingCampaigns && activeCampaigns.length > 1 && (
@@ -525,18 +526,6 @@ const Home = () => {
           <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
             <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#f8fafc" />
           </svg>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════
-          2. QUICK STATS ROW
-      ════════════════════════════════════════ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatItem value="$48,2M" label="Recaudado en 2025" icon={Heart} color="text-brand-600 bg-brand-50 border-brand-100" />
-          <StatItem value="1.250+" label="Socios Activos" icon={Users} color="text-accent-600 bg-accent-50 border-accent-100" />
-          <StatItem value="97%" label="Tasa de ejecución" icon={TrendingUp} color="text-blue-600 bg-blue-50 border-blue-100" />
-          <StatItem value="23" label="Equipos entregados" icon={Target} color="text-purple-600 bg-purple-50 border-purple-100" />
         </div>
       </section>
 

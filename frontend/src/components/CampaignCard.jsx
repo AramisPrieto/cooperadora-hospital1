@@ -19,12 +19,12 @@ const getCategoryFromTitle = (title) => {
 };
 
 const CATEGORY_STYLES = {
-  Neonatología: 'bg-emerald-50 text-emerald-700 border border-emerald-100/70',
-  Emergencias: 'bg-amber-50 text-amber-700 border border-amber-100/70',
-  Diagnóstico: 'bg-blue-50 text-blue-700 border border-blue-100/70',
-  'Terapia Intensiva': 'bg-purple-50 text-purple-700 border border-purple-100/70',
-  Pediatría: 'bg-pink-50 text-pink-700 border border-pink-100/70',
-  Laboratorio: 'bg-indigo-50 text-indigo-700 border border-indigo-100/70',
+  Neonatología: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+  Emergencias: 'bg-amber-50 text-amber-700 border border-amber-100',
+  Diagnóstico: 'bg-blue-50 text-blue-700 border border-blue-100',
+  'Terapia Intensiva': 'bg-purple-50 text-purple-700 border border-purple-100',
+  Pediatría: 'bg-pink-50 text-pink-700 border border-pink-100',
+  Laboratorio: 'bg-indigo-50 text-indigo-700 border border-indigo-100',
   General: 'bg-slate-50 text-slate-700 border border-slate-100',
 };
 
@@ -54,45 +54,49 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
   return (
     <div
       onClick={() => onClickDetail(id)}
-      className="group bg-white rounded-3xl overflow-hidden border border-slate-200/60 shadow-sm hover:shadow-card-hover hover:-translate-y-1 transition-all duration-550 flex flex-col h-full cursor-pointer relative"
+      className="group bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
     >
-      {/* ── Completed Badge Overlay ── */}
+      {/* ── Completed Overlay Badge ── */}
       {isComplete && (
-        <div className="absolute top-4 right-4 z-10 animate-fade-in">
-          <span className="inline-flex items-center gap-1 bg-emerald-600 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md">
-            ✓ Cumplida
+        <div className="absolute top-4 right-4 z-10">
+          <span className="inline-flex items-center gap-1 bg-emerald-650 text-white px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider shadow-sm">
+            Cumplida
           </span>
         </div>
       )}
 
-      {/* ── Top Image Container ── */}
-      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 shrink-0 border-b border-slate-100">
+      {/* ── Top Image / Placeholder ── */}
+      <div className="relative aspect-[16/10] overflow-hidden bg-slate-50 shrink-0 border-b border-slate-100">
         {image ? (
           <img
             src={image}
             alt={titulo}
             loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-slate-50 text-slate-400 font-mono text-[9px] font-black tracking-widest uppercase select-none">
+          <div className="w-full h-full flex items-center justify-center bg-slate-100/70 text-slate-400 font-mono text-[10px] font-bold tracking-wider uppercase select-none">
             IMG - {category}
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
-      {/* ── Card Content ── */}
-      <div className="p-6 flex flex-col flex-grow gap-4 text-left">
+      {/* ── Body ── */}
+      <div className="p-5 flex flex-col flex-grow gap-3.5">
         {/* Badges row */}
         <div className="flex flex-wrap gap-2">
-          <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${categoryClass}`}>
+          <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${categoryClass}`}>
             {category}
           </span>
           {isUrgent && (
-            <span className="bg-rose-50 text-rose-700 border border-rose-100/60 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider flex items-center gap-1 animate-pulse">
+            <span className="bg-rose-50 text-rose-700 border border-rose-100 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
               <span className="h-1.5 w-1.5 rounded-full bg-rose-600" />
               Urgente
+            </span>
+          )}
+          {isComplete && (
+            <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider flex items-center gap-1">
+              ✓ Entregado
             </span>
           )}
         </div>
@@ -103,52 +107,45 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
         </h3>
 
         {/* Economic stats */}
-        <div className="space-y-3 mt-auto pt-2">
+        <div className="space-y-2.5 mt-auto">
           <div className="flex justify-between items-baseline text-xs">
-            <span className="font-extrabold text-slate-850">
+            <span className="font-extrabold text-slate-800">
               {formatter.format(monto_actual)}{' '}
-              <span className="text-[10px] text-slate-400 font-semibold font-sans">/ {formatter.format(monto_objetivo)}</span>
+              <span className="text-[10px] text-slate-450 font-medium">/ {formatter.format(monto_objetivo)}</span>
             </span>
-            <span className={`font-black ${isUrgent ? 'text-rose-600' : isComplete ? 'text-emerald-600' : 'text-slate-800'}`}>
+            <span className={`font-black ${isUrgent ? 'text-rose-600' : isComplete ? 'text-emerald-600' : 'text-slate-700'}`}>
               {percentage}%
             </span>
           </div>
 
-          {/* Premium Progress Bar (Gradient and Soft Glow background) */}
-          <div className="w-full bg-slate-100/80 rounded-full h-2 overflow-hidden shadow-inner">
+          {/* Simple flat progress bar */}
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-700 ease-out ${
+              className={`h-full rounded-full transition-all duration-500 ${
                 isComplete
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600'
+                  ? 'bg-emerald-600'
                   : isUrgent
-                    ? 'bg-gradient-to-r from-rose-500 to-brand-600'
-                    : 'bg-gradient-to-r from-slate-800 to-slate-950'
+                    ? 'bg-rose-500'
+                    : 'bg-slate-900'
               }`}
               style={{ width: `${percentage}%` }}
             />
           </div>
 
           {/* Footer metrics */}
-          <div className="flex justify-between items-center pt-3 border-t border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-            <span className="flex items-center gap-1.5">
+          <div className="flex justify-between items-center pt-2.5 border-t border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
+            <span className="flex items-center gap-1">
               {isComplete ? (
-                <span className="text-emerald-650 font-black flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Cerrada
-                </span>
+                <span className="text-slate-400">Cerrada</span>
               ) : daysLeft !== null ? (
-                <span className={isUrgent ? 'text-rose-600 font-black flex items-center gap-1' : 'text-slate-500 flex items-center gap-1'}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${isUrgent ? 'bg-rose-500 animate-ping' : 'bg-slate-300'}`} />
-                  Quedan {daysLeft} {daysLeft === 1 ? 'día' : 'días'}
+                <span className={isUrgent ? 'text-rose-600 font-black' : 'text-slate-500'}>
+                  • Quedan {daysLeft} {daysLeft === 1 ? 'día' : 'días'}
                 </span>
               ) : (
-                <span className="text-slate-500 flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
-                  Activa
-                </span>
+                <span className="text-slate-500">• Activa</span>
               )}
             </span>
-            <span className="font-extrabold normal-case text-slate-500">{donorCount} donantes</span>
+            <span className="font-medium normal-case">{donorCount} donantes</span>
           </div>
         </div>
       </div>

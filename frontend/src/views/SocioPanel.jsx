@@ -5,18 +5,18 @@ import SocioProfile from '../components/socio/SocioProfile';
 import CuotasTab from '../components/socio/CuotasTab';
 import DonacionesTab from '../components/socio/DonacionesTab';
 import {
-  User, Heart, CheckCircle, CreditCard, Banknote, AlertCircle, RefreshCw, LogOut
+  User, Heart, CheckCircle, CreditCard, Banknote, AlertCircle, RefreshCw
 } from 'lucide-react';
 
 /* ── Tarjeta de estadística pequeña en cabecera ── */
 const StatCard = ({ label, value, icon: Icon, color }) => (
-  <div className="flex items-center gap-4 bg-white border border-slate-200 rounded-2xl px-5 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group">
-    <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 shadow-inner ${color}`}>
+  <div className="flex items-center gap-4 bg-white border border-slate-200 rounded-2xl px-5 py-4 shadow-sm">
+    <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${color}`}>
       <Icon className="h-5 w-5 text-white" />
     </div>
-    <div className="text-left">
+    <div>
       <p className="text-xl font-display font-black text-slate-800 leading-none">{value}</p>
-      <p className="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider mt-1 leading-none">{label}</p>
+      <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-1">{label}</p>
     </div>
   </div>
 );
@@ -254,25 +254,21 @@ const SocioPanel = () => {
   }
 
   return (
-    <div className="flex-grow bg-slate-50 min-h-screen pb-20 relative overflow-hidden">
-      {/* Decorative Glow Elements */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-50/30 rounded-full blur-[100px] pointer-events-none transform translate-x-1/3 -translate-y-1/3" />
+    <div className="flex-grow bg-slate-50 min-h-screen">
+
       
       {/* ── Cabecera del Panel ── */}
-      <div className="bg-white border-b border-slate-200/60 pt-28 relative z-10">
+      <div className="bg-white border-b border-slate-200 pt-28">
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="flex items-center gap-4 text-left">
-              <div className="h-12 w-12 bg-brand-600 text-white rounded-2xl flex items-center justify-center shadow-md shrink-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 bg-brand-600 text-white rounded-2xl flex items-center justify-center shadow-sm shrink-0">
                 <User className="h-6 w-6" />
               </div>
               <div>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-brand-50 text-brand-700 border border-brand-100 mb-1">
-                  Socio Activo
-                </span>
-                <h1 className="text-2xl font-display font-black text-slate-900 leading-none">Mi Panel de Autogestión</h1>
-                <p className="text-slate-550 text-xs font-semibold mt-1">
-                  Usuario: <span className="text-brand-600 font-bold">{user?.email}</span>
+                <h1 className="text-2xl font-display font-black text-slate-900">Panel de Socio</h1>
+                <p className="text-slate-500 text-xs font-medium mt-0.5">
+                  Autogestión de asociados — Socio: <span className="text-brand-600 font-bold">{user?.email}</span>
                 </p>
               </div>
             </div>
@@ -281,24 +277,24 @@ const SocioPanel = () => {
               <div className="flex flex-wrap gap-4">
                 <StatCard label="Total Aportado" value={`$${totalDonado.toLocaleString('es-AR')}`} icon={Heart} color="bg-brand-600" />
                 <StatCard label="Cuotas Pagas" value={cuotasPagas} icon={CreditCard} color="bg-accent-600" />
-                <StatCard label="Donaciones" value={donaciones.length} icon={Banknote} color="bg-slate-700" />
+                <StatCard label="Donaciones" value={donaciones.length} icon={Banknote} color="bg-slate-600" />
               </div>
             )}
           </div>
 
-          {/* Tab Selection */}
+          {/* Selector de Pestañas */}
           {profile && (
-            <div className="flex gap-1.5 border-t border-slate-100 pt-4 text-left">
+            <div className="flex gap-1 border-t border-slate-100 pt-4">
               {TABS.map(tab => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 ${
                       activeTab === tab.id
-                        ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10 border border-slate-900'
-                        : 'bg-white border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-50 hover:border-slate-350 hover:shadow-sm'
+                        ? 'bg-brand-50 text-brand-700 shadow-sm border border-brand-100'
+                        : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
                     }`}
                   >
                     <Icon className="h-3.5 w-3.5" />
@@ -312,21 +308,21 @@ const SocioPanel = () => {
       </div>
 
       {/* ── Contenido Principal ── */}
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6 relative z-10 text-left">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         
         {/* Alertas Globales */}
         {errorMsg && (
           <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm font-semibold rounded-2xl animate-fade-up">
             <AlertCircle className="h-5 w-5 shrink-0" />
             <span className="flex-grow">{errorMsg}</span>
-            <button onClick={() => setErrorMsg('')} className="text-rose-450 hover:text-rose-600 transition-colors">
+            <button onClick={() => setErrorMsg('')} className="text-rose-400 hover:text-rose-600">
               <RefreshCw className="h-4 w-4" />
             </button>
           </div>
         )}
         {successMsg && (
           <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-semibold rounded-2xl animate-fade-up">
-            <CheckCircle className="h-5 w-5 shrink-0 text-emerald-605" />
+            <CheckCircle className="h-5 w-5 shrink-0" />
             <span>{successMsg}</span>
           </div>
         )}
@@ -336,7 +332,7 @@ const SocioPanel = () => {
             <div className="h-10 w-10 border-4 border-slate-200 border-t-brand-500 rounded-full animate-spin" />
           </div>
         ) : !profile ? (
-          <div className="bg-white rounded-[2rem] border border-slate-200 p-8 text-center space-y-4 max-w-xl mx-auto shadow-sm animate-fade-up">
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-4 max-w-xl mx-auto shadow-sm animate-fade-up">
             <div className="h-16 w-16 bg-slate-50 border border-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto shadow-inner">
               <User className="h-8 w-8" />
             </div>
@@ -345,11 +341,12 @@ const SocioPanel = () => {
               Tu cuenta de usuario <span className="font-bold text-slate-700">{user?.email}</span> aún no tiene un perfil de socio asociado en el Libro de Registro de la Cooperadora.
             </p>
             <p className="text-slate-400 text-[11px] leading-relaxed max-w-md mx-auto">
-              Si acabas de registrarte, por favor aguardá a que un administrador valide y vincule tu perfil, o ponete en contacto con la administración.
+              Si acabás de registrarte, por favor aguardá a que un administrador valide y vincule tu perfil, o ponete en contacto con la administración.
             </p>
           </div>
         ) : (
           <>
+            {/* ══════════════ TAB: RESUMEN / MI PERFIL ══════════════ */}
             {/* ══════════════ TAB: RESUMEN / MI PERFIL ══════════════ */}
             {activeTab === 'resumen' && (
               <SocioProfile
@@ -359,7 +356,7 @@ const SocioPanel = () => {
               />
             )}
 
-            {/* ══════════════ TAB: CUOTAS SOCIALES ══════════════ */}
+            {/* ══════════════ TAB: CUOTAS SOCIALES (MASHUP) ══════════════ */}
             {activeTab === 'cuotas' && (
               <CuotasTab
                 profile={profile}
