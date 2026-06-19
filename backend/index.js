@@ -45,10 +45,8 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    const isDevelopment = process.env.NODE_ENV !== 'production';
-
-    // Permite peticiones sin origin (como herramientas de testeo local, curl o Postman) solo en desarrollo
-    if (!origin && isDevelopment) {
+    // Permite peticiones sin origin (como herramientas de testeo local, curl, Postman o peticiones del mismo origen/proxys)
+    if (!origin) {
       return callback(null, true);
     }
 
@@ -56,8 +54,8 @@ app.use(cors({
       return callback(null, true);
     }
 
-    // Permitir subdominios .vercel.app solo durante el desarrollo o staging (no en producción estricta)
-    if (isDevelopment && origin && origin.endsWith('.vercel.app')) {
+    // Permitir subdominios .vercel.app específicos de este proyecto (deploys de Vercel/preview)
+    if (origin.startsWith('https://cooperadora-') && origin.endsWith('.vercel.app')) {
       return callback(null, true);
     }
 
