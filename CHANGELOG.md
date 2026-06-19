@@ -392,3 +392,18 @@
 - **Eliminación de Tarjetas de Estadísticas en Obras Concretadas**:
   - Removidas las tres tarjetas de métricas automáticas (Equipos & Obras, Inversión Lograda, Participación) de [ObrasConcretadas.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/ObrasConcretadas.jsx) ya que los valores eran estimaciones y podían inducir a error.
   - Limpieza de imports (`Award`, `TrendingUp`, `Users`) y cálculo `useMemo` de estadísticas que quedaron sin uso.
+
+### Versión 1.27.0 — Limpieza de UI, Panel de Administración y Correcciones de Usabilidad (Thiago Masson)
+- **Métricas Reales en el Panel de Administración (Dashboard)**:
+  - Reemplazo de los datos estáticos de demostración (mock data) en los gráficos del panel de administración por datos reales obtenidos desde el servidor (ingresos acumulados por transferencias aprobadas y registro de nuevos socios de los últimos 6 meses).
+- **Limpieza de UI en Obras Concretadas**:
+  - Remoción definitiva de la vista de grilla y de los chips de categorías ("Todas"/"General"). Ajuste de la línea de tiempo ([ObrasConcretadas.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/ObrasConcretadas.jsx)) como vista única y corrección del import ausente de `Award` de `lucide-react`.
+- **Diseño Unificado de Tarjetas de Noticias**:
+  - Rediseño de las tarjetas de noticias tanto en la Home ([Home.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/Home.jsx)) como en la vista de búsqueda ([NewsSearch.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/NewsSearch.jsx)) para adoptar una estética compacta idéntica al formato de campañas y proyectos (`rounded-3xl`, padding `p-5`, hover `-translate-y-1` y proporción `aspect-[16/10]`).
+  - Uso de la utilidad `getPlainTextSnippet` para recortar y renderizar extractos textuales limpios (sin HTML) a un máximo de 90 caracteres con el fin de evitar desajustes visuales y garantizar la uniformidad en el diseño.
+  - Ocultamiento definitivo del buscador de noticias en la Home para mayor claridad visual, manteniéndolo exclusivamente en la vista de búsqueda principal.
+- **Alineación de Fechas en Detalle de Noticias**:
+  - Corrección de la alineación y espaciado de los detalles de publicación en el sidebar de [NewsDetail.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/NewsDetail.jsx) para prevenir la superposición de fechas largas (uso de `items-start`, `shrink-0` y alineación `text-right`).
+  - Remoción total del bloque de tags/etiquetas al pie del artículo según la preferencia del usuario.
+- **Protección contra Bucle de Redirecciones**:
+  - Limpieza automática de las claves `user` y `token` del `localStorage` en [Navbar.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/components/Navbar.jsx) ante respuestas de estado 401 por expiración o invalidez de sesión, previniendo bucles infinitos de redirección provocados por la protección de `GuestRoute`.

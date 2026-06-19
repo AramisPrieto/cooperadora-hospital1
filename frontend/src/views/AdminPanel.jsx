@@ -394,7 +394,7 @@ const AdminPanel = () => {
                   <LayoutDashboard className="h-5 w-5 text-brand-600" />
                   Métricas y Evolución
                 </h2>
-                <DashboardCharts />
+                <DashboardCharts transfers={transfers} partners={partners} />
               </div>
             )}
 

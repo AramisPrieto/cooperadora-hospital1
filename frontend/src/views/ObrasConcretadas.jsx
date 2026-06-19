@@ -3,10 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { 
   CheckCircle, 
   Search, 
-  Grid, 
   Calendar, 
   Sparkles, 
   ChevronRight,
+  Award,
 } from 'lucide-react';
 import api from '../api/axios';
 
@@ -47,8 +47,6 @@ const ObrasConcretadas = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Todas');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'timeline'
 
   // Fetch completed campaigns
   useEffect(() => {
@@ -73,22 +71,14 @@ const ObrasConcretadas = () => {
     document.title = "Obras Concretadas — Cooperadora del Hospital Emilio Ferreyra";
   }, []);
 
-  // Unique categories list
-  const categories = useMemo(() => {
-    const cats = new Set(campaigns.map(c => getCategoryFromTitle(c.titulo)));
-    return ['Todas', ...Array.from(cats)];
-  }, [campaigns]);
-
 
   // Filtered campaigns
   const filteredCampaigns = useMemo(() => {
     return campaigns.filter(c => {
-      const category = getCategoryFromTitle(c.titulo);
-      const matchesCategory = selectedCategory === 'Todas' || category === selectedCategory;
       const matchesSearch = c.titulo.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+      return matchesSearch;
     });
-  }, [campaigns, selectedCategory, searchQuery]);
+  }, [campaigns, searchQuery]);
 
   // Helper for sorting timeline items by completion date (newest first)
   const timelineCampaigns = useMemo(() => {
@@ -141,12 +131,10 @@ const ObrasConcretadas = () => {
           </p>
         </div>
 
-
-
-        {/* ── Filter Controls & Mode Toggler ── */}
-        <div className="bg-white rounded-3xl border border-slate-200/60 p-5 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+        {/* ── Filter Controls ── */}
+        <div className="bg-white rounded-3xl border border-slate-200/60 p-5 mb-10 flex items-center justify-between gap-6 shadow-sm">
           {/* Search bar */}
-          <div className="relative w-full md:w-80">
+          <div className="relative w-full max-w-md">
             <Search className="absolute left-4 top-3.5 h-4.5 w-4.5 text-slate-400" />
             <input
               id="search-obras-input"
@@ -156,52 +144,6 @@ const ObrasConcretadas = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-3 bg-slate-50/80 rounded-2xl text-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 transition-all duration-200"
             />
-          </div>
-
-          {/* Category Chips Scroller */}
-          <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-2 md:pb-0 scrollbar-none self-start md:self-auto">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                id={`cat-chip-${cat.toLowerCase().replace(/\s+/g, '-')}`}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all duration-200 ${
-                  selectedCategory === cat
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          {/* Mode Toggler (Grid vs Timeline) */}
-          <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/40 shrink-0 self-end md:self-auto">
-            <button
-              id="toggle-view-grid"
-              onClick={() => setViewMode('grid')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
-                viewMode === 'grid'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Grid className="h-4 w-4" />
-              Grilla
-            </button>
-            <button
-              id="toggle-view-timeline"
-              onClick={() => setViewMode('timeline')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
-                viewMode === 'timeline'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Calendar className="h-4 w-4" />
-              Línea de Tiempo
-            </button>
           </div>
         </div>
 
@@ -218,97 +160,14 @@ const ObrasConcretadas = () => {
             </div>
             <h3 className="text-lg font-display font-black text-slate-800">No se encontraron obras</h3>
             <p className="text-slate-500 text-sm mt-2">
-              No hay proyectos concretados en la categoría <strong>{selectedCategory}</strong> que coincidan con la búsqueda. Intenta limpiar los filtros.
+              No hay proyectos concretados que coincidan con la búsqueda. Intenta limpiar la búsqueda.
             </p>
             <button
-              onClick={() => { setSelectedCategory('Todas'); setSearchQuery(''); }}
+              onClick={() => { setSearchQuery(''); }}
               className="mt-6 btn-accent px-6 py-2.5 text-xs inline-flex"
             >
-              Limpiar Filtros
+              Limpiar Búsqueda
             </button>
-          </div>
-        ) : viewMode === 'grid' ? (
-          /* ──────────────── GRID VIEW ──────────────── */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
-            {filteredCampaigns.map(camp => {
-              const category = getCategoryFromTitle(camp.titulo);
-              const catClass = CATEGORY_COLORS[category] || CATEGORY_COLORS.General;
-              const image = camp.detalles?.galeria_rica?.imagenes?.[0] || camp.detalles?.equipamiento_imagen || '';
-              const donors = getDonorCount(camp.id, camp.monto_actual);
-              const dateStr = camp.fecha_limite 
-                ? new Date(camp.fecha_limite).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })
-                : 'Recientemente';
-
-              return (
-                <div
-                  key={camp.id}
-                  onClick={() => handleCardClick(camp.id)}
-                  className="group bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-card-hover hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col h-full relative"
-                >
-                  {/* Banner superior de logro */}
-                  <div className="absolute top-4 right-4 z-10">
-                    <span className="inline-flex items-center gap-1.5 bg-emerald-500 text-white px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-md animate-pulse">
-                      <CheckCircle className="h-3.5 w-3.5 fill-white text-emerald-500" />
-                      100% Logrado
-                    </span>
-                  </div>
-
-                  {/* Imagen o gradiente alternativo */}
-                  <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 border-b border-slate-100">
-                    {image ? (
-                      <img
-                        src={image}
-                        alt={camp.titulo}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-550 ease-out"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-tr from-accent-600 to-teal-800 flex items-center justify-center p-6 relative">
-                        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
-                        <Award className="h-12 w-12 text-white/30" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Contenido de la Tarjeta */}
-                  <div className="p-6 flex flex-col flex-grow gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${catClass}`}>
-                        {category}
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {dateStr}
-                      </span>
-                    </div>
-
-                    <h3 className="text-base font-display font-black text-slate-800 leading-snug group-hover:text-accent-600 transition-colors line-clamp-2 min-h-[2.75rem]">
-                      {camp.titulo}
-                    </h3>
-
-                    {/* Línea divisoria */}
-                    <div className="border-t border-slate-100 pt-4 mt-auto">
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Inversión Final</p>
-                          <p className="font-extrabold text-slate-800 mt-0.5">{formatter.format(camp.monto_actual)}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Co-financiamiento</p>
-                          <p className="font-extrabold text-slate-800 mt-0.5">{donors} donantes</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Botón de acción simulado */}
-                    <div className="pt-2 flex items-center justify-between text-xs font-black text-accent-700 uppercase tracking-widest group-hover:text-accent-600 transition-colors">
-                      <span>Ver Detalles del Logro</span>
-                      <ChevronRight className="h-4 w-4 group-hover:translate-x-1.5 transition-transform duration-300" />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         ) : (
           /* ──────────────── TIMELINE VIEW ──────────────── */

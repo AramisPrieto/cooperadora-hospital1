@@ -29,6 +29,15 @@ const StatItem = ({ value, label, icon: Icon, color }) => (
 );
 
 
+/* ── getPlainTextSnippet ── */
+const getPlainTextSnippet = (htmlString, maxLength = 120) => {
+  if (!htmlString) return '';
+  const cleanText = htmlString.replace(/<\/?[^>]+(>|$)/g, "");
+  if (cleanText.length <= maxLength) return cleanText;
+  return cleanText.substring(0, maxLength) + '...';
+};
+
+
 /* ── News gradient colors ── */
 const NEWS_COLORS = [
   'from-teal-400 to-brand-600',
@@ -538,9 +547,7 @@ const Home = () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
           <div>
             <div className="inline-flex items-center gap-2 mb-3 text-brand-600 text-xs font-black uppercase tracking-widest">
-              <div className="h-0.5 w-6 bg-brand-500 rounded-full" />
               Campañas Activas
-              <div className="h-0.5 w-6 bg-brand-500 rounded-full" />
             </div>
             <h2 className="section-title">Campañas de Recaudación</h2>
             <p className="section-subtitle">
@@ -607,9 +614,7 @@ const Home = () => {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col items-center text-center mb-10 gap-2">
               <div className="inline-flex items-center gap-2 mb-2 text-emerald-600 text-xs font-black uppercase tracking-widest">
-                <div className="h-0.5 w-6 bg-emerald-500 rounded-full" />
                 Impacto Real
-                <div className="h-0.5 w-6 bg-emerald-500 rounded-full" />
               </div>
               <h2 className="section-title text-emerald-900">Obras Concretadas</h2>
               <p className="section-subtitle max-w-2xl mx-auto">
@@ -649,30 +654,23 @@ const Home = () => {
       <section id="noticias-section" className="bg-gradient-to-b from-slate-50 to-slate-100 border-t border-slate-200/60 py-16">
         <div className="max-w-7xl mx-auto px-4">
           {/* Heading */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 mb-3 text-slate-500 text-xs font-black uppercase tracking-widest">
-                <div className="h-0.5 w-6 bg-slate-400 rounded-full" />
-                Novedades Institucionales
-                <div className="h-0.5 w-6 bg-slate-400 rounded-full" />
-              </div>
-              <h2 className="section-title flex items-center gap-3">
-                <Newspaper className="h-8 w-8 text-brand-500" />
-                Noticias e Impacto Social
-              </h2>
-              <p className="section-subtitle">
-                Información detallada sobre nuestros proyectos y avances en el hospital.
-              </p>
+          <div className="mb-10 text-left">
+            <div className="inline-flex items-center gap-2 mb-3 text-slate-500 text-xs font-black uppercase tracking-widest">
+              Novedades Institucionales
             </div>
-
-            {/* Search */}
-            <NewsSearchForm onSearch={handleSearch} />
+            <h2 className="section-title flex items-center gap-3">
+              <Newspaper className="h-8 w-8 text-brand-500" />
+              Noticias e Impacto Social
+            </h2>
+            <p className="section-subtitle">
+              Información detallada sobre nuestros proyectos y avances en el hospital.
+            </p>
           </div>
 
           {/* News grid */}
           {loadingNews ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              {[1, 2].map(i => <NewsSkeleton key={i} />)}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map(i => <NewsSkeleton key={i} />)}
             </div>
           ) : news.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-200">
@@ -680,22 +678,23 @@ const Home = () => {
               <p className="text-slate-400 font-semibold">No se encontraron noticias.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {news.map((noti, idx) => {
                 const grad = NEWS_COLORS[idx % NEWS_COLORS.length];
+                const snippet = getPlainTextSnippet(noti.cuerpo_html, 90);
                 return (
                   <article
                     key={noti._id}
                     onClick={() => navigate(`/noticias/${noti._id}`)}
-                    className="bg-white rounded-[2rem] border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 flex flex-col group cursor-pointer"
+                    className="group bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
                   >
                     {/* Image with gradient fallback */}
-                    <div className="aspect-[16/9] w-full overflow-hidden relative shrink-0 bg-slate-50">
+                    <div className="aspect-[16/10] w-full overflow-hidden relative shrink-0 bg-slate-50 border-b border-slate-100">
                       {noti.imagen_url ? (
                         <img
                           src={noti.imagen_url}
                           alt={noti.titulo}
-                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                           onError={(e) => {
                             e.target.style.display = 'none';
                             e.target.nextSibling.style.display = 'flex';
@@ -716,7 +715,7 @@ const Home = () => {
                       <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${grad}`} />
                     </div>
 
-                    <div className="p-6 flex flex-col flex-grow gap-3">
+                    <div className="p-5 flex flex-col flex-grow gap-3.5 text-left">
                       {/* Meta row */}
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
@@ -731,14 +730,13 @@ const Home = () => {
                       </h3>
 
                       {/* Body */}
-                      <div
-                        className="text-sm text-slate-600 font-light leading-relaxed line-clamp-3 flex-grow"
-                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(noti.cuerpo_html) }}
-                      />
+                      <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2 flex-grow">
+                        {snippet}
+                      </p>
 
                       {/* Read more footer */}
-                      <div className="flex justify-end pt-2 border-t border-slate-50 mt-1">
-                        <span className="inline-flex items-center gap-1 text-xs font-black uppercase tracking-wider text-brand-600 group-hover:text-brand-700">
+                      <div className="flex justify-end pt-3 border-t border-slate-100 mt-auto">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-brand-600 group-hover:text-brand-700">
                           Leer noticia
                           <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
                         </span>

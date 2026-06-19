@@ -195,7 +195,6 @@ const NewsSearch = () => {
             Qué hicimos con tu aporte
           </h1>
         </header>
-
         {/* ── SEARCH INPUT ── */}
         <section className="pb-6">
           <div className="relative max-w-xl">
@@ -304,12 +303,12 @@ const NewsSearch = () => {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginatedNews.map(noti => {
                 const cat = getCategoryForNews(noti);
-                const snippet = getPlainTextSnippet(noti.cuerpo_html);
+                const snippet = getPlainTextSnippet(noti.cuerpo_html, 90);
                 return (
                   <article
                     key={noti._id}
                     onClick={() => navigate(`/noticias/${noti._id}`)}
-                    className="bg-white rounded-[2rem] border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 flex flex-col group cursor-pointer"
+                    className="group bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
                   >
                     {/* Top Image or Placeholder */}
                     <div className="aspect-[16/10] w-full overflow-hidden relative border-b border-slate-100 shrink-0 bg-slate-50">
@@ -317,7 +316,7 @@ const NewsSearch = () => {
                         <img
                           src={noti.imagen_url}
                           alt={noti.titulo}
-                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                           onError={(e) => {
                             e.target.style.display = 'none';
                             e.target.nextSibling.style.display = 'flex';
@@ -338,7 +337,7 @@ const NewsSearch = () => {
                     </div>
 
                     {/* Content */}
-                    <div className="p-6 flex flex-col flex-grow gap-3 text-left">
+                    <div className="p-5 flex flex-col flex-grow gap-3.5 text-left">
                       {/* Category and date row */}
                       <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-wider">
                         <span className="text-brand-600 tracking-widest">{cat}</span>
@@ -351,12 +350,12 @@ const NewsSearch = () => {
                       </h3>
 
                       {/* Description */}
-                      <p className="text-slate-500 text-xs font-medium leading-relaxed line-clamp-3">
+                      <p className="text-slate-500 text-xs font-medium leading-relaxed line-clamp-2">
                         {snippet}
                       </p>
 
                       {/* Leer noticia link */}
-                      <div className="flex justify-end pt-3 border-t border-slate-50 mt-auto">
+                      <div className="flex justify-end pt-3 border-t border-slate-100 mt-auto">
                         <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-brand-600 group-hover:text-brand-700">
                           Leer noticia
                           <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
