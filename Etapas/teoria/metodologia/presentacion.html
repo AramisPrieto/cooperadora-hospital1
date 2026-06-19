@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentación TFI - Cooperadora Hospital Dr. Emilio Ferreyra</title>
+  <!-- Google Fonts: Montserrat (títulos) e Inter (cuerpo) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* VARIABLES DE DISEÑO (Colores institucionales y tema premium oscuro) */
+    :root {
+      --bg-dark: #090d16;
+      --bg-dark-gradient: linear-gradient(135deg, #090d16 0%, #03070c 100%);
+      --card-bg: rgba(15, 23, 42, 0.6);
+      --card-border: rgba(5, 150, 105, 0.2);
+      --card-border-hover: rgba(220, 38, 38, 0.4);
+      --brand-red: #dc2626;      /* Cruz médica y urgencia */
+      --brand-emerald: #059669;  /* Verde clínico elegante */
+      --brand-emerald-glow: rgba(5, 150, 105, 0.15);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-display: 'Montserrat', sans-serif;
+      --font-sans: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background: var(--bg-dark);
+      background-image: var(--bg-dark-gradient);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* FONDO ECG Y EFECTOS VISUALES */
+    .ecg-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    .ecg-line {
+      stroke: var(--brand-emerald);
+      stroke-width: 2.5;
+      stroke-dasharray: 2000;
+      stroke-dashoffset: 2000;
+      animation: drawLine 8s linear infinite;
+      fill: none;
+    }
+
+    @keyframes drawLine {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .glow-overlay {
+      position: absolute;
+      top: -10%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, var(--brand-emerald-glow) 0%, rgba(0,0,0,0) 70%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .glow-overlay-red {
+      position: absolute;
+      bottom: -10%;
+      left: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(220, 38, 38, 0.04) 0%, rgba(0,0,0,0) 70%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* NAVEGACIÓN Y CONTROLES */
+    .controls {
+      position: absolute;
+      bottom: 2rem;
+      right: 3rem;
+      display: flex;
+      gap: 1rem;
+      z-index: 100;
+    }
+
+    .btn-nav {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-nav:hover {
+      background: var(--brand-emerald);
+      border-color: var(--brand-emerald);
+      transform: translateY(-2px);
+      box-shadow: 0 0 15px rgba(5, 150, 105, 0.5);
+    }
+
+    .btn-nav:active {
+      transform: scale(0.95);
+    }
+
+    .progress-bar-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 100;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 16.66%;
+      background: linear-gradient(90deg, var(--brand-emerald) 0%, var(--brand-red) 100%);
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 8px var(--brand-emerald);
+    }
+
+    .slide-indicator {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 3rem;
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .slide-indicator span.active {
+      color: var(--brand-emerald);
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    /* CONTENEDOR DE DIAPOSITIVAS */
+    .slides-container {
+      flex: 1;
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100%;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem 6rem;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(100px) scale(0.98);
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0) scale(1);
+    }
+
+    .slide.prev {
+      transform: translateX(-100px) scale(0.98);
+    }
+
+    /* CABECERAS DE SLIDES */
+    .slide-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .slide-category {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--brand-emerald);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .slide-category::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--brand-red);
+      border-radius: 50%;
+    }
+
+    .slide-title {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      background: linear-gradient(135deg, var(--text-main) 30%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ESTRUCTURAS DE TARJETAS (CARDS) */
+    .grid-container {
+      display: grid;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--brand-emerald);
+      opacity: 0.6;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--card-border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .card:hover::before {
+      background: var(--brand-red);
+      height: 100%;
+    }
+
+    .card-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* SLIDE 1: PORTADA EXCLUSIVA */
+    .slide-portada {
+      text-align: left;
+      justify-content: space-between;
+      height: 80%;
+    }
+
+    .portada-header {
+      margin-top: 2rem;
+    }
+
+    .portada-univ {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .portada-subuniv {
+      font-size: 0.95rem;
+      color: var(--brand-emerald);
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    .portada-tfi {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 600;
+      background: linear-gradient(90deg, var(--brand-emerald) 0%, var(--brand-red) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .portada-title {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .portada-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 2rem;
+    }
+
+    .meta-team {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .team-title {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--brand-emerald);
+      font-weight: 700;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(220px, auto));
+      gap: 0.75rem 2rem;
+    }
+
+    .team-member {
+      font-size: 0.95rem;
+    }
+
+    .team-member strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .team-member span {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      display: block;
+      margin-top: 0.1rem;
+    }
+
+    .meta-delivery {
+      text-align: right;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .meta-delivery strong {
+      color: var(--text-main);
+    }
+
+    /* SLIDE 2: ALCANCE GRID */
+    .grid-alcance {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      margin-top: 0.5rem;
+    }
+
+    .icon-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 8px;
+      background: rgba(5, 150, 105, 0.15);
+      color: var(--brand-emerald);
+      font-weight: 800;
+      font-size: 1.1rem;
+      margin-right: 0.5rem;
+      border: 1px solid rgba(5, 150, 105, 0.3);
+    }
+    
+    .card:hover .icon-badge {
+      background: rgba(220, 38, 38, 0.15);
+      color: var(--brand-red);
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    /* SLIDE 3: ROLES DETALLADOS */
+    .grid-roles {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .role-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .role-header {
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .role-name {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .role-title {
+      font-size: 0.8rem;
+      color: var(--brand-emerald);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 0.25rem;
+    }
+
+    .role-list {
+      list-style: none;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .role-list li {
+      position: relative;
+      padding-left: 1.2rem;
+      line-height: 1.4;
+    }
+
+    .role-list li::before {
+      content: '⚡';
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 0.75rem;
+      color: var(--brand-red);
+    }
+
+    /* SLIDE 4: ARQUITECTURA / HYBRID DB */
+    .archi-container {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2rem;
+      align-items: stretch;
+    }
+
+    .archi-flow {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.2rem;
+    }
+
+    .archi-node {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(5, 150, 105, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s;
+    }
+
+    .archi-node:hover {
+      border-color: var(--brand-emerald);
+      box-shadow: 0 0 15px rgba(5, 150, 105, 0.2);
+    }
+
+    .archi-node.red-border {
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    .archi-node.red-border:hover {
+      border-color: var(--brand-red);
+      box-shadow: 0 0 15px rgba(220, 38, 38, 0.2);
+    }
+
+    .archi-node-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .archi-node-tech {
+      font-size: 0.75rem;
+      color: var(--brand-emerald);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .archi-node.red-border .archi-node-tech {
+      color: var(--brand-red);
+    }
+
+    .archi-arrow {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      margin: -0.4rem 0;
+    }
+
+    .archi-db-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .db-block {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(5, 150, 105, 0.2);
+      border-radius: 10px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .db-block.nosql {
+      border-color: rgba(220, 38, 38, 0.2);
+    }
+
+    .db-block-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .db-block-list {
+      list-style: none;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .db-block-list li {
+      background: rgba(30, 41, 59, 0.4);
+      padding: 0.4rem 0.6rem;
+      border-radius: 4px;
+      border-left: 3px solid var(--brand-emerald);
+    }
+
+    .db-block.nosql .db-block-list li {
+      border-left-color: var(--brand-red);
+    }
+
+    .archi-mashup {
+      grid-column: 1 / span 2;
+      background: rgba(5, 150, 105, 0.05);
+      border: 1px dashed var(--brand-emerald);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    /* SLIDE 5: OPTIMIZACIÓN / HARDENING */
+    .grid-opti {
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .opti-group-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 0.5rem;
+    }
+
+    .opti-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .opti-item {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .opti-check {
+      color: var(--brand-emerald);
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .opti-lock {
+      color: var(--brand-red);
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .opti-info h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 0.15rem;
+    }
+
+    .opti-info p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* SLIDE 6: PATRONES Y MEJORAS */
+    .grid-patterns {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .pattern-badge {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      color: var(--brand-red);
+    }
+
+    .card:hover .pattern-badge {
+      background: rgba(5, 150, 105, 0.1);
+      border-color: rgba(5, 150, 105, 0.2);
+      color: var(--brand-emerald);
+    }
+
+    .pattern-accent-text {
+      color: var(--brand-emerald);
+      font-weight: 600;
+    }
+    
+    .pattern-block {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 6px;
+      padding: 0.6rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+    }
+
+    /* FOOTER CON MARCA */
+    .slide-footer {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 0;
+      width: 100%;
+      padding: 0 6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      z-index: 5;
+    }
+    
+    .footer-brand {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .footer-brand span {
+      color: var(--brand-red);
+    }
+
+    /* TECLADO GUÍA */
+    .keyboard-guide {
+      position: absolute;
+      top: 2rem;
+      right: 6rem;
+      display: flex;
+      gap: 0.4rem;
+      background: rgba(15,23,42,0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      align-items: center;
+      backdrop-filter: blur(5px);
+      z-index: 100;
+    }
+
+    .key-badge {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 4px;
+      padding: 0.1rem 0.3rem;
+      font-weight: bold;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Progreso en la Parte Superior -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Guía de teclado -->
+  <div class="keyboard-guide">
+    <span>Navega con</span>
+    <span class="key-badge">←</span>
+    <span class="key-badge">→</span>
+    <span>o clicks</span>
+  </div>
+
+  <!-- Fondo ECG animado -->
+  <div class="ecg-container">
+    <svg width="100%" height="100%" viewBox="0 0 1400 300" preserveAspectRatio="none">
+      <path class="ecg-line" d="M 0 150 L 300 150 L 320 120 L 340 180 L 360 150 L 500 150 L 515 50 L 530 260 L 545 130 L 555 170 L 570 150 L 800 150 L 820 110 L 840 190 L 860 150 L 1050 150 L 1065 40 L 1080 270 L 1095 130 L 1105 175 L 1120 150 L 1400 150" />
+    </svg>
+  </div>
+
+  <!-- Capas de resplandor sutil (Branding) -->
+  <div class="glow-overlay"></div>
+  <div class="glow-overlay-red"></div>
+
+  <!-- Indicador del Slide actual -->
+  <div class="slide-indicator" id="slideIndicator">
+    <span class="active" id="currentSlideNum">1</span> / <span id="totalSlideNum">6</span>
+  </div>
+
+  <!-- Botones flotantes de Navegación -->
+  <div class="controls">
+    <button class="btn-nav" id="btnPrev" aria-label="Anterior">←</button>
+    <button class="btn-nav" id="btnNext" aria-label="Siguiente">→</button>
+  </div>
+
+  <!-- CONTENEDOR DE DIAPOSITIVAS -->
+  <div class="slides-container">
+
+    <!-- DIAPOSITIVA 1: PORTADA -->
+    <div class="slide active">
+      <div class="slide-portada">
+        <div class="portada-header">
+          <div class="portada-univ">Universidad Tecnológica Nacional (UTN)</div>
+          <div class="portada-subuniv">Extensión Áulica Necochea</div>
+          <div class="portada-tfi">Metodología de Sistemas 2 · Trabajo Final Integrador</div>
+          <h1 class="portada-title">Portal Web de la Asociación Cooperadora del Hospital Municipal "Dr. Emilio Ferreyra"</h1>
+        </div>
+        
+        <div class="portada-meta">
+          <div class="meta-team">
+            <span class="team-title">Miembros del Equipo y Roles</span>
+            <div class="team-grid">
+              <div class="team-member">
+                <strong>Aramis Prieto</strong>
+                <span>Scrum Master & Lead Backend Developer</span>
+              </div>
+              <div class="team-member">
+                <strong>Kevin Nielsen</strong>
+                <span>Security & Backend Developer</span>
+              </div>
+              <div class="team-member">
+                <strong>Thiago Masson</strong>
+                <span>Full Stack Developer & Branding Specialist</span>
+              </div>
+              <div class="team-member">
+                <strong>Santiago Ialungo</strong>
+                <span>UI/UX & Lead Frontend Developer</span>
+              </div>
+            </div>
+          </div>
+          <div class="meta-delivery">
+            Docente: <strong>Daniel Moreno</strong><br>
+            Fecha de Entrega: <strong>Junio 2026</strong><br>
+            Necochea, Argentina
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 2: ALCANCE -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-category">Requerimientos generales</div>
+        <h2 class="slide-title">Descripción y Alcance del Proyecto</h2>
+      </div>
+      
+      <div class="grid-container grid-alcance">
+        <div class="card">
+          <div class="card-title">
+            <span class="icon-badge">01</span>
+            Gestión de Socios
+          </div>
+          <p class="card-desc">Registro en línea de asociados con validaciones obligatorias (DNI único, domicilio, teléfono), automatizando la incorporación al Libro de Registro digital.</p>
+        </div>
+        
+        <div class="card">
+          <div class="card-title">
+            <span class="icon-badge">02</span>
+            Módulo Transaccional
+          </div>
+          <p class="card-desc">Historial completo de pagos de cuotas sociales mensuales y control de membresía con pasarela de pago recurrente mediante Mercado Pago.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span class="icon-badge">03</span>
+            Recaudación Transparente
+          </div>
+          <p class="card-desc">Visualización pública de campañas de recaudación (insumos, obras y aparatología) con barras de progreso financiero calculadas en tiempo real.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span class="icon-badge">04</span>
+            Auditoría de Donaciones
+          </div>
+          <p class="card-desc">Checkout interactivo para registrar transferencias bancarias manuales mediante carga de comprobantes, y donación directa en línea.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span class="icon-badge">05</span>
+            Panel Administrativo
+          </div>
+          <p class="card-desc">Interfaz de control exclusiva para operadores para aprobar/rechazar transferencias, dar de alta/baja campañas y gestionar el padrón de socios.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span class="icon-badge">06</span>
+            Módulo Informativo
+          </div>
+          <p class="card-desc">Portal dinámico para la publicación y difusión de novedades, obras concretadas y logros institucionales de la cooperadora del hospital.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 3: EQUIPO Y ROLES -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-category">Planificación & Gestión</div>
+        <h2 class="slide-title">Miembros del Equipo y Roles Asignados</h2>
+      </div>
+
+      <div class="grid-container grid-roles">
+        <!-- ARAMIS PRIETO -->
+        <div class="card role-card">
+          <div class="role-header">
+            <div class="role-name">Aramis Prieto</div>
+            <div class="role-title">Scrum Master & Lead Backend</div>
+          </div>
+          <ul class="role-list">
+            <li>Facilitador de ceremonias ágiles.</li>
+            <li>Orquestación del esquema híbrido de bases de datos.</li>
+            <li>Implementación de bloqueos de fila relacionales.</li>
+            <li>Programación de pruebas de integración automatizadas.</li>
+          </ul>
+        </div>
+
+        <!-- KEVIN NIELSEN -->
+        <div class="card role-card">
+          <div class="role-header">
+            <div class="role-name">Kevin Nielsen</div>
+            <div class="role-title">Security & Backend Developer</div>
+          </div>
+          <ul class="role-list">
+            <li>Implementación de autenticación segura por JWT.</li>
+            <li>Configuración de Rate Limiting por IP para protección DDoS.</li>
+            <li>Estructuración de regex avanzadas para validación de datos.</li>
+            <li>Desarrollo de microservicio SMTP de correos automáticos.</li>
+          </ul>
+        </div>
+
+        <!-- SANTIAGO IALUNGO -->
+        <div class="card role-card">
+          <div class="role-header">
+            <div class="role-name">Santiago Ialungo</div>
+            <div class="role-title">UI/UX & Lead Frontend</div>
+          </div>
+          <ul class="role-list">
+            <li>Identidad visual del portal (paleta clínica, fondos de cuadrícula).</li>
+            <li>Despliegue y diseño responsivo adaptativo con Tailwind CSS.</li>
+            <li>Implementación de Lenis Scroll e interacciones fluidas.</li>
+            <li>Vistas de usuario público y dashboard administrativo.</li>
+          </ul>
+        </div>
+
+        <!-- THIAGO MASSON -->
+        <div class="card role-card">
+          <div class="role-header">
+            <div class="role-name">Thiago Masson</div>
+            <div class="role-title">Full Stack & Branding</div>
+          </div>
+          <ul class="role-list">
+            <li>Migración y gestión del monorrepo con pnpm workspaces.</li>
+            <li>Integración de logotipos e identidad formal del Hospital.</li>
+            <li>Desarrollo y modelado de noticias documentales.</li>
+            <li>Sanitización de entradas contra vulnerabilidades XSS (DOMPurify).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 4: ARQUITECTURA -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-category">Arquitectura de Software</div>
+        <h2 class="slide-title">Persistencia Híbrida y Modelo Cliente-Servidor</h2>
+      </div>
+
+      <div class="archi-container">
+        <!-- Columna de Arquitectura General -->
+        <div class="archi-flow">
+          <div class="archi-node">
+            <div class="archi-node-title">Cliente (Frontend SPA)</div>
+            <div class="archi-node-tech">React.js · Vite · Tailwind CSS</div>
+          </div>
+          
+          <div class="archi-arrow">⇅ HTTPS / REST API + JWT</div>
+          
+          <div class="archi-node red-border">
+            <div class="archi-node-title">API Server (Backend)</div>
+            <div class="archi-node-tech">Node.js · Express · pnpm workspaces</div>
+          </div>
+        </div>
+
+        <!-- Columna de Persistencia Híbrida -->
+        <div class="archi-db-grid">
+          <!-- SQL BLOCK -->
+          <div class="db-block">
+            <div class="db-block-title">
+              <span class="icon-badge">SQL</span>
+              Transaccional ACID
+            </div>
+            <ul class="db-block-list">
+              <li><strong>`usuarios`</strong>: Credenciales con contraseñas hasheadas en `bcryptjs`.</li>
+              <li><strong>`perfiles_socios`</strong>: Registro legal de asociados (DNI único).</li>
+              <li><strong>`campanas_eco`</strong>: Balances y metas financieras de campañas.</li>
+            </ul>
+          </div>
+
+          <!-- NOSQL BLOCK -->
+          <div class="db-block nosql">
+            <div class="db-block-title">
+              <span class="icon-badge" style="background:rgba(220,38,38,0.15); color:var(--brand-red); border-color:rgba(220,38,38,0.3)">NoSQL</span>
+              Documental Flexible
+            </div>
+            <ul class="db-block-list">
+              <li><strong>`noticias_actualidad`</strong>: Novedades con galerías y vídeos dinámicos.</li>
+              <li><strong>`campanas_detalle`</strong>: Narrativa enriquecida vinculada por `campana_id_ref`.</li>
+            </ul>
+          </div>
+
+          <!-- MASHUP AND LOCKS -->
+          <div class="archi-mashup">
+            <h4 style="font-family:var(--font-display); font-size:0.95rem; font-weight:700; margin-bottom:0.4rem; color:#fff">⚡ Mecanismos Especiales de Datos:</h4>
+            <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4">
+              <strong>Data Mashup:</strong> Para evitar latencias de red, el backend consulta en paralelo SQL y NoSQL mediante <span class="pattern-accent-text">Promise.all</span> y unifica los datos en una única respuesta estructurada para el cliente.<br>
+              <strong>Evitación de Condiciones de Carrera:</strong> El endpoint de donación adquiere un bloqueo exclusivo sobre la fila SQL (<span class="pattern-accent-text">SELECT ... FOR UPDATE</span>) garantizando transacciones concurrentes seguras.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 5: OPTIMIZACIÓN Y SEGURIDAD -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-category">Rendimiento, SEO y Hardening</div>
+        <h2 class="slide-title">Optimización y Seguridad para Producción</h2>
+      </div>
+
+      <div class="grid-container grid-opti">
+        <!-- COLUMNA FRONTEND & SEO -->
+        <div>
+          <div class="opti-group-title">
+            <span class="opti-check">✓</span> Frontend, SEO & UX
+          </div>
+          <div class="opti-list">
+            <div class="opti-item">
+              <span class="opti-check">✦</span>
+              <div class="opti-info">
+                <h4>Code Splitting y Lazy Loading</h4>
+                <p>Carga reactiva de paneles pesados mediante `React.lazy()` y `<Suspense>`, reduciendo el bundle inicial para asegurar un FCP veloz.</p>
+              </div>
+            </div>
+            
+            <div class="opti-item">
+              <span class="opti-check">✦</span>
+              <div class="opti-info">
+                <h4>Velocidad Perceptual con Skeletons</h4>
+                <p>Componentes esqueleto (`CampaignSkeleton`, `NewsSkeleton`) con animaciones de pulso que eliminan el salto visual durante cargas.</p>
+              </div>
+            </div>
+
+            <div class="opti-item">
+              <span class="opti-check">✦</span>
+              <div class="opti-info">
+                <h4>Optimización SEO y Semántica HTML5</h4>
+                <p>Uso estricto de etiquetas semánticas (`<main>`, `<section>`), etiquetas Open Graph para redes sociales y precarga DNS de fuentes.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLUMNA BACKEND & SEGURIDAD -->
+        <div>
+          <div class="opti-group-title">
+            <span class="opti-lock">🛡</span> Backend & Hardening
+          </div>
+          <div class="opti-list">
+            <div class="opti-item">
+              <span class="opti-lock">🔒</span>
+              <div class="opti-info">
+                <h4>Caché Reactivo Invalidador</h4>
+                <p>Uso de `NodeCache` con TTL de 5m en lecturas concurrentes, invalidado dinámicamente mediante `flushCache()` al registrarse cambios o pagos.</p>
+              </div>
+            </div>
+
+            <div class="opti-item">
+              <span class="opti-lock">🔒</span>
+              <div class="opti-info">
+                <h4>Rate Limiting & Confianza de Proxy</h4>
+                <p>Limites de tasas para prevenir DDoS en endpoints críticos, con configuración `trust proxy` para interpretar correctamente IPs de Render/Vercel.</p>
+              </div>
+            </div>
+
+            <div class="opti-item">
+              <span class="opti-lock">🔒</span>
+              <div class="opti-info">
+                <h4>Protecciones Helmet y Mongo Sanitize</h4>
+                <p>Bloqueo de Clickjacking y XSS mediante inyección de cabeceras seguras y saneo automático de parámetros query contra inyección NoSQL.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 6: PROPUESTAS DE MEJORA -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-category">Patrones de Diseño y Refactorización</div>
+        <h2 class="slide-title">Análisis de Código y Propuestas de Refactorización</h2>
+      </div>
+
+      <div class="grid-container grid-patterns">
+        <!-- SINGLETON -->
+        <div class="card">
+          <span class="pattern-badge">Singleton Pattern</span>
+          <div class="card-title" style="margin-top:0.25rem">Conexión de BD Única</div>
+          <p class="card-desc">
+            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.8rem">backend/config/db.js</span><br>
+            Asegura una única instancia de conexión para los motores SQL y NoSQL, previniendo la fatiga del pool de conexiones.<br>
+            <span class="pattern-accent-text">Ventaja:</span> Ahorro sustancial de memoria y control centralizado del estado de la base de datos.
+          </p>
+          <div class="pattern-block">
+            class DB { static getInstance() { ... } }
+          </div>
+        </div>
+
+        <!-- FACTORY METHOD -->
+        <div class="card">
+          <span class="pattern-badge">Factory Method</span>
+          <div class="card-title" style="margin-top:0.25rem">Creación de Usuarios</div>
+          <p class="card-desc">
+            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.8rem">services/userService.js</span><br>
+            Delegación de la creación de instancias del modelo según rol (<span class="pattern-accent-text">Socio</span> o <span class="pattern-accent-text">Admin</span>), precargando permisos específicos.<br>
+            <span class="pattern-accent-text">Ventaja:</span> Cumplimiento del principio Open/Closed al extender tipos de usuarios sin alterar el controlador.
+          </p>
+          <div class="pattern-block">
+            UserFactory.createUser(role, data);
+          </div>
+        </div>
+
+        <!-- STATE PATTERN -->
+        <div class="card">
+          <span class="pattern-badge">State Pattern + Async Worker</span>
+          <div class="card-title" style="margin-top:0.25rem">Conciliación de Transferencias</div>
+          <p class="card-desc">
+            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.8rem">donacionController.js</span><br>
+            El flujo de transferencias pasa a delegarse en estados: <span class="pattern-accent-text">Pendiente</span>, <span class="pattern-accent-text">Aprobado</span> o <span class="pattern-accent-text">Rechazado</span>, combinándose con un Worker asíncrono secundario para notificaciones interbancarias automáticas.<br>
+            <span class="pattern-accent-text">UX:</span> Elimina el cuello de botella de aprobación manual.
+          </p>
+          <div class="pattern-block">
+            donation.transitionTo(new ApprovedState());
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- FIN SLIDES-CONTAINER -->
+
+  <!-- Pie de diapositiva estático -->
+  <div class="slide-footer">
+    <div class="footer-brand">
+      <span>🏥</span> Cooperadora Hospital Necochea
+    </div>
+    <div style="font-size:0.75rem; color:var(--text-muted);">
+      Metodología de Sistemas 2 · Trabajo Final Integrador
+    </div>
+  </div>
+
+  <script>
+    // CONTROLADOR DE DIAPOSITIVAS INTERACTIVAS
+    const slides = document.querySelectorAll('.slide');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    const progressBar = document.getElementById('progressBar');
+    const currentSlideNum = document.getElementById('currentSlideNum');
+    const totalSlideNum = document.getElementById('totalSlideNum');
+
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+    totalSlideNum.textContent = totalSlides;
+
+    function updatePresentation() {
+      // Remover clases activas de todas las diapositivas
+      slides.forEach((slide, idx) => {
+        slide.classList.remove('active', 'prev');
+        if (idx < currentIndex) {
+          slide.classList.add('prev');
+        }
+      });
+
+      // Añadir clase activa a la diapositiva actual
+      slides[currentIndex].classList.add('active');
+
+      // Actualizar progreso e indicadores
+      const progressPercent = ((currentIndex + 1) / totalSlides) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+      currentSlideNum.textContent = currentIndex + 1;
+
+      // Habilitar/Deshabilitar botones en los extremos
+      btnPrev.style.opacity = currentIndex === 0 ? '0.3' : '1';
+      btnPrev.style.pointerEvents = currentIndex === 0 ? 'none' : 'auto';
+      
+      btnNext.style.opacity = currentIndex === totalSlides - 1 ? '0.3' : '1';
+      btnNext.style.pointerEvents = currentIndex === totalSlides - 1 ? 'none' : 'auto';
+    }
+
+    function nextSlide() {
+      if (currentIndex < totalSlides - 1) {
+        currentIndex++;
+        updatePresentation();
+      }
+    }
+
+    function prevSlide() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updatePresentation();
+      }
+    }
+
+    // Eventos de botones
+    btnNext.addEventListener('click', nextSlide);
+    btnPrev.addEventListener('click', prevSlide);
+
+    // Eventos del Teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft') {
+        prevSlide();
+      }
+    });
+
+    // Inicializar estado
+    updatePresentation();
+  </script>
+</body>
+</html>
