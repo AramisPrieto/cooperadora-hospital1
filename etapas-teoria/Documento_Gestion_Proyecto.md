@@ -139,7 +139,7 @@ Para la gestión de este proyecto, se seleccionó el **Modelo Scrum combinado co
 * **Equipo de Desarrollo (Development Team):**
   - **Kevin Nielsen:** Desarrollo del Backend, middleware de rate limiting, validaciones robustas con regex y validator, pasarela de auditoría de transferencias bancarias y servicio de correos SMTP.
   - **Thiago Masson:** Configuración del entorno de dependencias monorrepo (migración a pnpm), integración del branding y logotipo oficial de la cooperadora, desarrollo del módulo documental de noticias e implementación de sanitización DOMPurify.
-  - **Santiago Ialungo:** Diseño estético clínico de UI/UX, optimización de la paleta de colores y el fondo ECG, desarrollo del Navbar Scroll-Spy, integración de Lenis scroll y la maquetación responsiva del panel de administración.
+  - **Santiago Ialungo:** Diseño estético clínico de UI/UX, optimización de la paleta de colores y fondo, desarrollo del Navbar Scroll-Spy, integración de Lenis scroll y la maquetación responsiva del panel de administración.
   - **Aramis Prieto:** Estructuración de la base de datos PostgreSQL y MongoDB, orquestación del Data Mashup, control transaccional de concurrencia mediante `SELECT FOR UPDATE` y programación de la suite de 47 tests automatizados en Vitest.
 
 ### 8.2 Product Backlog Inicial
@@ -416,7 +416,7 @@ La priorización se realizó bajo la metodología MoSCoW, enfocada en asegurar u
 Considerando las características del estándar de calidad analizados, el proyecto garantiza cada aspecto de la siguiente manera:
 
 1. **Adecuación Funcional:** La plataforma cubre con exactitud el ciclo de negocio real: registro de socios en el libro legal, visualización fidedigna de campañas, declaración y validación de transferencias, y comunicación de novedades.
-2. **Usabilidad:** Rediseño UI/UX adaptado a la salud, con una interfaz clara basada en colores pasteles, una cuadrícula ECG de fondo que contextualiza el portal, animaciones sutiles, estados de carga (skeletons) y scroll inercial suave. El Navbar destaca la sección activa mediante Scroll-Spy.
+2. **Usabilidad:** Rediseño UI/UX adaptado a la salud, con una interfaz clara basada en colores pasteles, una cuadrícula de fondo que contextualiza el portal, animaciones sutiles, estados de carga (skeletons) y scroll inercial suave. El Navbar destaca la sección activa mediante Scroll-Spy.
 3. **Eficiencia:** Agregación síncrona en base de datos híbrida (Data Mashup) utilizando `Promise.all` para ejecutar de manera paralela las consultas relacionales y documentales, evitando bloqueos de red secuenciales.
 4. **Fiabilidad:** Prevención de colisiones de datos bajo concurrencia concurrente en SQL mediante bloqueo exclusivo de fila y manejo transaccional a nivel de motor de datos.
 5. **Seguridad:** Uso de tokens JWT firmados digitalmente para la autorización, almacenamiento seguro de contraseñas mediante hash `bcryptjs`, desinfección de inputs para evitar inyecciones SQL/NoSQL y sanitización contra inyecciones XSS.
