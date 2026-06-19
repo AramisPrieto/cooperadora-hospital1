@@ -458,7 +458,7 @@
 
 ### 2026-06-19 - Mejoras de Interfaz y Panel Administrativo
 - **Nacionalidad y Localidad en Registro**:
-  - Reemplazo de los campos de texto libre por etiquetas `<select>` en el registro de la aplicación y en el formulario del panel administrativo, unificando criterios y garantizando la recolección de localidades correctas.
+  - Se configuraron los campos de *Nacionalidad* y *Localidad* como campos de texto libre, estableciendo "Argentina" y "Necochea" respectivamente como valores prellenados por defecto en el registro público (`Login.jsx`) y en el formulario del panel administrativo (`PartnerForm.jsx`), permitiendo mayor flexibilidad a los usuarios.
 - **Gestión de Cuotas Sociales**:
   - Inclusión de la nueva pestaña **Cuotas Sociales** en el Panel de Administrador, permitiendo visualizar, buscar por socio y cambiar el estado de las cuotas (aprobar/rechazar) desde una tabla unificada.
   - Creación de los endpoints `GET /api/socios/admin/cuotas` y `PUT /api/socios/admin/cuotas/:id/validar` en el backend para orquestar la gestión de cuotas.
@@ -466,5 +466,3 @@
   - Remoción de la etiqueta "Visible" en la interfaz de gestión de Noticias.
   - Adición de un sistema de **Paginación de Resultados** (hasta 25 ítems por vista) en la lista de Transferencias para optimizar el rendimiento del navegador ante el historial extenso.
   - Implementación de un buscador en tiempo real en la tabla de **Transferencias**, permitiendo filtrar donaciones por email, nombre, apellido o DNI del remitente, requiriendo actualización en el controlador `donacionController.js` para incluir los datos del perfil del socio.
-- **Valores por Defecto en Formularios**:
-  - Preselección automática de "Argentina" en el campo *Nacionalidad* y "Necochea" en el campo *Localidad*, tanto en la vista pública de registro (`Login.jsx`) como en el formulario de alta del administrador (`PartnerForm.jsx`), mejorando la fluidez del alta de nuevos socios.

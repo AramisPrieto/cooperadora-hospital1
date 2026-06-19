@@ -98,17 +98,14 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
             </div>
             <div>
               <label htmlFor="nacionalidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nacionalidad *</label>
-              <select 
+              <input 
                 id="nacionalidad"
+                type="text" 
                 value={form.nacionalidad} 
                 onChange={e => handleChange('nacionalidad', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
                 required
-              >
-                <option value="">Seleccione...</option>
-                <option value="Argentina">Argentina</option>
-                <option value="Extranjera">Extranjera</option>
-              </select>
+              />
             </div>
           </div>
         </div>
@@ -144,22 +141,14 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
             </div>
             <div>
               <label htmlFor="localidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Localidad *</label>
-              <select 
+              <input 
                 id="localidad"
+                type="text" 
                 value={form.localidad} 
                 onChange={e => handleChange('localidad', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
                 required
-              >
-                <option value="">Seleccione...</option>
-                <option value="Necochea">Necochea</option>
-                <option value="Quequén">Quequén</option>
-                <option value="La Dulce">La Dulce</option>
-                <option value="Juan N. Fernández">Juan N. Fernández</option>
-                <option value="Claraz">Claraz</option>
-                <option value="Ramón Santamarina">Ramón Santamarina</option>
-                <option value="Otra">Otra</option>
-              </select>
+              />
             </div>
           </div>
         </div>

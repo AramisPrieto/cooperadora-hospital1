@@ -292,11 +292,7 @@ const Login = () => {
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="nacionalidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nacionalidad *</label>
-                      <select id="nacionalidad" required value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} className="input-field py-2 text-sm">
-                        <option value="">Seleccione...</option>
-                        <option value="Argentina">Argentina</option>
-                        <option value="Extranjera">Extranjera</option>
-                      </select>
+                      <input id="nacionalidad" type="text" required value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} placeholder="Argentina" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="direccion" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Dirección *</label>
@@ -304,16 +300,7 @@ const Login = () => {
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="localidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Localidad *</label>
-                      <select id="localidad" required value={localidad} onChange={e => setLocalidad(e.target.value)} className="input-field py-2 text-sm">
-                        <option value="">Seleccione...</option>
-                        <option value="Necochea">Necochea</option>
-                        <option value="Quequén">Quequén</option>
-                        <option value="La Dulce">La Dulce</option>
-                        <option value="Juan N. Fernández">Juan N. Fernández</option>
-                        <option value="Claraz">Claraz</option>
-                        <option value="Ramón Santamarina">Ramón Santamarina</option>
-                        <option value="Otra">Otra</option>
-                      </select>
+                      <input id="localidad" type="text" required value={localidad} onChange={e => setLocalidad(e.target.value)} placeholder="Necochea" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="fechaNacimiento" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">F. Nacimiento *</label>
