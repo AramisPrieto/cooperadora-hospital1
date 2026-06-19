@@ -32,7 +32,7 @@ El proyecto consiste en el diseño, desarrollo e implementación de un portal we
   7. **Autogestión de Cuotas Sociales:** Historial de facturación de cuotas mensuales y adhesión a débito automático con débito recurrente de Mercado Pago.
   8. **Páginas de búsqueda y Timeline de Obras:** Buscadores dinámicos e independientes de Campañas y Noticias, y una sección de Obras Concretadas para exponer los hitos del 100% en formato de línea de tiempo interactiva.
   9. **Recuperación de contraseña segura y Mitigaciones:** Flujo de forgot/reset password con tokens expirables, mitigación de vulnerabilidades IDOR y ReDoS.
-  10. **Monitoreo y Telemetría en la Nube:** Monitoreo en producción con Vercel Analytics y Speed Insights, y proxies inversos de cookies para resolver Same-Origin.
+  10. **Monitoreo y Telemetría en la Nube:** Monitoreo en producción con Vercel Analytics y Speed Insights.
 
 ### 1.2 Justificación
 * **Necesidad que busca resolver:** Centralizar, formalizar y despapelar la administración de la cooperadora, permitiendo captar aportes de la ciudadanía digitalizada en cualquier momento del día de manera auditable y segura.
