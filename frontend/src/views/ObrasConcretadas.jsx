@@ -5,11 +5,8 @@ import {
   Search, 
   Grid, 
   Calendar, 
-  Users, 
-  Award, 
   Sparkles, 
   ChevronRight,
-  TrendingUp
 } from 'lucide-react';
 import api from '../api/axios';
 
@@ -82,16 +79,6 @@ const ObrasConcretadas = () => {
     return ['Todas', ...Array.from(cats)];
   }, [campaigns]);
 
-  // Statistics calculations
-  const stats = useMemo(() => {
-    const totalInvested = campaigns.reduce((acc, c) => acc + parseFloat(c.monto_actual), 0);
-    const totalDonors = campaigns.reduce((acc, c) => acc + getDonorCount(c.id, c.monto_actual), 0);
-    return {
-      count: campaigns.length,
-      invested: totalInvested,
-      donors: totalDonors
-    };
-  }, [campaigns]);
 
   // Filtered campaigns
   const filteredCampaigns = useMemo(() => {
@@ -154,48 +141,7 @@ const ObrasConcretadas = () => {
           </p>
         </div>
 
-        {/* ── Statistics Summary Cards ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-          {/* Card 1: Total Obras */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-5 group">
-            <div className="h-14 w-14 rounded-2xl bg-accent-50 text-accent-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-              <Award className="h-7 w-7" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-550 uppercase tracking-widest">Equipos & Obras</p>
-              <h3 className="text-2xl font-display font-black text-slate-800 mt-1">{loading ? '...' : stats.count} Proyectos</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Financiados al 100%</p>
-            </div>
-          </div>
 
-          {/* Card 2: Total Invested */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-5 group">
-            <div className="h-14 w-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-              <TrendingUp className="h-7 w-7" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-550 uppercase tracking-widest">Inversión Lograda</p>
-              <h3 className="text-2xl font-display font-black text-slate-800 mt-1">
-                {loading ? '...' : formatter.format(stats.invested)}
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">Dinero de la comunidad</p>
-            </div>
-          </div>
-
-          {/* Card 3: Total Donors */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-300 flex items-center gap-5 group">
-            <div className="h-14 w-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-              <Users className="h-7 w-7" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-slate-550 uppercase tracking-widest">Participación</p>
-              <h3 className="text-2xl font-display font-black text-slate-800 mt-1">
-                +{loading ? '...' : stats.donors.toLocaleString('es-AR')}
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">Donantes involucrados</p>
-            </div>
-          </div>
-        </div>
 
         {/* ── Filter Controls & Mode Toggler ── */}
         <div className="bg-white rounded-3xl border border-slate-200/60 p-5 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
