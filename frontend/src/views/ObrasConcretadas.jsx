@@ -463,9 +463,9 @@ const ObrasConcretadas = () => {
         <div className="mt-20 bg-slate-900 rounded-[2.5rem] p-8 sm:p-12 text-center text-white relative overflow-hidden shadow-xl">
           {/* Radial visual effect */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-accent-950/40 via-slate-900 to-slate-900 -z-10" />
-          <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+          <div className="absolute inset-0 opacity-[0.02] pointer-events-none -z-10" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
-          <div className="max-w-2xl mx-auto space-y-6">
+          <div className="relative z-10 max-w-2xl mx-auto space-y-6">
             <h2 className="text-3xl font-display font-black tracking-tight leading-none">
               ¿Quieres ayudarnos a seguir concretando obras?
             </h2>
