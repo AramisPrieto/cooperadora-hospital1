@@ -165,6 +165,27 @@ const AdminPanel = () => {
     }
   };
 
+  /* ── Delete partner ── */
+  const handleDeletePartner = async (id) => {
+    if (!window.confirm('¿Seguro que desea eliminar por completo a este socio y su cuenta de usuario? Esta acción no se puede deshacer.')) return;
+    setSubmitting(true);
+    setErrorMsg('');
+    setSuccessMsg('');
+    try {
+      await api.delete(`/socios/${id}`);
+      setSuccessMsg('Socio y su cuenta eliminados correctamente.');
+      if (expandedPartnerId === id) setExpandedPartnerId(null);
+      if (editingPartnerId === id) setEditingPartnerId(null);
+      loadDashboardData();
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.response?.data?.error || 'Error al eliminar el socio.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // TEAM_001: Aprobar una transferencia declarada por un socio
   const handleApproveTransfer = async (id) => {
     setSubmitting(true);
@@ -671,6 +692,14 @@ const AdminPanel = () => {
 
                               {/* ACTION BUTTONS (At the bottom of the card) */}
                               <div className="flex justify-end gap-2 border-t border-slate-200/60 pt-3">
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeletePartner(part.numero_asociado)}
+                                  disabled={submitting}
+                                  className="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white font-bold uppercase tracking-wider rounded-xl text-[10px] transition-colors disabled:opacity-40"
+                                >
+                                  Eliminar Socio
+                                </button>
                                 <button
                                   type="button"
                                   onClick={() => startEditPartner(part.numero_asociado)}

@@ -396,6 +396,10 @@
 ### Versión 1.27.0 — Limpieza de UI, Panel de Administración y Correcciones de Usabilidad (Thiago Masson)
 - **Métricas Reales en el Panel de Administración (Dashboard)**:
   - Reemplazo de los datos estáticos de demostración (mock data) en los gráficos del panel de administración por datos reales obtenidos desde el servidor (ingresos acumulados por transferencias aprobadas y registro de nuevos socios de los últimos 6 meses).
+- **Eliminación de Socios desde el Panel de Administración**:
+  - Implementación del botón "Eliminar Socio" en la sección de socios expandible.
+  - Modificación del controlador de backend `deleteSocio` para destruir el registro de `Usuario` correspondiente, eliminando automáticamente por cascada (`onDelete: 'CASCADE'`) tanto el perfil del socio como sus registros de cuotas, evitando dejar usuarios huérfanos.
+  - Actualización de las pruebas unitarias en `socio.test.js` para certificar la limpieza total de datos relacionados.
 - **Limpieza de UI y Ajustes en Obras Concretadas**:
   - Remoción definitiva de la vista de grilla y de los chips de categorías ("Todas"/"General"). Ajuste de la línea de tiempo ([ObrasConcretadas.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/ObrasConcretadas.jsx)) como vista única, corrección del import ausente de `Award` de `lucide-react`, eliminación del badge superior de "Impacto Comunitario", adición del mini título/eyebrow superior "Obras Concretadas" (`text-brand-600`) y estandarización del diseño de la barra de búsqueda (con botón para limpiar búsqueda) para unificarla con la barra de búsqueda de campañas y noticias.
   - En la Home ([Home.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/Home.jsx)), alineación a la izquierda y remoción del color de letras verde esmeralda (`text-emerald-900`) en el encabezado de Obras Concretadas para que respete exactamente el formato de campañas y noticias.

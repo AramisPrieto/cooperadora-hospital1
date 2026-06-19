@@ -446,6 +446,9 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
     });
 
     it('DELETE /:id debe permitir a admin eliminar un perfil de socio', async () => {
+      // Guardar el ID del usuario antes de la eliminación
+      const usuarioId = socioPerfil.usuario_id_fk;
+
       const res = await request(app)
         .delete(`/api/socios/${socioPerfil.numero_asociado}`)
         .set('Authorization', `Bearer ${adminToken}`);
@@ -453,9 +456,13 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('message', 'Perfil de socio eliminado exitosamente.');
 
-      // Verificar que ya no exista
+      // Verificar que ya no exista el perfil
       const dbPerfil = await PerfilSocio.findByPk(socioPerfil.numero_asociado);
       expect(dbPerfil).toBeNull();
+
+      // Verificar que tampoco exista el usuario asociado (evitando registros huérfanos)
+      const dbUsuario = await Usuario.findByPk(usuarioId);
+      expect(dbUsuario).toBeNull();
     });
   });
 });

@@ -293,7 +293,14 @@ export const deleteSocio = async (req, res) => {
       return res.status(404).json({ error: 'Socio no encontrado.' });
     }
 
-    await socio.destroy();
+    const usuarioId = socio.usuario_id_fk;
+    if (usuarioId) {
+      // Eliminar el Usuario asociado; esto eliminará en cascada el PerfilSocio y PagoCuota
+      await Usuario.destroy({ where: { id: usuarioId } });
+    } else {
+      await socio.destroy();
+    }
+
     return res.json({ message: 'Perfil de socio eliminado exitosamente.' });
   } catch (error) {
     console.error('Error al eliminar socio:', error);
