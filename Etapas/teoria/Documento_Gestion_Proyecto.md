@@ -93,7 +93,6 @@ Diseñar, desarrollar e implementar una plataforma web con persistencia híbrida
 
 ### 5.2 Funcionalidades Excluidas
 * **Procesamiento de Tarjetas de Crédito Reales:** Excluido del proyecto de forma expresa debido a los costos asociados por comisiones de pasarelas de pago y a la necesidad de concentrar la contabilidad en transferencias directas al CBU institucional sin intermediarios comerciales.
-* **Sincronización Automatísima con la API del Banco:** No se realiza la comunicación en tiempo real con el Homebanking de la institución para auto-conciliar transferencias debido a las restricciones de seguridad y el costo elevado de las interfaces bancarias en el mercado nacional.
 * **Chat interactivo en tiempo real:** Soporte técnico y consultas directas quedan fuera del alcance del portal web (se manejan vía canales tradicionales de contacto ya existentes).
 * **Aplicación Móvil Nativa:** El desarrollo de aplicaciones móviles dedicadas para Android o iOS se excluye del alcance; se garantiza, en cambio, la responsividad absoluta de la aplicación web en dispositivos móviles.
 
