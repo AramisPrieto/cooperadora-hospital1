@@ -172,7 +172,108 @@ export const createSocio = async (req, res) => {
   }
 };
 
-// Actualizar perfil de socio (Admin o el propio socio)
+// Actualizar perfil del propio socio autenticado (Autogestión)
+export const updateMyProfile = async (req, res) => {
+  const {
+    dni,
+    estado,
+    nombre,
+    apellido,
+    direccion,
+    nacionalidad,
+    telefono,
+    fecha_nacimiento,
+    genero,
+    metodo_pago,
+    fecha_ultimo_pago,
+    localidad,
+    observaciones
+  } = req.body;
+
+  // Validar campos obligatorios si están presentes
+  const requiredStringFields = {
+    nombre: 'Nombre',
+    apellido: 'Apellido',
+    direccion: 'Dirección',
+    localidad: 'Localidad',
+    nacionalidad: 'Nacionalidad',
+    telefono: 'Teléfono',
+    fecha_nacimiento: 'Fecha de nacimiento',
+    genero: 'Género',
+    metodo_pago: 'Método de pago'
+  };
+
+  for (const [key, label] of Object.entries(requiredStringFields)) {
+    if (req.body[key] !== undefined) {
+      const val = req.body[key];
+      if (val === null || (typeof val === 'string' && val.trim() === '')) {
+        return res.status(400).json({ error: `El campo ${label} es obligatorio y no puede estar vacío.` });
+      }
+    }
+  }
+
+  try {
+    const socio = await PerfilSocio.findOne({ where: { usuario_id_fk: req.user.id } });
+    if (!socio) {
+      return res.status(404).json({ error: 'No se encontró un perfil de socio vinculado a este usuario.' });
+    }
+
+    // Los socios no pueden cambiar su propio estado de aprobación
+    if (estado && estado !== socio.estado) {
+      return res.status(403).json({ error: 'Los socios no pueden cambiar su propio estado de aprobación.' });
+    }
+
+    // Validar DNI único si se está modificando
+    if (dni !== undefined) {
+      const dniInt = parseInt(dni);
+      if (isNaN(dniInt) || dniInt < 1000000 || dniInt > 99999999) {
+        return res.status(400).json({ error: 'El DNI es obligatorio y debe ser un número válido de entre 7 y 8 dígitos.' });
+      }
+      if (dniInt !== socio.dni) {
+        const existingDni = await PerfilSocio.findOne({ where: { dni: dniInt } });
+        if (existingDni) {
+          return res.status(400).json({ error: 'El DNI ingresado ya está en uso.' });
+        }
+        socio.dni = dniInt;
+      }
+    }
+
+    if (nombre !== undefined) socio.nombre = nombre.trim();
+    if (apellido !== undefined) socio.apellido = apellido.trim();
+    if (direccion !== undefined) socio.direccion = direccion.trim();
+    if (nacionalidad !== undefined) socio.nacionalidad = nacionalidad.trim();
+    if (telefono !== undefined) socio.telefono = telefono.trim();
+    if (fecha_nacimiento !== undefined) socio.fecha_nacimiento = fecha_nacimiento;
+    if (genero !== undefined) socio.genero = genero;
+    
+    if (metodo_pago !== undefined && metodo_pago !== socio.metodo_pago) {
+      const currentMonth = new Date().toISOString().substring(0, 7); // YYYY-MM
+      if (socio.mes_ultimo_cambio_metodo_pago === currentMonth) {
+        if (socio.cant_cambios_metodo_pago >= 3) {
+          return res.status(400).json({ error: 'No podés cambiar tu método de pago más de 3 veces en el mismo mes.' });
+        }
+        socio.cant_cambios_metodo_pago += 1;
+      } else {
+        socio.mes_ultimo_cambio_metodo_pago = currentMonth;
+        socio.cant_cambios_metodo_pago = 1;
+      }
+      socio.metodo_pago = metodo_pago;
+    }
+    
+    if (fecha_ultimo_pago !== undefined) socio.fecha_ultimo_pago = fecha_ultimo_pago;
+    if (localidad !== undefined) socio.localidad = localidad.trim();
+    if (observaciones !== undefined) socio.observaciones = observaciones;
+
+    await socio.save();
+
+    return res.json({ message: 'Perfil de socio actualizado correctamente.', socio });
+  } catch (error) {
+    console.error('Error al actualizar perfil propio:', error);
+    return res.status(500).json({ error: 'Error al actualizar el perfil de socio.' });
+  }
+};
+
+// Actualizar perfil de socio (Solo Admin)
 export const updateSocio = async (req, res) => {
   const { id } = req.params; // numero_asociado
   const {
@@ -219,16 +320,6 @@ export const updateSocio = async (req, res) => {
       return res.status(404).json({ error: 'Perfil de socio no encontrado.' });
     }
 
-    // Restringir que un socio edite perfiles ajenos o altere su propio estado
-    if (req.user.rol !== 'admin') {
-      if (socio.usuario_id_fk !== req.user.id) {
-        return res.status(403).json({ error: 'No tienes permiso para modificar este perfil.' });
-      }
-      if (estado && estado !== socio.estado) {
-        return res.status(403).json({ error: 'Los socios no pueden cambiar su propio estado de aprobación.' });
-      }
-    }
-
     // Validar DNI único si se está modificando
     if (dni !== undefined) {
       const dniInt = parseInt(dni);
@@ -244,7 +335,7 @@ export const updateSocio = async (req, res) => {
       }
     }
 
-    if (estado && req.user.rol === 'admin') {
+    if (estado !== undefined) {
       socio.estado = estado;
     }
 
@@ -255,19 +346,7 @@ export const updateSocio = async (req, res) => {
     if (telefono !== undefined) socio.telefono = telefono.trim();
     if (fecha_nacimiento !== undefined) socio.fecha_nacimiento = fecha_nacimiento;
     if (genero !== undefined) socio.genero = genero;
-    if (metodo_pago !== undefined && metodo_pago !== socio.metodo_pago) {
-      if (req.user.rol !== 'admin') {
-        const currentMonth = new Date().toISOString().substring(0, 7); // YYYY-MM
-        if (socio.mes_ultimo_cambio_metodo_pago === currentMonth) {
-          if (socio.cant_cambios_metodo_pago >= 3) {
-            return res.status(400).json({ error: 'No podés cambiar tu método de pago más de 3 veces en el mismo mes.' });
-          }
-          socio.cant_cambios_metodo_pago += 1;
-        } else {
-          socio.mes_ultimo_cambio_metodo_pago = currentMonth;
-          socio.cant_cambios_metodo_pago = 1;
-        }
-      }
+    if (metodo_pago !== undefined) {
       socio.metodo_pago = metodo_pago;
     }
     if (fecha_ultimo_pago !== undefined) socio.fecha_ultimo_pago = fecha_ultimo_pago;

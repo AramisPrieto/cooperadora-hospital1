@@ -101,10 +101,10 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
     });
   });
 
-  describe('PUT /:id', () => {
+  describe('Actualización de perfiles (PUT)', () => {
     it('debe permitir a un socio actualizar su propio DNI', async () => {
       const res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({
           dni: 99887766
@@ -114,7 +114,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
       expect(res.body.socio).toHaveProperty('dni', 99887766);
     });
 
-    it('debe impedir a un socio actualizar el perfil de otro socio', async () => {
+    it('debe impedir a un socio (no admin) usar el endpoint por ID', async () => {
       const res = await request(app)
         .put(`/api/socios/${socioPerfil.numero_asociado}`)
         .set('Authorization', `Bearer ${anotherSocioToken}`)
@@ -123,12 +123,12 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
         });
 
       expect(res.status).toBe(403);
-      expect(res.body).toHaveProperty('error', 'No tienes permiso para modificar este perfil.');
+      expect(res.body).toHaveProperty('error', 'Permisos insuficientes');
     });
 
     it('debe impedir a un socio cambiar su propio estado de aprobación', async () => {
       const res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({
           estado: 'activo'
@@ -152,7 +152,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
 
     it('debe rechazar (status 400) si un socio intenta actualizar un campo obligatorio a un string vacío', async () => {
       const res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({
           nombre: ''
@@ -164,7 +164,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
 
     it('debe rechazar (status 400) si un socio intenta actualizar un campo obligatorio a null', async () => {
       const res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({
           apellido: null
@@ -176,7 +176,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
 
     it('debe rechazar (status 400) si un socio intenta actualizar un campo obligatorio a espacios en blanco', async () => {
       const res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({
           direccion: '    '
@@ -200,7 +200,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
 
     it('debe rechazar (status 400) si se intenta actualizar el DNI a un largo inválido', async () => {
       const res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({
           dni: 12345
@@ -213,7 +213,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
     it('debe permitir a un socio cambiar su método de pago hasta 3 veces en el mes actual', async () => {
       // 1er cambio
       let res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({ metodo_pago: 'debito' });
       expect(res.status).toBe(200);
@@ -222,7 +222,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
 
       // 2do cambio
       res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({ metodo_pago: 'transferencia' });
       expect(res.status).toBe(200);
@@ -231,7 +231,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
 
       // 3er cambio
       res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({ metodo_pago: 'cobrador' });
       expect(res.status).toBe(200);
@@ -249,7 +249,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
       });
 
       const res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({ metodo_pago: 'transferencia' });
 
@@ -286,7 +286,7 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
       });
 
       const res = await request(app)
-        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
         .send({ metodo_pago: 'transferencia' });
 

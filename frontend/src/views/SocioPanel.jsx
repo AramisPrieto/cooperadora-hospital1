@@ -131,7 +131,7 @@ const SocioPanel = () => {
     setSuccessMsg('');
 
     try {
-      const res = await api.put(`/socios/${profile.numero_asociado}`, formValues);
+      const res = await api.put('/socios/mi-perfil', formValues);
       setSuccessMsg('Datos actualizados correctamente.');
       setProfile(res.data.socio);
     } catch (err) {
@@ -224,7 +224,7 @@ const SocioPanel = () => {
     setErrorMsg('');
     setSuccessMsg('');
     try {
-      const res = await api.put(`/socios/${profile.numero_asociado}`, { metodo_pago: newMethod });
+      const res = await api.put('/socios/mi-perfil', { metodo_pago: newMethod });
       setProfile(res.data.socio);
       setSuccessMsg(`Método de pago cambiado a ${newMethod.toUpperCase()} con éxito.`);
     } catch (err) {

@@ -5,6 +5,7 @@ import {
   getMyCuotas,
   createSocio,
   updateSocio,
+  updateMyProfile,
   deleteSocio
 } from '../controllers/socioController.js';
 import {
@@ -42,8 +43,11 @@ router.post('/mi-perfil/pagos/declarar', transactionLimiter, validateDeclararPag
 router.post('/suscripcion/crear', transactionLimiter, iniciarSuscripcion);
 router.post('/suscripcion/cancelar', cancelarSuscripcion);
 
-// Autogestión / Admin: Actualizar perfil de socio (Socio edita su DNI, Admin edita todo y estado)
-router.put('/:id', validateSocio, updateSocio);
+// Autogestión: Actualizar propio perfil de socio (Socio edita su DNI/datos)
+router.put('/mi-perfil', validateSocio, updateMyProfile);
+
+// Admin: Actualizar perfil de cualquier socio por ID
+router.put('/:id', authorizeRoles('admin'), validateSocio, updateSocio);
 
 // Rutas exclusivas de Administrador
 router.get('/', authorizeRoles('admin'), getAllSocios);

@@ -1,41 +1,20 @@
-import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
+dotenv.config();
 
-// Helper para verificar si SMTP está configurado
-const isSmtpConfigured = () => {
-  return !!(
-    process.env.SMTP_HOST &&
-    process.env.SMTP_PORT &&
-    process.env.SMTP_USER &&
-    process.env.SMTP_PASS
-  );
-};
-
-// Crear y configurar el transportador de nodemailer
-const getTransporter = () => {
-  if (!isSmtpConfigured()) {
-    return null;
-  }
-
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || '587', 10),
-    secure: process.env.SMTP_SECURE === 'true', // true para 465, false para otros puertos
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+// Helper para verificar si Resend está configurado
+const isResendConfigured = () => {
+  return !!process.env.RESEND_API_KEY;
 };
 
 /**
- * Envía un correo electrónico agradeciendo la donación por transferencia
+ * Envía un correo electrónico agradeciendo la donación por transferencia utilizando Resend
  * @param {Object} params
  * @param {string} params.email - Dirección del destinatario
  * @param {number|string} params.monto - Monto de la donación
  * @param {string} params.campanaTitulo - Título de la campaña a la que se donó
  */
 export const enviarMailAgradecimiento = async ({ email, monto, campanaTitulo }) => {
-  const emailFrom = process.env.EMAIL_FROM || '"Cooperadora Hospital" <no-reply@cooperadora.org>';
+  const emailFrom = process.env.EMAIL_FROM || 'onboarding@resend.dev';
   const montoFormateado = parseFloat(monto).toLocaleString('es-AR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
@@ -161,12 +140,10 @@ En nombre de toda la Comisión Directiva y del personal del hospital, ¡te damos
 Asociación Cooperadora del Hospital Municipal de Necochea
   `.trim();
 
-  const transporter = getTransporter();
-
-  if (!transporter) {
+  if (!isResendConfigured()) {
     // Modo simulación/desarrollo
     console.log('\n==================================================');
-    console.log('📢 SIMULACIÓN DE ENVÍO DE EMAIL (SMTP no configurado)');
+    console.log('📢 SIMULACIÓN DE ENVÍO DE EMAIL (RESEND_API_KEY no configurada)');
     console.log(`De:      ${emailFrom}`);
     console.log(`Para:    ${email}`);
     console.log(`Asunto:  ${subject}`);
@@ -176,19 +153,33 @@ Asociación Cooperadora del Hospital Municipal de Necochea
     return { simulated: true, email, monto, campanaTitulo };
   }
 
-  // Enviar correo real
+  // Enviar correo real usando la API de Resend por HTTPS (Puerto 443)
   try {
-    const info = await transporter.sendMail({
-      from: emailFrom,
-      to: email,
-      subject: subject,
-      text: textContent,
-      html: htmlContent,
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: emailFrom,
+        to: email,
+        subject: subject,
+        html: htmlContent,
+        text: textContent
+      }),
     });
-    console.log(`[Email Service] Correo enviado a ${email}: ${info.messageId}`);
-    return { sent: true, messageId: info.messageId };
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    }
+
+    console.log(`[Email Service - Resend] Correo enviado a ${email}: ${data.id}`);
+    return { sent: true, messageId: data.id };
   } catch (error) {
-    console.error(`[Email Service] Error al enviar correo real a ${email}:`, error);
-    throw error; // Re-lanzar para que el llamador pueda logear o manejar
+    console.error(`[Email Service - Resend] Error al enviar correo real a ${email}:`, error);
+    throw error;
   }
 };
