@@ -556,16 +556,12 @@ Para llevar adelante el desarrollo, los 4 integrantes del grupo asumieron roles 
 
 * **Scrum Master & Lead Backend Developer (Aramis Prieto):**
   - *Responsabilidades:* Orquestación de bases de datos híbridas, transaccionalidad contable y concurrencia (locks SQL), control de integración Git y suite de tests en Vitest.
-  - *Participación:* 30%.
 * **Security & Backend Developer (Kevin Nielsen):**
   - *Responsabilidades:* Implementación de JWT, desarrollo de APIs de transferencias y perfiles, middlewares de sanitización NoSQL, control de tasa (rate limiting) y servicio de correos SMTP.
-  - *Participación:* 30%.
 * **UI/UX & Lead Frontend Developer (Santiago Ialungo):**
   - *Responsabilidades:* Diseño visual con estética clínica, responsividad, integración de Lenis scroll y Navbar Scroll-Spy, maquetación de gráficos en panel de administración.
-  - *Participación:* 20%.
 * **Full Stack Developer & Branding Specialist (Thiago Masson):**
   - *Responsabilidades:* Gestión del monorrepo pnpm, integración de logotipos oficiales, desarrollo del gestor de noticias MongoDB, implementación de sanitización DOMPurify.
-  - *Participación:* 20%.
 
 ### 20.2 Recursos Tecnológicos
 * **Lenguajes y Entornos de Ejecución:** JavaScript (Node.js v18+, React con Vite).
