@@ -465,8 +465,7 @@ La deuda técnica en el desarrollo del portal web se identifica en los siguiente
 ### 19.1 Estrategia de Estimación Seleccionada
 Para el desarrollo de la segunda etapa del proyecto se combinaron tres metodologías complementarias:
 1. **Work Breakdown Structure (WBS):** Descomposición jerárquica del proyecto en componentes menores para identificar con precisión todas las tareas de diseño, codificación, aseguramiento de calidad y despliegue.
-2. **Juicio de Expertos:** Basado en la experiencia del equipo en proyectos académicos anteriores de Programación y Base de Datos para establecer una línea base de complejidad.
-3. **Story Points mediante Planning Poker (Estimación Ágil):** Asignación de puntos de historia para estimar el esfuerzo y complejidad relativa de cada requerimiento del Backlog, utilizando la escala modificada de Fibonacci (1, 2, 3, 5, 8, 13).
+2. **Story Points mediante Planning Poker (Estimación Ágil):** Asignación de puntos de historia para estimar el esfuerzo y complejidad relativa de cada requerimiento del Backlog, utilizando la escala modificada de Fibonacci (1, 2, 3, 5, 8, 13).
 
 ### Justificación de la Elección
 La combinación de Story Points y WBS resulta óptima para el modelo Scrum. Estimar en horas directas en un equipo de estudiantes suele ser inexacto debido a la disparidad de horarios y curvas de aprendizaje individuales. Los **Story Points** abstraen el factor tiempo y se concentran en la complejidad técnica y el riesgo. Por su parte, la **WBS** garantiza que no se omitan actividades fundamentales no funcionales (como la configuración del monorrepo, las migraciones de base de datos o la configuración del servidor SMTP).
