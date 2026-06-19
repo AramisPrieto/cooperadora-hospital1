@@ -54,8 +54,11 @@ app.use(cors({
       return callback(null, true);
     }
 
-    // Permitir subdominios .vercel.app específicos de este proyecto (deploys de Vercel/preview)
-    if (origin.startsWith('https://cooperadora-') && origin.endsWith('.vercel.app')) {
+    // Permitir subdominios .vercel.app específicos de este proyecto o dominios de la cooperadora (Cloudflare/Custom)
+    if (
+      (origin.startsWith('https://cooperadora-') && origin.endsWith('.vercel.app')) ||
+      (origin.startsWith('https://') && origin.includes('cooperadora'))
+    ) {
       return callback(null, true);
     }
 

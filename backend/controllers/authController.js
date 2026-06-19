@@ -160,9 +160,10 @@ export const logout = async (req, res, next) => {
 // Solicitar recuperación de contraseña (Olvidé mi contraseña)
 export const forgotPassword = async (req, res, next) => {
   const { email } = req.body;
+  const origin = req.headers.origin || (req.headers.referer ? new URL(req.headers.referer).origin : null);
 
   try {
-    await forgotPasswordService(email);
+    await forgotPasswordService(email, origin);
     return res.json({
       message: 'Si el correo está registrado en nuestro sistema, te llegará un mensaje con instrucciones para restablecer tu contraseña.'
     });

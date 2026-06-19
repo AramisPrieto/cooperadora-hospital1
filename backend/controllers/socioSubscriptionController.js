@@ -188,19 +188,21 @@ export const webhookMercadoPago = async (req, res) => {
   const signatureHeader = req.headers['x-signature'];
   const requestIdHeader = req.headers['x-request-id'];
 
-  // 1. Validar la existencia de las cabeceras de seguridad
-  if (!signatureHeader || !requestIdHeader) {
-    console.warn('⚠️ [Webhook MP] Intento de acceso sin headers de firma.');
-    return res.status(403).json({ error: 'Prohibido. Faltan headers de seguridad de MP.' });
-  }
-
-  // 2. Validar la firma matemática
   const webhookSecret = process.env.MP_WEBHOOK_SECRET;
-  const bypassSignature = process.env.BYPASS_WEBHOOK_SIGNATURE === 'true';
+  const bypassSignature = process.env.BYPASS_WEBHOOK_SIGNATURE === 'true' || process.env.NODE_ENV === 'development';
   
-  if (!webhookSecret && !bypassSignature) {
-    console.error('❌ ERROR CRÍTICO DE CONFIGURACIÓN: MP_WEBHOOK_SECRET no está configurado y no se ha activado BYPASS_WEBHOOK_SIGNATURE.');
-    return res.status(500).json({ error: 'Error interno de configuración de seguridad.' });
+  if (!bypassSignature) {
+    // 1. Validar la existencia de las cabeceras de seguridad
+    if (!signatureHeader || !requestIdHeader) {
+      console.warn('⚠️ [Webhook MP] Intento de acceso sin headers de firma.');
+      return res.status(403).json({ error: 'Prohibido. Faltan headers de seguridad de MP.' });
+    }
+
+    // 2. Validar que tengamos el secret configurado
+    if (!webhookSecret) {
+      console.error('❌ ERROR CRÍTICO DE CONFIGURACIÓN: MP_WEBHOOK_SECRET no está configurado.');
+      return res.status(500).json({ error: 'Error interno de configuración de seguridad.' });
+    }
   }
 
   if (webhookSecret) {

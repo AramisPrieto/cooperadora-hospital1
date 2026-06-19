@@ -181,7 +181,7 @@ export const getSessionService = async (userId) => {
 /**
  * Servicio para solicitar el restablecimiento de contraseña (genera token y envía mail)
  */
-export const forgotPasswordService = async (email) => {
+export const forgotPasswordService = async (email, frontendUrl) => {
   // Buscar usuario y su perfil
   const user = await Usuario.findOne({
     where: { email },
@@ -208,7 +208,8 @@ export const forgotPasswordService = async (email) => {
   await enviarMailRecuperacion({
     email: user.email,
     token,
-    nombre
+    nombre,
+    frontendUrl
   });
 
   return { success: true };

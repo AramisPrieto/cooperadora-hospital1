@@ -345,10 +345,10 @@ Asociación Cooperadora del Hospital Municipal de Necochea
  * @param {string} params.token - Token único de restablecimiento
  * @param {string} params.nombre - Nombre del usuario
  */
-export const enviarMailRecuperacion = async ({ email, token, nombre }) => {
+export const enviarMailRecuperacion = async ({ email, token, nombre, frontendUrl }) => {
   const emailFrom = process.env.EMAIL_FROM || 'onboarding@resend.dev';
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const resetLink = `${frontendUrl}/reset-password?token=${token}`;
+  const resolvedFrontendUrl = frontendUrl || process.env.FRONTEND_URL || 'http://localhost:3000';
+  const resetLink = `${resolvedFrontendUrl}/reset-password?token=${token}`;
   
   const subject = 'Recupera tu contraseña - Cooperadora Hospital de Necochea';
 
