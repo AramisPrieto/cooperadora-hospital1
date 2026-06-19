@@ -12,6 +12,8 @@
 - [ ] cambiar logo coperadora footer
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
+- [ ] arreglar visual de fecha en seccion noticias (THIAGO)
+- [ ] en obras concretadas dejar unicamente linea de tiempo (THIAGO)
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
 - [x] Vincular el frontend con el backend
