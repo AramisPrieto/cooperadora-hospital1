@@ -1,8 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { Op } from 'sequelize';
 import { Usuario, PerfilSocio } from '../models/index.js';
 import sequelize from '../config/db.js';
 import dotenv from 'dotenv';
+import { enviarMailBienvenida, enviarMailRecuperacion } from './emailService.js';
 
 dotenv.config();
 
@@ -95,6 +98,13 @@ export const registerUserService = async (userData) => {
     }, { transaction });
 
     await transaction.commit();
+
+    // Enviar correo de bienvenida en segundo plano
+    enviarMailBienvenida({
+      email: user.email,
+      nombre: perfil.nombre,
+      apellido: perfil.apellido
+    }).catch(err => console.error('Error al enviar correo de bienvenida:', err));
   } catch (err) {
     await transaction.rollback();
     throw err;
@@ -167,3 +177,81 @@ export const getSessionService = async (userId) => {
 
   return user;
 };
+
+/**
+ * Servicio para solicitar el restablecimiento de contraseña (genera token y envía mail)
+ */
+export const forgotPasswordService = async (email) => {
+  // Buscar usuario y su perfil
+  const user = await Usuario.findOne({
+    where: { email },
+    include: [{ model: PerfilSocio, as: 'perfilSocio' }]
+  });
+
+  // Si no existe, no tiramos error para mitigar la enumeración de emails.
+  // Solo retornamos success simulado.
+  if (!user) {
+    console.log(`[Forgot Password] Petición para correo inexistente: ${email}`);
+    return { success: true };
+  }
+
+  // Generar token seguro
+  const token = crypto.randomBytes(20).toString('hex');
+  const expiration = new Date(Date.now() + 3600000); // 1 hora de validez
+
+  user.reset_password_token = token;
+  user.reset_password_expires = expiration;
+  await user.save();
+
+  // Enviar correo de recuperación
+  const nombre = user.perfilSocio ? user.perfilSocio.nombre : 'Socio';
+  await enviarMailRecuperacion({
+    email: user.email,
+    token,
+    nombre
+  });
+
+  return { success: true };
+};
+
+/**
+ * Servicio para redefinir la contraseña del usuario usando el token
+ */
+export const resetPasswordService = async (token, newPassword) => {
+  // Validar seguridad de la contraseña
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+  if (!passwordRegex.test(newPassword)) {
+    const error = new Error('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.');
+    error.status = 400;
+    throw error;
+  }
+
+  // Buscar usuario con el token que no haya expirado
+  const user = await Usuario.findOne({
+    where: {
+      reset_password_token: token,
+      reset_password_expires: {
+        [Op.gt]: new Date()
+      }
+    }
+  });
+
+  if (!user) {
+    const error = new Error('El enlace de recuperación es inválido o ha expirado.');
+    error.status = 400;
+    throw error;
+  }
+
+  // Hashear la nueva contraseña
+  const salt = await bcrypt.genSalt(10);
+  const password_hash = await bcrypt.hash(newPassword, salt);
+
+  // Guardar nueva contraseña y limpiar campos de recuperación
+  user.password_hash = password_hash;
+  user.reset_password_token = null;
+  user.reset_password_expires = null;
+  await user.save();
+
+  return { success: true };
+};
+

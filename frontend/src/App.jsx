@@ -9,6 +9,8 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 const Home = lazy(() => import('./views/Home'));
 const Login = lazy(() => import('./views/Login'));
+const ForgotPassword = lazy(() => import('./views/ForgotPassword'));
+const ResetPassword = lazy(() => import('./views/ResetPassword'));
 const AdminPanel = lazy(() => import('./views/AdminPanel'));
 const SocioPanel = lazy(() => import('./views/SocioPanel'));
 const CampaignSearch = lazy(() => import('./views/CampaignSearch'));
@@ -56,6 +58,8 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+                <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
+                <Route path="/reset-password" element={<GuestRoute><ResetPassword /></GuestRoute>} />
                 <Route path="/campanas" element={<CampaignSearch />} />
                 <Route path="/campanas/:id" element={<CampaignDetail />} />
                 <Route path="/noticias" element={<NewsSearch />} />

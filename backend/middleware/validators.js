@@ -177,3 +177,32 @@ export const validateSocio = [
 
   handleValidationErrors,
 ];
+
+/**
+ * Validaciones para POST /api/auth/forgot-password
+ */
+export const validateForgotPassword = [
+  body('email')
+    .notEmpty().withMessage('El email es obligatorio.')
+    .isEmail().withMessage('El formato del email no es válido.')
+    .normalizeEmail(),
+
+  handleValidationErrors,
+];
+
+/**
+ * Validaciones para POST /api/auth/reset-password
+ */
+export const validateResetPassword = [
+  body('token')
+    .notEmpty().withMessage('El token de recuperación es obligatorio.')
+    .isString().withMessage('El token no es válido.'),
+
+  body('password')
+    .notEmpty().withMessage('La contraseña es obligatoria.')
+    .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres.')
+    .isLength({ max: 128 }).withMessage('La contraseña no puede superar los 128 caracteres.'),
+
+  handleValidationErrors,
+];
+

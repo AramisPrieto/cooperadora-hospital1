@@ -206,9 +206,19 @@ const Login = () => {
 
             {/* Contraseña */}
             <div className="space-y-1.5">
-              <label htmlFor="password" className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                Contraseña
-              </label>
+              <div className="flex justify-between items-center">
+                <label htmlFor="password" className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Contraseña
+                </label>
+                {isLogin && (
+                  <Link
+                    to="/forgot-password"
+                    className="text-[10px] font-semibold text-brand-600 hover:text-brand-700 transition-colors uppercase tracking-wider"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                 <input

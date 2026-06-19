@@ -1,4 +1,10 @@
-import { registerUserService, loginUserService, getSessionService } from '../services/authService.js';
+import {
+  registerUserService,
+  loginUserService,
+  getSessionService,
+  forgotPasswordService,
+  resetPasswordService
+} from '../services/authService.js';
 
 const setTokenCookie = (res, token) => {
   const isProd = process.env.NODE_ENV === 'production';
@@ -150,3 +156,40 @@ export const logout = async (req, res, next) => {
     next(error);
   }
 };
+
+// Solicitar recuperación de contraseña (Olvidé mi contraseña)
+export const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+
+  try {
+    await forgotPasswordService(email);
+    return res.json({
+      message: 'Si el correo está registrado en nuestro sistema, te llegará un mensaje con instrucciones para restablecer tu contraseña.'
+    });
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.message });
+    }
+    console.error('Error en forgotPassword controller:', error);
+    next(error);
+  }
+};
+
+// Restablecer contraseña con token
+export const resetPassword = async (req, res, next) => {
+  const { token, password } = req.body;
+
+  try {
+    await resetPasswordService(token, password);
+    return res.json({
+      message: 'Tu contraseña ha sido restablecida correctamente.'
+    });
+  } catch (error) {
+    if (error.status) {
+      return res.status(error.status).json({ error: error.message });
+    }
+    console.error('Error en resetPassword controller:', error);
+    next(error);
+  }
+};
+

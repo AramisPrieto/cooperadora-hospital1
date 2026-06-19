@@ -224,4 +224,91 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       expect(res.body).toHaveProperty('error', 'Credenciales inválidas.');
     });
   });
+
+  describe('POST /forgot-password y POST /reset-password', () => {
+    beforeEach(async () => {
+      // Registrar un usuario para las pruebas de recuperación
+      await request(app)
+        .post('/api/auth/register')
+        .send({
+          ...baseRegisterData,
+          email: 'recover@test.com',
+          password: 'Password123',
+          dni: 87654321
+        });
+    });
+
+    it('debe responder success al solicitar recuperación para cualquier correo', async () => {
+      const res = await request(app)
+        .post('/api/auth/forgot-password')
+        .send({ email: 'recover@test.com' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.message).toContain('Si el correo está registrado');
+
+      const resNonExistent = await request(app)
+        .post('/api/auth/forgot-password')
+        .send({ email: 'doesnotexist@test.com' });
+
+      expect(resNonExistent.status).toBe(200);
+    });
+
+    it('debe restablecer la contraseña exitosamente usando un token válido', async () => {
+      // Solicitar recuperación para generar el token
+      await request(app)
+        .post('/api/auth/forgot-password')
+        .send({ email: 'recover@test.com' });
+
+      // Obtener el usuario de la DB para leer el token generado
+      const { Usuario } = await import('../models/index.js');
+      const user = await Usuario.findOne({ where: { email: 'recover@test.com' } });
+      expect(user.reset_password_token).toBeDefined();
+      expect(user.reset_password_token).not.toBeNull();
+
+      // Enviar nueva contraseña con el token
+      const resReset = await request(app)
+        .post('/api/auth/reset-password')
+        .send({
+          token: user.reset_password_token,
+          password: 'Newpassword123'
+        });
+
+      expect(resReset.status).toBe(200);
+      expect(resReset.body.message).toContain('restablecida correctamente');
+
+      // Intentar loguearse con la nueva contraseña
+      const resLogin = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'recover@test.com',
+          password: 'Newpassword123'
+        });
+
+      expect(resLogin.status).toBe(200);
+    });
+
+    it('debe fallar al restablecer si el token es inválido', async () => {
+      const resReset = await request(app)
+        .post('/api/auth/reset-password')
+        .send({
+          token: 'invalidtoken123456789',
+          password: 'Newpassword123'
+        });
+
+      expect(resReset.status).toBe(400);
+      expect(resReset.body.error).toContain('inválido o ha expirado');
+    });
+
+    it('debe fallar al restablecer si la contraseña es débil', async () => {
+      const resReset = await request(app)
+        .post('/api/auth/reset-password')
+        .send({
+          token: 'some_token',
+          password: 'weak'
+        });
+
+      expect(resReset.status).toBe(400);
+      expect(resReset.body.error).toContain('La contraseña debe tener al menos 8 caracteres');
+    });
+  });
 });
