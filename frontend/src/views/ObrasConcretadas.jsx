@@ -466,7 +466,7 @@ const ObrasConcretadas = () => {
           <div className="absolute inset-0 opacity-[0.02] pointer-events-none -z-10" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
           <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-            <h2 className="text-3xl font-display font-black tracking-tight leading-none">
+            <h2 className="text-3xl font-display font-black tracking-tight leading-none text-white">
               ¿Quieres ayudarnos a seguir concretando obras?
             </h2>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
