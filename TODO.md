@@ -3,6 +3,7 @@
 ## 🛠️ Tareas por Hacer (Backlog)
 - [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) 
 - [ ] ver mails que habia echo kevo dejarlos andando
+- [ ] mail que te llegue cuando te aprueban como socio
 ## 🔄 En Progreso
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
