@@ -8,6 +8,8 @@
 - [ ] ver mails que habia echo kevo dejarlos andando
 - [ ] agregar obras concretadas como pantalla aparte
 - [ ] probar ia diseño hacer prueba
+- [ ] alerta compartir windows
+- [ ] cambiar logo coperadora footer
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
 ## ✅ Terminado
