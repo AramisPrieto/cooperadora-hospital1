@@ -75,7 +75,7 @@ Diseñar, desarrollar e implementar una plataforma web con persistencia híbrida
 | **Comisión Directiva de la Cooperadora** (Product Owner / Cliente) | Maximizar la recaudación de fondos, digitalizar el registro de asociados, y brindar transparencia contable a la comunidad. | **Alto** |
 | **Vecinos y Donantes de Necochea/Quequén** (Usuarios Finales) | Donar de forma sencilla mediante transferencia, completar su registro de socios y verificar el impacto real de su aporte. | **Medio** |
 | **Operadores y Personal Administrativo** (Usuarios Operacionales) | Disponer de un panel intuitivo para validar donaciones, cargar noticias sin conocimientos técnicos y actualizar campañas. | **Medio** |
-| **Equipo de Desarrollo** (Aramis, Kevin, Thiago, Santiago) | Garantizar la calidad técnica de la plataforma, implementar requerimientos complejos y aprobar el TFI de la cursada. | **Alto** |
+| **Equipo de Desarrollo** (Aramis, Kevin, Thiago, Santiago) | Garantizar la calidad técnica de la plataforma, implementar requerimientos complejos y aprobar el trabajo final integrador de la cursada. | **Alto** |
 
 ---
 
