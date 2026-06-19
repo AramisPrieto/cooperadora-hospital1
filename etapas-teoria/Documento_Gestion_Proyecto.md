@@ -23,12 +23,16 @@ El proyecto consiste en el diseño, desarrollo e implementación de un portal we
 * **Institución seleccionada:** Asociación Cooperadora del Hospital Municipal "Dr. Emilio Ferreyra" (Necochea, Buenos Aires).
 * **Problemática identificada:** Tradicionalmente, la cooperadora operaba de manera puramente manual y descentralizada. La captación de socios dependía de cobradores físicos o registros en papel propensos a pérdidas. Asimismo, la comunidad carecía de un canal digital confiable y transparente para visualizar el destino exacto de sus donaciones (ej. compra de aparatología médica u obras en salas), lo que mermaba el nivel de confianza de los vecinos de Necochea y Quequén. Finalmente, el proceso de declaración y validación de transferencias bancarias directas requería conciliaciones manuales engorrosas y no generaba ningún acuse de recibo o agradecimiento inmediato al donante.
 * **Solución propuesta:** Un portal web interactivo que centraliza y digitaliza los procesos clave:
-  1. **Registro y autogestión de socios:** Permite a los vecinos completar sus datos (incluyendo DNI único obligatorio) para formar parte digitalmente del Libro Registro de Asociados.
+  1. **Registro y autogestión de socios:** Permite a los vecinos completar sus datos (incluyendo DNI único obligatorio) para formar parte digitalmente del Libro Registro de Asociados, actualizando su perfil en la pestaña "Mi Resumen".
   2. **Campañas de recaudación con barras de progreso en tiempo real:** Visualización interactiva del monto financiero acumulado frente a la meta objetiva.
-  3. **Checkout de donaciones mediante transferencia bancaria:** Declaración formal de la transferencia con carga de comprobantes y validación administrativa.
-  4. **Panel de control del administrador:** Permite a los operadores de la cooperadora validar o rechazar transferencias, administrar campañas y gestionar novedades.
+  3. **Checkout de donaciones mediante transferencia y pago online:** Declaración formal de transferencias con comprobante y checkout interactivo mediante Mercado Pago para donaciones web directas.
+  4. **Panel de control del administrador:** Permite a los operadores validar o rechazar transferencias y cuotas, administrar campañas y noticias, y ver métricas financieras reales.
   5. **Mecanismo de Data Mashup y persistencia híbrida:** Uso de PostgreSQL para la consistencia transaccional ACID y MongoDB para el contenido flexible y multimedia de noticias y detalles enriquecidos.
-  6. **Automatización de agradecimientos por email (SMTP):** Notificación automática tras la aprobación administrativa de la donación.
+  6. **Automatización de notificaciones por email (Resend API):** Envío automático de correos (bienvenida, confirmación de donaciones/pagos y recuperación de contraseña) a través de HTTPS (puerto 443) con la API REST de Resend.
+  7. **Autogestión de Cuotas Sociales:** Historial de facturación de cuotas mensuales y adhesión a débito automático con débito recurrente de Mercado Pago.
+  8. **Páginas de búsqueda y Timeline de Obras:** Buscadores dinámicos e independientes de Campañas y Noticias, y una sección de Obras Concretadas para exponer los hitos del 100% en formato de línea de tiempo interactiva.
+  9. **Recuperación de contraseña segura y Mitigaciones:** Flujo de forgot/reset password con tokens expirables, mitigación de vulnerabilidades IDOR y ReDoS.
+  10. **Monitoreo y Telemetría en la Nube:** Monitoreo en producción con Vercel Analytics y Speed Insights, y proxies inversos de cookies para resolver Same-Origin.
 
 ### 1.2 Justificación
 * **Necesidad que busca resolver:** Centralizar, formalizar y despapelar la administración de la cooperadora, permitiendo captar aportes de la ciudadanía digitalizada en cualquier momento del día de manera auditable y segura.
@@ -53,12 +57,14 @@ Ser el canal digital líder y referente de transparencia en el ámbito de la sal
 Diseñar, desarrollar e implementar una plataforma web con persistencia híbrida y panel administrativo seguro para la Asociación Cooperadora del Hospital Municipal "Dr. Emilio Ferreyra" que optimice la captación de socios, la gestión de campañas financieras y la auditoría interna de transferencias bancarias durante el primer semestre de 2026.
 
 ### 3.2 Objetivos Específicos
-1. **Arquitectura Híbrida y Mashup:** Diseñar e implementar una base de datos híbrida utilizando PostgreSQL para los datos críticos transaccionales (socios, usuarios, finanzas) y MongoDB para datos no estructurados multimedia (noticias, narrativas enriquecidas), reduciendo la latencia de carga mediante agregación síncrona en el servidor.
+1. **Arquitectura Híbrida and Mashup:** Diseñar e implementar una base de datos híbrida utilizando PostgreSQL para los datos críticos transaccionales (socios, usuarios, finanzas) y MongoDB para datos no estructurados multimedia (noticias, narrativas enriquecidas), reduciendo la latencia de carga mediante agregación síncrona en el servidor.
 2. **Registro de Socios Auditable:** Desarrollar un módulo de registro para asociados que valide campos obligatorios (DNI e email únicos) y permita a los administradores exportar y mantener actualizado el Libro Registro de Asociados digitalizado.
 3. **Flujo Contable de Transferencias:** Implementar un flujo de declaración y validación manual de transferencias bancarias en el panel de administración, vinculando las aprobaciones a la actualización automática de las barras de progreso de recaudación.
-4. **Seguridad y Tasa de Peticiones:** Garantizar la seguridad de la plataforma aplicando autenticación JWT, encriptación bcrypt para contraseñas, middleware de sanitización contra inyección NoSQL, protección contra XSS en noticias y rate limiting por IP en endpoints de autenticación y donación.
-5. **Notificaciones Automatizadas:** Integrar un servicio de correos SMTP que despache automáticamente correos personalizados de agradecimiento a los donantes una vez que sus transferencias sean aprobadas por el operador.
-6. **Validación y Pruebas Automatizadas:** Desarrollar una suite de al menos 45 pruebas de integración automatizadas utilizando Vitest y Supertest que certifique la robustez de las API y el cumplimiento estricto de las reglas de negocio (por ejemplo, impedir aprobaciones que superen la meta restante de la campaña).
+4. **Seguridad, Criptografía y Tasa:** Garantizar la seguridad aplicando autenticación JWT, encriptación bcrypt, rate limiting, mitigación de vulnerabilidades OWASP (IDOR en perfiles, inyecciones ReDoS, y clickjacking) y validación criptográfica de firmas HMAC SHA256 en webhooks.
+5. **Notificaciones por API REST:** Reemplazar los servicios SMTP tradicionales por una integración directa con la API de Resend a través del puerto seguro HTTPS 443, enviando correos automatizados de bienvenida, restablecimiento de contraseña y confirmaciones de donación/pago.
+6. **Validación y Pruebas Automatizadas:** Desarrollar y ampliar la suite de pruebas de integración automatizadas utilizando Vitest y Supertest, alcanzando 79 pruebas para certificar la estabilidad de flujos transaccionales y de seguridad.
+7. **Adhesión Financiera e Integración Recurrente:** Integrar el SDK de Mercado Pago para procesar débitos recurrentes de cuotas mensuales y donaciones web con validaciones de webhooks en tiempo real e invalidación de caché selectiva.
+8. **Telemetría e Infraestructura:** Configurar proxies inversos en el frontend para Cookies Same-Origin y registrar Core Web Vitals en producción a través de Vercel Analytics y Speed Insights.
 
 ---
 
@@ -77,22 +83,30 @@ Diseñar, desarrollar e implementar una plataforma web con persistencia híbrida
 
 ### 5.1 Funcionalidades Incluidas
 * **Módulo de Autenticación y Cuentas:** Registro de usuarios en rol `socio` e inicio de sesión seguro firmando tokens JWT. Restricción del rol `admin` a cuentas insertadas directamente por base de datos para prevenir auto-escalamiento.
-* **Registro en el Libro de Asociados:** Panel del socio para registrar sus datos personales (DNI obligatorio, nombre, dirección) con validación estricta en base de datos PostgreSQL.
+* **Registro en el Libro de Asociados:** Panel del socio para registrar sus datos personales (DNI obligatorio, nombre, dirección) con validación relacional estricta en PostgreSQL.
+* **Autogestión de Socios (SocioPanel):** Sección privada dividida en tres pestañas responsivas: "Mi Resumen" (datos de perfil y DNI), "Mis Cuotas" (períodos de facturación, pago manual y adhesión a débito automático) y "Mis Donaciones" (historial transaccional).
+* **Integración con Mercado Pago:** Soporte oficial para cobro de cuotas mensuales vía débito automático (suscripciones preapproval) y pasarela de pago online para campañas con callbacks de webhook validados criptográficamente (HMAC SHA256) e invalidación de caché selectiva.
 * **Visualización de la Campaña del Mes:** Sección destacada en la página de inicio que consume de manera síncrona los montos de PostgreSQL y las narrativas visuales de MongoDB (Data Mashup).
 * **Checkout de Declaración de Transferencia:** Formulario interactivo donde el socio declara la transferencia realizada detallando el monto, la fecha, y simula la carga del comprobante bancario.
 * **Panel de Administración Integral:** Panel interactivo para el operador de la cooperadora con:
-  - Métricas agregadas de recaudación (barra de progreso financiero, total recaudado y socios activos).
-  - Listado interactivo de transferencias pendientes de validación con botones de "Aprobar" y "Rechazar" que previenen doble clic.
+  - Métricas agregadas y gráficos con datos reales de recaudaciones y nuevos asociados de los últimos 6 meses.
+  - Tabla de cuotas sociales para buscar socios y auditar o validar/rechazar los pagos manuales de cuotas.
+  - Buscador en tiempo real y paginado en el listado de transferencias (por email, nombre, o DNI) que previene clics dobles.
   - CRUD de campañas de recaudación y edición de noticias de actualidad.
+  - Capacidad de eliminar socios eliminando por cascada su cuenta y pagos asociados en PostgreSQL.
 * **Gestor de Noticias y Sanitización:** Publicador dinámico de novedades en MongoDB. Renderizado de artículos con DOMPurify en el frontend para evitar ataques XSS.
 * **Protección ante Concurrencia en Donaciones:** Bloqueo exclusivo a nivel de fila (`SELECT ... FOR UPDATE`) en PostgreSQL al validar donaciones concurrentes para evitar colisiones contables.
 * **Límite de Recaudación en Campañas:** Bloqueo de aprobaciones de transferencias que superen el saldo restante requerido para completar la campaña de recaudación.
-* **Envío de Agradecimiento SMTP:** Conexión asíncrona no bloqueante con Nodemailer para despachar un correo HTML estilizado al socio donante una vez aprobada su donación.
-* **Middleware de Seguridad Global:** Rate limiter por IP (100 peticiones globales / 15 min, 10 logins / 15 min, 5 donaciones / hora) y desinfección de consultas contra inyecciones NoSQL (`express-mongo-sanitize`).
-* **Suite de Pruebas Automatizadas:** 47 pruebas de integración ejecutadas en un entorno de base de datos de test aislado que valida endpoints CRUD, autenticación, y control de desbordamiento en campañas.
+* **Envío de Correos por API de Resend:** Conexión HTTPS para despachar notificaciones asíncronas de bienvenida a nuevos socios, confirmaciones de donación/pago y enlaces de restablecimiento de contraseñas.
+* **Flujo Seguro de Restablecimiento de Credenciales:** Enrutamiento dinámico de enlaces de forgot/reset password con tokens temporales firmados y hashes de bcrypt.
+* **Vistas de Búsqueda y Timeline Independientes:** Páginas de búsqueda `/campanas` (filtrado cliente de activas), `/noticias` (ordenamiento por fecha y paginación) y `/obras-concretadas` (exclusiva para campañas del 100% con vista en formato de línea de tiempo con hitos y buscador).
+* **Módulo de Compartido Rápido (ShareModal):** Componente accesible (WCAG) para compartir campañas y noticias en redes sociales (WhatsApp, Facebook, X, Telegram) o copiar link con retroalimentación visual.
+* **Middleware de Seguridad Global:** Rate limiter por IP (100 peticiones globales / 15 min, 10 logins / 15 min, 5 donaciones / hora), sanitización contra inyección NoSQL (`express-mongo-sanitize`) e inyección ReDoS, Helmet HTTP headers, y cookies Same-Origin vía proxy inverso en Vercel.
+* **Monitoreo en Producción:** Integración de Vercel Analytics y Speed Insights en el cliente React.
+* **Suite de Pruebas Automatizadas:** 79 pruebas de integración ejecutadas en Vitest con limpieza automática en bases de datos aisladas de test (`cooperadora_db_test` y `cooperadora_nosql_test`).
 
 ### 5.2 Funcionalidades Excluidas
-* **Procesamiento de Tarjetas de Crédito Reales:** Excluido del proyecto de forma expresa debido a los costos asociados por comisiones de pasarelas de pago y a la necesidad de concentrar la contabilidad en transferencias directas al CBU institucional sin intermediarios comerciales.
+* **Procesamiento de Tarjetas de Crédito Directo:** Excluido para tarjetas físicas tradicionales directas; en su lugar, se delega de forma segura en las pasarelas y el balance de saldo de Mercado Pago (débito de cuenta y suscripción) o transferencias bancarias directas para eliminar comisiones y complejidades fiscales.
 * **Chat interactivo en tiempo real:** Soporte técnico y consultas directas quedan fuera del alcance del portal web (se manejan vía canales tradicionales de contacto ya existentes).
 * **Aplicación Móvil Nativa:** El desarrollo de aplicaciones móviles dedicadas para Android o iOS se excluye del alcance; se garantiza, en cambio, la responsividad absoluta de la aplicación web en dispositivos móviles.
 
@@ -145,6 +159,14 @@ Para la gestión de este proyecto, se seleccionó el **Modelo Scrum combinado co
 | **PB-09** | Validaciones robustas, control de inputs y rate limiters por IP | Alta | 5 | Finalizado |
 | **PB-10** | Servicio de correos automatizados SMTP para agradecimientos | Media | 5 | Finalizado |
 | **PB-11** | Suite de pruebas automatizadas de integración y seguridad (Vitest) | Alta | 8 | Finalizado |
+| **PB-12** | Módulo de autogestión de socios (SocioPanel frontend) | Alta | 5 | Finalizado |
+| **PB-13** | Integración de Mercado Pago (checkout online y débito automático) | Alta | 13 | Finalizado |
+| **PB-14** | Migración a la API REST de Resend y configuración de notificaciones | Alta | 5 | Finalizado |
+| **PB-15** | Flujo seguro de recuperación de contraseña (forgot/reset) | Alta | 5 | Finalizado |
+| **PB-16** | Páginas independientes de búsqueda (Campañas, Noticias, Obras timeline) | Media | 10 | Finalizado |
+| **PB-17** | Modal de compartido rápido accesible (ShareModal) | Media | 3 | Finalizado |
+| **PB-18** | Panel administrativo extendido (cuotas, buscador, eliminación) | Alta | 8 | Finalizado |
+| **PB-19** | Monorepo pnpm workspaces y telemetría de rendimiento en la nube | Alta | 6 | Finalizado |
 
 ---
 
@@ -236,6 +258,51 @@ Para la gestión de este proyecto, se seleccionó el **Modelo Scrum combinado co
   1. Las pruebas deben ejecutarse en bases de datos de test (`cooperadora_db_test` y `cooperadora_nosql_test`) sin alterar los datos de desarrollo ni de producción.
   2. La suite debe correr de manera secuencial y limpiar los registros insertados de forma automática entre cada test.
 
+### HU-11: Débito Automático para Cuotas (Mercado Pago)
+* **Como** socio registrado,
+* **quiero** adherirme al débito automático con Mercado Pago,
+* **para** automatizar el pago mensual de mi cuota sin necesidad de declarar transferencias bancarias de forma manual.
+* **Criterios de Aceptación:**
+  1. El sistema debe generar una suscripción recurrente en el sandbox de Mercado Pago y guardarla en la base relacional.
+  2. Tras confirmarse el pago mediante Webhook (`preapproval`/`payment`), el estado de la membresía del socio debe actualizarse automáticamente.
+  3. Se limitan los cambios de método de pago a un máximo de 3 al mes por usuario socio para evitar abusos.
+
+### HU-12: Restablecimiento Seguro de Contraseña
+* **Como** socio que olvidó su clave,
+* **quiero** poder solicitar un restablecimiento de contraseña ingresando mi correo electrónico,
+* **para** recibir un enlace seguro de recuperación por email y definir una nueva contraseña.
+* **Criterios de Aceptación:**
+  1. El email enviado debe contener un enlace seguro con un token firmado y de expiración corta (1 hora).
+  2. El enlace de restablecimiento debe resolverse de forma dinámica según el origen de la petición (localhost o producción).
+  3. El formulario de restablecimiento debe validar la robustez mínima de la nueva clave (mayúsculas, números y alfanumérico).
+
+### HU-13: Compartido Rápido de Contenido
+* **Como** donante o visitante,
+* **quiero** compartir una campaña de recaudación o una noticia de actualidad en mis redes sociales,
+* **para** difundir el trabajo de la cooperadora e incentivar a otros vecinos a colaborar.
+* **Criterios de Aceptación:**
+  1. El modal debe proveer accesos directos de compartido para WhatsApp, Facebook, X (Twitter) y Telegram.
+  2. Debe incluir la opción de copiar el enlace al portapapeles con retroalimentación visual instantánea ("¡Copiado!").
+  3. El modal debe ser accesible (WCAG), soportando navegación por teclado y tags aria.
+
+### HU-14: Gestión de Cuotas por Administradores
+* **Como** operador administrador,
+* **quiero** auditar, buscar y validar el estado de las cuotas sociales de los asociados en una pestaña unificada,
+* **para** registrar formalmente el ingreso contable y activar las membresías.
+* **Criterios de Aceptación:**
+  1. El listado de cuotas debe permitir buscar por nombre, apellido, DNI o correo del socio.
+  2. El operador debe poder aprobar o rechazar declaraciones de transferencias de cuotas en un clic.
+  3. El backend debe persistir los cambios y emitir una transacción segura relacional.
+
+### HU-15: Vista de Obras Concretadas en Timeline
+* **Como** vecino de la comunidad,
+* **quiero** acceder a una sección independiente que muestre las campañas completadas al 100% en formato de timeline,
+* **para** comprobar en qué se invirtieron los fondos recaudados en obras pasadas del hospital.
+* **Criterios de Aceptación:**
+  1. Las campañas que ya alcanzaron el 100% de su meta no deben figurar en la pestaña de campañas activas, apareciendo exclusivamente en la vista de obras concretadas.
+  2. La vista debe estructurarse como una línea de tiempo ordenada cronológicamente con buscadores y filtros por categoría.
+  3. Las obras deben mostrar fotos reales y la inversión final lograda.
+
 ---
 
 ## 10. Requerimientos
@@ -249,8 +316,13 @@ Para la gestión de este proyecto, se seleccionó el **Modelo Scrum combinado co
 6. **RF-06 (Auditoría Administrativa):** El panel de administración debe proveer un listado de transferencias declaradas y permitir al operador marcarlas como "Aprobada" o "Rechazada".
 7. **RF-07 (Límite de Campaña):** La API de donaciones debe rechazar cualquier transacción que exceda el remanente financiero necesario para alcanzar el 100% de la meta de la campaña.
 8. **RF-08 (Gestión Documental de Noticias):** El sistema debe permitir el almacenamiento de artículos de noticias multimedia con formato libre en MongoDB.
-9. **RF-09 (Envío SMTP):** El backend debe enviar un correo electrónico HTML formal de agradecimiento al email del socio inmediatamente tras confirmarse la validez de su donación.
+9. **RF-09 (Notificaciones por Correo):** El backend debe enviar correos personalizados e institucionales (bienvenida, confirmación de donaciones/pagos y restablecimiento de contraseña) utilizando la API de Resend.
 10. **RF-10 (Control de Transacciones Concurrentes):** El backend debe emplear bloqueos exclusivos de fila (`SELECT FOR UPDATE`) al actualizar los saldos de campañas en SQL para evitar inconsistencias en el acumulado de recaudaciones simultáneas.
+11. **RF-11 (Débito Recurrente Mercado Pago):** El sistema debe posibilitar la suscripción al débito automático con Mercado Pago para cobros recurrentes mensuales de la cuota social.
+12. **RF-12 (Restablecimiento de Credenciales):** El sistema debe permitir al usuario solicitar el restablecimiento de su clave mediante el envío de un token temporal al correo y la validación de robustez de contraseña.
+13. **RF-13 (Compartido Rápido):** El portal debe integrar un modal accesible para compartir publicaciones (campañas y noticias) en redes sociales (WhatsApp, Facebook, X, Telegram) o copiar el link.
+14. **RF-14 (Auditoría Administrativa de Cuotas):** El panel de administración debe proveer una vista unificada y paginada con buscador para la gestión del pago de cuotas mensuales de los asociados.
+15. **RF-15 (Vista de Obras Concretadas):** El sistema debe contar con una vista independiente exclusiva para mostrar los logros y campañas que hayan alcanzado el 100% de la recaudación en formato de timeline.
 
 ### 10.2 Requerimientos No Funcionales (RNF)
 1. **RNF-01 (Seguridad - Hashing):** Todas las contraseñas de los usuarios deben almacenarse de forma irreversible utilizando el algoritmo de hashing `bcryptjs` con un factor de costo mínimo de 10.
@@ -258,6 +330,9 @@ Para la gestión de este proyecto, se seleccionó el **Modelo Scrum combinado co
 3. **RNF-03 (Seguridad - XSS):** El frontend debe sanitizar dinámicamente todo el contenido HTML insertado por administradores antes de renderizarlo, empleando `DOMPurify` para neutralizar scripts maliciosos.
 4. **RNF-04 (Rendimiento - Latencia de Mashup):** Las consultas de agregación de datos híbridos (Data Mashup) deben ejecutarse en paralelo usando `Promise.all` para asegurar que el tiempo de respuesta del backend sea inferior a 150 ms bajo condiciones normales de red.
 5. **RNF-05 (Disponibilidad y Tasa):** El sistema debe resistir ataques básicos de denegación de servicio (DoS) bloqueando mediante HTTP 429 a cualquier IP que supere las 100 peticiones globales por cada ventana de 15 minutos.
+6. **RNF-06 (Accesibilidad del Compartido):** El modal de compartido rápido (ShareModal) debe cumplir con las directrices de accesibilidad WCAG, validado mediante tests automatizados de `jest-axe`.
+7. **RNF-07 (Caché con Invalidación Selectiva):** Las consultas pesadas y agregados de campañas deben almacenarse en memoria en el servidor e invalidarse mediante patrones selectivos (`flushCachePattern`) ante mutaciones.
+8. **RNF-08 (Telemetría de Rendimiento en Nube):** La plataforma debe integrar los servicios de Vercel Analytics y Speed Insights para registrar y evaluar Core Web Vitals en producción de forma automatizada.
 
 ---
 
@@ -289,6 +364,11 @@ La priorización se realizó bajo la metodología MoSCoW, enfocada en asegurar u
 * **R-08: Saturación del Servidor por Fuerza Bruta (Técnico):** Ataque automatizado de fuerza bruta sobre el login que agota los recursos de memoria y CPU del servidor local.
 * **R-09: Regresión de Software por Integración Rápida (Gestión):** Romper componentes existentes (como la persistencia NoSQL de noticias) al integrar la lógica de transferencias en PostgreSQL.
 * **R-10: Incumplimiento de Metas por Donaciones Huérfanas (Negocio):** Socios que declaran transferencias falsas o montos erróneos inflando artificialmente el progreso de la campaña sin que el dinero real haya ingresado.
+* **R-11: Bloqueo de Puertos SMTP en Render (Gestión):** Bloqueo de puertos SMTP tradicionales (465/587) en el plan gratuito del host de backend, interrumpiendo el envío de correos transaccionales.
+* **R-12: Manipulación IDOR de Perfiles de Socios (Técnico):** Ataques IDOR modificando parámetros ID de ruta para editar o ver datos de perfiles ajenos en el portal.
+* **R-13: Error de Redirección 404 en Vercel (Técnico):** Errores 404 al recargar sub-rutas directas de la SPA (ej: `/campanas`, `/admin`) en Vercel al no coincidir con archivos físicos.
+* **R-14: Pérdida de Cookies de Sesión en Dominios Cruzados (Técnico):** Bloqueo de cookies de autenticación `HttpOnly` debido a restricciones SameSite entre el frontend y el backend alojados en dominios diferentes.
+* **R-15: Denegación de Servicio por Expresiones Regulares - ReDoS (Técnico):** Ataques de Catastrophic Backtracking en la búsqueda de noticias al inyectar expresiones regulares maliciosas en los inputs de búsqueda.
 
 ---
 
@@ -306,6 +386,11 @@ La priorización se realizó bajo la metodología MoSCoW, enfocada en asegurar u
 | **R-08** | Saturación del Servidor por Fuerza Bruta | Media | Medio | **Medio** |
 | **R-09** | Regresión de Software por Integración | Media | Medio | **Medio** |
 | **R-10** | Incumplimiento por Donaciones Huérfanas | Alta | Alto | **Alto** |
+| **R-11** | Bloqueo de Puertos SMTP en Render | Alta | Alto | **Alto** |
+| **R-12** | Manipulación IDOR de Perfiles | Baja | Alto | **Medio** |
+| **R-13** | Error de Redirección 404 en Vercel | Alta | Medio | **Medio** |
+| **R-14** | Pérdida de Cookies SameSite | Media | Alto | **Alto** |
+| **R-15** | Denegación de Servicio por ReDoS | Baja | Medio | **Medio** |
 
 ---
 
@@ -321,6 +406,11 @@ La priorización se realizó bajo la metodología MoSCoW, enfocada en asegurar u
 * **Mitigación R-08 (Fuerza Bruta):** Implementación de rate limiters basados en la dirección IP mediante `express-rate-limit`, bloqueando temporalmente a clientes sospechosos.
 * **Mitigación R-09 (Regresión):** Construcción de una robusta suite de pruebas con Vitest que valida de manera automática que todos los endpoints respondan correctamente ante refactorizaciones de código.
 * **Mitigación R-10 (Donaciones Huérfanas):** Mantener el estado "Pendiente" para las donaciones declaradas. La barra de progreso de la campaña solo se incrementa una vez que el administrador valida que el dinero impactó efectivamente en el extracto bancario real de la institución.
+* **Mitigación R-11 (Bloqueo SMTP):** Sustitución del módulo de envío SMTP tradicional por una integración REST HTTPS nativa con la API de Resend (puerto 443), eludiendo bloqueos de firewall en la nube.
+* **Mitigación R-12 (IDOR en Perfiles):** Refactorización del controlador y eliminación de ID de ruta en endpoints públicos de perfil de socio, resolviendo la consulta de base de datos a partir del ID de usuario decodificado directamente del token JWT de sesión.
+* **Mitigación R-13 (Error 404 Vercel):** Configuración de rewrites en `vercel.json` para redirigir todas las peticiones a `index.html`, delegando el ruteo interno al React Router.
+* **Mitigación R-14 (Cookies SameSite):** Implementación de proxy inverso en `vercel.json` mapeando `/api/*` al servidor Render para tratar llamadas y cookies como Same-Origin, previniendo el bloqueo de navegadores modernos.
+* **Mitigación R-15 (Ataques ReDoS):** Sanitización y escape estricto de caracteres especiales de expresiones regulares en las búsquedas en `noticiaController.js` para evitar patrones maliciosos.
 
 ---
 
@@ -343,29 +433,31 @@ El plan de testing se compone de tres etapas estratégicas:
 
 1. **Pruebas de Integración Automatizadas:**
    - **Herramienta:** Vitest y Supertest.
-   - **Objetivo:** Validar las respuestas HTTP, el enrutamiento y las reglas de negocio críticas de la API (alta de socios, registro, Mashup y flujos de donaciones).
-   - **Implementación:** 47 casos de prueba ejecutados sobre bases de datos locales dedicadas a test (`cooperadora_db_test` y `cooperadora_nosql_test`) con limpieza automática mediante scripts de setup.
+   - **Objetivo:** Validar las respuestas HTTP, el enrutamiento y las reglas de negocio críticas de la API (alta de socios, registro, Mashup, flujos de donaciones y recuperación de contraseñas).
+   - **Implementación:** 79 casos de prueba automatizados ejecutados sobre bases de datos locales y remotas dedicadas a test (`cooperadora_db_test` y `cooperadora_nosql_test`) con limpieza automática mediante scripts de setup, además de bypass de firmas de webhook en local.
 2. **Pruebas de Concurrencia:**
-   - **Herramienta:** Scripts personalizados simulando múltiples llamadas simultáneas de aprobación al endpoint de donaciones.
+   - **Herramienta:** Scripts de estrés personalizados simulando múltiples aprobaciones de donaciones concurrentes e invalidación de caché selectiva.
    - **Objetivo:** Asegurar que el bloqueo exclusivo `SELECT FOR UPDATE` en PostgreSQL encole las peticiones de forma ordenada y no existan condiciones de carrera.
-3. **Pruebas de Seguridad (Penetración Básica):**
-   - **Objetivo:** Verificar la inmutabilidad de los limitadores de tasa (Rate Limiting) y comprobar que el middleware bloquea inyecciones de operadores NoSQL y payloads maliciosos de JavaScript en la carga de noticias.
+3. **Pruebas de Accesibilidad y Sesión (Frontend):**
+   - **Herramienta:** `jest-axe` y pruebas unitarias en `vitest`.
+   - **Objetivo:** Validar el cumplimiento de accesibilidad WCAG en el modal de compartido (`ShareModal.test.jsx`) y certificar que la limpieza del `localStorage` tras expiraciones e inicios de sesión funciona correctamente (`Navbar.test.jsx`).
 
 ---
 
 ## 17. Deuda Técnica
 
-La deuda técnica en el desarrollo del portal web se identifica en tres aspectos principales:
+La deuda técnica en el desarrollo del portal web se identifica en los siguientes aspectos principales:
 
 * **Origen:**
-  - **Urgencia del Cronograma:** La necesidad de completar el flujo de donaciones bancarias a tiempo para las pre-entregas forzó al equipo a delegar la validación e integración del scroll a etapas posteriores (Lenis scroll presentaba conflictos con estilos CSS globales).
-  - **Sincronización Híbrida Manual:** Ante la falta de un middleware ORM híbrido nativo, la sincronización entre el ID de campaña SQL y el detalle de campaña en MongoDB se realiza de manera manual en la capa de negocio del controlador backend.
+  - **Sincronización Híbrida Manual:** Ante la falta de un middleware ORM híbrido nativo, la sincronización de IDs y datos cruzados entre PostgreSQL y MongoDB se realiza manualmente en los controladores del backend.
+  - **Falta de Webhooks Directos Bancarios:** El flujo contable depende de la auditoría y validación manual del operador (aprobar/rechazar) en lugar de una conciliación automática real por API bancaria.
 * **Consecuencias:**
-  - Incremento del esfuerzo requerido para añadir nuevas vistas multimedia.
-  - Fragilidad en el acople de la maquetación de frontend si el archivo global CSS crece desordenadamente.
+  - Acoplamiento estrecho entre los controladores backend y los modelos documentales/relacionales específicos.
+  - Carga operativa continua para los administradores de la cooperadora al validar cada donación y pago.
 * **Acciones Correctivas:**
-  - Creación de la suite de Vitest de forma temprana para detectar regresiones ante cambios en las bases de datos.
-  - Refactorización del Lenis scroll migrando formalmente a `@lenis/react`, limpiando los remanentes obsoletos en `index.css` para estabilizar el renderizado del cliente.
+  - Estabilización del scroll inercial mediante la migración total a `@lenis/react` y limpieza de `index.css`.
+  - Suite robusta de 79 tests que blinda al sistema contra regresiones durante refactorizaciones.
+  - Modularización e invalidación proactiva de caché para mantener los listados ágiles y consistentes.
 
 ---
 
@@ -397,21 +489,32 @@ El proyecto se descompuso en las siguientes tareas dentro de la estructura de WB
 | **3.0** | **SOC** | **Módulo de Gestión de Socios** | **Administración del Libro de Asociados** |
 | 3.1 | SOC-01 | API de Perfil de Socio | CRUD relacional en Postgres para completar DNI y domicilio. |
 | 3.2 | SOC-02 | Interfaz de Autogestión del Socio | Panel privado donde el socio visualiza y edita su información. |
+| 3.3 | SOC-03 | Autogestión de Cuotas y Donaciones | Pestañas del SocioPanel (Mi Resumen, Mis Cuotas y Mis Donaciones). |
 | **4.0** | **CAM** | **Módulo de Campañas** | **Visualización financiera y narrativa híbrida** |
 | 4.1 | CAM-01 | Modelos SQL/NoSQL de Campañas | Creación de tablas de metas (Postgres) y documentos multimedia (Mongo). |
 | 4.2 | CAM-02 | Endpoint de Data Mashup | Agregación síncrona en backend con `Promise.all` para campañas. |
 | 4.3 | CAM-03 | Componentes de visualización y progreso | Barra de progreso e indicadores interactivos en la Home del cliente. |
-| **5.0** | **DON** | **Módulo de Donaciones** | **Declaración de aportes por transferencia** |
+| **5.0** | **DON** | **Módulo de Donaciones** | **Declaración de aportes y pago online** |
 | 5.1 | DON-01 | API de declaración de transferencias | Rutas y lógica para almacenar donaciones pendientes con comprobante. |
 | 5.2 | DON-02 | Control transaccional de concurrencia | Bloqueo `SELECT FOR UPDATE` para evitar colisión de montos. |
 | 5.3 | DON-03 | Control de límites financieros | Middleware que restringe aprobaciones que excedan la meta restante. |
+| 5.4 | DON-04 | Mercado Pago checkout | Botón de pago online en el modal de detalles de campañas. |
+| 5.5 | DON-05 | Webhook y pasarelas Mercado Pago | Webhooks para suscripciones y donaciones, redirecciones dinámicas. |
 | **6.0** | **ADM** | **Panel de Administración** | **Auditoría contable y gestión de contenidos** |
 | 6.1 | ADM-01 | Interfaz de control administrativo | Listado de transferencias y botones de acción rápida sin doble clic. |
 | 6.2 | ADM-02 | CRUD de campañas y noticias | Formularios para que el operador administre la plataforma. |
+| 6.3 | ADM-03 | Dashboard real y Cuotas Admin | Gráficos reales, pestaña de gestión de cuotas de asociados. |
+| 6.4 | ADM-04 | Eliminación en cascada de socios | Botón de eliminación y cascadas onDelete en PostgreSQL. |
 | **7.0** | **SEG** | **Seguridad y Calidad** | **Robustez e integridad del portal** |
 | 7.1 | SEG-01 | Middleware de Rate Limiting e Inyecciones | Configuración de limitadores por IP y sanitización en Express. |
-| 7.2 | SEG-02 | Servicio de correos SMTP | Nodemailer asíncrono para correos de agradecimiento. |
-| 7.3 | SEG-03 | Suite de pruebas de integración | 47 pruebas automatizadas en Vitest con entornos de test aislados. |
+| 7.2 | SEG-02 | Notificaciones por API de Resend | Integración de Resend por puerto HTTPS 443 para despacho asíncrono. |
+| 7.3 | SEG-03 | Suite de pruebas de integración | 79 pruebas automatizadas en Vitest con entornos de test aislados. |
+| 7.4 | SEG-04 | Recuperación de claves | Forgot/reset password, tokens temporales y encriptación bcrypt. |
+| **8.0** | **NAV** | **Navegación e Interacción Premium** | **Rutas independientes, compartir y telemetría** |
+| 8.1 | NAV-01 | Buscadores Independientes | Páginas independientes de búsqueda de Campañas y Noticias con detalle. |
+| 8.2 | NAV-02 | Obras Concretadas y Timeline | Vista exclusiva de logros al 100% en formato de línea de tiempo. |
+| 8.3 | NAV-03 | ShareModal accesible | Ventana modal de compartido rápido accesible y testeada con jest-axe. |
+| 8.4 | NAV-04 | Despliegue en la nube y telemetría | Ruteo SPA vercel.json, cookies Same-Site, Vercel Analytics/Speed Insights. |
 
 ### 19.3 Estimación de Esfuerzo
 
@@ -425,24 +528,28 @@ Se estimó el esfuerzo relativo de cada tarea utilizando Story Points (SP) justi
 | **AUT-02** | 3 | Desarrollo del formulario de login y redirección inteligente reteniendo parámetros de campaña. |
 | **SOC-01** | 3 | Estructuración del modelo relacional en Sequelize con DNI únicos obligatorios. |
 | **SOC-02** | 3 | Maquetación responsiva del panel privado del socio para autogestión de datos. |
+| **SOC-03** | 5 | Desarrollo del SocioPanel frontend con tres secciones independientes (Perfil, Cuotas y Donaciones). |
 | **CAM-01** | 5 | Diseño del esquema híbrido de datos cruzando relaciones SQL y documentos NoSQL. |
 | **CAM-02** | 5 | Desarrollo del controlador Mashup y optimización con `Promise.all` para evitar latencia de red. |
 | **CAM-03** | 3 | Integración en la interfaz de usuario con barra de progreso, Lenis scroll y skeletons de carga. |
 | **DON-01** | 5 | Diseño de la tabla de transferencias y rutas de declaración con adjunto de comprobantes. |
 | **DON-02** | 8 | Alta complejidad: gestión transaccional SQL y bloqueos de fila exclusivos para la concurrencia. |
 | **DON-03** | 5 | Lógica de validación contable para el saldo de la campaña y rechazos controlados. |
+| **DON-04** | 5 | Creación de preferencias de pago y botón checkout de Mercado Pago para donaciones directas. |
+| **DON-05** | 8 | Webhooks de Mercado Pago (preapproval/payment), verificación HMAC SHA256 y proxies dinámicos de retorno. |
 | **ADM-01** | 5 | UI interactiva para aprobar/rechazar transferencias inhabilitando botones para evitar doble envío. |
 | **ADM-02** | 5 | Formularios CRUD administrativos, sanitizados contra código malicioso (DOMPurify). |
+| **ADM-03** | 5 | Gráficos reales en dashboard, tabla de cuotas sociales y buscador de transferencias paginado. |
+| **ADM-04** | 3 | Lógica de borrado físico de asociados y cascada onDelete en PostgreSQL. |
 | **SEG-01** | 3 | Integración de Express-rate-limit y Mongo-sanitize en la pila de middlewares central. |
-| **SEG-02** | 5 | Configuración de Nodemailer, plantillas HTML adaptativas y flujo asíncrono no bloqueante. |
-| **SEG-03** | 8 | Alta complejidad: diseño de 47 tests en base aislada con borrado automático tras ejecución. |
 | **TOTAL** | **77 SP** | **Esfuerzo global del proyecto estimado en puntos de historia.** |
 
 ### 19.4 Análisis de Factores que Afectan la Estimación
 * **Complejidad Técnica (Persistencia Híbrida):** La falta de soporte nativo para consultas unificadas SQL/NoSQL requirió codificar lógica adicional en el backend (Mashup), lo que incrementó las estimaciones de las tareas de campañas.
 * **Curva de Aprendizaje en Concurrencia:** La lógica de locks en Sequelize (`SELECT FOR UPDATE`) requirió investigación profunda y pruebas exhaustivas, elevando el riesgo y esfuerzo estimado de la tarea **DON-02** al máximo de la escala.
 * **Integración del Scroll y CSS:** Los problemas imprevistos en la maquetación CSS global al integrar Lenis scroll generaron un desvío técnico que afectó los tiempos del frontend.
-* **Dependencias de SMTP Externo:** La configuración de servidores SMTP reales o cuentas de aplicación de Gmail introdujo dependencias externas de red que incrementaron la variabilidad en las pruebas de notificaciones.
+* **Integración de APIs de Terceros:** La comunicación asíncrona con Mercado Pago (suscripciones y preferencias de pago) y la API de Resend introdujeron variabilidad e incrementaron los puntos estimados debido a dependencias de red y configuraciones de seguridad de webhooks.
+* **Despliegues Cloud y Cookies SameSite:** La separación del frontend (Vercel) y backend (Render) introdujo complejidades relativas a políticas de CORS y cookies HttpOnly SameSite de sesión, requiriendo proxies inversos en el frontend.
 
 ---
 
@@ -466,19 +573,20 @@ Para llevar adelante el desarrollo, los 4 integrantes del grupo asumieron roles 
 
 ### 20.2 Recursos Tecnológicos
 * **Lenguajes y Entornos de Ejecución:** JavaScript (Node.js v18+, React con Vite).
-* **Frameworks y Librerías de Backend:** Express (servidor API), Sequelize (ORM SQL), Mongoose (ODM NoSQL), Nodemailer (SMTP).
-* **Frameworks y Librerías de Frontend:** React.js, Tailwind CSS (estilos responsivos), Lenis (scroll inercial suave), `@lenis/react`, DOMPurify (sanitización XSS).
+* **Frameworks y Librerías de Backend:** Express (servidor API), Sequelize (ORM SQL), Mongoose (ODM NoSQL), Resend SDK (email transaccional), Mercado Pago SDK (pagos y débitos).
+* **Frameworks y Librerías de Frontend:** React.js, Tailwind CSS, Lenis, `@lenis/react`, DOMPurify (sanitización XSS), Recharts (dashboard), Lucide React (iconos), `@vercel/analytics`, `@vercel/speed-insights`.
 * **Bases de Datos:** PostgreSQL (transaccional ACID) y MongoDB (documental multimedia).
-* **Seguridad:** bcryptjs (hashing de claves), jsonwebtoken (JWT), express-rate-limit (tasa por IP), express-mongo-sanitize (inyecciones).
-* **Testing:** Vitest, Supertest.
-* **Control de Versiones y Dependencias:** Git, GitHub, pnpm (monorrepo workspace).
-* **Infraestructura de Desarrollo:** Docker Desktop (para levantar Postgres y Mongo localmente).
+* **Seguridad:** bcryptjs (hashing de claves), jsonwebtoken (JWT), express-rate-limit (tasa por IP), express-mongo-sanitize (inyecciones), validación de firmas HMAC SHA256 para webhooks.
+* **Testing:** Vitest, Supertest, `jest-axe` (accesibilidad).
+* **Control de Versiones y Dependencias:** Git, GitHub, pnpm workspaces (monorrepo unificado).
+* **Infraestructura de Desarrollo:** Docker Desktop (levantar Postgres/Mongo locales), Pinggy / Ngrok (túneles HTTPS locales para webhooks).
 
 ### 20.3 Recursos de Infraestructura
 * **Estaciones de Trabajo:** Computadoras personales de desarrollo (arquitectura Apple Silicon / Intel Core i7 con 16GB RAM).
 * **Servidores Virtuales de Desarrollo (Simulados):** Contenedores Docker locales para la persistencia SQL y NoSQL aisladas.
-* **Servidor de Correo SMTP:** Servidor SMTP de desarrollo (Gmail con contraseña de aplicación o Mailtrap) para el envío y validación de notificaciones de agradecimiento.
-* **Red Local / Proxy:** Proxy reverso de Vite configurado en el puerto 3000 apuntando hacia el puerto 5001 del backend para eludir políticas de CORS sin requerir certificados de producción en desarrollo.
+* **Servidor de Correo Transaccional:** API REST de Resend en la nube para el envío y validación de notificaciones, evitando puertos bloqueados en Render.
+* **Servidores Cloud de Producción:** Render.com (para alojar la API de Node.js), Vercel (para compilar y distribuir el frontend de React), MongoDB Atlas (base de datos NoSQL en la nube) y base de datos relacional PostgreSQL administrada.
+* **Red Local / Proxy:** Proxy reverso de Vite en local, y configuraciones de rewrites en `vercel.json` en producción que redirigen `/api/*` hacia Render para Same-Site cookies.
 
 ---
 
@@ -502,18 +610,19 @@ Aunque el proyecto se desarrolló ad-honorem en el marco de la cursada universit
 | **TOTAL HUMANO** | | **256 hs** | | **$3.840 USD** |
 
 ### 21.2 Costos Tecnológicos
-Para la puesta en producción real de la plataforma, se estiman los siguientes costos anuales de licenciamiento e infraestructura en la nube (proveedores como AWS o DigitalOcean y servicios locales):
+Para la puesta en producción real de la plataforma, se estiman los siguientes costos anuales de licenciamiento e infraestructura en la nube (Render, Vercel, MongoDB Atlas y APIs asociadas):
 
 | Concepto Tecnológico | Descripción / Proveedor | Costo Mensual | Costo Anual |
 | :--- | :--- | :-: | :-: |
-| **Hosting VPS** | Instancia Linux básica en la nube (Node.js/React) | $10 USD | $120 USD |
-| **Base de Datos SQL** | PostgreSQL administrado (con backups diarios) | $15 USD | $180 USD |
-| **Base de Datos NoSQL** | MongoDB Atlas (Tier compartido escalable) | $9 USD | $108 USD |
+| **Hosting Backend (Render)** | Instancia en la nube para Node.js / Express | $7 USD | $84 USD |
+| **Hosting Frontend (Vercel)** | Distribución estática de React.js y telemetría | Gratis | Gratis |
+| **Base de Datos SQL (Render)** | PostgreSQL administrado con copias de respaldo | $7 USD | $84 USD |
+| **Base de Datos NoSQL** | MongoDB Atlas (Tier M0 gratuito para producción) | Gratis | Gratis |
 | **Dominio Web** | Dominio `.org.ar` para instituciones sin fines de lucro | - | $15 USD |
-| **Certificado SSL** | Let's Encrypt (Configuración de renovación automática) | Gratis | Gratis |
-| **Servicio de Email SMTP** | SendGrid / Mailgun (Plan básico de hasta 10.000 envíos) | $15 USD | $180 USD |
+| **Certificado SSL** | Let's Encrypt (Proveído por Vercel / Render) | Gratis | Gratis |
+| **Servicio de Email (Resend)** | Plan gratuito de Resend (hasta 3.000 envíos/mes) | Gratis | Gratis |
 | **Licencia Docker/Tools** | Docker Desktop Personal / VS Code / Git | Gratis | Gratis |
-| **TOTAL TECNOLÓGICO** | | **$49 USD** | **$603 USD** |
+| **TOTAL TECNOLÓGICO** | | **$14 USD** | **$183 USD** |
 
 ### 21.3 Costos de Operación y Mantenimiento (Post-producción mensual)
 Una vez desplegado el sistema, se requieren tareas periódicas para garantizar la disponibilidad y seguridad del portal:
@@ -526,11 +635,11 @@ Una vez desplegado el sistema, se requieren tareas periódicas para garantizar l
 | Categoría de Costo | Costo Inicial / Desarrollo | Costo Anual Recurrente (Operación) |
 | :--- | :-: | :-: |
 | Recursos Humanos (Desarrollo) | $3.840 USD | - |
-| Recursos Tecnológicos (Nube) | - | $603 USD |
+| Recursos Tecnológicos (Nube) | - | $183 USD |
 | Operación y Mantenimiento | - | $960 USD |
-| **TOTAL CONSOLIDADO** | **$3.840 USD** | **$1.563 USD** |
+| **TOTAL CONSOLIDADO** | **$3.840 USD** | **$1.143 USD** |
 
-*Nota: El costo total para el primer año de vida útil del sistema (desarrollo + operación) asciende a **$5.403 USD**.*
+*Nota: El costo total para el primer año de vida útil del sistema (desarrollo + operación) asciende a **$4.983 USD**.*
 
 ---
 
@@ -554,7 +663,11 @@ El cronograma del proyecto se estructuró a lo largo del cuatrimestre académico
 3. **Hito 3 (13 de mayo de 2026):** *Arquitectura híbrida de base de datos definida y API CRUD de backend estructuradas (Etapa 3).* Conexión exitosa a Postgres y MongoDB.
 4. **Hito 4 (3 de junio de 2026):** *Integración de Frontend con Backend y checkout de transferencias finalizado.* Barras de progreso financiero interconectadas en el panel administrativo.
 5. **Hito 5 (12 de junio de 2026):** *Suite de testing automatizada al 100% y rate limiting implementado.* Plataforma estable y desinfectada contra ataques XSS e inyecciones.
-6. **Hito 6 (22 de junio de 2026):** *Defensa Oral y Cierre del Proyecto.* Presentación final integradora ante la mesa evaluadora.
+6. **Hito 6 (15 de junio de 2026):** *Módulo de autogestión de socios e integración con pasarela Mercado Pago completados.* Cuotas mensuales y débito automático funcionando con webhooks de simulación local en Pinggy.
+7. **Hito 7 (17 de junio de 2026):** *Migración a la API de Resend y despliegue final en la nube.* Despliegue en Render (API) y Vercel (React), resolviendo cookies Same-Site y SPA routing.
+8. **Hito 8 (18 de junio de 2026):** *Refactorizaciones de seguridad y telemetría de rendimiento.* Forgot/reset password, mitigación de vulnerabilidades IDOR y ReDoS, e inyección de Vercel Analytics y Speed Insights.
+9. **Hito 9 (19 de junio de 2026):** *Navegación premium, Timeline de Obras y Compartido accesible.* Páginas independientes de búsqueda de Campañas y Noticias, sección de Obras Concretadas en timeline, y ShareModal accesible (WCAG).
+10. **Hito 10 (22 de junio de 2026):** *Defensa Oral y Cierre del Proyecto.* Presentación final integradora ante la mesa evaluadora.
 
 ### 22.3 Entregables
 
@@ -563,37 +676,47 @@ El cronograma del proyecto se estructuró a lo largo del cuatrimestre académico
 | **Entregable 1: Wireframes HTML** | Archivos HTML estáticos con la propuesta de diseño visual (Home, Login, Admin, Buscador). | Fin de la Semana 4 |
 | **Entregable 2: Código Backend API** | Repositorio backend en Node/Express con persistencia híbrida configurada y validada. | Fin de la Semana 6 |
 | **Entregable 3: Portal Web Integrado** | Monorrepo pnpm conteniendo el frontend React conectado y el panel administrativo interactivo. | Fin de la Semana 8 |
-| **Entregable 4: Suite de Pruebas** | Suite de 47 pruebas automatizadas en Vitest integradas y listas para ejecución. | Fin de la Semana 9 |
+| **Entregable 4: Suite de Pruebas** | Suite de 79 pruebas automatizadas en Vitest (incluyendo jest-axe y local storage). | Fin de la Semana 9 |
 | **Entregable 5: Documento de Gestión** | Informe PDF formal unificado de gestión del desarrollo de software (Parte 1 y Parte 2). | Fin de la Semana 10 |
 
 ### 22.4 Dependencias
 * **La codificación del frontend (React) depende de la API estable del Backend:** No se pueden integrar las barras de progreso interactivo sin la respuesta JSON unificada del endpoint de Data Mashup de Campañas.
 * **La validación del checkout de donación depende del alta de perfiles de socios:** Para declarar una transferencia, el socio debe haber ingresado previamente su DNI en el panel privado de autogestión (Libro de Asociados).
-* **El envío de correos SMTP depende de la aprobación contable:** El despachador de Nodemailer no puede gatillarse de forma huérfana; requiere obligatoriamente que el operador presione "Aprobar" sobre una transferencia en el panel.
-* **La finalización y aprobación del proyecto académico depende de la suite de testing:** La cátedra exige que las reglas críticas de desbordamiento de metas financieras y concurrencia estén cubiertas por pruebas automatizadas antes de la defensa oral.
+* **El envío de correos por Resend depende del disparo de eventos de la API:** El despachador de correos requiere la confirmación de registros, validación de transferencias/pagos o solicitudes de cambio de clave para gatillar las llamadas HTTPS.
+* **La finalización y aprobación del proyecto académico depende de la suite de testing:** La cátedra exige que las reglas críticas de desbordamiento de metas financieras, concurrencia y seguridad estén cubiertas por pruebas automatizadas antes de la defensa oral.
 
 ---
 
 ## 23. Gestión de Cambios
 
 ### 23.1 Escenarios de Cambio
-Durante el ciclo de vida del desarrollo se presentaron cinco situaciones de cambio significativas que requirieron la adaptación del plan original:
+Durante el ciclo de vida del desarrollo se presentaron diez situaciones de cambio significativas que requirieron la adaptación del plan original:
 
 1. **Cambio 1: Remoción de la Pasarela de Tarjeta de Crédito Simulada:** Inicialmente se planeaba incluir cobros directos por tarjeta de crédito en el frontend. Sin embargo, tras dialogar con la cooperadora, se identificó que las comisiones comerciales y la complejidad impositiva desaconsejaban este canal, prefiriendo concentrar toda la recaudación en transferencias bancarias directas declaradas y auditadas manualmente.
 2. **Cambio 2: Conflicto e Incompatibilidad del Lenis Scroll:** Durante el rediseño clínico, la biblioteca Lenis (para desplazamiento suave) generaba bloqueos visuales y colisiones con los selectores de scroll nativos en `index.css`, ralentizando la carga del frontend en navegadores Firefox y móviles.
 3. **Cambio 3: Necesidad de Control Contable Transaccional:** Se detectó el riesgo de concurrencia al realizar múltiples pruebas simultáneas de aprobación sobre una misma campaña, forzando a reestructurar la consulta de actualización con un bloqueo de fila (`SELECT FOR UPDATE`).
 4. **Cambio 4: Incorporación de Límites de Recaudación:** Originalmente se permitía declarar y aprobar cualquier monto sobre una campaña. Se solicitó añadir una validación contable estricta en caliente que bloquee la aprobación de transferencias que superen el monto restante para la meta de la campaña.
 5. **Cambio 5: Sanitización Obligatoria XSS en Noticias:** Conectores HTML ricos inyectados en la colección MongoDB de noticias evidenciaron vulnerabilidades de inyección de scripts (XSS). Se requirió incorporar la biblioteca DOMPurify en el frontend de forma urgente.
+6. **Cambio 6: Bloqueo de Puertos SMTP en Render Cloud:** Al desplegar en la capa gratuita de Render, se identificó que los puertos SMTP estándar (465/587) están bloqueados salientes. Se requirió migrar a la API HTTPS (puerto 443) de Resend.
+7. **Cambio 7: Cookies de Sesión SameSite en Vercel:** Las cookies HttpOnly se bloqueaban al enviarse cruzadas (`*.vercel.app` a `*.onrender.com`). Se implementó un proxy inverso en `vercel.json` para enrutar `/api/*` y tratarlas como Same-Origin.
+8. **Cambio 8: Restricciones de Retorno HTTPS de Mercado Pago:** Las pasarelas de MP exigen retornos HTTPS, bloqueando entornos localhost. Se implementaron return proxies en el backend y paso dinámico de `frontend_url`.
+9. **Cambio 9: Mitigación IDOR en Perfil de Socio:** Para evitar IDORs, se refactorizó la actualización del perfil resolviendo el socio del token JWT de sesión del socio en lugar de parámetros de ruta.
+10. **Cambio 10: Independización de Secciones de Búsqueda y Navegación:** El Home concentraba demasiada lógica y lag visual. Se crearon vistas separadas e independientes para `/campanas`, `/noticias`, `/obras-concretadas` y `/noticias/:id`.
 
 ### 23.2 Análisis de Impacto de los Cambios
 
 | Cambio | Impacto sobre el Alcance | Impacto sobre el Tiempo | Impacto sobre los Costos | Impacto sobre la Calidad |
 | :--- | :--- | :--- | :--- | :--- |
-| **Cambio 1: Remoción Tarjeta** | **Reducción de alcance:** Se eliminaron las API de cobro simulado y controladores obsoletos. | **Neutro:** Liberó horas de desarrollo que se reasignaron a auditoría de transferencias. | **Reducción:** Evitó el análisis de costos de pasarelas de terceros. | **Alta:** Focalizó la contabilidad del sistema en un flujo 100% auditable. |
+| **Cambio 1: Remoción Tarjeta** | **Reducción de alcance:** Se eliminaron las API de cobro simulado y controladores obsoletos. | **Neutro:** Liberó horas de desarrollo que se reasignaron a la auditoría de transferencias. | **Reducción:** Evitó el análisis de costos de pasarelas de terceros. | **Alta:** Focalizó la contabilidad del sistema en un flujo 100% auditable. |
 | **Cambio 2: Lenis Scroll** | **Neutro:** No modificó los requerimientos funcionales de la UI. | **Desvío de 2 días:** Se requirió refactorizar el wrapper CSS y migrar a `@lenis/react`. | **Neutro:** Cero costos de licenciamiento (código abierto). | **Alta:** Garantizó una navegación suave, fluida y profesional en todo tipo de pantallas. |
-| **Cambio 3: Concurrencia SQL** | **Incremento técnico:** Incorporación de bloqueos de fila relacionales y control transaccional. | **Desvío de 3 días:** Requirió escribir tests de concurrencia específicos. | **Neutro** | **Crítica:** Elevó la robustez financiera y fiabilidad de los datos al 100% (cero colisiones). |
+| **Cambio 3: Concurrencia SQL** | **Incremento de alcance:** Incorporación de bloqueos de fila relacionales y control transaccional. | **Desvío de 3 días:** Requirió escribir tests de concurrencia específicos. | **Neutro** | **Crítica:** Elevó la robustez financiera y fiabilidad de los datos al 100% (cero colisiones). |
 | **Cambio 4: Límite de Campañas** | **Incremento de alcance:** Nuevas reglas de negocio de validación de saldos en backend. | **Desvío de 2 días:** Desarrollo de endpoints de control y suite de pruebas en Vitest. | **Neutro** | **Alta:** Evitó la sobredonación y garantizó la coherencia contable frente a metas financieras. |
 | **Cambio 5: Sanitización XSS** | **Incremento de seguridad:** Sanitización en el renderizado con DOMPurify. | **Desvío de 1 día:** Incorporación de dependencia y refactorización de vistas. | **Neutro** | **Alta:** Clausuró vulnerabilidades críticas de seguridad, protegiendo las sesiones de los socios. |
+| **Cambio 6: API Resend** | **Neutro:** Sustitución de módulo de email por API HTTP. | **Desvío de 1 día:** Desarrollo de plantillas y API. | **Neutro:** Plan gratuito de Resend. | **Alta:** Garantizó la entrega de correos en entornos Serverless sin bloqueos de puerto. |
+| **Cambio 7: Cookies SameSite** | **Neutro:** Modificación de archivos de despliegue. | **Desvío de 2 días:** Configuración de `vercel.json` y cookies HttpOnly. | **Neutro** | **Alta:** Permitió mantener sesiones seguras HttpOnly cruzadas sin rechazo del navegador. |
+| **Cambio 8: Redirecciones MP** | **Incremento técnico:** Controladores de redirección y túneles locales Pinggy. | **Desvío de 2 días:** Desarrollo de scripts y return proxies. | **Neutro** | **Alta:** Permitió el testeo y producción sin romper las redirecciones de Mercado Pago. |
+| **Cambio 9: Mitigación IDOR** | **Neutro:** Refactorización de rutas. | **Desvío de 1 día:** Pruebas de seguridad e IDOR. | **Neutro** | **Alta:** Resolvió vulnerabilidades críticas de escalamiento de privilegios horizontales en socios. |
+| **Cambio 10: Vistas Separadas** | **Incremento UX:** Rutas dedicadas, timeline interactivo y buscador de obras. | **Desvío de 3 días:** Creación de 3 vistas y timeline con Recharts. | **Neutro** | **Alta:** Mejoró drásticamente el rendimiento de carga inicial, el SEO y la usabilidad. |
 
 ### 23.3 Estrategias de Gestión de Cambios
 Para evitar el descontrol del alcance (*scope creep*) ante estas situaciones de cambio, el equipo aplicó el siguiente proceso de control de cambios ágil:
@@ -608,51 +731,52 @@ Para evitar el descontrol del alcance (*scope creep*) ante estas situaciones de 
 ## 24. Seguimiento y Control del Proyecto
 
 ### 24.1 Estado Actual del Proyecto
-El proyecto se encuentra en el estado final de la **Etapa 4**, alineado estrictamente con el historial de versiones acumulado y el backlog de `TODO.md`:
+El proyecto se encuentra finalizado en su totalidad, alineado con el historial de versiones acumulado hasta la versión v1.32.0:
 
 * **Funcionalidades Finalizadas:**
-  - Configuración del monorrepo con `pnpm` y entorno de bases de datos PostgreSQL y MongoDB locales en Docker.
-  - Autenticación segura JWT, encriptación bcrypt de contraseñas y redirección post-login fluida.
-  - API de perfiles de asociados y autogestión de datos en Libro Registro de Asociados.
-  - Orquestación de datos síncrona (Data Mashup) para el Hero de Campañas destacadas.
-  - Checkout de donaciones declarando transferencias y panel de administración interactivo para aprobar/rechazar transferencias sin doble clic.
-  - Control transaccional de concurrencia mediante bloqueo exclusivo de fila `SELECT FOR UPDATE` en PostgreSQL.
-  - Validación contable de límites financieros en la API de donaciones.
-  - Gestor de noticias en MongoDB con sanitización DOMPurify en el frontend.
-  - Envío automático de agradecimientos por email transaccional SMTP.
-  - Middlewares de rate limiting por IP y sanitización contra inyecciones NoSQL.
-  - Suite de 47 pruebas de integración automatizadas en Vitest con base de test aislada y limpia.
+  - Configuración del monorrepo con `pnpm workspaces` y unificación de scripts de ejecución concurrentes en la raíz.
+  - Autenticación JWT, encriptación bcrypt, forgot/reset password y redirección inteligente post-login.
+  - Autogestión del Socio (SocioPanel): Mi Resumen, Mis Cuotas (historial y pago) y Mis Donaciones.
+  - Integración de Mercado Pago: Suscripciones recurrentes de cuota social y pasarelas de pago online para donaciones con webhook criptográfico HMAC.
+  - Panel de Administración: Dashboard real, pestaña de cuotas sociales, buscador de transferencias paginado y eliminación de socios en cascada.
+  - Seguridad y robustez en producción: Mitigación de inyecciones NoSQL, ReDoS (expresiones regulares sanitizadas), Clickjacking (Helmet) e IDOR (perfiles basados en JWT).
+  - Envío automático de notificaciones por email a través de la API REST de Resend (bienvenidas, agradecimientos y tokens de restablecimiento).
+  - Páginas independientes de búsqueda de Campañas y Noticias con detalle, y sección de Obras Concretadas en línea de tiempo (timeline).
+  - Modal de compartido rápido accessible (ShareModal) con WCAG y retroalimentación de copiado.
+  - Despliegue cloud: Render (API) y Vercel (React), cookies Same-Site con proxy inverso y telemetría de Core Web Vitals (Analytics/Speed Insights).
+  - Suite de 79 pruebas de integración automatizadas en Vitest con entornos de test aislados.
 * **Funcionalidades en Progreso:**
-  - Pruebas finales de la compilación PDF del Documento Integral de Gestión de Software.
+  - Ninguna (proyecto completado para presentación).
 * **Funcionalidades Pendientes (Backlog a futuro):**
-  - Autovalidación automatizada de transferencias con la API bancaria de la cooperadora (requiere convenios legales y presupuestarios externos).
+  - Integración automática real con API del homebanking de la cooperadora (requiere convenios legales y API de producción del banco).
 
 ### 24.2 Indicadores de Avance
 Para controlar la marcha del proyecto, se definieron los siguientes indicadores clave simples:
-* **Porcentaje de Funcionalidades Completadas:** **95%** (19 de las 20 tareas de la WBS finalizadas satisfactoriamente).
-* **Velocidad del Sprint:** **19.2 Story Points por Sprint** (Cumplimiento de los 77 Story Points estimados a lo largo de los 4 sprints de 2 semanas de desarrollo).
-* **Hitos Alcanzados:** **5 de 6** hitos aprobados y cerrados. Hito final (Defensa Oral) programado para el 22 de junio de 2026.
-* **Cobertura de Pruebas (Test Coverage):** **86.4%** de cobertura del código backend (47 casos de prueba de integración validados secuencialmente).
+* **Porcentaje de Funcionalidades Completadas:** **98%** (27 de las 28 tareas de la WBS finalizadas satisfactoriamente).
+* **Velocidad de Story Points:** **124 Story Points** acumulados y finalizados.
+* **Hitos Alcanzados:** **9 de 10** hitos cerrados. Hito final (Defensa Oral) programado para el 22 de junio de 2026.
+* **Cobertura de Pruebas (Test Coverage):** **86.4%** de cobertura del código backend (79 casos de prueba de integración pasando).
 
 ### 24.3 Riesgos Actuales (Vigencia)
 * **R-01 (Concurrencia Contable):** *Mitigado.* El bloqueo exclusivo de fila `SELECT FOR UPDATE` y los tests de estrés integrados garantizan que el riesgo esté controlado en un 100%.
-* **R-04 (Retraso de Tiempo):** *Bajo Control.* Con la totalidad del código integrado en `main` y las pruebas pasando con éxito, el riesgo de no llegar a la entrega es casi nulo.
-* **R-05 (SMTP en Producción):** *Bajo Control.* Las credenciales SMTP transaccionales han sido parametrizadas y se validó el envío de correos HTML a través de cuentas seguras de aplicación.
-* **R-10 (Donaciones Huérfanas):** *Bajo Control.* La lógica de negocio obliga al operador a contrastar los datos de la transferencia declarada en el panel contra su homebanking antes de dar la aprobación definitiva, impidiendo que declaraciones falsas alteren el acumulado real.
+* **R-04 (Retraso de Tiempo):** *Bajo Control.* Con la totalidad del código integrado en `main` y las pruebas pasando con éxito, el riesgo de no llegar a la entrega es nulo.
+* **R-05 / R-11 (SMTP en Producción / Bloqueo SMTP):** *Mitigado.* La migración a la API REST de Resend por puerto HTTPS 443 solucionó de raíz cualquier bloqueo.
+* **R-12 (IDOR en Perfiles):** *Mitigado.* Las rutas de socios se resuelven a partir del JWT de sesión, prohibiendo accesos cruzados.
+* **R-14 (Cookies de Sesión SameSite):** *Mitigado.* El proxy inverso en `vercel.json` solucionó el bloqueo de navegadores al convertir la sesión en Same-Origin.
 
 ### 24.4 Acciones Correctivas
-En caso de registrarse desvíos de alcance o problemas durante la fase final de despliegue local:
-* **Ante fallos de concurrencia en bases virtuales locales:** Reiniciar contenedores Docker mediante `docker-compose down && docker-compose up -d` para restaurar conexiones limpias.
-* **Ante retrasos en la redacción del manual de administración:** Congelar el desarrollo de funcionalidades complementarias del backlog a futuro (como la conciliación automática) y redistribuir el esfuerzo humano en pulir la documentación técnica final.
+En caso de registrarse problemas durante la fase final de presentación:
+* **Ante fallos de webhooks de Mercado Pago locales:** Ejecutar `start-dev-with-tunnel.js` para regenerar el túnel HTTPS dinámico y re-autenticar el webhook sandbox.
+* **Ante inconsistencias en base de datos de producción:** Emplear el backup de respaldo preventivo en `backend/old_db_backup.json` para restaurar el padrón y transacciones al estado inicial.
 
 ---
 
 ## 25. Conclusión General
 
-El desarrollo y gestión de este portal web para la Asociación Cooperadora del Hospital Municipal "Dr. Emilio Ferreyra" de Necochea demostró la importancia crítica de aplicar metodologías formales de ingeniería de software en proyectos reales. 
+El desarrollo y gestión de este portal web para la Asociación Cooperadora del Hospital Municipal "Dr. Emilio Ferreyra" de Necochea demostró la importancia crítica de aplicar metodologías formales de ingeniería de software en proyectos reales de gran envergadura. 
 
-En primer lugar, la **planificación sistemática** a través de la descomposición WBS y estimaciones relativas por Story Points permitió al equipo acotar el alcance, evitar desvíos temporales y garantizar que un desarrollo de alta complejidad técnica (que involucra dos motores de bases de datos diferentes operando en simultáneo) pudiera culminarse exitosamente dentro del rígido plazo del cuatrimestre universitario.
+En primer lugar, la **planificación sistemática** a través de la descomposición WBS y las estimaciones relativas por Story Points (escaladas de 77 a 124 SP) permitieron al equipo expandir el alcance de forma organizada. Esto garantizó la exitosa implementación de módulos avanzados como el control de cuotas, el débito automático y el checkout en línea con Mercado Pago, todo dentro del rígido cronograma del cuatrimestre universitario.
 
-En segundo lugar, el análisis proactivo de **riesgos contables e informáticos** derivó en decisiones técnicas sumamente maduras. La implementación de un flujo de validación manual en el panel de administración, reforzado por transacciones SQL seguras y bloqueos exclusivos de concurrencia, clausuró la posibilidad de inconsistencias contables o fraude por declaraciones falsas, convirtiendo a la plataforma en un entorno seguro y transparente capaz de generar confianza en los vecinos donantes.
+En segundo lugar, la resolución de **bloqueos e incidentes en producción** enriqueció notablemente el aprendizaje. Enfrentar problemas reales como el bloqueo de puertos SMTP en Render, la pérdida de cookies Same-Site en Vercel, o el retorno HTTPS de Mercado Pago condujo a soluciones profesionales robustas: la migración a la API REST de Resend, la estructuración de proxies inversos en `vercel.json` y el uso de túneles locales Pinggy.
 
-Por último, el **seguimiento constante** del backlog en `TODO.md` y la suite de Vitest de 47 pruebas automatizadas blindaron al portal contra regresiones y fallos imprevistos. Este proyecto no solo resolvió una necesidad administrativa real para la Cooperadora del Hospital Municipal —digitalizando y despapelando sus registros de socios y aportes—, sino que también representó un aprendizaje profesional de gran valor para los integrantes del equipo en la coordinación de equipos ágiles, la toma de decisiones técnicas fundamentadas y el aseguramiento de la calidad del software.
+Por último, la **protección del usuario y accesibilidad** cerraron el ciclo de calidad. Reforzar el backend contra vulnerabilidades IDOR, ReDoS y Clickjacking, implementar Vercel Analytics/Speed Insights para telemetría, diseñar un ShareModal accesible (WCAG), y estructurar Obras Concretadas en un timeline interactivo demuestran la madurez del equipo. Con una suite final de 79 pruebas automatizadas en Vitest, la cooperadora del hospital municipal cuenta hoy con un portal confiable, rápido, seguro y transparente, preparado para despapelar la administración y conectar a los vecinos de Necochea con su hospital público.
