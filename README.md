@@ -318,14 +318,7 @@ La primera vez que se sube el backend a Render, la base de datos PostgreSQL esta
 2. Abre la terminal en la carpeta `backend` y ejecuta: `node seed.js`
 3. Esto conectará tu PC a los servidores remotos y sembrará la información. *(Atención: Si tu base de datos prohíbe conexiones sin SSL, nuestro código de `db.js` fuerza SSL automáticamente si la URL contiene `render.com`).*
 
-### 3. Eliminar el Bloqueo de Acceso (Ir a Producción Real)
-Actualmente, el portal tiene un "candado" (un `prompt` en JavaScript) para evitar que terceros accedan mientras el equipo realiza pruebas cerradas. 
-Cuando el hospital decida lanzar la página de forma oficial al público:
-1. Abre el archivo `frontend/src/main.jsx`.
-2. Borra todo el bloque de código debajo de `// Protección básica para la etapa de desarrollo` que contiene el `prompt()` y el `if (password !== "X9$mK2#vLq7@pW4n")`.
-3. Haz un commit y push a GitHub. Vercel actualizará la página automáticamente y quedará abierta a todo el mundo.
-
-### 4. Transición a Mercado Pago (Dinero Real)
+### 3. Transición a Mercado Pago (Dinero Real)
 Cuando estés listo para dejar de simular pagos:
 1. Ve a tu integración en el panel de Mercado Pago y genera tus **Credenciales de Producción**.
 2. Reemplaza el `MP_ACCESS_TOKEN` en Render por el de producción.
@@ -341,24 +334,8 @@ Para mantener la calidad y consistencia del código a lo largo del ciclo de vida
 * **`develop`:** Rama de integración principal. Todas las nuevas funcionalidades se mezclan aquí para pruebas de integración antes de pasar a `main`.
 * **Ramas de Feature (`feat/...` o `fix/...`):** Ramas de desarrollo temporal creadas por cada desarrollador para implementar una funcionalidad o corregir un bug específico.
 
-### 2. Mensajes de Commit Semánticos
-Todos los commits deben seguir la convención de [Conventional Commits](https://www.conventionalcommits.org/):
-* `feat:` Para implementar nuevas características en el software (ej: `feat: agregar pasarela de Mercado Pago`).
-* `fix:` Para corregir errores o fallos detectados (ej: `fix: resolver desbordamiento de UI en buscador`).
-* `docs:` Para cambios o mejoras en la documentación (ej: `docs: actualizar diccionario de datos`).
-* `refactor:` Para reestructuraciones de código que no alteran la lógica de negocio ni corrigen fallos.
-* `test:` Para agregar o corregir pruebas unitarias o de accesibilidad.
 
-```bash
-# Ejemplo de flujo de trabajo git ordinario:
-git checkout -b feat/mi-nueva-vista
-git add .
-git commit -m "feat: implementar buscador de noticias con autocompletado"
-git checkout develop
-git merge feat/mi-nueva-vista
-```
-
-### 3. Convenciones de Nomenclatura y Estilo
+### 2. Convenciones de Nomenclatura y Estilo
 * **Frontend (JavaScript/React):** Nombres de componentes en `PascalCase` (`CampaignCard.jsx`), funciones y variables en `camelCase`. Estilos encapsulados por componentes utilizando clases utilitarias Tailwind.
 * **Backend (Node.js/Express):** Archivos y variables en `camelCase`. Nombres de tablas SQL y columnas configurados explícitamente en minúsculas y usando guiones bajos (`underscored: true` en Sequelize) para consistencia con bases de datos relacionales tradicionales (ej: `numero_asociado`, `perfiles_socios`).
 * **Tipado Seguro:** Sanitizar siempre strings con `.trim()`, parsear IDs a enteros estrictos y manejar decimales en montos usando `parseFloat` de manera previa a interactuar con los modelos SQL/NoSQL.
