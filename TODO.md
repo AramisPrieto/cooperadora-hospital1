@@ -6,6 +6,7 @@
 - [ ] hacer wireframes como en el boceto(02 · Buscador de campañas,03 · Detalle de campaña,04 · Noticias y logros)
 - [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) - ARAMIS
 - [ ] ver mails que habia echo kevo dejarlos andando
+- [ ] agregar obras concretadas como pantalla aparte
 - [ ] probar ia diseño hacer prueba
 ## 🔄 En Progreso
 - [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
