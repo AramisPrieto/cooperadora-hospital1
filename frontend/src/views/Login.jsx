@@ -22,8 +22,8 @@ const Login = () => {
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
   const [direccion, setDireccion] = useState('');
-  const [localidad, setLocalidad] = useState('');
-  const [nacionalidad, setNacionalidad] = useState('');
+  const [localidad, setLocalidad] = useState('Necochea');
+  const [nacionalidad, setNacionalidad] = useState('Argentina');
   const [telefono, setTelefono] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [genero, setGenero] = useState('');

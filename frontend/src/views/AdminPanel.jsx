@@ -46,6 +46,7 @@ const AdminPanel = () => {
   const [transfers, setTransfers] = useState([]);
   const [cuotas, setCuotas] = useState([]);
   const [cuotasSearch, setCuotasSearch] = useState('');
+  const [transfersSearch, setTransfersSearch] = useState('');
   const [currentTransferPage, setCurrentTransferPage] = useState(1);
   const [expandedPartnerId, setExpandedPartnerId] = useState(null);
   const [editingPartnerId, setEditingPartnerId] = useState(null);
@@ -819,12 +820,24 @@ const AdminPanel = () => {
         {/* ══════════════ TRANSFERS TAB ══════════════ */}
         {activeTab === 'transfers' && (
           <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden animate-fade-up">
-            <div className="p-5 border-b border-slate-100">
-              <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
-                <Banknote className="h-5 w-5 text-emerald-600" />
-                Donaciones por Transferencia Bancaria
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">Gestione y apruebe las declaraciones de transferencia de los socios.</p>
+            <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
+                  <Banknote className="h-5 w-5 text-emerald-600" />
+                  Donaciones por Transferencia Bancaria
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">Gestione y apruebe las declaraciones de transferencia de los socios.</p>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 w-full md:w-64">
+                <Search className="h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por email, socio o DNI..."
+                  value={transfersSearch}
+                  onChange={(e) => setTransfersSearch(e.target.value)}
+                  className="bg-transparent border-none outline-none text-xs w-full font-semibold text-slate-700"
+                />
+              </div>
             </div>
 
             {loading ? (
@@ -839,7 +852,7 @@ const AdminPanel = () => {
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
-                      <th className="p-4">Socio (Email)</th>
+                      <th className="p-4">Socio</th>
                       <th className="p-4">Campaña</th>
                       <th className="p-4 text-right">Monto</th>
                       <th className="p-4">Comprobante</th>
@@ -850,14 +863,26 @@ const AdminPanel = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {(() => {
+                      const filteredTransfers = transfers.filter(tr => {
+                        const match = transfersSearch.toLowerCase();
+                        const email = (tr.usuario?.email || '').toLowerCase();
+                        const nombreSocio = `${tr.usuario?.perfilSocio?.nombre || ''} ${tr.usuario?.perfilSocio?.apellido || ''}`.toLowerCase();
+                        const dni = String(tr.usuario?.perfilSocio?.dni || '');
+                        return email.includes(match) || nombreSocio.includes(match) || dni.includes(match);
+                      });
+
                       const transfersPerPage = 25;
+                      const totalTransferPages = Math.ceil(filteredTransfers.length / transfersPerPage);
                       const indexOfLastTransfer = currentTransferPage * transfersPerPage;
                       const indexOfFirstTransfer = indexOfLastTransfer - transfersPerPage;
-                      const currentTransfers = transfers.slice(indexOfFirstTransfer, indexOfLastTransfer);
+                      const currentTransfers = filteredTransfers.slice(indexOfFirstTransfer, indexOfLastTransfer);
                       
                       return currentTransfers.map(tr => (
                       <tr key={tr.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="p-4 font-bold text-slate-700">{tr.usuario?.email ?? '—'}</td>
+                        <td className="p-4">
+                          <div className="font-bold text-slate-700">{tr.usuario?.perfilSocio ? `${tr.usuario.perfilSocio.nombre} ${tr.usuario.perfilSocio.apellido}` : (tr.usuario?.email ?? '—')}</div>
+                          {tr.usuario?.perfilSocio && <div className="text-[10px] text-slate-400 font-semibold mt-0.5">DNI: {tr.usuario.perfilSocio.dni} | {tr.usuario.email}</div>}
+                        </td>
                         <td className="p-4 text-slate-600 font-semibold">{tr.campana?.titulo ?? '—'}</td>
                         <td className="p-4 text-right font-black text-slate-800">
                           ${parseFloat(tr.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
@@ -929,42 +954,55 @@ const AdminPanel = () => {
             )}
             
             {/* Pagination Controls */}
-            {transfers.length > 25 && (
-              <div className="flex items-center justify-center gap-2 p-5 border-t border-slate-100 bg-slate-50">
-                <button
-                  onClick={() => setCurrentTransferPage(prev => Math.max(prev - 1, 1))}
-                  disabled={currentTransferPage === 1}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.ceil(transfers.length / 25) }).map((_, idx) => {
-                    const pageNum = idx + 1;
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentTransferPage(pageNum)}
-                        className={`h-8 w-8 rounded-lg text-xs font-bold transition-colors ${
-                          currentTransferPage === pageNum
-                            ? 'bg-brand-600 text-white shadow-sm'
-                            : 'text-slate-500 hover:bg-slate-200'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+            {(() => {
+              const filteredTransfers = transfers.filter(tr => {
+                const match = transfersSearch.toLowerCase();
+                const email = (tr.usuario?.email || '').toLowerCase();
+                const nombreSocio = `${tr.usuario?.perfilSocio?.nombre || ''} ${tr.usuario?.perfilSocio?.apellido || ''}`.toLowerCase();
+                const dni = String(tr.usuario?.perfilSocio?.dni || '');
+                return email.includes(match) || nombreSocio.includes(match) || dni.includes(match);
+              });
+              const totalPages = Math.ceil(filteredTransfers.length / 25) || 1;
+
+              if (filteredTransfers.length <= 25) return null;
+
+              return (
+                <div className="flex items-center justify-center gap-2 p-5 border-t border-slate-100 bg-slate-50">
+                  <button
+                    onClick={() => setCurrentTransferPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentTransferPage === 1}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }).map((_, idx) => {
+                      const pageNum = idx + 1;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setCurrentTransferPage(pageNum)}
+                          className={`h-8 w-8 rounded-lg text-xs font-bold transition-colors ${
+                            currentTransferPage === pageNum
+                              ? 'bg-brand-600 text-white shadow-sm'
+                              : 'text-slate-500 hover:bg-slate-200'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button
+                    onClick={() => setCurrentTransferPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentTransferPage === totalPages}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setCurrentTransferPage(prev => Math.min(prev + 1, Math.ceil(transfers.length / 25)))}
-                  disabled={currentTransferPage === Math.ceil(transfers.length / 25)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </button>
-              </div>
-            )}
+              );
+            })()}
           </div>
         )}
 

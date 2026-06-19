@@ -1,5 +1,5 @@
 // TEAM_001: Controlador para gestionar el flujo de donaciones por transferencia y su aprobación manual
-import { DonacionTransferencia, CampanaEco, Usuario } from '../models/index.js';
+import { DonacionTransferencia, CampanaEco, Usuario, PerfilSocio } from '../models/index.js';
 import sequelize from '../config/db.js';
 import { enviarMailAgradecimiento } from '../services/emailService.js';
 import { crearPreferenciaDonacion } from '../services/mpService.js';
@@ -67,7 +67,12 @@ export const getTransferencias = async (req, res) => {
         {
           model: Usuario,
           as: 'usuario',
-          attributes: ['id', 'email']
+          attributes: ['id', 'email'],
+          include: [{
+            model: PerfilSocio,
+            as: 'perfilSocio',
+            attributes: ['dni', 'nombre', 'apellido']
+          }]
         },
         {
           model: CampanaEco,
