@@ -140,11 +140,14 @@ Para asegurar la autenticidad de los eventos reportados por Mercado Pago, el web
 
 ---
 
-### 2. Notificaciones por Correo Electrónico (SMTP)
+### 2. Notificaciones por Correo Electrónico (Resend API - HTTPS)
 
-El sistema utiliza `nodemailer` en el servidor para comunicarse con los socios cuando ocurren eventos significativos:
-* **Agradecimiento de Donaciones por Transferencia:** Al aprobarse manualmente una donación de transferencia en el panel de administración (`PUT /api/donaciones/transferencias/:id/aprobar`), se invoca al servicio `enviarMailAgradecimiento` para enviar de manera asíncrona un correo HTML formateado con los detalles del aporte.
-* **Modo Simulación:** En entornos de desarrollo donde no estén configuradas las variables `SMTP_*` en el `.env`, el transportador entra automáticamente en modo fallback e imprime el contenido completo del correo directamente en la consola para depuración.
+El sistema integra la API REST de **Resend** para el despacho de correos electrónicos transaccionales y de notificación a través de peticiones HTTPS seguras por el puerto **443** (evitando los bloqueos de puertos SMTP tradicionales en la capa gratuita de Render):
+* **Agradecimiento de Donaciones por Transferencia:** Al aprobarse manualmente una donación en el panel de administración (`PUT /api/donaciones/transferencias/:id/aprobar`), se envía un correo HTML con los detalles de la donación e impacto en la campaña.
+* **Bienvenida de Nuevos Socios:** Al registrarse de forma exitosa en el portal (`POST /api/auth/register`), se despacha un correo dando la bienvenida al socio e indicándole el estado de aprobación pendiente.
+* **Aprobación de Socio:** Al aprobarse la cuenta de un socio desde el panel de administración (`PUT /api/socios/:id`), se le notifica por correo electrónico que su cuenta está activa y puede ingresar a declarar cuotas.
+* **Recuperación de Contraseña:** Envío de enlaces seguros temporales (validez de 1 hora) al solicitar restablecer la contraseña.
+* **Modo Simulación:** En entornos de desarrollo donde no esté configurada `RESEND_API_KEY`, el servicio entra automáticamente en modo simulación e imprime los correos formateados por consola para depuración.
 
 ---
 
@@ -308,7 +311,8 @@ Para que el sistema funcione, es vital configurar correctamente las variables en
 | **Backend** | `JWT_SECRET` | Llave alfanumérica robusta para firmar los JSON Web Tokens. |
 | **Backend** | `MP_ACCESS_TOKEN` | Token privado (Access Token) de la integración de Mercado Pago. |
 | **Backend** | `MP_WEBHOOK_SECRET` | Secreto criptográfico de Mercado Pago para validar la firma de los webhooks. |
-| **Backend** | `SMTP_*` | Configuraciones del servidor de correo saliente (`HOST`, `USER`, `PASS`, `SECURE`). |
+| **Backend** | `RESEND_API_KEY` | Clave API privada de Resend (`re_...`) para enviar correos electrónicos. |
+| **Backend** | `EMAIL_FROM` | Dirección de remitente autorizada en Resend (por defecto `onboarding@resend.dev` para pruebas). |
 | **Frontend** | `VITE_API_URL` | URL pública o local del backend (ej: `http://localhost:5001`). |
 | **Frontend** | `VITE_MP_PUBLIC_KEY` | Clave pública de Mercado Pago para el checkout de donaciones. |
 

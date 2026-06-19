@@ -506,3 +506,165 @@ Asociación Cooperadora del Hospital Municipal de Necochea
   }
 };
 
+/**
+ * Envía un correo notificando al socio que su cuenta ha sido aprobada por la administración
+ * @param {Object} params
+ * @param {string} params.email - Dirección del destinatario
+ * @param {string} params.nombre - Nombre del socio
+ */
+export const enviarMailAprobacionSocio = async ({ email, nombre }) => {
+  const emailFrom = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+  const subject = '¡Tu cuenta de socio ha sido aprobada! - Cooperadora Hospital de Necochea';
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #f4f7f6;
+      color: #333333;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 30px auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e0e0e0;
+    }
+    .header {
+      background: linear-gradient(135deg, #0d9488, #0f766e);
+      color: #ffffff;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .content {
+      padding: 40px 30px;
+      line-height: 1.6;
+    }
+    .content p {
+      margin: 0 0 20px;
+      font-size: 16px;
+    }
+    .status-box {
+      background-color: #f0fdfa;
+      border-left: 4px solid #0d9488;
+      padding: 20px;
+      margin: 25px 0;
+      border-radius: 0 4px 4px 0;
+    }
+    .status-box p {
+      margin: 0;
+      font-size: 16px;
+      color: #0f766e;
+      font-weight: bold;
+    }
+    .footer {
+      background-color: #f9fafb;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #6b7280;
+      border-top: 1px solid #f3f4f6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>¡Felicidades, ${nombre}!</h1>
+    </div>
+    <div class="content">
+      <p>Nos alegra informarte que la Comisión Directiva de la Asociación Cooperadora del Hospital Municipal de Necochea ha aprobado tu solicitud de asociación.</p>
+      
+      <div class="status-box">
+        <p>Estado de cuenta: ACTIVO (Aprobado)</p>
+      </div>
+
+      <p>A partir de ahora ya puedes acceder a tu panel de socio para:</p>
+      <ul>
+        <li>Ver tu estado de cuotas mensuales.</li>
+        <li>Declarar tus pagos de cuotas por transferencia bancaria de forma directa.</li>
+        <li>Gestionar tus suscripciones de pago y donaciones.</li>
+      </ul>
+      
+      <p>Tu participación es fundamental para seguir sosteniendo y mejorando la salud pública de nuestra ciudad. ¡Muchas gracias por tu compromiso!</p>
+    </div>
+    <div class="footer">
+      <p>Asociación Cooperadora del Hospital Municipal de Necochea</p>
+      <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+
+  const textContent = `
+¡Tu cuenta de socio ha sido aprobada! - Cooperadora Hospital de Necochea
+
+Hola, ${nombre}.
+
+Nos alegra informarte que la Comisión Directiva de la Asociación Cooperadora del Hospital Municipal de Necochea ha aprobado tu solicitud de asociación.
+
+Estado de cuenta: ACTIVO (Aprobado)
+
+A partir de ahora ya puedes acceder a tu panel de socio para ver tu estado de cuotas mensuales, declarar tus pagos por transferencia bancaria y gestionar tus suscripciones.
+
+¡Muchas gracias por tu compromiso!
+
+Asociación Cooperadora del Hospital Municipal de Necochea
+  `.trim();
+
+  if (!isResendConfigured()) {
+    console.log('\n==================================================');
+    console.log('📢 SIMULACIÓN DE APROBACIÓN DE SOCIO (RESEND_API_KEY no configurada)');
+    console.log(`De:      ${emailFrom}`);
+    console.log(`Para:    ${email}`);
+    console.log(`Asunto:  ${subject}`);
+    console.log('--------------------------------------------------');
+    console.log(textContent);
+    console.log('==================================================\n');
+    return { simulated: true, email };
+  }
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: emailFrom,
+        to: email,
+        subject: subject,
+        html: htmlContent,
+        text: textContent
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || `HTTP error! status: ${response.status}`);
+    }
+
+    console.log(`[Email Service - Resend] Mail de aprobación enviado a ${email}: ${data.id}`);
+    return { sent: true, messageId: data.id };
+  } catch (error) {
+    console.error(`[Email Service - Resend] Error al enviar mail de aprobación a ${email}:`, error);
+    throw error;
+  }
+};
+
+

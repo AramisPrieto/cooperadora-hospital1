@@ -37,11 +37,13 @@ frontend/
 │   │   ├── AdminPanel.jsx      # Panel del Administrador (solicitudes, campañas, noticias)
 │   │   ├── CampaignDetail.jsx  # Detalle de campaña (donar, Mercado Pago, obras)
 │   │   ├── CampaignSearch.jsx  # Listado y buscador de campañas de recaudación
+│   │   ├── ForgotPassword.jsx  # Formulario para solicitar enlace de recuperación de clave (NUEVO)
 │   │   ├── Home.jsx            # Página principal institucional, estadísticas y noticias
 │   │   ├── Login.jsx           # Formulario unificado de ingreso y registro (socios)
 │   │   ├── NewsDetail.jsx      # Detalle extendido de una noticia
 │   │   ├── NewsSearch.jsx      # Buscador e histórico de novedades
 │   │   ├── ObrasConcretadas.jsx # Listado de campañas finalizadas e impacto social
+│   │   ├── ResetPassword.jsx   # Formulario para ingresar nueva contraseña con validaciones (NUEVO)
 │   │   └── SocioPanel.jsx      # Panel privado del socio (Cuotas, Donaciones, Perfil)
 │   ├── App.jsx         # Declaración del Router y rutas públicas/privadas
 │   ├── index.css       # Configuración global de estilos y directivas de Tailwind

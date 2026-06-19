@@ -73,6 +73,8 @@ Resguarda los datos de inicio de sesión y privilegios.
 | `email` | `VARCHAR(255)` | `NOT NULL` | Único. Correo electrónico del usuario. |
 | `password_hash` | `VARCHAR(255)` | `NOT NULL` | Contraseña cifrada con `bcryptjs`. |
 | `rol` | `ENUM('socio', 'admin')` | `NOT NULL` | Por defecto `'socio'`. |
+| `reset_password_token` | `VARCHAR(255)` | `NULL` | Token temporal único para restablecer la contraseña. |
+| `reset_password_expires` | `TIMESTAMP` | `NULL` | Fecha y hora límite de expiración del token. |
 
 #### Tabla: `perfiles_socios`
 Registra los datos oficiales de los asociados al padrón.
@@ -144,10 +146,12 @@ Maneja las novedades y eventos publicados en el portal.
 Toda la comunicación con el backend se realiza bajo el prefijo `/api`. Las peticiones que requieren inicio de sesión deben adjuntar la cabecera `Authorization: Bearer <jwt_token>` o utilizar la cookie de sesión configurada.
 
 ### 🔐 Módulo de Autenticación (`/api/auth`)
-* `POST /api/auth/register`: Registro de usuario y socio. Payload con email, password, dni, nombre, apellido, dirección, localidad, nacionalidad, teléfono, fecha_nacimiento, genero y metodo_pago.
+* `POST /api/auth/register`: Registro de usuario y socio. Payload con email, password, dni, nombre, apellido, dirección, localidad, nacionalidad, teléfono, fecha_nacimiento, genero y metodo_pago. (Envía mail de bienvenida).
 * `POST /api/auth/login`: Autenticación de usuario. Retorna token y datos de usuario.
 * `GET /api/auth/me`: Retorna los datos del usuario autenticado actual.
 * `POST /api/auth/logout`: Finaliza la sesión actual.
+* `POST /api/auth/forgot-password`: Genera token de un solo uso de recuperación y despacha mail con enlace seguro. Payload con `email`.
+* `POST /api/auth/reset-password`: Valida el token temporal y actualiza la contraseña del usuario. Payload con `token` y `password`.
 
 ### 🏥 Módulo de Gestión de Socios (`/api/socios`)
 * `GET /api/socios/mi-perfil`: Retorna el perfil completo del socio autenticado.
@@ -156,7 +160,8 @@ Toda la comunicación con el backend se realiza bajo el prefijo `/api`. Las peti
 * `POST /api/socios/mi-perfil/pagos/declarar`: Permite subir comprobante y declarar pago de cuota.
 * `POST /api/socios/suscripcion/crear`: Inicia la suscripción en Mercado Pago y retorna initPoints.
 * `POST /api/socios/suscripcion/cancelar`: Cancela suscripción activa en Mercado Pago.
-* `PUT /api/socios/:id`: Actualiza datos de contacto de socio (autogestión) o datos completos y estado de aprobación (Admin).
+* `PUT /api/socios/mi-perfil`: (Autogestión) Permite que el socio actualice sus propios datos personales (DNI, teléfono, dirección, etc.).
+* `PUT /api/socios/:id`: (Solo Admin) Actualiza datos completos y estado de aprobación de cualquier socio. (Envía un correo de confirmación al socio si el estado cambia a `'activo'`).
 * `GET /api/socios`: (Admin) Listado de socios registrados.
 * `POST /api/socios`: (Admin) Registro manual de un socio.
 * `DELETE /api/socios/:id`: (Admin) Elimina un socio.

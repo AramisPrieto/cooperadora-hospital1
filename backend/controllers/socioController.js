@@ -1,5 +1,6 @@
 import { PerfilSocio, Usuario, PagoCuota } from '../models/index.js';
 import { Op } from 'sequelize';
+import { enviarMailAprobacionSocio } from '../services/emailService.js';
 
 // Obtener todos los perfiles de socios (Solo Admin - Soporta Paginación y Búsqueda)
 export const getAllSocios = async (req, res) => {
@@ -315,7 +316,9 @@ export const updateSocio = async (req, res) => {
   }
 
   try {
-    const socio = await PerfilSocio.findByPk(id);
+    const socio = await PerfilSocio.findByPk(id, {
+      include: [{ model: Usuario, as: 'usuario' }]
+    });
     if (!socio) {
       return res.status(404).json({ error: 'Perfil de socio no encontrado.' });
     }
@@ -334,6 +337,8 @@ export const updateSocio = async (req, res) => {
         socio.dni = dniInt;
       }
     }
+
+    const previousEstado = socio.estado;
 
     if (estado !== undefined) {
       socio.estado = estado;
@@ -354,6 +359,14 @@ export const updateSocio = async (req, res) => {
     if (observaciones !== undefined) socio.observaciones = observaciones;
 
     await socio.save();
+
+    // Si cambia el estado a 'activo' (aprobado) y antes no lo estaba, enviar correo de aprobación
+    if (estado === 'activo' && previousEstado !== 'activo' && socio.usuario) {
+      enviarMailAprobacionSocio({
+        email: socio.usuario.email,
+        nombre: socio.nombre
+      }).catch(err => console.error('Error al enviar correo de aprobación de socio:', err));
+    }
 
     return res.json({ message: 'Perfil de socio actualizado correctamente.', socio });
   } catch (error) {

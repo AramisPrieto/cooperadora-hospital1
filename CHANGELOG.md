@@ -435,3 +435,22 @@
   - Integración del modal de compartir en el detalle de campañas ([CampaignDetail.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/CampaignDetail.jsx)).
   - Adición del botón lateral "Compartir publicación" e integración del modal en el detalle de noticias ([NewsDetail.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/NewsDetail.jsx)).
 
+### Versión 1.30.0 — Notificaciones de Resend y Recuperación de Contraseñas (Antigravity)
+- **Migración a la API de Resend (HTTP/HTTPS)**:
+  - Reemplazo del cliente SMTP (Nodemailer) por una conexión HTTPS nativa por el puerto `443` utilizando la API REST de Resend. Esto soluciona por completo el bloqueo de puertos tradicionales (25/465/587) de la capa gratuita de Render.
+  - Implementación del modo simulación/desarrollo por terminal cuando la clave de API no está presente.
+  - Documentación de variables de entorno actualizadas (`RESEND_API_KEY`, `EMAIL_FROM`) en [backend/.env.example](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/.env.example).
+- **Refactorización de Seguridad (Aislamiento de Perfiles de Socios)**:
+  - Mitigación de vulnerabilidades de IDOR/manipulación de parámetros mediante la creación de la ruta `PUT /api/socios/mi-perfil` que resuelve los datos basándose en el JWT de sesión (`req.user.id`).
+  - Restricción del endpoint general `PUT /api/socios/:id` exclusivamente a operadores de rol `admin` mediante `authorizeRoles('admin')`.
+- **Flujo Seguro de Recuperación de Contraseña**:
+  - Incorporación de las columnas `reset_password_token` y `reset_password_expires` al modelo `Usuario` en [Usuario.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/models/Usuario.js) (PostgreSQL).
+  - Creación de endpoints transaccionales `POST /api/auth/forgot-password` (con limiter contra brute force y token con validez de 1 hora) y `POST /api/auth/reset-password` (con hashing mediante bcrypt, limpieza automática del token y validadores de fortaleza de clave).
+  - Vistas de Frontend [ForgotPassword.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/ForgotPassword.jsx) (ingreso de correo con mitigación de enumeración de emails) y [ResetPassword.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/ResetPassword.jsx) (formulario interactivo de nueva contraseña con validaciones visuales de robustez).
+  - Enlace de recuperación "¿Olvidaste tu contraseña?" integrado en el flujo unificado en [Login.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Login.jsx).
+- **Notificaciones por Correo Electrónico**:
+  - **Bienvenida:** Envío automático de un correo electrónico de bienvenida institucional a los nuevos socios al registrarse en [authService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/authService.js).
+  - **Aprobación de Socio:** Envío de un mail automático notificando la aprobación del socio por la administración una vez que el admin cambia su estado a activo en `PUT /api/socios/:id` en [socioController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioController.js).
+  - **Agradecimiento de Donaciones:** Envío de correo tras la validación de transferencias bancarias de donación en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js).
+
+
