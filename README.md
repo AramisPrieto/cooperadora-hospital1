@@ -485,4 +485,15 @@ git checkout -b develop
   - Diseño de botonera de paginación adaptativa `< 1 2 3 >` en la parte inferior de los listados cuando superan los 6 elementos.
   - Seteo dinámico para restablecer la página actual a 1 cada vez que cambien los filtros, ordenamiento o términos de búsqueda.
 
+### Versión 1.23.0 — Vista Detallada de Noticias y Ajustes de Inicio (Santiago Ialungo)
+
+- **Ajustes del Listado de Campañas en Inicio**:
+  - Remoción de los filtros de búsqueda (`campaignSearchInput`) y selector de ordenamiento (`campaignActiveSort`) de la página de inicio.
+  - Limitación visual del grid de campañas activas a las primeras 3 campañas.
+  - Incorporación de un botón "Ver más campañas" debajo del grid que navega al buscador independiente `/campanas`.
+- **Nueva Vista de Detalle de Noticia (`/noticias/:id`)**:
+  - Desarrollo de [NewsDetail.jsx](file:///c:/Users/Santiago/Desktop/cooperadora-hospital1/frontend/src/views/NewsDetail.jsx) para renderizar noticias individuales en una vista premium independiente.
+  - Diseño clínico con breadcrumbs, visualizadores estéticos para imágenes ausentes, sidebar de información y un panel inferior de recomendación con 3 noticias recientes.
+  - Transición del flujo de "Leer noticia" en la Home y en el Buscador para navegar a esta nueva vista dedicada en lugar de abrir ventanas modales.
+
 
