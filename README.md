@@ -101,7 +101,7 @@ Ambas respuestas se ensamblan en un único objeto JSON unificado que se envía a
 
 ---
 
-## 🔌 Integraciones con Servicios Externos (Mercado Pago y SMTP)
+## 🔌 Integraciones con Servicios Externos (Mercado Pago, Resend y Vercel Analytics)
 
 ### 1. Pasarela de Pagos (Mercado Pago SDK)
 
@@ -148,6 +148,13 @@ El sistema integra la API REST de **Resend** para el despacho de correos electr�
 * **Aprobación de Socio:** Al aprobarse la cuenta de un socio desde el panel de administración (`PUT /api/socios/:id`), se le notifica por correo electrónico que su cuenta está activa y puede ingresar a declarar cuotas.
 * **Recuperación de Contraseña:** Envío de enlaces seguros temporales (validez de 1 hora) al solicitar restablecer la contraseña.
 * **Modo Simulación:** En entornos de desarrollo donde no esté configurada `RESEND_API_KEY`, el servicio entra automáticamente en modo simulación e imprime los correos formateados por consola para depuración.
+
+---
+
+### 3. Métricas y Rendimiento (Vercel Analytics)
+
+El frontend integra `@vercel/analytics` para recopilar datos de tráfico, rendimiento y uso del portal de forma anónima y sin comprometer la privacidad del usuario:
+* **Despliegue y Captura:** El componente `<Analytics />` de React se inicializa en el componente raíz [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx). Recopila información de vistas de página y métricas de Web Vitals de manera automática una vez que el proyecto se encuentra activo en Vercel.
 
 ---
 

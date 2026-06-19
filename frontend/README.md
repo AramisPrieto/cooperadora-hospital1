@@ -81,6 +81,13 @@ El frontend incluye suites de prueba automatizadas con **Vitest** y **React Test
 
 ---
 
+## 📈 Métricas y Analíticas (Vercel Analytics)
+El frontend incorpora `@vercel/analytics` para el seguimiento del rendimiento y comportamiento de la web:
+* **Inicialización:** La aplicación monta el componente `<Analytics />` en [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx).
+* **Métricas:** Mide de forma pasiva y sin impacto en la velocidad de carga (Web Vitals como LCP, FID, CLS) y visitas únicas en producción.
+
+---
+
 ## 🛠️ Comandos de Desarrollo (pnpm)
 
 *Por favor, ejecuta estos comandos dentro de la carpeta `/frontend` o usando el filtro de pnpm en la raíz del proyecto:*

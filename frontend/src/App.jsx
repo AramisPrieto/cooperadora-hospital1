@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ReactLenis } from 'lenis/react'; // TEAM_001: Wrapper oficial para React
+import { Analytics } from '@vercel/analytics/react';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -89,6 +90,7 @@ function App() {
           <Footer />
         </div>
       </Router>
+      <Analytics />
     </ReactLenis>
   );
 }
