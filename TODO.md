@@ -7,6 +7,8 @@
 - [ ] mail que te llegue cuando te aprueban como socio
 - [ ] configurar visible y no visible noticias o quitar visible y que esten siempre todas habalr en grupo
 - [ ] cuotas
+- [ ] no tener que refrescar para ver las transferenicaias
+- [ ] 
 ## 🔄 En Progreso
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
