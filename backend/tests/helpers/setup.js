@@ -3,6 +3,7 @@ import pg from 'pg';
 import mongoose from 'mongoose';
 import sequelize from '../../config/db.js';
 import { connectMongoDB } from '../../config/mongo.js';
+import '../../models/index.js';
 
 export const initTestDatabase = async () => {
   const connectionUrl = process.env.DATABASE_URL;

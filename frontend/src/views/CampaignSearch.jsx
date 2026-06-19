@@ -34,8 +34,6 @@ const CampaignSearch = () => {
   const [activeSort, setActiveSort] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todas');
   const [currentPage, setCurrentPage] = useState(1);
-  const debounceRef = useRef(null);
-
   // Reset page when category, search input, sort, or underlying campaigns change
   useEffect(() => {
     setCurrentPage(1);
@@ -60,18 +58,18 @@ const CampaignSearch = () => {
     }
   }, []);
 
-  // Carga inicial
+  // Carga inicial y búsqueda con debounce
   useEffect(() => {
-    fetchCampaigns('', activeSort);
-  }, [activeSort, fetchCampaigns]);
+    if (searchInput === '') {
+      fetchCampaigns('', activeSort);
+      return;
+    }
 
-  // Búsqueda con debounce
-  useEffect(() => {
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
+    const timer = setTimeout(() => {
       fetchCampaigns(searchInput, activeSort);
     }, 350);
-    return () => clearTimeout(debounceRef.current);
+
+    return () => clearTimeout(timer);
   }, [searchInput, activeSort, fetchCampaigns]);
 
   const handleClearSearch = () => {

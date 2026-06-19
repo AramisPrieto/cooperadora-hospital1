@@ -1,19 +1,11 @@
 # 📋 Plan de Trabajo y Pendientes
 ## 🚀 Prioridades Actuales
 ## 🛠️ Tareas por Hacer (Backlog)
-- [ ] Validar los PDFs de las etapas del proyecto
-- [ ] arreglar agregar imagenes, elegir imagen background (Kevin)
-- [ ] hacer wireframes como en el boceto(02 · Buscador de campañas,03 · Detalle de campaña,04 · Noticias y logros)
-- [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) - ARAMIS
+- [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) 
 - [ ] ver mails que habia echo kevo dejarlos andando
-- [ ] agregar obras concretadas como pantalla aparte
-- [ ] probar ia diseño hacer prueba
-- [ ] alerta compartir windows
-- [ ] cambiar logo coperadora footer
+- [ ] eliminar usuario
+- [ ] mail que te llegue cuando te aprueban como socio
 ## 🔄 En Progreso
-- [/] Revisar los wireframes (`Cooperadora Necochea - Wireframes.html`)
-- [ ] arreglar visual de fecha en seccion noticias (THIAGO)
-- [ ] en obras concretadas dejar unicamente linea de tiempo (THIAGO)
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
 - [x] Vincular el frontend con el backend
@@ -30,5 +22,6 @@
 - [x] agregar en gestion de socios el cambio a "inactivo" (THIAGO)
 - [x] añadir carrusel (THIAGO)
 - [x] quitar # en noticias
-
+- [x] arreglar visual de fecha en seccion noticias (THIAGO)
+- [x] en obras concretadas dejar unicamente linea de tiempo (THIAGO)
 - [x] actualizar verfcer

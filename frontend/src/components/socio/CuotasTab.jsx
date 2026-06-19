@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CreditCard, CheckCircle, Clock, XCircle, Check, ArrowRight, Copy, Banknote } from 'lucide-react';
+import { CreditCard, CheckCircle, Clock, XCircle, Check, ArrowRight, Copy, Banknote, Info } from 'lucide-react';
 import FileUpload from '../FileUpload';
 
 const CuotasTab = ({
@@ -217,25 +217,65 @@ const CuotasTab = ({
           <div className="flex flex-col gap-2">
             <p className="text-xs text-slate-500">Seleccioná cómo preferís abonar tu cuota social:</p>
             <div className="flex gap-2">
-              {['debito', 'transferencia', 'cobrador'].map((method) => (
-                <button
-                  key={method}
-                  type="button"
-                  onClick={() => {
-                    if (method === 'debito' && profile.mp_subscription_status === 'authorized') return;
-                    onChangeMethod(method);
-                  }}
-                  className={`flex-grow text-xs px-2.5 py-2 rounded-xl font-black uppercase tracking-wider border transition-all ${
-                    profile?.metodo_pago === method
-                      ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
-                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-                  disabled={method === 'debito' && profile.mp_subscription_status === 'authorized'}
-                >
-                  {method === 'debito' ? 'Débito MP' : method === 'transferencia' ? 'CBU / Alias' : 'Cobrador'}
-                </button>
-              ))}
+              {['debito', 'transferencia', 'cobrador'].map((method) => {
+                const currentMonth = new Date().toISOString().substring(0, 7);
+                const cantCambios = profile?.mes_ultimo_cambio_metodo_pago === currentMonth 
+                  ? (profile?.cant_cambios_metodo_pago || 0) 
+                  : 0;
+                const reachedLimit = cantCambios >= 3;
+                const isSelected = profile?.metodo_pago === method;
+                const isDebitoAuthorized = method === 'debito' && profile?.mp_subscription_status === 'authorized';
+                const isDisabled = isDebitoAuthorized || (!isSelected && reachedLimit);
+
+                return (
+                  <button
+                    key={method}
+                    type="button"
+                    onClick={() => {
+                      if (isDebitoAuthorized) return;
+                      onChangeMethod(method);
+                    }}
+                    className={`flex-grow text-xs px-2.5 py-2 rounded-xl font-black uppercase tracking-wider border transition-all ${
+                      isSelected
+                        ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                    }`}
+                    disabled={isDisabled}
+                  >
+                    {method === 'debito' ? 'Débito MP' : method === 'transferencia' ? 'CBU / Alias' : 'Cobrador'}
+                  </button>
+                );
+              })}
             </div>
+
+            {/* Mensaje informativo sobre el límite de cambios de método de pago */}
+            {(() => {
+              const currentMonth = new Date().toISOString().substring(0, 7);
+              const cantCambios = profile?.mes_ultimo_cambio_metodo_pago === currentMonth 
+                ? (profile?.cant_cambios_metodo_pago || 0) 
+                : 0;
+              const cambiosRestantes = Math.max(0, 3 - cantCambios);
+              const mesesMap = {
+                '01': 'enero', '02': 'febrero', '03': 'marzo', '04': 'abril',
+                '05': 'mayo', '06': 'junio', '07': 'julio', '08': 'agosto',
+                '09': 'septiembre', '10': 'octubre', '11': 'noviembre', '12': 'diciembre'
+              };
+              const mesActualNombre = mesesMap[currentMonth.substring(5, 7)] || 'este mes';
+
+              return (
+                <div className="mt-1 flex items-start gap-2 p-3 bg-amber-50/70 border border-amber-100 rounded-xl text-amber-800 text-[11px] leading-relaxed">
+                  <Info className="h-4 w-4 mt-0.5 shrink-0 text-amber-600" />
+                  <div>
+                    <span className="font-bold">Límite de cambios:</span> Podés cambiar tu método de pago hasta 3 veces por mes. 
+                    {cambiosRestantes > 0 ? (
+                      <span> Te quedan <strong className="font-black text-amber-900">{cambiosRestantes}</strong> {cambiosRestantes === 1 ? 'cambio disponible' : 'cambios disponibles'} en {mesActualNombre}.</span>
+                    ) : (
+                      <span className="text-rose-700 font-bold block mt-1">Ya alcanzaste el límite de 3 cambios en {mesActualNombre}. No podés realizar más cambios hasta el mes siguiente.</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Débito automático (Mercado Pago) */}

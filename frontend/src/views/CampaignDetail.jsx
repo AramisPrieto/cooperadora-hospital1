@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLenis } from 'lenis/react';
 import api from '../api/axios';
 import FileUpload from '../components/FileUpload';
+import ShareModal from '../components/ShareModal';
 import {
   Heart, ArrowLeft, Calendar, Clock, Target, TrendingUp,
   Share2, CheckCircle, AlertCircle, ShieldCheck, Banknote,
@@ -441,7 +442,7 @@ const CampaignDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showDonationModal, setShowDonationModal] = useState(false);
-  const [shared, setShared] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   // Scroll al inicio al montar la página
   useEffect(() => {
@@ -499,17 +500,8 @@ const CampaignDetail = () => {
     load();
   }, [id]);
 
-  const handleShare = async () => {
-    const url = window.location.href;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: campaign?.titulo, url });
-      } else {
-        await navigator.clipboard.writeText(url);
-        setShared(true);
-        setTimeout(() => setShared(false), 2500);
-      }
-    } catch {}
+  const handleShare = () => {
+    setIsShareOpen(true);
   };
 
   if (loading) return <DetailSkeleton />;
@@ -796,6 +788,16 @@ const CampaignDetail = () => {
           }}
         />
       )}
+
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        url={window.location.href}
+        title={campaign?.titulo || ''}
+        summary="¡Sumate a colaborar! Campaña para la Cooperadora del Hospital Emilio Ferreyra."
+        imageUrl={campaign?.detalles?.galeria_rica?.imagenes?.[0] || campaign?.detalles?.equipamiento_imagen || ''}
+        shareMessage={`¡Hola! Te invito a sumarte y colaborar con la campaña: "${campaign?.titulo || ''}" de la Cooperadora del Hospital Emilio Ferreyra.`}
+      />
     </div>
   );
 };

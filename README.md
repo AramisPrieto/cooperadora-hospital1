@@ -101,6 +101,53 @@ Ambas respuestas se ensamblan en un único objeto JSON unificado que se envía a
 
 ---
 
+## 🔌 Integraciones con Servicios Externos (Mercado Pago y SMTP)
+
+### 1. Pasarela de Pagos (Mercado Pago SDK)
+
+El sistema soporta donaciones únicas y suscripciones recurrentes de cuotas mensuales.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Socio
+    participant Frontend as Frontend (Vite)
+    participant Backend as Backend (Express)
+    participant MP as API Mercado Pago
+    participant Webhook as Webhook Endpoint
+
+    Socio->>Frontend: Desea Donar / Asociarse (Débito)
+    Frontend->>Backend: POST /api/donaciones/campanas/:id/donar-mp
+    Note over Backend: Instancia Preference() o PreApproval()<br/>con MP_ACCESS_TOKEN
+    Backend->>MP: Crear Preferencia o Suscripción
+    MP-->>Backend: Retorna init_point y preapproval_id
+    Backend-->>Frontend: Envía init_point
+    Frontend->>Socio: Redirecciona a Checkout de MP
+    Socio->>MP: Completa Pago / Autoriza Débito
+    MP->>Webhook: Notificación Asincrónica (POST /api/webhooks/mercadopago)
+    Note over Webhook: Valida Firma HMAC SHA256<br/>con MP_WEBHOOK_SECRET
+    Webhook->>MP: Consulta ID de pago/suscripción
+    MP-->>Webhook: Retorna estado (approved / authorized)
+    Webhook->>Backend: Actualiza SQL (Monto Campaña / Cuota Socio)
+    Webhook-->>MP: HTTP 200 OK
+```
+
+#### 🛡️ Validación de Webhooks y Seguridad (Anti-Spoofing)
+Para asegurar la autenticidad de los eventos reportados por Mercado Pago, el webhook (`POST /api/webhooks/mercadopago`) realiza una validación de firma criptográfica:
+1. Extrae la firma y metadatos provistos en las cabeceras HTTP de la pasarela.
+2. Genera un hash HMAC-SHA256 local utilizando la clave `MP_WEBHOOK_SECRET` y el cuerpo recibido.
+3. Si los hashes no coinciden, retorna un error de autenticación `401 Unauthorized` bloqueando inmediatamente la petición, evitando ataques de inyección de pagos falsos.
+
+---
+
+### 2. Notificaciones por Correo Electrónico (SMTP)
+
+El sistema utiliza `nodemailer` en el servidor para comunicarse con los socios cuando ocurren eventos significativos:
+* **Agradecimiento de Donaciones por Transferencia:** Al aprobarse manualmente una donación de transferencia en el panel de administración (`PUT /api/donaciones/transferencias/:id/aprobar`), se invoca al servicio `enviarMailAgradecimiento` para enviar de manera asíncrona un correo HTML formateado con los detalles del aporte.
+* **Modo Simulación:** En entornos de desarrollo donde no estén configuradas las variables `SMTP_*` en el `.env`, el transportador entra automáticamente en modo fallback e imprime el contenido completo del correo directamente en la consola para depuración.
+
+---
+
 ## 🔐 Seguridad: Gestión de Roles de Administrador
 
 El endpoint público `POST /api/auth/register` **siempre crea usuarios con rol `socio`**. No es posible auto-asignarse el rol `admin` desde el formulario de registro.
@@ -217,7 +264,7 @@ Este proyecto está estructurado como un **Monorepo gestionado con pnpm Workspac
      ```bash
      pnpm test
      ```
-     *(Ejecuta la suite de 26 pruebas de la interfaz). En caso de querer usar modo watch, puedes correr `pnpm test:frontend` o ingresar a `frontend` y correr `pnpm run test:watch`.*
+     *(Ejecuta la suite de 30 pruebas de la interfaz). En caso de querer usar modo watch, puedes correr `pnpm test:frontend` o ingresar a `frontend` y correr `pnpm run test:watch`.*
    * **Pruebas del Backend (API REST):**
      ```bash
      pnpm test:backend
@@ -271,35 +318,27 @@ La primera vez que se sube el backend a Render, la base de datos PostgreSQL esta
 2. Abre la terminal en la carpeta `backend` y ejecuta: `node seed.js`
 3. Esto conectará tu PC a los servidores remotos y sembrará la información. *(Atención: Si tu base de datos prohíbe conexiones sin SSL, nuestro código de `db.js` fuerza SSL automáticamente si la URL contiene `render.com`).*
 
-### 3. Eliminar el Bloqueo de Acceso (Ir a Producción Real)
-Actualmente, el portal tiene un "candado" (un `prompt` en JavaScript) para evitar que terceros accedan mientras el equipo realiza pruebas cerradas. 
-Cuando el hospital decida lanzar la página de forma oficial al público:
-1. Abre el archivo `frontend/src/main.jsx`.
-2. Borra todo el bloque de código debajo de `// Protección básica para la etapa de desarrollo` que contiene el `prompt()` y el `if (password !== "X9$mK2#vLq7@pW4n")`.
-3. Haz un commit y push a GitHub. Vercel actualizará la página automáticamente y quedará abierta a todo el mundo.
-
-### 4. Transición a Mercado Pago (Dinero Real)
+### 3. Transición a Mercado Pago (Dinero Real)
 Cuando estés listo para dejar de simular pagos:
 1. Ve a tu integración en el panel de Mercado Pago y genera tus **Credenciales de Producción**.
 2. Reemplaza el `MP_ACCESS_TOKEN` en Render por el de producción.
 3. Reemplaza el `VITE_MP_PUBLIC_KEY` en Vercel por el de producción.
 4. Reinicia ambos servidores. ¡A partir de ese momento, los cobros irán directo a la cuenta bancaria de la Cooperadora!
 
-## 🛠️ Comandos Git Utilizados (Estructura de Trabajo)
-Para mantener un orden profesional en el repositorio, la estructura de ramas se inicia en `develop`:
-```bash
-# Inicializar repositorio local
-git init
+## 🛠️ Convenciones de Desarrollo y Flujo de Trabajo (Git & Code Styles)
 
-# Agregar todos los archivos estructurados (filtrados por .gitignore)
-git add .
+Para mantener la calidad y consistencia del código a lo largo del ciclo de vida del software, el equipo sigue directrices estrictas:
 
-# Hacer el primer commit
-git commit -m "feat: inicializar backend y frontend híbrido para Etapa 4"
+### 1. Modelo de Ramas (Git Flow Simplificado)
+* **`main`:** Contiene el código listo para producción y despliegue final (Vercel + Render).
+* **`develop`:** Rama de integración principal. Todas las nuevas funcionalidades se mezclan aquí para pruebas de integración antes de pasar a `main`.
+* **Ramas de Feature (`feat/...` o `fix/...`):** Ramas de desarrollo temporal creadas por cada desarrollador para implementar una funcionalidad o corregir un bug específico.
 
-# Crear y cambiarse a la rama de desarrollo
-git checkout -b develop
-```
+
+### 2. Convenciones de Nomenclatura y Estilo
+* **Frontend (JavaScript/React):** Nombres de componentes en `PascalCase` (`CampaignCard.jsx`), funciones y variables en `camelCase`. Estilos encapsulados por componentes utilizando clases utilitarias Tailwind.
+* **Backend (Node.js/Express):** Archivos y variables en `camelCase`. Nombres de tablas SQL y columnas configurados explícitamente en minúsculas y usando guiones bajos (`underscored: true` en Sequelize) para consistencia con bases de datos relacionales tradicionales (ej: `numero_asociado`, `perfiles_socios`).
+* **Tipado Seguro:** Sanitizar siempre strings con `.trim()`, parsear IDs a enteros estrictos y manejar decimales en montos usando `parseFloat` de manera previa a interactuar con los modelos SQL/NoSQL.
 
 ---
 
