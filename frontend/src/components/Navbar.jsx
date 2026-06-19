@@ -66,6 +66,8 @@ const Navbar = () => {
       await api.post('/auth/logout');
       setUser(null);
       setIsAuthenticated(false);
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
       navigate('/');
     } catch (error) {
       console.error('Error al cerrar sesión', error);

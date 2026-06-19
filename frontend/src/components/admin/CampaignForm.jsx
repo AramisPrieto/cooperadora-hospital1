@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { X, Sparkles, Info, Save } from 'lucide-react';
 import FileUpload from '../FileUpload';
 
-const FormLabel = ({ children }) => (
-  <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
+const FormLabel = ({ children, htmlFor }) => (
+  <label htmlFor={htmlFor} className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
     {children}
   </label>
 );
@@ -58,6 +58,7 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
         <button
           type="button"
           onClick={onCancel}
+          aria-label="Cerrar"
           className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
         >
           <X className="h-4 w-4" />
@@ -72,8 +73,9 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
         </p>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <FormLabel>Título de la Campaña</FormLabel>
+            <FormLabel htmlFor="titulo">Título de la Campaña</FormLabel>
             <input 
+              id="titulo"
               type="text" 
               required 
               value={form.titulo} 
@@ -83,8 +85,9 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
             />
           </div>
           <div>
-            <FormLabel>Monto Objetivo (ARS)</FormLabel>
+            <FormLabel htmlFor="monto_objetivo">Monto Objetivo (ARS)</FormLabel>
             <input 
+              id="monto_objetivo"
               type="number" 
               required 
               min="0" 
@@ -95,8 +98,9 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
             />
           </div>
           <div>
-            <FormLabel>Monto Actual Recaudado (ARS)</FormLabel>
+            <FormLabel htmlFor="monto_actual">Monto Actual Recaudado (ARS)</FormLabel>
             <input 
+              id="monto_actual"
               type="number" 
               min="0" 
               value={form.monto_actual} 
@@ -106,8 +110,9 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
             />
           </div>
           <div>
-            <FormLabel>Fecha Límite</FormLabel>
+            <FormLabel htmlFor="fecha_limite">Fecha Límite</FormLabel>
             <input 
+              id="fecha_limite"
               type="date" 
               value={form.fecha_limite} 
               onChange={e => handleChange('fecha_limite', e.target.value)} 
@@ -115,8 +120,9 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
             />
           </div>
           <div>
-            <FormLabel>Estado de Obra</FormLabel>
+            <FormLabel htmlFor="obraStatus">Estado de Obra</FormLabel>
             <select 
+              id="obraStatus"
               value={form.obraStatus} 
               onChange={e => handleChange('obraStatus', e.target.value)} 
               className={inputCls}
@@ -151,8 +157,9 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
         </p>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <FormLabel>Testimonio (Texto)</FormLabel>
+            <FormLabel htmlFor="testimoniosText">Testimonio (Texto)</FormLabel>
             <input 
+              id="testimoniosText"
               type="text" 
               value={form.testimoniosText} 
               onChange={e => handleChange('testimoniosText', e.target.value)} 
@@ -161,8 +168,9 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
             />
           </div>
           <div>
-            <FormLabel>Testimonio (Autor)</FormLabel>
+            <FormLabel htmlFor="testimoniosAutor">Testimonio (Autor)</FormLabel>
             <input 
+              id="testimoniosAutor"
               type="text" 
               value={form.testimoniosAutor} 
               onChange={e => handleChange('testimoniosAutor', e.target.value)} 
@@ -187,8 +195,9 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
             </p>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <FormLabel>Información / Utilidad del Equipo</FormLabel>
+                <FormLabel htmlFor="equipamiento_info">Información / Utilidad del Equipo</FormLabel>
                 <textarea
+                  id="equipamiento_info"
                   value={form.equipamiento_info}
                   onChange={e => handleChange('equipamiento_info', e.target.value)}
                   className={`${inputCls} min-h-[100px] py-3`}

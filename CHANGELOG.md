@@ -406,4 +406,16 @@
   - Corrección de la alineación y espaciado de los detalles de publicación en el sidebar de [NewsDetail.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/views/NewsDetail.jsx) para prevenir la superposición de fechas largas (uso de `items-start`, `shrink-0` y alineación `text-right`).
   - Remoción total del bloque de tags/etiquetas al pie del artículo según la preferencia del usuario.
 - **Protección contra Bucle de Redirecciones**:
-  - Limpieza automática de las claves `user` y `token` del `localStorage` en [Navbar.jsx](file:///c:/Users/masso/OneDrive/Escritorio/cooperadora-hospital1/frontend/src/components/Navbar.jsx) ante respuestas de estado 401 por expiración o invalidez de sesión, previniendo bucles infinitos de redirección provocados por la protección de `GuestRoute`.
+  - Limpieza automática de las claves `user` y `token` del `localStorage` en [Navbar.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.jsx) ante respuestas de estado 401 por expiración o invalidez de sesión, previniendo bucles infinitos de redirección provocados por la protección de `GuestRoute`.
+
+### Versión 1.28.0 — Gestión Centralizada del Monorepo con pnpm Workspaces (Antigravity)
+- **Monorepo Unificado y pnpm Workspaces**:
+  - Creación de [pnpm-workspace.yaml](file:///Users/aramisprieto/Documents/cooperadora-hospital1/pnpm-workspace.yaml) y configuración del espacio de trabajo unificando los proyectos de `frontend` y `backend` bajo una misma gestión de dependencias.
+  - Creación de [package.json](file:///Users/aramisprieto/Documents/cooperadora-hospital1/package.json) en la raíz para definir scripts globales simplificados de desarrollo y pruebas.
+- **Scripts Centralizados y Concurrencia**:
+  - Configuración del script `pnpm dev` en la raíz para iniciar concurrentemente y con un solo comando los servidores de desarrollo de frontend (Vite) y backend (Node/Express) mediante `concurrently`.
+  - Configuración de `pnpm test` en la raíz para ejecutar de manera directa la suite de 26 pruebas de la interfaz de frontend.
+- **Pruebas y Robustez de Sesión**:
+  - Creación de pruebas unitarias específicas en [Navbar.test.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.test.jsx) para certificar que el almacenamiento local se limpia de manera efectiva al cerrar sesión o al recibir errores de sesión expirada.
+  - Implementación de un mock robusto de `localStorage` en [setupTests.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/setupTests.js) para evitar warnings de Node y fallos en entornos automatizados.
+

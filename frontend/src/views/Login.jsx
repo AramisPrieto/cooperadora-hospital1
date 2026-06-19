@@ -187,12 +187,13 @@ const Login = () => {
 
             {/* Email */}
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+              <label htmlFor="email" className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                 Correo Electrónico
               </label>
               <div className="relative">
                 <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                 <input
+                  id="email"
                   type="email"
                   required
                   value={email}
@@ -205,12 +206,13 @@ const Login = () => {
 
             {/* Contraseña */}
             <div className="space-y-1.5">
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+              <label htmlFor="password" className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                 Contraseña
               </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                 <input
+                  id="password"
                   type={showPass ? 'text' : 'password'}
                   required
                   value={password}
@@ -222,6 +224,7 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPass(!showPass)}
+                  aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                   tabIndex={-1}
                 >
@@ -239,12 +242,13 @@ const Login = () => {
             {!isLogin && (
               <>
                 <div className="space-y-1.5 animate-fade-up">
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  <label htmlFor="dni" className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     DNI <span className="text-red-500 normal-case font-normal">(Obligatorio para socios)</span>
                   </label>
                   <div className="relative">
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                     <input
+                      id="dni"
                       type="number"
                       required
                       value={dni}
@@ -265,36 +269,36 @@ const Login = () => {
                   </p>
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nombre *</label>
-                      <input type="text" required value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Juan" className="input-field py-2 text-sm" />
+                      <label htmlFor="nombre" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nombre *</label>
+                      <input id="nombre" type="text" required value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Juan" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Apellido *</label>
-                      <input type="text" required value={apellido} onChange={e => setApellido(e.target.value)} placeholder="Pérez" className="input-field py-2 text-sm" />
+                      <label htmlFor="apellido" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Apellido *</label>
+                      <input id="apellido" type="text" required value={apellido} onChange={e => setApellido(e.target.value)} placeholder="Pérez" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Teléfono *</label>
-                      <input type="text" required value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="2262550000" className="input-field py-2 text-sm" />
+                      <label htmlFor="telefono" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Teléfono *</label>
+                      <input id="telefono" type="text" required value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="2262550000" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nacionalidad *</label>
-                      <input type="text" required value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} placeholder="Argentino" className="input-field py-2 text-sm" />
+                      <label htmlFor="nacionalidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nacionalidad *</label>
+                      <input id="nacionalidad" type="text" required value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} placeholder="Argentino" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Dirección *</label>
-                      <input type="text" required value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Calle 60 1234" className="input-field py-2 text-sm" />
+                      <label htmlFor="direccion" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Dirección *</label>
+                      <input id="direccion" type="text" required value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Calle 60 1234" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Localidad *</label>
-                      <input type="text" required value={localidad} onChange={e => setLocalidad(e.target.value)} placeholder="Necochea" className="input-field py-2 text-sm" />
+                      <label htmlFor="localidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Localidad *</label>
+                      <input id="localidad" type="text" required value={localidad} onChange={e => setLocalidad(e.target.value)} placeholder="Necochea" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">F. Nacimiento *</label>
-                      <input type="date" required value={fechaNacimiento} onChange={e => setFechaNacimiento(e.target.value)} className="input-field py-2.5 text-sm" />
+                      <label htmlFor="fechaNacimiento" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">F. Nacimiento *</label>
+                      <input id="fechaNacimiento" type="date" required value={fechaNacimiento} onChange={e => setFechaNacimiento(e.target.value)} className="input-field py-2.5 text-sm" />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Género *</label>
-                      <select required value={genero} onChange={e => setGenero(e.target.value)} className="input-field py-2 text-sm">
+                      <label htmlFor="genero" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Género *</label>
+                      <select id="genero" required value={genero} onChange={e => setGenero(e.target.value)} className="input-field py-2 text-sm">
                         <option value="">Seleccione...</option>
                         <option value="masculino">Masculino</option>
                         <option value="femenino">Femenino</option>
@@ -302,8 +306,8 @@ const Login = () => {
                       </select>
                     </div>
                     <div className="col-span-2 space-y-1">
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Método de Pago Preferido *</label>
-                      <select required value={metodoPago} onChange={e => setMetodoPago(e.target.value)} className="input-field py-2 text-sm">
+                      <label htmlFor="metodoPago" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Método de Pago Preferido *</label>
+                      <select id="metodoPago" required value={metodoPago} onChange={e => setMetodoPago(e.target.value)} className="input-field py-2 text-sm">
                         <option value="">Seleccione...</option>
                         <option value="transferencia">Transferencia Bancaria</option>
                         <option value="efectivo">Efectivo</option>

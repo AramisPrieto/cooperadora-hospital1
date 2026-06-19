@@ -49,8 +49,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
           </h4>
           <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre *</label>
+              <label htmlFor="nombre" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre *</label>
               <input 
+                id="nombre"
                 type="text" 
                 value={form.nombre} 
                 onChange={e => handleChange('nombre', e.target.value)} 
@@ -59,8 +60,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Apellido *</label>
+              <label htmlFor="apellido" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Apellido *</label>
               <input 
+                id="apellido"
                 type="text" 
                 value={form.apellido} 
                 onChange={e => handleChange('apellido', e.target.value)} 
@@ -69,8 +71,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha Nacimiento *</label>
+              <label htmlFor="fecha_nacimiento" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha Nacimiento *</label>
               <input 
+                id="fecha_nacimiento"
                 type="date" 
                 value={form.fecha_nacimiento} 
                 onChange={e => handleChange('fecha_nacimiento', e.target.value)} 
@@ -79,8 +82,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Género *</label>
+              <label htmlFor="genero" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Género *</label>
               <select 
+                id="genero"
                 value={form.genero} 
                 onChange={e => handleChange('genero', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs"
@@ -93,8 +97,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               </select>
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nacionalidad *</label>
+              <label htmlFor="nacionalidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nacionalidad *</label>
               <input 
+                id="nacionalidad"
                 type="text" 
                 value={form.nacionalidad} 
                 onChange={e => handleChange('nacionalidad', e.target.value)} 
@@ -113,8 +118,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
           </h4>
           <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Teléfono *</label>
+              <label htmlFor="telefono" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Teléfono *</label>
               <input 
+                id="telefono"
                 type="text" 
                 value={form.telefono} 
                 onChange={e => handleChange('telefono', e.target.value)} 
@@ -123,8 +129,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Dirección *</label>
+              <label htmlFor="direccion" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Dirección *</label>
               <input 
+                id="direccion"
                 type="text" 
                 value={form.direccion} 
                 onChange={e => handleChange('direccion', e.target.value)} 
@@ -133,8 +140,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Localidad *</label>
+              <label htmlFor="localidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Localidad *</label>
               <input 
+                id="localidad"
                 type="text" 
                 value={form.localidad} 
                 onChange={e => handleChange('localidad', e.target.value)} 
@@ -153,8 +161,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
           </h4>
           <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Método de Pago *</label>
+              <label htmlFor="metodo_pago" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Método de Pago *</label>
               <select 
+                id="metodo_pago"
                 value={form.metodo_pago} 
                 onChange={e => handleChange('metodo_pago', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs"
@@ -168,8 +177,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               </select>
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha Último Pago</label>
+              <label htmlFor="fecha_ultimo_pago" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha Último Pago</label>
               <input 
+                id="fecha_ultimo_pago"
                 type="date" 
                 value={form.fecha_ultimo_pago} 
                 onChange={e => handleChange('fecha_ultimo_pago', e.target.value)} 
@@ -177,8 +187,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               />
             </div>
             <div>
-              <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Observaciones</label>
+              <label htmlFor="observaciones" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Observaciones</label>
               <textarea 
+                id="observaciones"
                 value={form.observaciones} 
                 onChange={e => handleChange('observaciones', e.target.value)} 
                 rows={3} 
