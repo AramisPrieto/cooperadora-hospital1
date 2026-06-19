@@ -347,7 +347,7 @@ Asociación Cooperadora del Hospital Municipal de Necochea
  */
 export const enviarMailRecuperacion = async ({ email, token, nombre }) => {
   const emailFrom = process.env.EMAIL_FROM || 'onboarding@resend.dev';
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
   const resetLink = `${frontendUrl}/reset-password?token=${token}`;
   
   const subject = 'Recupera tu contraseña - Cooperadora Hospital de Necochea';

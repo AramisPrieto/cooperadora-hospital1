@@ -12,7 +12,10 @@ const getMpClient = () => {
 };
 
 const getBackendUrl = () => {
-  return process.env.BACKEND_URL || process.env.BACKEND_TUNNEL_URL || 'http://localhost:5001';
+  if (process.env.NODE_ENV === 'production') {
+    return process.env.BACKEND_URL || '';
+  }
+  return process.env.BACKEND_TUNNEL_URL || process.env.BACKEND_URL || 'http://localhost:5001';
 };
 
 /**
