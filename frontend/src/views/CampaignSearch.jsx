@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
 import CampaignCard from '../components/CampaignCard';
 import { CampaignSearchSkeleton } from '../components/Skeletons';
@@ -129,21 +129,42 @@ const CampaignSearch = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-20 pt-6">
+    <div className="bg-slate-50 min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       
-      {/* ── SECCIÓN SUPERIOR: TÍTULOS ── */}
-      <header className="max-w-6xl mx-auto px-4 pt-12 pb-6 space-y-3.5">
-        <span className="block text-xs font-black uppercase text-brand-600 tracking-widest">
-          Campañas
-        </span>
-        <h1 className="text-3xl sm:text-5xl font-display font-black text-slate-900 leading-tight tracking-tight">
-          Buscá la causa que más te interesa
-        </h1>
-      </header>
+      {/* Decorative background blur shapes */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-50/40 rounded-full blur-[120px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-50/30 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/4 translate-y-1/4" />
 
-      {/* ── BARRA DE BÚSQUEDA ── */}
-      <section className="max-w-6xl mx-auto px-4 pb-6">
-        <div className="relative max-w-xl">
+      <div className="max-w-7xl mx-auto relative z-10">
+        
+        {/* ── Breadcrumb ── */}
+        <nav className="mb-6" aria-label="Breadcrumb">
+          <ol className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+            <li>
+              <Link to="/" className="hover:text-brand-600 transition-colors flex items-center gap-1.5">
+                Inicio
+              </Link>
+            </li>
+            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+            <li className="text-slate-800 font-extrabold" aria-current="page">
+              Campañas
+            </li>
+          </ol>
+        </nav>
+
+        {/* ── SECCIÓN SUPERIOR: TÍTULOS ── */}
+        <header className="pt-4 pb-6 space-y-3.5 text-left">
+          <span className="block text-xs font-black uppercase text-brand-600 tracking-widest">
+            Campañas
+          </span>
+          <h1 className="text-3xl sm:text-5xl font-display font-black text-slate-900 leading-tight tracking-tight">
+            Buscá la causa que más te interesa
+          </h1>
+        </header>
+
+        {/* ── BARRA DE BÚSQUEDA ── */}
+        <section className="pb-6">
+          <div className="relative max-w-xl">
           <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400 pointer-events-none" />
           <input
             type="text"
@@ -164,7 +185,7 @@ const CampaignSearch = () => {
       </section>
 
       {/* ── BARRA DE FILTROS (CHIPS + ORDENAR) ── */}
-      <section className="max-w-6xl mx-auto px-4 pb-8 border-b border-slate-100">
+      <section className="pb-8 border-b border-slate-200/60">
         <div className="flex flex-col md:flex-row gap-5 items-start md:items-center justify-between">
           
           {/* Categorías (Chips) */}
@@ -220,7 +241,7 @@ const CampaignSearch = () => {
       </section>
 
       {/* ── GRID DE CAMPAÑAS ── */}
-      <main className="max-w-6xl mx-auto px-4 py-10">
+      <main className="py-10">
         {loading ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map(i => <CampaignSearchSkeleton key={i} />)}
@@ -293,6 +314,7 @@ const CampaignSearch = () => {
         )}
       </main>
     </div>
+  </div>
   );
 };
 

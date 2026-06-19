@@ -561,9 +561,35 @@ const CampaignDetail = () => {
         ];
 
   return (
-    <div className="min-h-screen bg-slate-50/40 pb-20 pt-24">
-      {/* ── Main Container ── */}
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="bg-slate-50 min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      
+      {/* Decorative background blur shapes */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-50/40 rounded-full blur-[120px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-50/30 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/4 translate-y-1/4" />
+
+      <div className="max-w-7xl mx-auto relative z-10">
+        
+        {/* ── Breadcrumb ── */}
+        <nav className="mb-6" aria-label="Breadcrumb">
+          <ol className="flex items-center gap-2 text-xs font-semibold text-slate-505">
+            <li>
+              <Link to="/" className="hover:text-brand-600 transition-colors flex items-center gap-1.5">
+                Inicio
+              </Link>
+            </li>
+            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+            <li>
+              <Link to="/campanas" className="hover:text-brand-600 transition-colors">
+                Campañas
+              </Link>
+            </li>
+            <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+            <li className="text-slate-800 font-extrabold truncate max-w-[200px] sm:max-w-[300px]" aria-current="page">
+              {campaign.titulo}
+            </li>
+          </ol>
+        </nav>
+
         <div className="grid lg:grid-cols-3 gap-12 items-start">
           {/* ══ LEFT COLUMN ══ */}
           <div className="lg:col-span-2 space-y-8">

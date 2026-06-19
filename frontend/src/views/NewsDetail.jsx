@@ -123,21 +123,28 @@ const NewsDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white pb-20 pt-20">
-      {/* ── BREADCRUMBS & NAVIGATION ── */}
-      <nav className="max-w-5xl mx-auto px-4 pt-8 pb-4">
-        <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
-          <Link to="/" className="hover:text-slate-800 transition-colors">Inicio</Link>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <Link to="/noticias" className="hover:text-slate-800 transition-colors">Noticias</Link>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-slate-650 truncate max-w-[200px] sm:max-w-[350px]">{noti.titulo}</span>
-        </div>
-      </nav>
+    <div className="bg-slate-50 min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      
+      {/* Decorative background blur shapes */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-50/40 rounded-full blur-[120px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-50/30 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/4 translate-y-1/4" />
 
-      {/* ── ARTICLE VIEW ── */}
-      <main className="max-w-4xl mx-auto px-4 pt-4 pb-12">
-        <article className="space-y-8 text-left">
+      <div className="max-w-7xl mx-auto relative z-10">
+        
+        {/* ── BREADCRUMBS & NAVIGATION ── */}
+        <nav className="pt-4 pb-4">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <Link to="/" className="hover:text-slate-800 transition-colors">Inicio</Link>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <Link to="/noticias" className="hover:text-slate-800 transition-colors">Noticias</Link>
+            <ChevronRight className="h-3.5 w-3.5" />
+            <span className="text-slate-600 truncate max-w-[200px] sm:max-w-[350px]">{noti.titulo}</span>
+          </div>
+        </nav>
+
+        {/* ── ARTICLE VIEW ── */}
+        <main className="max-w-4xl mx-auto pt-4 pb-12">
+          <article className="bg-white rounded-[2rem] border border-slate-200/60 p-8 sm:p-12 shadow-sm space-y-8 text-left">
           {/* Header Row */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -231,13 +238,13 @@ const NewsDetail = () => {
               </div>
             </div>
           </div>
-        </article>
-      </main>
+          </article>
+        </main>
 
       {/* ── RECOMMENDATIONS / OTHER NEWS ── */}
       {otherNews.length > 0 && (
-        <section className="bg-slate-50 border-t border-slate-150/50 py-16 px-4">
-          <div className="max-w-5xl mx-auto">
+        <section className="border-t border-slate-200/60 py-16 mt-8">
+          <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4 text-left">
               <div>
                 <span className="text-[10px] font-black uppercase text-brand-600 tracking-widest block mb-1">
@@ -311,6 +318,7 @@ const NewsDetail = () => {
           </div>
         </section>
       )}
+      </div>
     </div>
   );
 };
