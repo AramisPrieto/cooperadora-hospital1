@@ -95,6 +95,54 @@ VALUES ('admin@cooperadora.org', '$2a$10$...hash...', 'admin');
 
 ---
 
+## 🛡️ Estandarización de Seguridad, Robustez y Control de Flujo
+
+Para mitigar riesgos de inyección de código, denegación de servicio (DoS) e interceptación de datos, establecimos políticas estrictas de validación y límites en toda la arquitectura:
+
+### 1. Políticas de Validación y Sanitización de Datos
+* **Frontend**: En el evento `onSubmit` de cada formulario (`CampaignForm`, `NewsForm`, `PartnerForm`, `SocioProfile` y `CuotasTab`), los datos de texto son sanitizados mediante `.trim()` para eliminar espacios redundantes. Los montos económicos son parseados estrictamente como números reales (`parseFloat`) y los campos de ID y DNI como enteros (`parseInt`), evitando propagar valores `NaN`.
+* **Backend**:
+  * Se implementaron validaciones secundarias del formato de parámetros de ruta (`id`). En PostgreSQL/MySQL se comprueba que sean enteros válidos y en MongoDB (Mongoose) se verifica mediante expresiones regulares que cumplan con la estructura de un `ObjectId` hexadecimal de 24 caracteres antes de ejecutar cualquier consulta, evitando caídas internas del driver de base de datos.
+  * **Estandarización de Excepciones**: Los bloques `catch` de los controladores se diseñaron de manera hermética. Las trazas técnicas del error (`error.stack` o `error.message`) se imprimen únicamente en el servidor mediante `console.error` para auditoría interna, mientras que al cliente se le retorna siempre una respuesta JSON genérica, evitando la fuga de detalles de estructura de base de datos.
+
+### 2. Control de Flujo y Límite de Tasa de Solicitudes (Rate Limiting)
+Se implementaron middlewares basados en `express-rate-limit` en endpoints estratégicos del backend:
+* **Global**: `globalLimiter` (100 requests por IP cada 15 minutos) a nivel de API global.
+* **Autenticación**: `authLimiter` (10 requests por IP cada 15 minutos) en las rutas de registro y login.
+* **Donaciones**: `donationLimiter` (5 requests por IP cada hora) en los endpoints para declarar donaciones por transferencia y Mercado Pago.
+* **Transacciones**: `transactionLimiter` (5 requests por IP cada 15 minutos) aplicado en las acciones de los socios como declarar pagos manuales de cuotas y crear suscripciones recurrentes.
+
+### 3. Aislamiento de Dominios (CORS) y Cabeceras HTTP
+* **CORS Condicional**: En entornos de producción (`NODE_ENV === 'production'`), el servidor Express restringe las peticiones únicamente a los orígenes explícitos configurados (`FRONTEND_URL`), rechazando peticiones sin cabecera de origen o comodines generales de subdominios de Vercel.
+* **Hiding Server Tech & Clickjacking**: Se deshabilita explícitamente la cabecera `X-Powered-By` en Express y se configura `frameguard: { action: 'sameorigin' }` en Helmet para mitigar ataques de secuestro de clics (Clickjacking).
+
+### 📊 Flujo del Viaje del Dato Sanitizado
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant Frontend as Frontend (React Form)
+    participant RateLimiter as Middleware (Rate Limiting / CORS)
+    participant Backend as Backend (Express Controller)
+    participant Database as Base de Datos (SQL / NoSQL)
+
+    Usuario->>Frontend: Ingresa datos en formulario
+    Note over Frontend: Sanitización y Tipado<br/>(trim, parseFloat, booleanos)
+    Frontend->>RateLimiter: Petición HTTP (JSON)
+    Note over RateLimiter: Validación origen (CORS)<br/>y control de tasa (429 si satura)
+    RateLimiter->>Backend: Datos Limpios
+    Note over Backend: Validación secundaria<br/>y control de IDs (ej. ObjectId Mongoose)
+    Backend->>Database: ORM / ODM Parametrizado
+    Note over Database: Persistencia Segura y ACID
+    Database-->>Backend: OK
+    Backend-->>Usuario: Respuesta JSON Limpia (sin tokens ni trazas)
+```
+
+---
+
+---
+
 ## 🚀 Despliegue en la Nube (Arquitectura de Producción)
 
 El proyecto está diseñado para ejecutarse en entornos Cloud Native modernos con la siguiente infraestructura:
@@ -513,5 +561,18 @@ git checkout -b develop
 - **Fusión e Integración de Código**:
   - Resolución de conflictos en [CampaignSearch.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/CampaignSearch.jsx) para integrar de forma limpia la nueva paginación de Santi con la carga asíncrona de skeletons.
   - Resolución y acomodo cronológico de la bitácora de cambios en el archivo [README.md](file:///Users/aramisprieto/Documents/cooperadora-hospital1/README.md).
+
+### Versión 1.25.0 — Estandarización de Seguridad, Robustez y Control de Flujo (Aramis Prieto)
+- **Validación y Sanitización en Formularios del Frontend**:
+  - Implementación de `.trim()` en inputs de texto, parseo estricto a enteros (`parseInt`) y reales (`parseFloat`), y forzado booleano en `CampaignForm.jsx`, `NewsForm.jsx`, `PartnerForm.jsx`, `SocioProfile.jsx` y `CuotasTab.jsx`.
+- **Estandarización de Manejo de Excepciones**:
+  - Eliminación de la fuga de trazas internas (`error.message`) hacia los clientes en los bloques `catch` de los controladores del backend, reemplazándolas por respuestas JSON genéricas de error 500.
+  - Robustecimiento del formato de parámetros de ruta (`id`) con validaciones de números enteros y formato hexadecimal `ObjectId` de 24 caracteres en `campanaController.js` y `noticiaController.js`.
+- **Hardenización de Express y CORS**:
+  - Deshabilitación de la cabecera `X-Powered-By` para mitigar recolección de huella tecnológica.
+  - Re-estructuración del middleware CORS en `index.js` para endurecer la validación de orígenes en producción, prohibiendo peticiones sin origen y comodines `.vercel.app`.
+  - Configuración de `frameguard: { action: 'sameorigin' }` en Helmet para mitigar Clickjacking.
+- **Middleware de Límite de Tasa de Transacciones**:
+  - Creación del middleware `transactionLimiter` (5 req / 15 min por IP) y su aplicación en la creación de suscripciones y declaraciones de pago del socio en `socioRoutes.js`.
 
 

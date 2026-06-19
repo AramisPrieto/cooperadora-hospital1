@@ -16,8 +16,14 @@ export const getAllNoticias = async (req, res) => {
         ]
       };
     }
-    const parsedLimit = parseInt(limit, 10);
-    const parsedPage = parseInt(page, 10);
+    let parsedLimit = parseInt(limit, 10);
+    if (isNaN(parsedLimit) || parsedLimit <= 0) {
+      parsedLimit = 10;
+    }
+    let parsedPage = parseInt(page, 10);
+    if (isNaN(parsedPage) || parsedPage <= 0) {
+      parsedPage = 1;
+    }
 
     const noticias = await NoticiaActualidad.find(query)
       .sort({ fecha: -1 })
@@ -34,6 +40,10 @@ export const getAllNoticias = async (req, res) => {
 // Obtener noticia por ID (Público)
 export const getNoticiaById = async (req, res) => {
   const { id } = req.params;
+  // Validar formato de ObjectId de MongoDB (24 caracteres hexadecimales)
+  if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+    return res.status(400).json({ error: 'ID de noticia inválido.' });
+  }
   try {
     const noticia = await NoticiaActualidad.findById(id);
     if (!noticia) {
@@ -72,6 +82,10 @@ export const updateNoticia = async (req, res) => {
   const { id } = req.params;
   const { titulo, cuerpo_html, multimedia, tags, fecha, imagen_url } = req.body;
 
+  if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+    return res.status(400).json({ error: 'ID de noticia inválido.' });
+  }
+
   try {
     const noticia = await NoticiaActualidad.findById(id);
     if (!noticia) {
@@ -97,6 +111,11 @@ export const updateNoticia = async (req, res) => {
 // Eliminar noticia (Solo Admin)
 export const deleteNoticia = async (req, res) => {
   const { id } = req.params;
+
+  if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+    return res.status(400).json({ error: 'ID de noticia inválido.' });
+  }
+
   try {
     const noticia = await NoticiaActualidad.findById(id);
     if (!noticia) {

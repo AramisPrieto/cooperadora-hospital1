@@ -9,8 +9,14 @@ import { flushCachePattern } from '../middleware/cacheMiddleware.js';
 export const getAllCampanas = async (req, res) => {
   const { limit = 10, page = 1, sort, search, all } = req.query;
   try {
-    const parsedLimit = all === 'true' ? 1000 : parseInt(limit, 10);
-    const parsedPage = parseInt(page, 10);
+    let parsedLimit = all === 'true' ? 1000 : parseInt(limit, 10);
+    if (isNaN(parsedLimit) || parsedLimit <= 0) {
+      parsedLimit = 10;
+    }
+    let parsedPage = parseInt(page, 10);
+    if (isNaN(parsedPage) || parsedPage <= 0) {
+      parsedPage = 1;
+    }
 
     // Filtro de búsqueda por título
     const where = { activo: true };
@@ -65,12 +71,16 @@ export const getAllCampanas = async (req, res) => {
 // 2. DATA MASHUP: GET /api/campanas/:id (Autenticado - Fusión Sincrónica SQL + NoSQL)
 export const getCampanaById = async (req, res) => {
   const { id } = req.params;
+  const parsedId = parseInt(id, 10);
+  if (isNaN(parsedId)) {
+    return res.status(400).json({ error: 'ID de campaña inválido.' });
+  }
 
   try {
     // Consulta sincrónica paralela a SQL y MongoDB usando Promise.all
     const [sqlData, nosqlData] = await Promise.all([
-      CampanaEco.findByPk(id),
-      CampanaDetalle.findOne({ campana_id_ref: parseInt(id) })
+      CampanaEco.findByPk(parsedId),
+      CampanaDetalle.findOne({ campana_id_ref: parsedId })
     ]);
 
     if (!sqlData) {
@@ -120,8 +130,21 @@ export const getCampanaById = async (req, res) => {
 export const createCampana = async (req, res) => {
   const { titulo, monto_objetivo, monto_actual, fecha_limite, es_campana_del_mes, testimonios, galeria_rica, obra_status, equipamiento_info, equipamiento_imagen } = req.body;
 
-  if (monto_objetivo < 0 || (monto_actual && monto_actual < 0)) {
-    return res.status(400).json({ error: 'Los montos económicos no pueden ser negativos.' });
+  if (!titulo || typeof titulo !== 'string' || !titulo.trim()) {
+    return res.status(400).json({ error: 'El título de la campaña es requerido y debe ser texto.' });
+  }
+
+  const parsedMontoObjetivo = parseFloat(monto_objetivo);
+  if (isNaN(parsedMontoObjetivo) || parsedMontoObjetivo < 0) {
+    return res.status(400).json({ error: 'El monto objetivo debe ser un número no negativo.' });
+  }
+
+  let parsedMontoActual = 0.00;
+  if (monto_actual !== undefined) {
+    parsedMontoActual = parseFloat(monto_actual);
+    if (isNaN(parsedMontoActual) || parsedMontoActual < 0) {
+      return res.status(400).json({ error: 'El monto actual debe ser un número no negativo si es provisto.' });
+    }
   }
 
   // Iniciamos una transacción en SQL
@@ -136,8 +159,8 @@ export const createCampana = async (req, res) => {
     // 1. Guardar progreso financiero en SQL (Transaccional)
     const sqlCampana = await CampanaEco.create({
       titulo,
-      monto_objetivo,
-      monto_actual: monto_actual || 0.00,
+      monto_objetivo: parsedMontoObjetivo,
+      monto_actual: parsedMontoActual,
       fecha_limite,
       activo: true,
       es_campana_del_mes: es_campana_del_mes || false
@@ -172,10 +195,13 @@ export const createCampana = async (req, res) => {
     }
 
   } catch (error) {
-    // Revertir cambios en SQL ante cualquier error
-    await transaction.rollback();
+    try {
+      await transaction.rollback();
+    } catch (rollbackError) {
+      console.error('Error al hacer rollback de la transacción:', rollbackError);
+    }
     console.error('Error al crear campaña:', error);
-    return res.status(500).json({ error: error.message || 'Error interno del servidor al crear la campaña.' });
+    return res.status(500).json({ error: 'Error interno del servidor al crear la campaña.' });
   }
 };
 
@@ -184,26 +210,49 @@ export const updateCampana = async (req, res) => {
   const { id } = req.params;
   const { titulo, monto_objetivo, monto_actual, fecha_limite, activo, es_campana_del_mes, testimonios, galeria_rica, obra_status, equipamiento_info, equipamiento_imagen } = req.body;
 
-  if (monto_objetivo < 0 || (monto_actual && monto_actual < 0)) {
-    return res.status(400).json({ error: 'Los montos económicos no pueden ser negativos.' });
+  const parsedId = parseInt(id, 10);
+  if (isNaN(parsedId)) {
+    return res.status(400).json({ error: 'ID de campaña inválido.' });
+  }
+
+  let parsedMontoObjetivo;
+  if (monto_objetivo !== undefined) {
+    parsedMontoObjetivo = parseFloat(monto_objetivo);
+    if (isNaN(parsedMontoObjetivo) || parsedMontoObjetivo < 0) {
+      return res.status(400).json({ error: 'El monto objetivo debe ser un número no negativo.' });
+    }
+  }
+
+  let parsedMontoActual;
+  if (monto_actual !== undefined) {
+    parsedMontoActual = parseFloat(monto_actual);
+    if (isNaN(parsedMontoActual) || parsedMontoActual < 0) {
+      return res.status(400).json({ error: 'El monto actual debe ser un número no negativo.' });
+    }
   }
 
   const transaction = await sequelize.transaction();
 
   try {
     // 1. Buscar en SQL con la transacción
-    const sqlCampana = await CampanaEco.findByPk(id, { transaction });
+    const sqlCampana = await CampanaEco.findByPk(parsedId, { transaction });
     if (!sqlCampana) {
       await transaction.rollback();
       return res.status(404).json({ error: 'Campaña relacional no encontrada.' });
     }
 
     // Actualizar SQL
-    if (titulo !== undefined) sqlCampana.titulo = titulo;
-    if (monto_objetivo !== undefined) sqlCampana.monto_objetivo = monto_objetivo;
-    if (monto_actual !== undefined) sqlCampana.monto_actual = monto_actual;
+    if (titulo !== undefined) {
+      if (typeof titulo !== 'string' || !titulo.trim()) {
+        await transaction.rollback();
+        return res.status(400).json({ error: 'El título debe ser un texto no vacío.' });
+      }
+      sqlCampana.titulo = titulo;
+    }
+    if (parsedMontoObjetivo !== undefined) sqlCampana.monto_objetivo = parsedMontoObjetivo;
+    if (parsedMontoActual !== undefined) sqlCampana.monto_actual = parsedMontoActual;
     if (fecha_limite !== undefined) sqlCampana.fecha_limite = fecha_limite;
-    if (activo !== undefined) sqlCampana.activo = activo;
+    if (activo !== undefined) sqlCampana.activo = !!activo;
     if (es_campana_del_mes !== undefined) {
       if (es_campana_del_mes === true) {
         await CampanaEco.update({ es_campana_del_mes: false }, { where: {}, transaction });
@@ -215,7 +264,7 @@ export const updateCampana = async (req, res) => {
     await sqlCampana.save({ transaction });
 
     // 2. Buscar y actualizar en MongoDB
-    let nosqlCampana = await CampanaDetalle.findOne({ campana_id_ref: parseInt(id) });
+    let nosqlCampana = await CampanaDetalle.findOne({ campana_id_ref: parsedId });
     if (!nosqlCampana) {
       nosqlCampana = new CampanaDetalle({ campana_id_ref: sqlCampana.id });
     }
@@ -250,10 +299,15 @@ export const updateCampana = async (req, res) => {
 // 5. ELIMINAR CAMPAÑA (Solo Admin - SQL + NoSQL)
 export const deleteCampana = async (req, res) => {
   const { id } = req.params;
+  const parsedId = parseInt(id, 10);
+  if (isNaN(parsedId)) {
+    return res.status(400).json({ error: 'ID de campaña inválido.' });
+  }
+
   const transaction = await sequelize.transaction();
 
   try {
-    const sqlCampana = await CampanaEco.findByPk(id, { transaction });
+    const sqlCampana = await CampanaEco.findByPk(parsedId, { transaction });
     if (!sqlCampana) {
       await transaction.rollback();
       return res.status(404).json({ error: 'Campaña relacional no encontrada.' });
@@ -263,7 +317,7 @@ export const deleteCampana = async (req, res) => {
     await sqlCampana.destroy({ transaction });
 
     // 2. Eliminar NoSQL correspondiente
-    await CampanaDetalle.deleteOne({ campana_id_ref: parseInt(id) });
+    await CampanaDetalle.deleteOne({ campana_id_ref: parsedId });
 
     await transaction.commit();
 
@@ -281,9 +335,14 @@ export const deleteCampana = async (req, res) => {
 // 6. ÚLTIMOS DONANTES DE UNA CAMPAÑA (Público - datos enmascarados)
 export const getDonantes = async (req, res) => {
   const { id } = req.params;
+  const parsedId = parseInt(id, 10);
+  if (isNaN(parsedId)) {
+    return res.status(400).json({ error: 'ID de campaña inválido.' });
+  }
+
   try {
     const donaciones = await DonacionTransferencia.findAll({
-      where: { campana_id: parseInt(id), estado: 'aprobada' },
+      where: { campana_id: parsedId, estado: 'aprobada' },
       order: [['updated_at', 'DESC']],
       limit: 8,
       attributes: ['monto', 'updated_at']

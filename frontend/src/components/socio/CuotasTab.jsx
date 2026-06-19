@@ -32,15 +32,17 @@ const CuotasTab = ({
 
   const handleSubSubmit = (e) => {
     e.preventDefault();
-    onSubscribeMP(subMonto);
+    const parsedMonto = parseFloat(subMonto);
+    onSubscribeMP(isNaN(parsedMonto) ? 0 : parsedMonto);
   };
 
   const handleTransferSubmit = (e) => {
     e.preventDefault();
+    const parsedMonto = parseFloat(transferMonto);
     onDeclareTransfer({
-      monto: transferMonto,
-      numero_comprobante: transferNumber,
-      comprobante_url: transferReceiptUrl
+      monto: isNaN(parsedMonto) ? 0 : parsedMonto,
+      numero_comprobante: (transferNumber || '').trim(),
+      comprobante_url: (transferReceiptUrl || '').trim()
     }).then(() => {
       // Clear local inputs on success
       setTransferMonto('');

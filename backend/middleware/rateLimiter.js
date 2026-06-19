@@ -50,3 +50,20 @@ export const donationLimiter = rateLimit({
   skip: () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
+/**
+ * transactionLimiter — Evita spam de operaciones de pago o suscripciones.
+ * 5 requests por IP cada 15 minutos.
+ */
+export const transactionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      error: 'Límite de transacciones alcanzado. Por favor, intentá de nuevo más tarde.'
+    });
+  },
+  skip: () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+});
+

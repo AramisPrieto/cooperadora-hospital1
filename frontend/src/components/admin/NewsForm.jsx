@@ -26,7 +26,13 @@ const NewsForm = ({ news, onSave, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(form);
+    const cleanedForm = {
+      titulo: (form.titulo || '').trim(),
+      cuerpo_html: (form.cuerpo_html || '').trim(),
+      fecha: form.fecha ? form.fecha : null,
+      imagen_url: (form.imagen_url || '').trim()
+    };
+    onSave(cleanedForm);
   };
 
   return (

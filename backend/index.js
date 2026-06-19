@@ -32,6 +32,9 @@ const app = express();
 app.set('trust proxy', 1); // Confiar en el proxy reverso (Render/Vercel) para la lectura correcta de IPs en express-rate-limit
 const PORT = process.env.PORT || 5000;
 
+// Deshabilitar la cabecera X-Powered-By de Express para ocultar la tecnología del servidor
+app.disable('x-powered-by');
+
 // Middlewares globales
 // Configuración estricta de CORS
 const allowedOrigins = [
@@ -42,19 +45,33 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Permite peticiones sin origin (como herramientas de testeo local o curl) y orígenes permitidos
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS Policy: Acceso denegado.'));
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+
+    // Permite peticiones sin origin (como herramientas de testeo local, curl o Postman) solo en desarrollo
+    if (!origin && isDevelopment) {
+      return callback(null, true);
     }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Permitir subdominios .vercel.app solo durante el desarrollo o staging (no en producción estricta)
+    if (isDevelopment && origin && origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    callback(new Error('CORS Policy: Acceso denegado.'));
   },
   credentials: true // Permite envío de cookies/tokens si fuera necesario
 }));
 
 app.use(helmet({
   crossOriginResourcePolicy: false,
-})); // Añade cabeceras HTTP de seguridad y permite cargar imágenes desde otros dominios (CORS/CORP)
+  frameguard: {
+    action: 'sameorigin' // Mitiga ataques de Clickjacking denegando la carga de frames de terceros
+  }
+})); // Añade cabeceras HTTP de seguridad
 app.use(express.json());
 app.use(cookieParser()); // Para leer cookies de sesión
 app.use(mongoSanitize());      // Sanitiza req.body/params/query — bloquea NoSQL injection

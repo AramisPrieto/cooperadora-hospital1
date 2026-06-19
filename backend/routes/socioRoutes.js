@@ -16,6 +16,7 @@ import {
 } from '../controllers/socioSubscriptionController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
 import { validateSocio, validateDeclararPago } from '../middleware/validators.js';
+import { transactionLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -35,10 +36,10 @@ router.get('/mi-perfil/cuotas', getMyCuotas);
 router.get('/mi-perfil/pagos', obtenerMiHistorialPagos);
 
 // Autogestión: Declarar pago de cuota por transferencia
-router.post('/mi-perfil/pagos/declarar', validateDeclararPago, declararPagoTransferencia);
+router.post('/mi-perfil/pagos/declarar', transactionLimiter, validateDeclararPago, declararPagoTransferencia);
 
 // Autogestión: Gestión de suscripción Mercado Pago
-router.post('/suscripcion/crear', iniciarSuscripcion);
+router.post('/suscripcion/crear', transactionLimiter, iniciarSuscripcion);
 router.post('/suscripcion/cancelar', cancelarSuscripcion);
 
 // Autogestión / Admin: Actualizar perfil de socio (Socio edita su DNI, Admin edita todo y estado)

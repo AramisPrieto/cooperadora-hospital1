@@ -27,11 +27,12 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const parsedDni = parseInt(form.dni, 10);
     onUpdate({
-      dni: parseInt(form.dni),
-      telefono: form.telefono.trim(),
-      direccion: form.direccion.trim(),
-      localidad: form.localidad.trim()
+      dni: isNaN(parsedDni) ? 0 : parsedDni,
+      telefono: (form.telefono || '').trim(),
+      direccion: (form.direccion || '').trim(),
+      localidad: (form.localidad || '').trim()
     });
   };
 

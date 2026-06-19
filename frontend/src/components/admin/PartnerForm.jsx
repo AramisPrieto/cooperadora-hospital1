@@ -22,7 +22,20 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(partner.numero_asociado, form);
+    const cleanedForm = {
+      nombre: (form.nombre || '').trim(),
+      apellido: (form.apellido || '').trim(),
+      direccion: (form.direccion || '').trim(),
+      localidad: (form.localidad || '').trim(),
+      nacionalidad: (form.nacionalidad || '').trim(),
+      telefono: (form.telefono || '').trim(),
+      fecha_nacimiento: form.fecha_nacimiento ? form.fecha_nacimiento : null,
+      genero: (form.genero || '').trim(),
+      metodo_pago: (form.metodo_pago || '').trim(),
+      fecha_ultimo_pago: form.fecha_ultimo_pago ? form.fecha_ultimo_pago : null,
+      observaciones: (form.observaciones || '').trim()
+    };
+    onSave(partner.numero_asociado, cleanedForm);
   };
 
   return (

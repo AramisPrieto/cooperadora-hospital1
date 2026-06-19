@@ -33,7 +33,20 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(form);
+    const cleanedForm = {
+      titulo: (form.titulo || '').trim(),
+      monto_objetivo: parseFloat(form.monto_objetivo) || 0,
+      monto_actual: form.monto_actual !== '' ? (parseFloat(form.monto_actual) || 0) : 0,
+      fecha_limite: form.fecha_limite ? form.fecha_limite : null,
+      testimoniosText: (form.testimoniosText || '').trim(),
+      testimoniosAutor: (form.testimoniosAutor || '').trim(),
+      imagenUrl: (form.imagenUrl || '').trim(),
+      obraStatus: (form.obraStatus || 'Planeada').trim(),
+      es_campana_del_mes: !!form.es_campana_del_mes,
+      equipamiento_info: (form.equipamiento_info || '').trim(),
+      equipamiento_imagen: (form.equipamiento_imagen || '').trim()
+    };
+    onSave(cleanedForm);
   };
 
   return (
