@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
 import DOMPurify from 'dompurify';
-import { ArrowLeft, Calendar, ChevronRight, Newspaper, Clock, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Calendar, ChevronRight, Newspaper, Clock, ArrowRight, Share2 } from 'lucide-react';
+import ShareModal from '../components/ShareModal';
 
 /* ── Helpers ── */
 const formatLongDate = (dateString) => {
@@ -61,6 +62,7 @@ const NewsDetail = () => {
   const [otherNews, setOtherNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   useEffect(() => {
     const fetchNewsDetail = async () => {
@@ -218,7 +220,14 @@ const NewsDetail = () => {
                   </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-2 space-y-2.5">
+                  <button
+                    onClick={() => setIsShareOpen(true)}
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-2xl text-xs font-bold uppercase tracking-wider transition-colors shadow-sm"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    Compartir publicación
+                  </button>
                   <button
                     onClick={() => navigate('/noticias')}
                     className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-colors shadow-sm"
@@ -309,9 +318,18 @@ const NewsDetail = () => {
             </div>
           </section>
         )}
-      </div>
+      <ShareModal
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+        url={window.location.href}
+        title={noti?.titulo || ''}
+        summary={getPlainTextSnippet(noti?.cuerpo_html || '')}
+        imageUrl={noti?.imagen_url || ''}
+        shareMessage={`¡Hola! Te comparto esta noticia importante de la Cooperadora del Hospital Emilio Ferreyra: "${noti?.titulo || ''}"`}
+      />
     </div>
-  );
+  </div>
+);
 };
 
 export default NewsDetail;
