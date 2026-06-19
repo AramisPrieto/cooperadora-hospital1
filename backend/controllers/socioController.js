@@ -399,3 +399,83 @@ export const deleteSocio = async (req, res) => {
     return res.status(500).json({ error: 'Error al eliminar el socio.' });
   }
 };
+
+// Obtener todas las cuotas (Solo Admin - Soporta Paginación y Búsqueda por Socio)
+export const getAllCuotas = async (req, res) => {
+  const { limit, page, search } = req.query;
+  try {
+    const parsedLimit = parseInt(limit || '50', 10);
+    const parsedPage = parseInt(page || '1', 10);
+
+    let whereCondition = {};
+    if (search) {
+      whereCondition = {
+        [Op.or]: [
+          { '$perfilSocio.nombre$': { [Op.iLike]: `%${search}%` } },
+          { '$perfilSocio.apellido$': { [Op.iLike]: `%${search}%` } },
+          ...(isNaN(parseInt(search)) ? [] : [{ '$perfilSocio.dni$': parseInt(search) }])
+        ]
+      };
+    }
+
+    const { count, rows: cuotas } = await PagoCuota.findAndCountAll({
+      where: whereCondition,
+      include: [{ 
+        model: PerfilSocio, 
+        as: 'perfilSocio', 
+        attributes: ['numero_asociado', 'nombre', 'apellido', 'dni', 'usuario_id_fk'],
+        include: [{ model: Usuario, as: 'usuario', attributes: ['email'] }]
+      }],
+      limit: parsedLimit,
+      offset: (parsedPage - 1) * parsedLimit,
+      order: [['fecha_pago', 'DESC']]
+    });
+
+    return res.json({
+      cuotas,
+      total: count,
+      totalPages: Math.ceil(count / parsedLimit),
+      currentPage: parsedPage
+    });
+  } catch (error) {
+    console.error('Error al obtener cuotas:', error);
+    return res.status(500).json({ error: 'Error al obtener el historial de cuotas.' });
+  }
+};
+
+// Validar una cuota (Aprobar / Rechazar) (Solo Admin)
+export const validarCuota = async (req, res) => {
+  const { id } = req.params; // ID de PagoCuota
+  const { estado } = req.body; // 'aprobado' o 'rechazado'
+
+  if (!['aprobado', 'rechazado'].includes(estado)) {
+    return res.status(400).json({ error: 'El estado debe ser "aprobado" o "rechazado".' });
+  }
+
+  try {
+    const cuota = await PagoCuota.findByPk(id, {
+      include: [{ model: PerfilSocio, as: 'perfilSocio' }]
+    });
+
+    if (!cuota) {
+      return res.status(404).json({ error: 'Cuota no encontrada.' });
+    }
+
+    cuota.estado = estado;
+    await cuota.save();
+
+    // Si se aprueba, actualizar la fecha de último pago del socio
+    if (estado === 'aprobado' && cuota.perfilSocio) {
+      cuota.perfilSocio.fecha_ultimo_pago = cuota.fecha_pago || new Date();
+      if (cuota.perfilSocio.estado === 'pendiente') {
+        cuota.perfilSocio.estado = 'activo';
+      }
+      await cuota.perfilSocio.save();
+    }
+
+    return res.json({ message: `Cuota ${estado} correctamente.`, cuota });
+  } catch (error) {
+    console.error('Error al validar cuota:', error);
+    return res.status(500).json({ error: 'Error al validar la cuota.' });
+  }
+};

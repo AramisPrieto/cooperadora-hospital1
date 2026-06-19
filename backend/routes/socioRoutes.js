@@ -6,7 +6,9 @@ import {
   createSocio,
   updateSocio,
   updateMyProfile,
-  deleteSocio
+  deleteSocio,
+  getAllCuotas,
+  validarCuota
 } from '../controllers/socioController.js';
 import {
   iniciarSuscripcion,
@@ -50,6 +52,8 @@ router.put('/mi-perfil', validateSocio, updateMyProfile);
 router.put('/:id', authorizeRoles('admin'), validateSocio, updateSocio);
 
 // Rutas exclusivas de Administrador
+router.get('/admin/cuotas', authorizeRoles('admin'), getAllCuotas);
+router.put('/admin/cuotas/:id/validar', authorizeRoles('admin'), validarCuota);
 router.get('/', authorizeRoles('admin'), getAllSocios);
 router.post('/', authorizeRoles('admin'), validateSocio, createSocio);
 router.delete('/:id', authorizeRoles('admin'), deleteSocio);

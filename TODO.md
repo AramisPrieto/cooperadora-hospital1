@@ -5,8 +5,7 @@
 - [ ] ver mails que habia echo kevo dejarlos andando
 - [ ] eliminar usuario
 - [ ] mail que te llegue cuando te aprueban como socio
-- [ ] no tener que refrescar para ver las transferenicaias
-- [ ] agregart en trasnferencias buscar por socio y que apartir de 25 transferencias cree otras presta;as 
+- [ ] configurar visible y no visible noticias o quitar visible y que esten siempre todas habalr en grupo
 ## 🔄 En Progreso
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
@@ -27,5 +26,3 @@
 - [x] arreglar visual de fecha en seccion noticias (THIAGO)
 - [x] en obras concretadas dejar unicamente linea de tiempo (THIAGO)
 - [x] actualizar verfcer
-- [x] configurar visible y no visible noticias o quitar visible y que esten siempre todas habalr en grupo
-- [x] cuotas

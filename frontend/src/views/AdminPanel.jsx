@@ -10,7 +10,8 @@ import {
   CheckCircle, Clock, AlertTriangle, LayoutDashboard,
   Newspaper, X, Save, AlertCircle, Sparkles,
   Banknote, XCircle, ChevronDown, ChevronUp, User, MapPin,
-  Calendar, Globe, Phone, Info
+  Calendar, Globe, Phone, Info, CreditCard, Search,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 /* ── Small stat card in header ── */
@@ -33,6 +34,7 @@ const TABS = [
   { id: 'partners',  label: 'Socios',   icon: Users },
   { id: 'news',      label: 'Noticias', icon: Newspaper },
   { id: 'transfers', label: 'Transferencias', icon: Banknote },
+  { id: 'cuotas',    label: 'Cuotas Sociales', icon: CreditCard },
 ];
 
 const AdminPanel = () => {
@@ -42,6 +44,9 @@ const AdminPanel = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [news, setNews] = useState([]);
   const [transfers, setTransfers] = useState([]);
+  const [cuotas, setCuotas] = useState([]);
+  const [cuotasSearch, setCuotasSearch] = useState('');
+  const [currentTransferPage, setCurrentTransferPage] = useState(1);
   const [expandedPartnerId, setExpandedPartnerId] = useState(null);
   const [editingPartnerId, setEditingPartnerId] = useState(null);
 
@@ -68,16 +73,18 @@ const AdminPanel = () => {
     setLoading(true);
     setErrorMsg('');
     try {
-      const [pRes, cRes, nRes, tRes] = await Promise.all([
+      const [pRes, cRes, nRes, tRes, cuoRes] = await Promise.all([
         api.get('/socios'),
         api.get('/campanas'),
         api.get('/noticias'),
-        api.get('/donaciones/transferencias')
+        api.get('/donaciones/transferencias'),
+        api.get('/socios/admin/cuotas?limit=1000')
       ]);
       setPartners(pRes.data);
       setCampaigns(cRes.data);
       setNews(nRes.data);
       setTransfers(tRes.data);
+      setCuotas(cuoRes.data.cuotas || []);
     } catch (err) {
       console.error(err);
       setErrorMsg('Error al cargar la información del panel.');
@@ -145,6 +152,22 @@ const AdminPanel = () => {
     const t = setTimeout(() => setSuccessMsg(''), 4000);
     return () => clearTimeout(t);
   }, [successMsg]);
+
+  /* ── Cuota validation ── */
+  const handleValidateCuota = async (id, estado) => {
+    if (!window.confirm(`¿Estás seguro de marcar esta cuota como ${estado}?`)) return;
+    setSubmitting(true);
+    try {
+      await api.put(`/socios/admin/cuotas/${id}/validar`, { estado });
+      setSuccessMsg(`Cuota ${estado} correctamente.`);
+      loadDashboardData();
+    } catch (error) {
+      console.error(error);
+      setErrorMsg(error.response?.data?.error || 'Error al validar la cuota.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   /* ── Update partner status ── */
   const handleUpdatePartnerStatus = async (num, newStatus) => {
@@ -738,7 +761,6 @@ const AdminPanel = () => {
                 <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
                   <Newspaper className="h-5 w-5 text-violet-600" />
                   Gestión de Noticias
-                  <span className="badge bg-violet-100 text-violet-700 ml-1">Visible</span>
                 </h2>
                 <button
                   onClick={() => { resetNewsForm(); setShowNewsForm(true); }}
@@ -827,7 +849,13 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {transfers.map(tr => (
+                    {(() => {
+                      const transfersPerPage = 25;
+                      const indexOfLastTransfer = currentTransferPage * transfersPerPage;
+                      const indexOfFirstTransfer = indexOfLastTransfer - transfersPerPage;
+                      const currentTransfers = transfers.slice(indexOfFirstTransfer, indexOfLastTransfer);
+                      
+                      return currentTransfers.map(tr => (
                       <tr key={tr.id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="p-4 font-bold text-slate-700">{tr.usuario?.email ?? '—'}</td>
                         <td className="p-4 text-slate-600 font-semibold">{tr.campana?.titulo ?? '—'}</td>
@@ -882,6 +910,152 @@ const AdminPanel = () => {
                               </button>
                               <button
                                 onClick={() => handleRejectTransfer(tr.id)}
+                                disabled={submitting}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <XCircle className="h-3 w-3" />
+                                Rechazar
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px]">Procesada</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))})()}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            {/* Pagination Controls */}
+            {transfers.length > 25 && (
+              <div className="flex items-center justify-center gap-2 p-5 border-t border-slate-100 bg-slate-50">
+                <button
+                  onClick={() => setCurrentTransferPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentTransferPage === 1}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.ceil(transfers.length / 25) }).map((_, idx) => {
+                    const pageNum = idx + 1;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentTransferPage(pageNum)}
+                        className={`h-8 w-8 rounded-lg text-xs font-bold transition-colors ${
+                          currentTransferPage === pageNum
+                            ? 'bg-brand-600 text-white shadow-sm'
+                            : 'text-slate-500 hover:bg-slate-200'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={() => setCurrentTransferPage(prev => Math.min(prev + 1, Math.ceil(transfers.length / 25)))}
+                  disabled={currentTransferPage === Math.ceil(transfers.length / 25)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ══════════════ CUOTAS TAB ══════════════ */}
+        {activeTab === 'cuotas' && (
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden animate-fade-up">
+            <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-indigo-600" />
+                  Gestión de Cuotas Sociales
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">Historial y validación de cuotas de los socios.</p>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 w-full md:w-64">
+                <Search className="h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por socio o DNI..."
+                  value={cuotasSearch}
+                  onChange={(e) => setCuotasSearch(e.target.value)}
+                  className="bg-transparent border-none outline-none text-xs w-full font-semibold text-slate-700"
+                />
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="p-8 text-center text-slate-400 text-sm">Cargando cuotas...</div>
+            ) : cuotas.length === 0 ? (
+              <div className="p-12 text-center">
+                <CreditCard className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                <p className="text-slate-400 text-sm font-semibold">No hay cuotas registradas.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                      <th className="p-4">Socio</th>
+                      <th className="p-4 text-right">Monto</th>
+                      <th className="p-4">Fecha Pago</th>
+                      <th className="p-4">Método</th>
+                      <th className="p-4">Estado</th>
+                      <th className="p-4 text-center">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {cuotas.filter(c => {
+                       const match = cuotasSearch.toLowerCase();
+                       const fullName = `${c.perfilSocio?.nombre || ''} ${c.perfilSocio?.apellido || ''}`.toLowerCase();
+                       const dni = String(c.perfilSocio?.dni || '');
+                       return fullName.includes(match) || dni.includes(match);
+                     }).map(c => (
+                      <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="p-4">
+                          <div className="font-bold text-slate-700">{c.perfilSocio?.nombre} {c.perfilSocio?.apellido}</div>
+                          <div className="text-[10px] text-slate-400 font-semibold mt-0.5">DNI: {c.perfilSocio?.dni}</div>
+                        </td>
+                        <td className="p-4 text-right font-black text-slate-800">
+                          ${parseFloat(c.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                        </td>
+                        <td className="p-4 text-slate-600 font-semibold">
+                          {c.fecha_pago ? new Date(c.fecha_pago).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                        </td>
+                        <td className="p-4 uppercase text-[10px] tracking-wider text-slate-500 font-bold">
+                          {c.metodo_pago}
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            c.estado === 'aprobado' || c.estado === 'pagado'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                              : c.estado === 'rechazado'
+                              ? 'bg-rose-50 text-rose-700 border-rose-100'
+                              : 'bg-amber-50 text-amber-700 border-amber-100'
+                          }`}>
+                            {c.estado}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          {c.estado === 'pendiente' ? (
+                            <div className="inline-flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => handleValidateCuota(c.id, 'aprobado')}
+                                disabled={submitting}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                                Aprobar
+                              </button>
+                              <button
+                                onClick={() => handleValidateCuota(c.id, 'rechazado')}
                                 disabled={submitting}
                                 className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
                               >
