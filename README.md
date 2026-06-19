@@ -575,4 +575,41 @@ git checkout -b develop
 - **Middleware de Límite de Tasa de Transacciones**:
   - Creación del middleware `transactionLimiter` (5 req / 15 min por IP) y su aplicación en la creación de suscripciones y declaraciones de pago del socio en `socioRoutes.js`.
 
+### Versión 1.26.0 — Vista de Obras Concretadas, Armonía Visual y Mejoras de UX (Aramis Prieto)
 
+- **Nueva Vista Independiente: Obras Concretadas (`/obras-concretadas`)**:
+  - Creación de [ObrasConcretadas.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/ObrasConcretadas.jsx) bajo la ruta `/obras-concretadas`, exclusiva para campañas que alcanzaron el 100% de su meta de recaudación.
+  - Filtrado automático al fetch: se excluyen las campañas activas para que esta vista muestre únicamente los proyectos completados.
+  - Dos modos de visualización conmutables: **grilla de tarjetas** y **línea de tiempo** (timeline con nodos emergentes y eje central).
+  - Buscador por título y chips de filtro por categoría (Neonatología, Emergencias, Diagnóstico, Terapia Intensiva, Pediatría, Laboratorio, General) con reset automático de página.
+  - Tarjetas con badge "100% Logrado", imagen real o gradiente placeholder, métricas de inversión final y navegación a la página de detalle.
+  - Sección CTA inferior sobre fondo oscuro con botones explícitamente estilizados para visibilidad en contraste alto.
+  - Enlace añadido en [Navbar.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.jsx) y [Footer.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Footer.jsx).
+
+- **Separación Estricta de Campañas Activas y Completadas**:
+  - [CampaignSearch.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/CampaignSearch.jsx) ahora filtra client-side las campañas cuyo `monto_actual >= monto_objetivo`, de modo que las campañas completadas **no aparecen** en `/campanas` y quedan exclusivamente en `/obras-concretadas`.
+
+- **Imágenes por Defecto para Campañas y Noticias**:
+  - [CampaignCard.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/CampaignCard.jsx): reemplazado el texto monospace `"IMG - Categoría"` por un gradiente oscuro premium (`slate-700 → slate-900`) con ícono de estetoscopio, dot-grid sutil y glow de acento.
+  - [NewsSearch.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/NewsSearch.jsx): reemplazado el fondo diagonal con etiqueta de texto por el mismo estilo de gradiente con ícono de periódico para armonía visual.
+  - [Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx): las tarjetas de noticias en el inicio ahora muestran la imagen real cuando existe y el mismo gradiente de fallback cuando no, unificando el diseño con la vista `/noticias`.
+
+- **Armonía Visual entre Páginas**:
+  - Las tarjetas de noticias en la Home adoptaron el mismo diseño que [NewsSearch.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/NewsSearch.jsx): `rounded-[2rem]`, borde, hover, imagen de encabezado.
+  - Agregada la clase `.badge-teal` faltante en [index.css](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/index.css), referenciada en el Hero de la Home pero ausente en la hoja de estilos.
+
+- **Corrección de Botones CTA en Obras Concretadas**:
+  - Eliminado conflicto de z-index en la sección oscura del CTA. Se añadió `isolate` al contenedor padre y se migró el overlay radial a `opacity` directa.
+  - Los botones "Ver Campañas Activas" y "Asociarse Ahora" usan clases inline explícitas en lugar de `btn-brand`/`btn-accent`, garantizando visibilidad correcta sobre fondo `bg-slate-900`.
+
+- **Redirección de Usuarios ya Autenticados (`/login`)**:
+  - Creación del componente `GuestRoute` en [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx) que envuelve la ruta `/login`. Si el usuario ya tiene sesión activa, es redirigido automáticamente: administradores a `/admin` y socios a `/`.
+  - Aplica tanto al formulario de login como al de registro (`/login?mode=register`).
+
+- **Exclusión de Carpetas de Configuración del Repositorio**:
+  - Agregadas las rutas `.gemini/` y `.agents/` al [.gitignore](file:///Users/aramisprieto/Documents/cooperadora-hospital1/.gitignore) para impedir que metadatos de herramientas de desarrollo sean commiteados accidentalmente.
+  - Eliminación del tracking existente mediante `git rm --cached`, preservando los archivos localmente.
+
+- **Eliminación de Tarjetas de Estadísticas en Obras Concretadas**:
+  - Removidas las tres tarjetas de métricas automáticas (Equipos & Obras, Inversión Lograda, Participación) de [ObrasConcretadas.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/ObrasConcretadas.jsx) ya que los valores eran estimaciones y podían inducir a error.
+  - Limpieza de imports (`Award`, `TrendingUp`, `Users`) y cálculo `useMemo` de estadísticas que quedaron sin uso.
