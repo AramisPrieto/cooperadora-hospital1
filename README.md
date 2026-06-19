@@ -217,7 +217,7 @@ Este proyecto está estructurado como un **Monorepo gestionado con pnpm Workspac
      ```bash
      pnpm test
      ```
-     *(Ejecuta la suite de 26 pruebas de la interfaz). En caso de querer usar modo watch, puedes correr `pnpm test:frontend` o ingresar a `frontend` y correr `pnpm run test:watch`.*
+     *(Ejecuta la suite de 30 pruebas de la interfaz). En caso de querer usar modo watch, puedes correr `pnpm test:frontend` o ingresar a `frontend` y correr `pnpm run test:watch`.*
    * **Pruebas del Backend (API REST):**
      ```bash
      pnpm test:backend

@@ -423,3 +423,11 @@
   - Creación de pruebas unitarias específicas en [Navbar.test.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.test.jsx) para certificar que el almacenamiento local se limpia de manera efectiva al cerrar sesión o al recibir errores de sesión expirada.
   - Implementación de un mock robusto de `localStorage` en [setupTests.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/setupTests.js) para evitar warnings de Node y fallos en entornos automatizados.
 
+### Versión 1.29.0 — Compartido Rápido con Vista Previa y Feedback de Copiado (Antigravity)
+- **Módulo de Compartido Rápido (`ShareModal`)**:
+  - Creación de [ShareModal.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/ShareModal.jsx) con plantilla visual de previsualización de tarjeta, botones rápidos para WhatsApp, Facebook, X (Twitter) y Telegram, y feedback de copiado al portapapeles ("¡Copiado!") con toast e indicación de estado.
+  - Creación de pruebas unitarias y de accesibilidad en [ShareModal.test.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/ShareModal.test.jsx) usando `vitest` y `jest-axe`, garantizando cumplimiento de las pautas de accesibilidad WCAG.
+- **Integración en Campañas y Noticias**:
+  - Integración del modal de compartir en el detalle de campañas ([CampaignDetail.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/CampaignDetail.jsx)).
+  - Adición del botón lateral "Compartir publicación" e integración del modal en el detalle de noticias ([NewsDetail.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/NewsDetail.jsx)).
+
