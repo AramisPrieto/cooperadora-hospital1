@@ -48,7 +48,11 @@ const CampaignSearch = () => {
       if (search.trim()) params.set('search', search.trim());
       if (sort) params.set('sort', sort);
       const res = await api.get(`/campanas?${params.toString()}`);
-      setCampaigns(res.data);
+      // Solo campañas activas: excluir las que ya alcanzaron el 100% (ésas van a Obras Concretadas)
+      const active = res.data.filter(
+        c => parseFloat(c.monto_actual) < parseFloat(c.monto_objetivo)
+      );
+      setCampaigns(active);
     } catch (err) {
       console.error('Error cargando campañas:', err);
     } finally {
