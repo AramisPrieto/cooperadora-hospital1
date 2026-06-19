@@ -8,6 +8,15 @@ export const flushCache = () => {
   cache.flushAll();
 };
 
+export const flushCachePattern = (pattern) => {
+  const keys = cache.keys();
+  const matchedKeys = keys.filter(key => key.includes(pattern));
+  if (matchedKeys.length > 0) {
+    console.log(`🧹 [Cache] Vaciando caché para patrón "${pattern}":`, matchedKeys);
+    cache.del(matchedKeys);
+  }
+};
+
 export const cacheMiddleware = (req, res, next) => {
   // Solo cacheamos peticiones GET
   if (req.method !== 'GET') {

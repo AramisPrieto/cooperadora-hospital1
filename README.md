@@ -496,4 +496,22 @@ git checkout -b develop
   - Diseño clínico con breadcrumbs, visualizadores estéticos para imágenes ausentes, sidebar de información y un panel inferior de recomendación con 3 noticias recientes.
   - Transición del flujo de "Leer noticia" en la Home y en el Buscador para navegar a esta nueva vista dedicada en lugar de abrir ventanas modales.
 
+### Versión 1.24.0 — Optimización de Bundle, Modularización, Caché Selectiva e Integración Remota (Aramis Prieto)
+
+- **Optimización de Compilación (Code Splitting)**:
+  - Configuración de Rollup `manualChunks` en [vite.config.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/vite.config.js) para separar las librerías más pesadas (`recharts`/`d3` en `charts`, y `lucide-react` en `icons`), reduciendo drásticamente el peso del bundle JavaScript principal (`vendor`) y acelerando el tiempo de carga en la nube.
+- **Modularización y Aislamiento de Estado**:
+  - **Panel de Admin (`AdminPanel.jsx`)**: Extracción de formularios (`PartnerForm`, `CampaignForm`, `NewsForm`) y del módulo de gráficos (`DashboardCharts`) a componentes independientes para eliminar latencias de escritura.
+  - **Panel de Socio (`SocioPanel.jsx`)**: Extracción de las secciones de perfil, cuotas y aportes a componentes independientes (`SocioProfile`, `CuotasTab`, `DonacionesTab`).
+  - **Búsqueda en Inicio (`Home.jsx`)**: Creación de `NewsSearchForm` para aislar localmente el estado de escritura de la barra de búsqueda de noticias, evitando que toda la Home se re-renderice en cada pulsación de tecla.
+- **Centralización de Skeletons**:
+  - Creación de [Skeletons.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Skeletons.jsx) para centralizar animaciones de carga.
+  - Creación de `NewsSearchSkeleton` para las tarjetas de noticias independientes y refactorización de [NewsSearch.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/NewsSearch.jsx) para remover su esqueleto inline duplicado y consumirlo desde allí.
+- **Caché Selectiva del Backend**:
+  - Rediseño de [cacheMiddleware.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/middleware/cacheMiddleware.js) con la nueva función `flushCachePattern(pattern)` que elimina solo las claves que coinciden con un prefijo específico en memoria en lugar de borrar toda la caché del servidor.
+  - Actualización de los controladores de campañas, donaciones y Mercado Pago para vaciar selectivamente `/api/campanas`, e inclusión del vaciado de `/api/noticias` en el controlador de novedades tras cambios del administrador.
+- **Fusión e Integración de Código**:
+  - Resolución de conflictos en [CampaignSearch.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/CampaignSearch.jsx) para integrar de forma limpia la nueva paginación de Santi con la carga asíncrona de skeletons.
+  - Resolución y acomodo cronológico de la bitácora de cambios en el archivo [README.md](file:///Users/aramisprieto/Documents/cooperadora-hospital1/README.md).
+
 

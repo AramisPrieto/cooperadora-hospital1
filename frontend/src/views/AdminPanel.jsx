@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import FileUpload from '../components/FileUpload';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, LabelList
-} from 'recharts';
+import DashboardCharts from '../components/admin/DashboardCharts';
+import CampaignForm from '../components/admin/CampaignForm';
+import NewsForm from '../components/admin/NewsForm';
+import PartnerForm from '../components/admin/PartnerForm';
 import {
   Shield, Users, Target, Plus, Pencil, Trash, FileText,
   CheckCircle, Clock, AlertTriangle, LayoutDashboard,
-  Newspaper, TrendingUp, X, Save, AlertCircle, Sparkles,
+  Newspaper, X, Save, AlertCircle, Sparkles,
   Banknote, XCircle, ChevronDown, ChevronUp, User, MapPin,
   Calendar, Globe, Phone, Info
 } from 'lucide-react';
@@ -32,26 +32,7 @@ const TABS = [
   { id: 'campaigns', label: 'Campañas', icon: Target },
   { id: 'partners',  label: 'Socios',   icon: Users },
   { id: 'news',      label: 'Noticias', icon: Newspaper },
-  { id: 'transfers', label: 'Transferencias', icon: Banknote }, // TEAM_001: Nueva pestaña
-];
-
-/* ── Mock Data para Gráficos ── */
-const mockRevenueData = [
-  { name: 'Ene', ingresos: 400000 },
-  { name: 'Feb', ingresos: 300000 },
-  { name: 'Mar', ingresos: 550000 },
-  { name: 'Abr', ingresos: 450000 },
-  { name: 'May', ingresos: 800000 },
-  { name: 'Jun', ingresos: 1200000 },
-];
-
-const mockPartnersData = [
-  { name: 'Ene', nuevos: 12 },
-  { name: 'Feb', nuevos: 18 },
-  { name: 'Mar', nuevos: 25 },
-  { name: 'Abr', nuevos: 20 },
-  { name: 'May', nuevos: 40 },
-  { name: 'Jun', nuevos: 65 },
+  { id: 'transfers', label: 'Transferencias', icon: Banknote },
 ];
 
 const AdminPanel = () => {
@@ -60,47 +41,17 @@ const AdminPanel = () => {
   const [partners, setPartners] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [news, setNews] = useState([]);
-  const [transfers, setTransfers] = useState([]); // TEAM_001: Estado para transferencias
+  const [transfers, setTransfers] = useState([]);
   const [expandedPartnerId, setExpandedPartnerId] = useState(null);
   const [editingPartnerId, setEditingPartnerId] = useState(null);
-  const [editForm, setEditForm] = useState({
-    nombre: '',
-    apellido: '',
-    direccion: '',
-    localidad: '',
-    nacionalidad: '',
-    telefono: '',
-    fecha_nacimiento: '',
-    genero: '',
-    metodo_pago: '',
-    fecha_ultimo_pago: '',
-    observaciones: ''
-  });
-
 
   /* Campaign form */
   const [showCampaignForm, setShowCampaignForm] = useState(false);
   const [editingCampaignId, setEditingCampaignId] = useState(null);
-  const [titulo, setTitulo] = useState('');
-  const [montoObjetivo, setMontoObjetivo] = useState('');
-  const [montoActual, setMontoActual] = useState('');
-  const [fechaLimite, setFechaLimite] = useState('');
-  const [testimoniosText, setTestimoniosText] = useState('');
-  const [testimoniosAutor, setTestimoniosAutor] = useState('');
-  const [imagenUrl, setImagenUrl] = useState('');
-  const [obraStatus, setObraStatus] = useState('Planeada');
-  const [esCampanaDelMes, setEsCampanaDelMes] = useState(false);
-  const [equipamientoInfo, setEquipamientoInfo] = useState('');
-  const [equipamientoImagen, setEquipamientoImagen] = useState('');
 
   /* News form */
   const [showNewsForm, setShowNewsForm] = useState(false);
   const [editingNewsId, setEditingNewsId] = useState(null);
-  const [newsTitulo, setNewsTitulo] = useState('');
-  const [newsCuerpoHtml, setNewsCuerpoHtml] = useState('');
-  const [newsTags, setNewsTags] = useState('');
-  const [newsFecha, setNewsFecha] = useState('');
-  const [newsImagenUrl, setNewsImagenUrl] = useState('');
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -121,12 +72,12 @@ const AdminPanel = () => {
         api.get('/socios'),
         api.get('/campanas'),
         api.get('/noticias'),
-        api.get('/donaciones/transferencias') // TEAM_001: Petición a la API de transferencias
+        api.get('/donaciones/transferencias')
       ]);
       setPartners(pRes.data);
       setCampaigns(cRes.data);
       setNews(nRes.data);
-      setTransfers(tRes.data); // TEAM_001: Actualizar estado de transferencias
+      setTransfers(tRes.data);
     } catch (err) {
       console.error(err);
       setErrorMsg('Error al cargar la información del panel.');
@@ -136,25 +87,11 @@ const AdminPanel = () => {
   };
 
   /* ── Socio editing handlers ── */
-  const startEditPartner = (part) => {
-    setEditingPartnerId(part.numero_asociado);
-    setEditForm({
-      nombre: part.nombre || '',
-      apellido: part.apellido || '',
-      direccion: part.direccion || '',
-      localidad: part.localidad || '',
-      nacionalidad: part.nacionalidad || '',
-      telefono: part.telefono || '',
-      fecha_nacimiento: part.fecha_nacimiento || '',
-      genero: part.genero || '',
-      metodo_pago: part.metodo_pago || '',
-      fecha_ultimo_pago: part.fecha_ultimo_pago || '',
-      observaciones: part.observaciones || ''
-    });
+  const startEditPartner = (id) => {
+    setEditingPartnerId(id);
   };
 
-  const handleSavePartnerDetails = async (id) => {
-    // Validar campos requeridos antes de guardar
+  const handleSavePartnerDetails = async (id, updatedForm) => {
     const {
       nombre,
       apellido,
@@ -165,7 +102,7 @@ const AdminPanel = () => {
       fecha_nacimiento,
       genero,
       metodo_pago
-    } = editForm;
+    } = updatedForm;
 
     if (
       !nombre || !nombre.trim() ||
@@ -187,7 +124,7 @@ const AdminPanel = () => {
     setErrorMsg('');
     setSuccessMsg('');
     try {
-      await api.put(`/socios/${id}`, editForm);
+      await api.put(`/socios/${id}`, updatedForm);
       setSuccessMsg('Datos del socio actualizados correctamente.');
       setEditingPartnerId(null);
       loadDashboardData();
@@ -199,7 +136,6 @@ const AdminPanel = () => {
       setSubmitting(false);
     }
   };
-
 
   useEffect(() => { loadDashboardData(); }, []);
 
@@ -264,25 +200,24 @@ const AdminPanel = () => {
     }
   };
 
-
   /* ── Save campaign ── */
-  const handleSaveCampaign = async (e) => {
-    e.preventDefault();
+  const handleSaveCampaign = async (formData) => {
     setErrorMsg(''); setSuccessMsg('');
-    const testimonios = (testimoniosText && testimoniosAutor)
-      ? [{ autor: testimoniosAutor, texto: testimoniosText }]
+    const testimonios = (formData.testimoniosText && formData.testimoniosAutor)
+      ? [{ autor: formData.testimoniosAutor, texto: formData.testimoniosText }]
       : [];
-    const galeria_rica = imagenUrl
-      ? { imagenes: [imagenUrl], videos: [] }
+    const galeria_rica = formData.imagenUrl
+      ? { imagenes: [formData.imagenUrl], videos: [] }
       : { imagenes: [], videos: [] };
     const payload = {
-      titulo, monto_objetivo: parseFloat(montoObjetivo),
-      monto_actual: montoActual ? parseFloat(montoActual) : 0,
-      fecha_limite: fechaLimite || null,
-      es_campana_del_mes: esCampanaDelMes,
-      testimonios, galeria_rica, obra_status: obraStatus,
-      equipamiento_info: equipamientoInfo,
-      equipamiento_imagen: equipamientoImagen,
+      titulo: formData.titulo,
+      monto_objetivo: parseFloat(formData.monto_objetivo),
+      monto_actual: formData.monto_actual ? parseFloat(formData.monto_actual) : 0,
+      fecha_limite: formData.fecha_limite || null,
+      es_campana_del_mes: formData.es_campana_del_mes,
+      testimonios, galeria_rica, obra_status: formData.obraStatus,
+      equipamiento_info: formData.equipamiento_info,
+      equipamiento_imagen: formData.equipamiento_imagen,
     };
     try {
       if (editingCampaignId) {
@@ -301,33 +236,11 @@ const AdminPanel = () => {
 
   const resetCampaignForm = () => {
     setShowCampaignForm(false); setEditingCampaignId(null);
-    setTitulo(''); setMontoObjetivo(''); setMontoActual('');
-    setFechaLimite(''); setTestimoniosText('');
-    setTestimoniosAutor(''); setImagenUrl(''); setObraStatus('Planeada');
-    setEsCampanaDelMes(false);
-    setEquipamientoInfo('');
-    setEquipamientoImagen('');
   };
 
-  const handleEditCampaign = async (id) => {
-    setErrorMsg('');
-    try {
-      const res = await api.get(`/campanas/${id}`);
-      const d = res.data;
-      setEditingCampaignId(d.id); setTitulo(d.titulo);
-      setMontoObjetivo(d.monto_objetivo); setMontoActual(d.monto_actual);
-      setFechaLimite(d.fecha_limite ? d.fecha_limite.split('T')[0] : '');
-      setTestimoniosText(d.detalles.testimonios?.[0]?.texto ?? '');
-      setTestimoniosAutor(d.detalles.testimonios?.[0]?.autor ?? '');
-      setImagenUrl(d.detalles.galeria_rica.imagenes?.[0] ?? '');
-      setObraStatus(d.detalles.obra_status ?? 'Planeada');
-      setEsCampanaDelMes(d.es_campana_del_mes ?? false);
-      setEquipamientoInfo(d.detalles?.equipamiento_info ?? '');
-      setEquipamientoImagen(d.detalles?.equipamiento_imagen ?? '');
-      setShowCampaignForm(true);
-    } catch (err) {
-      setErrorMsg('No se pudieron recuperar los detalles de la campaña.');
-    }
+  const handleEditCampaign = (id) => {
+    setEditingCampaignId(id);
+    setShowCampaignForm(true);
   };
 
   const handleDeleteCampaign = async (id) => {
@@ -335,7 +248,7 @@ const AdminPanel = () => {
     setSubmitting(true);
     try {
       await api.delete(`/campanas/${id}`);
-      setSuccessMsg('Campaña eliminada de ambas bases de datos.');
+      setSuccessMsg('Campaña personalizada eliminada.');
       loadDashboardData();
     } catch (err) {
       setErrorMsg('Error al eliminar la campaña.');
@@ -345,14 +258,13 @@ const AdminPanel = () => {
   };
 
   /* ── Save news ── */
-  const handleSaveNews = async (e) => {
-    e.preventDefault();
+  const handleSaveNews = async (formData) => {
     setErrorMsg(''); setSuccessMsg('');
     const payload = {
-      titulo: newsTitulo, cuerpo_html: newsCuerpoHtml,
+      titulo: formData.titulo, cuerpo_html: formData.cuerpo_html,
       tags: [],
-      fecha: newsFecha || undefined,
-      imagen_url: newsImagenUrl || undefined,
+      fecha: formData.fecha || undefined,
+      imagen_url: formData.imagen_url || undefined,
     };
     try {
       if (editingNewsId) {
@@ -371,16 +283,12 @@ const AdminPanel = () => {
 
   const resetNewsForm = () => {
     setShowNewsForm(false); setEditingNewsId(null);
-    setNewsTitulo(''); setNewsCuerpoHtml(''); setNewsTags(''); setNewsFecha(''); setNewsImagenUrl('');
   };
 
   const handleEditNews = (n) => {
-    setEditingNewsId(n._id); setNewsTitulo(n.titulo);
-    setNewsCuerpoHtml(n.cuerpo_html);
-    setNewsTags(n.tags?.join(', ') ?? '');
-    setNewsFecha(n.fecha ? n.fecha.split('T')[0] : '');
-    setNewsImagenUrl(n.imagen_url || '');
-    setShowNewsForm(true); setErrorMsg('');
+    setEditingNewsId(n._id);
+    setShowNewsForm(true);
+    setErrorMsg('');
   };
 
   const handleDeleteNews = async (id) => {
@@ -404,6 +312,7 @@ const AdminPanel = () => {
     </label>
   );
   const inputCls = "input-field";
+
 
   return (
     <div className="flex-grow bg-slate-50">
@@ -485,46 +394,7 @@ const AdminPanel = () => {
                   <LayoutDashboard className="h-5 w-5 text-brand-600" />
                   Métricas y Evolución
                 </h2>
-                <div className="grid lg:grid-cols-2 gap-6">
-                  {/* Gráfico 1 */}
-                  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Evolución de Recaudaciones (Mensual)</h3>
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={mockRevenueData}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                          <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val/1000}k`} />
-                          <Tooltip formatter={(value) => `$${value}`} contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                          <Line type="monotone" dataKey="ingresos" stroke="#0d9488" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                  
-                  {/* Gráfico 2 */}
-                  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                    <h3 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-6">Nuevos Socios Registrados</h3>
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={mockPartnersData} margin={{ top: 20 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                          <XAxis dataKey="name" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                          <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
-                          <Tooltip cursor={{ fill: '#fef2f2' }} contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                          <Bar dataKey="nuevos" fill="#dc2626" radius={[4, 4, 0, 0]}>
-                            <LabelList dataKey="nuevos" position="top" fill="#dc2626" fontSize={12} fontWeight="bold" />
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
-                
-                <p className="text-[11px] text-slate-400 text-center mt-4 font-semibold px-4 py-3 bg-slate-100/50 rounded-xl">
-                  <AlertCircle className="h-3.5 w-3.5 inline mr-1 -mt-0.5" />
-                  Nota: Los gráficos muestran datos de muestra (mock data) de forma demostrativa hasta la integración del historial transaccional en el servidor.
-                </p>
+                <DashboardCharts />
               </div>
             )}
 
@@ -533,126 +403,11 @@ const AdminPanel = () => {
           <div className="space-y-5">
             {/* Campaign Form */}
             {showCampaignForm && (
-              <form onSubmit={handleSaveCampaign} className="bg-white rounded-3xl border border-slate-100 shadow-card p-6 space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                  <h3 className="text-lg font-display font-black text-slate-800">
-                    {editingCampaignId ? '✏️ Editar Campaña' : '+ Nueva Campaña Híbrida'}
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={resetCampaignForm}
-                    className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-
-                {/* SQL fields */}
-                <div>
-                  <p className="text-[10px] font-black text-brand-600 uppercase tracking-widest mb-4 flex items-center gap-1.5">
-                    <div className="h-0.5 w-5 bg-brand-400 rounded-full" />
-                    Datos Generales
-                  </p>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <FormLabel>Título de la Campaña</FormLabel>
-                      <input type="text" required value={titulo} onChange={e => setTitulo(e.target.value)} className={inputCls} placeholder="Ej: Equipamiento para Pediatría" />
-                    </div>
-                    <div>
-                      <FormLabel>Monto Objetivo (ARS)</FormLabel>
-                      <input type="number" required min="0" value={montoObjetivo} onChange={e => setMontoObjetivo(e.target.value)} className={inputCls} placeholder="5000000" />
-                    </div>
-                    <div>
-                      <FormLabel>Monto Actual Recaudado (ARS)</FormLabel>
-                      <input type="number" min="0" value={montoActual} onChange={e => setMontoActual(e.target.value)} className={inputCls} placeholder="0" />
-                    </div>
-                    <div>
-                      <FormLabel>Fecha Límite</FormLabel>
-                      <input type="date" value={fechaLimite} onChange={e => setFechaLimite(e.target.value)} className={inputCls} />
-                    </div>
-                    <div>
-                      <FormLabel>Estado de Obra</FormLabel>
-                      <select value={obraStatus} onChange={e => setObraStatus(e.target.value)} className={inputCls}>
-                        <option value="Planeada">Planeada</option>
-                        <option value="En Ejecución">En Ejecución</option>
-                        <option value="En Proceso de Licitación">En Proceso de Licitación</option>
-                        <option value="Finalizada">Finalizada</option>
-                        <option value="Suspendida">Suspendida</option>
-                      </select>
-                    </div>
-                    <div className="md:col-span-2 flex items-center bg-slate-50 border border-slate-200/60 p-4 rounded-xl mt-2 select-none hover:bg-slate-100/50 transition-colors">
-                      <input
-                        type="checkbox"
-                        id="esCampanaDelMes"
-                        checked={esCampanaDelMes}
-                        onChange={e => setEsCampanaDelMes(e.target.checked)}
-                        className="h-4.5 w-4.5 text-brand-600 focus:ring-brand-500 border-slate-300 rounded cursor-pointer"
-                      />
-                      <label htmlFor="esCampanaDelMes" className="ml-3 block text-xs font-black text-slate-700 uppercase tracking-wider cursor-pointer">
-                        ★ Destacar como Campaña Activa del Mes (Hero del Home)
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* NoSQL fields */}
-                <div className="bg-violet-50 border border-violet-200/50 rounded-2xl p-5 space-y-4">
-                  <p className="text-[10px] font-black text-violet-700 uppercase tracking-widest flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    Detalles Multimedia
-                  </p>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <FormLabel>Testimonio (Texto)</FormLabel>
-                      <input type="text" value={testimoniosText} onChange={e => setTestimoniosText(e.target.value)} className={inputCls} placeholder="Fue un gran aporte para el hospital..." />
-                    </div>
-                    <div>
-                      <FormLabel>Testimonio (Autor)</FormLabel>
-                      <input type="text" value={testimoniosAutor} onChange={e => setTestimoniosAutor(e.target.value)} className={inputCls} placeholder="Dr. Juan Gómez" />
-                    </div>
-                  <div className="md:col-span-2">
-                      <FileUpload
-                        tipo="imagen"
-                        value={imagenUrl}
-                        onChange={setImagenUrl}
-                        label="Imagen de la Campaña (Galería)"
-                      />
-                    </div>
-                    
-                    {/* Equipamiento fields */}
-                    <div className="md:col-span-2 border-t border-violet-200/50 pt-4 mt-2">
-                      <p className="text-[10px] font-black text-violet-700 uppercase tracking-widest flex items-center gap-1.5 mb-4">
-                        <Info className="h-3.5 w-3.5 text-violet-600" />
-                        Información del Equipo Médico
-                      </p>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div className="md:col-span-2">
-                          <FormLabel>Información / Utilidad del Equipo</FormLabel>
-                          <textarea
-                            value={equipamientoInfo}
-                            onChange={e => setEquipamientoInfo(e.target.value)}
-                            className={`${inputCls} min-h-[100px] py-3`}
-                            placeholder="Ej: Este respirador de alta frecuencia servirá para la sala de neonatología..."
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <FileUpload
-                            tipo="imagen"
-                            value={equipamientoImagen}
-                            onChange={setEquipamientoImagen}
-                            label="Imagen del aparato a adquirir"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button type="submit" className="btn-brand w-full py-3.5 shine">
-                  <Save className="h-4 w-4" />
-                  {editingCampaignId ? 'Guardar Cambios' : 'Crear Campaña'}
-                </button>
-              </form>
+              <CampaignForm
+                campaign={campaigns.find(c => c.id === editingCampaignId)}
+                onSave={handleSaveCampaign}
+                onCancel={resetCampaignForm}
+              />
             )}
 
             {/* Campaigns list */}
@@ -844,188 +599,88 @@ const AdminPanel = () => {
                       {isExpanded && (
                         <div className="px-6 pb-6 pt-2 bg-slate-50/50 border-t border-slate-100 space-y-4">
                           {editingPartnerId === part.numero_asociado ? (
-                            /* EDIT MODE FORM */
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs animate-fade-down">
-                              {/* Col 1: Datos Personales */}
-                              <div className="space-y-2.5">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                  <User className="h-3.5 w-3.5 text-brand-500" />
-                                  Editar Datos Personales
-                                </h4>
-                                <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nombre *</label>
-                                    <input type="text" value={editForm.nombre} onChange={e => setEditForm({ ...editForm, nombre: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Apellido *</label>
-                                    <input type="text" value={editForm.apellido} onChange={e => setEditForm({ ...editForm, apellido: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha Nacimiento *</label>
-                                    <input type="date" value={editForm.fecha_nacimiento} onChange={e => setEditForm({ ...editForm, fecha_nacimiento: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Género *</label>
-                                    <select value={editForm.genero} onChange={e => setEditForm({ ...editForm, genero: e.target.value })} className="input-field py-1.5 px-3 text-xs">
-                                      <option value="">Seleccione...</option>
-                                      <option value="masculino">Masculino</option>
-                                      <option value="femenino">Femenino</option>
-                                      <option value="otro">Otro</option>
-                                    </select>
-                                  </div>
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Nacionalidad *</label>
-                                    <input type="text" value={editForm.nacionalidad} onChange={e => setEditForm({ ...editForm, nacionalidad: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Col 2: Contacto y Ubicación */}
-                              <div className="space-y-2.5">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                  <MapPin className="h-3.5 w-3.5 text-brand-500" />
-                                  Editar Contacto y Ubicación
-                                </h4>
-                                <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Teléfono *</label>
-                                    <input type="text" value={editForm.telefono} onChange={e => setEditForm({ ...editForm, telefono: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Dirección *</label>
-                                    <input type="text" value={editForm.direccion} onChange={e => setEditForm({ ...editForm, direccion: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Localidad *</label>
-                                    <input type="text" value={editForm.localidad} onChange={e => setEditForm({ ...editForm, localidad: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Col 3: Administración */}
-                              <div className="space-y-2.5">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                  <Shield className="h-3.5 w-3.5 text-brand-500" />
-                                  Editar Administración
-                                </h4>
-                                <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Método de Pago *</label>
-                                    <select value={editForm.metodo_pago} onChange={e => setEditForm({ ...editForm, metodo_pago: e.target.value })} className="input-field py-1.5 px-3 text-xs">
-                                      <option value="">Seleccione...</option>
-                                      <option value="transferencia">Transferencia Bancaria</option>
-                                      <option value="efectivo">Efectivo</option>
-                                      <option value="cobrador">Cobrador a Domicilio</option>
-                                      <option value="debito">Débito Automático</option>
-                                    </select>
-                                  </div>
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Fecha Último Pago</label>
-                                    <input type="date" value={editForm.fecha_ultimo_pago} onChange={e => setEditForm({ ...editForm, fecha_ultimo_pago: e.target.value })} className="input-field py-1.5 px-3 text-xs" />
-                                  </div>
-                                  <div>
-                                    <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Observaciones</label>
-                                    <textarea value={editForm.observaciones} onChange={e => setEditForm({ ...editForm, observaciones: e.target.value })} rows={3} className="input-field py-1.5 px-3 text-xs resize-none" placeholder="Notas internas..." />
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
+                            <PartnerForm
+                              partner={part}
+                              submitting={submitting}
+                              onSave={handleSavePartnerDetails}
+                              onCancel={() => setEditingPartnerId(null)}
+                            />
                           ) : (
-                            /* DISPLAY MODE (Read-only) */
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-                              {/* Col 1: Datos Personales */}
-                              <div className="space-y-2.5">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                  <User className="h-3.5 w-3.5 text-brand-500" />
-                                  Datos Personales
-                                </h4>
-                                <div className="space-y-2 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Nombre:</span> {part.nombre || '—'}</p>
-                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Apellido:</span> {part.apellido || '—'}</p>
-                                  <p className="text-slate-600">
-                                    <span className="font-bold text-slate-700">F. Nacimiento:</span>{' '}
-                                    {part.fecha_nacimiento ? new Date(part.fecha_nacimiento + 'T00:00:00').toLocaleDateString('es-AR') : '—'}
-                                  </p>
-                                  <p className="text-slate-600 capitalize"><span className="font-bold text-slate-700">Género:</span> {part.genero || '—'}</p>
-                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Nacionalidad:</span> {part.nacionalidad || '—'}</p>
+                            <>
+                              {/* DISPLAY MODE (Read-only) */}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                                {/* Col 1: Datos Personales */}
+                                <div className="space-y-2.5">
+                                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                    <User className="h-3.5 w-3.5 text-brand-500" />
+                                    Datos Personales
+                                  </h4>
+                                  <div className="space-y-2 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                    <p className="text-slate-600"><span className="font-bold text-slate-700">Nombre:</span> {part.nombre || '—'}</p>
+                                    <p className="text-slate-600"><span className="font-bold text-slate-700">Apellido:</span> {part.apellido || '—'}</p>
+                                    <p className="text-slate-600">
+                                      <span className="font-bold text-slate-700">F. Nacimiento:</span>{' '}
+                                      {part.fecha_nacimiento ? new Date(part.fecha_nacimiento + 'T00:00:00').toLocaleDateString('es-AR') : '—'}
+                                    </p>
+                                    <p className="text-slate-600 capitalize"><span className="font-bold text-slate-700">Género:</span> {part.genero || '—'}</p>
+                                    <p className="text-slate-600"><span className="font-bold text-slate-700">Nacionalidad:</span> {part.nacionalidad || '—'}</p>
+                                  </div>
                                 </div>
-                              </div>
 
-                              {/* Col 2: Contacto y Ubicación */}
-                              <div className="space-y-2.5">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                  <MapPin className="h-3.5 w-3.5 text-brand-500" />
-                                  Contacto y Ubicación
-                                </h4>
-                                <div className="space-y-2 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Teléfono:</span> {part.telefono || '—'}</p>
-                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Dirección:</span> {part.direccion || '—'}</p>
-                                  <p className="text-slate-600"><span className="font-bold text-slate-700">Localidad:</span> {part.localidad || '—'}</p>
+                                {/* Col 2: Contacto y Ubicación */}
+                                <div className="space-y-2.5">
+                                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                    <MapPin className="h-3.5 w-3.5 text-brand-500" />
+                                    Contacto y Ubicación
+                                  </h4>
+                                  <div className="space-y-2 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                    <p className="text-slate-600"><span className="font-bold text-slate-700">Teléfono:</span> {part.telefono || '—'}</p>
+                                    <p className="text-slate-600"><span className="font-bold text-slate-700">Dirección:</span> {part.direccion || '—'}</p>
+                                    <p className="text-slate-600"><span className="font-bold text-slate-700">Localidad:</span> {part.localidad || '—'}</p>
+                                  </div>
                                 </div>
-                              </div>
 
-                              {/* Col 3: Datos Administrativos */}
-                              <div className="space-y-2.5">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                                  <Shield className="h-3.5 w-3.5 text-brand-500" />
-                                  Administración
-                                </h4>
-                                <div className="space-y-2 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-                                  <p className="text-slate-600">
-                                    <span className="font-bold text-slate-700">Método de Pago:</span>{' '}
-                                    <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-bold text-[10px] uppercase tracking-wide capitalize">
-                                      {part.metodo_pago || '—'}
-                                    </span>
-                                  </p>
-                                  <p className="text-slate-600">
-                                    <span className="font-bold text-slate-700">Último Pago:</span>{' '}
-                                    {part.fecha_ultimo_pago ? new Date(part.fecha_ultimo_pago + 'T00:00:00').toLocaleDateString('es-AR') : '—'}
-                                  </p>
-                                  <p className="text-slate-600">
-                                    <span className="font-bold text-slate-700">Alta Sistema:</span>{' '}
-                                    {new Date(part.fecha_alta).toLocaleDateString('es-AR')}
-                                  </p>
-                                  <div className="mt-2 pt-2 border-t border-slate-100 text-slate-500">
-                                    <span className="font-black text-slate-600 text-[10px] uppercase tracking-wider block mb-0.5">Observaciones:</span>
-                                    <p className="italic leading-normal">{part.observaciones || 'Sin observaciones registradas.'}</p>
+                                {/* Col 3: Datos Administrativos */}
+                                <div className="space-y-2.5">
+                                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                    <Shield className="h-3.5 w-3.5 text-brand-500" />
+                                    Administración
+                                  </h4>
+                                  <div className="space-y-2 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                                    <p className="text-slate-600">
+                                      <span className="font-bold text-slate-700">Método de Pago:</span>{' '}
+                                      <span className="inline-block px-2 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-md font-bold text-[10px] uppercase tracking-wide capitalize">
+                                        {part.metodo_pago || '—'}
+                                      </span>
+                                    </p>
+                                    <p className="text-slate-600">
+                                      <span className="font-bold text-slate-700">Último Pago:</span>{' '}
+                                      {part.fecha_ultimo_pago ? new Date(part.fecha_ultimo_pago + 'T00:00:00').toLocaleDateString('es-AR') : '—'}
+                                    </p>
+                                    <p className="text-slate-600">
+                                      <span className="font-bold text-slate-700">Alta Sistema:</span>{' '}
+                                      {new Date(part.fecha_alta).toLocaleDateString('es-AR')}
+                                    </p>
+                                    <div className="mt-2 pt-2 border-t border-slate-100 text-slate-500">
+                                      <span className="font-black text-slate-600 text-[10px] uppercase tracking-wider block mb-0.5">Observaciones:</span>
+                                      <p className="italic leading-normal">{part.observaciones || 'Sin observaciones registradas.'}</p>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
 
-                          {/* ACTION BUTTONS (At the bottom of the card) */}
-                          <div className="flex justify-end gap-2 border-t border-slate-200/60 pt-3">
-                            {editingPartnerId === part.numero_asociado ? (
-                              <>
+                              {/* ACTION BUTTONS (At the bottom of the card) */}
+                              <div className="flex justify-end gap-2 border-t border-slate-200/60 pt-3">
                                 <button
                                   type="button"
-                                  onClick={() => setEditingPartnerId(null)}
-                                  disabled={submitting}
-                                  className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold uppercase tracking-wider rounded-xl text-[10px] transition-colors disabled:opacity-40 animate-fade"
+                                  onClick={() => startEditPartner(part.numero_asociado)}
+                                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold uppercase tracking-wider rounded-xl text-[10px] transition-colors"
                                 >
-                                  Cancelar
+                                  Editar Datos
                                 </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleSavePartnerDetails(part.numero_asociado)}
-                                  disabled={submitting}
-                                  className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold uppercase tracking-wider rounded-xl text-[10px] transition-colors disabled:opacity-40 animate-fade"
-                                >
-                                  Guardar Datos
-                                </button>
-                              </>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() => startEditPartner(part)}
-                                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold uppercase tracking-wider rounded-xl text-[10px] transition-colors animate-fade"
-                              >
-                                Editar Datos
-                              </button>
-                            )}
-                          </div>
+                              </div>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1041,46 +696,11 @@ const AdminPanel = () => {
           <div className="space-y-5">
             {/* News Form */}
             {showNewsForm && (
-              <form onSubmit={handleSaveNews} className="bg-white rounded-3xl border border-slate-100 shadow-card p-6 space-y-5">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                  <h3 className="text-lg font-display font-black text-slate-800">
-                    {editingNewsId ? '✏️ Editar Noticia' : '+ Nueva Noticia'}
-                  </h3>
-                  <button type="button" onClick={resetNewsForm} className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <div>
-                  <FormLabel>Título</FormLabel>
-                  <input type="text" required value={newsTitulo} onChange={e => setNewsTitulo(e.target.value)} className={inputCls} placeholder="Ej: Nuevo equipamiento para maternidad" />
-                </div>
-                <div>
-                  <FormLabel>Cuerpo / Contenido <span className="normal-case text-slate-400 font-normal ml-1">(HTML permitido)</span></FormLabel>
-                  <textarea
-                    required rows={5} value={newsCuerpoHtml}
-                    onChange={e => setNewsCuerpoHtml(e.target.value)}
-                    placeholder="<p>Texto de la noticia...</p>"
-                    className={`${inputCls} font-mono resize-y`}
-                  />
-                </div>
-                <div>
-                  <FormLabel>Fecha de Publicación</FormLabel>
-                  <input type="date" value={newsFecha} onChange={e => setNewsFecha(e.target.value)} className={inputCls} />
-                </div>
-
-                <FileUpload
-                  tipo="imagen"
-                  value={newsImagenUrl}
-                  onChange={setNewsImagenUrl}
-                  label="Imagen de portada (opcional)"
-                />
-
-                <button type="submit" className="btn-brand w-full py-3.5 shine">
-                  <Save className="h-4 w-4" />
-                  {editingNewsId ? 'Guardar Cambios' : 'Publicar Noticia'}
-                </button>
-              </form>
+              <NewsForm
+                news={news.find(n => n._id === editingNewsId)}
+                onSave={handleSaveNews}
+                onCancel={resetNewsForm}
+              />
             )}
 
             {/* News list */}

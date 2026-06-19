@@ -1,4 +1,5 @@
 import NoticiaActualidad from '../models/NoticiaActualidad.js';
+import { flushCachePattern } from '../middleware/cacheMiddleware.js';
 
 // Obtener todas las noticias (Público)
 export const getAllNoticias = async (req, res) => {
@@ -58,6 +59,7 @@ export const createNoticia = async (req, res) => {
       fecha: fecha || Date.now(),
       imagen_url: imagen_url || ''
     });
+    flushCachePattern('/api/noticias');
     return res.status(201).json(nuevaNoticia);
   } catch (error) {
     console.error('Error al crear noticia:', error);
@@ -84,6 +86,7 @@ export const updateNoticia = async (req, res) => {
     if (imagen_url !== undefined) noticia.imagen_url = imagen_url;
 
     await noticia.save();
+    flushCachePattern('/api/noticias');
     return res.json({ message: 'Noticia actualizada correctamente.', noticia });
   } catch (error) {
     console.error('Error al actualizar noticia:', error);
@@ -100,6 +103,7 @@ export const deleteNoticia = async (req, res) => {
       return res.status(404).json({ error: 'Noticia no encontrada.' });
     }
     await noticia.deleteOne();
+    flushCachePattern('/api/noticias');
     return res.json({ message: 'Noticia eliminada correctamente.' });
   } catch (error) {
     console.error('Error al eliminar noticia:', error);

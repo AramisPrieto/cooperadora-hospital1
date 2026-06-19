@@ -2,22 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import CampaignCard from '../components/CampaignCard';
+import { CampaignSearchSkeleton } from '../components/Skeletons';
 import { Search, X, Target, ChevronLeft, ChevronRight } from 'lucide-react';
-
-/* ── Skeleton ── */
-const CampaignSkeleton = () => (
-  <div className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden animate-pulse">
-    <div className="aspect-[16/10] bg-slate-100" />
-    <div className="p-5 space-y-4">
-      <div className="h-4 bg-slate-100 rounded w-1/4" />
-      <div className="h-5 bg-slate-100 rounded w-3/4" />
-      <div className="space-y-2">
-        <div className="h-3 bg-slate-100 rounded w-full" />
-        <div className="h-2.5 bg-slate-100 rounded-full w-full" />
-      </div>
-    </div>
-  </div>
-);
 
 const CATEGORIES = [
   'Todas',
@@ -237,7 +223,7 @@ const CampaignSearch = () => {
       <main className="max-w-6xl mx-auto px-4 py-10">
         {loading ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map(i => <CampaignSkeleton key={i} />)}
+            {[1, 2, 3, 4, 5, 6].map(i => <CampaignSearchSkeleton key={i} />)}
           </div>
         ) : filteredCampaigns.length === 0 ? (
           <div className="text-center py-20 flex flex-col items-center gap-4">

@@ -3,24 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import DOMPurify from 'dompurify';
 import { Search, X, Calendar, ArrowRight, Newspaper, ChevronLeft, ChevronRight } from 'lucide-react';
-
-/* ── Skeleton ── */
-const NewsSkeleton = () => (
-  <div className="bg-white rounded-3xl border border-slate-200/60 overflow-hidden animate-pulse">
-    <div className="aspect-[16/10] bg-slate-100" />
-    <div className="p-6 space-y-4">
-      <div className="flex justify-between">
-        <div className="h-3 bg-slate-100 rounded w-1/4" />
-        <div className="h-3 bg-slate-100 rounded w-1/6" />
-      </div>
-      <div className="h-5 bg-slate-100 rounded w-3/4" />
-      <div className="space-y-2">
-        <div className="h-3 bg-slate-100 rounded w-full" />
-        <div className="h-3 bg-slate-100 rounded w-5/6" />
-      </div>
-    </div>
-  </div>
-);
+import { NewsSearchSkeleton } from '../components/Skeletons';
 
 const CATEGORIES = [
   'Todas',
@@ -273,7 +256,7 @@ const NewsSearch = () => {
       <main className="max-w-6xl mx-auto px-4 py-10">
         {loading ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map(i => <NewsSkeleton key={i} />)}
+            {[1, 2, 3, 4, 5, 6].map(i => <NewsSearchSkeleton key={i} />)}
           </div>
         ) : sortedNews.length === 0 ? (
           <div className="text-center py-20 flex flex-col items-center gap-4">

@@ -2,7 +2,7 @@ import { CampanaEco, DonacionTransferencia } from '../models/index.js';
 import CampanaDetalle from '../models/CampanaDetalle.js';
 import sequelize from '../config/db.js';
 import { Op } from 'sequelize';
-import { flushCache } from '../middleware/cacheMiddleware.js';
+import { flushCachePattern } from '../middleware/cacheMiddleware.js';
 
 // 1. OBTENER TODAS LAS CAMPAÑAS (SQL Básicas - Públicas)
 // ?sort=urgente|cercana|mayor_meta  ?search=texto  ?limit=N  ?page=N  ?all=true
@@ -157,7 +157,7 @@ export const createCampana = async (req, res) => {
       // Confirmar la transacción SQL una vez que MongoDB también se completó
       await transaction.commit();
 
-      flushCache();
+      flushCachePattern('/api/campanas');
 
       return res.status(201).json({
         message: 'Campaña creada exitosamente en ambas bases de datos.',
@@ -230,7 +230,7 @@ export const updateCampana = async (req, res) => {
     // Confirmar transacción SQL si todo salió bien
     await transaction.commit();
 
-    flushCache();
+    flushCachePattern('/api/campanas');
 
     return res.json({
       message: 'Campaña actualizada exitosamente en bases híbridas.',
@@ -267,7 +267,7 @@ export const deleteCampana = async (req, res) => {
 
     await transaction.commit();
 
-    flushCache();
+    flushCachePattern('/api/campanas');
 
     return res.json({ message: 'Campaña y sus detalles eliminados de ambas bases de datos.' });
   } catch (error) {

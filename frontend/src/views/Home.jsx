@@ -6,6 +6,7 @@ import api from '../api/axios';
 import FileUpload from '../components/FileUpload';
 
 import CampaignCard from '../components/CampaignCard';
+import { NewsSkeleton, CampaignSkeleton } from '../components/Skeletons';
 import {
   Newspaper, Heart, Search, FileText, Users, Target,
   TrendingUp, ArrowRight, X, CheckCircle, AlertCircle,
@@ -27,33 +28,6 @@ const StatItem = ({ value, label, icon: Icon, color }) => (
   </div>
 );
 
-/* ── News skeleton ── */
-const NewsSkeleton = () => (
-  <div className="bg-white rounded-2xl p-6 border border-slate-100 animate-pulse space-y-3">
-    <div className="h-3 w-24 bg-slate-100 rounded-full" />
-    <div className="h-5 w-3/4 bg-slate-100 rounded-full" />
-    <div className="space-y-2">
-      <div className="h-3 bg-slate-100 rounded-full" />
-      <div className="h-3 bg-slate-100 rounded-full w-5/6" />
-      <div className="h-3 bg-slate-100 rounded-full w-4/6" />
-    </div>
-  </div>
-);
-
-/* ── Campaign skeleton ── */
-const CampaignSkeleton = () => (
-  <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden animate-pulse">
-    <div className="h-28 bg-gradient-to-br from-slate-200 to-slate-300" />
-    <div className="p-5 space-y-4">
-      <div className="h-5 w-3/4 bg-slate-100 rounded-full" />
-      <div className="grid grid-cols-2 gap-3">
-        <div className="h-14 bg-slate-100 rounded-xl" />
-        <div className="h-14 bg-slate-100 rounded-xl" />
-      </div>
-      <div className="h-2.5 bg-slate-100 rounded-full" />
-    </div>
-  </div>
-);
 
 /* ── News gradient colors ── */
 const NEWS_COLORS = [
@@ -71,6 +45,37 @@ const formatter = new Intl.NumberFormat('es-AR', {
   maximumFractionDigits: 0,
 });
 
+const NewsSearchForm = ({ onSearch }) => {
+  const [query, setQuery] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSearch(query);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex items-center w-full md:max-w-sm">
+      <div className="relative flex-grow">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Buscar noticias..."
+          className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-l-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400 transition-all"
+        />
+      </div>
+      <button
+        type="submit"
+        aria-label="Buscar noticias"
+        className="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-r-xl border border-brand-600 hover:border-brand-500 transition-colors"
+      >
+        <Search className="h-4 w-4" />
+      </button>
+    </form>
+  );
+};
+
 const Home = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -86,7 +91,6 @@ const Home = () => {
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
   
   /* ── State for Campaigns ── */
   const [donationMethod, setDonationMethod] = useState('transferencia');
@@ -186,11 +190,10 @@ const Home = () => {
     };
   }, [selectedCampaign, lenis]);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  const handleSearch = async (query) => {
     setLoadingNews(true);
     try {
-      const res = await api.get(`/noticias?search=${searchQuery}`);
+      const res = await api.get(`/noticias?search=${query}`);
       setNews(res.data);
     } catch (err) {
       console.error(err);
@@ -671,24 +674,7 @@ const Home = () => {
             </div>
 
             {/* Search */}
-            <form onSubmit={handleSearch} className="flex items-center w-full md:max-w-sm">
-              <div className="relative flex-grow">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Buscar noticias..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-l-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400 transition-all"
-                />
-              </div>
-              <button
-                type="submit"
-                className="px-4 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-r-xl border border-brand-600 hover:border-brand-500 transition-colors"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-            </form>
+            <NewsSearchForm onSearch={handleSearch} />
           </div>
 
           {/* News grid */}
