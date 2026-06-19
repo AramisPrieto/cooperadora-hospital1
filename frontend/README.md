@@ -63,11 +63,19 @@ El acceso a las secciones internas se gestiona dinámicamente mediante el estado
 
 ---
 
-## ♿ Pruebas y Accesibilidad (Vitest)
+## ♿ Pautas de Accesibilidad (WCAG 2.1) y Experiencia de Usuario (UX)
 
-La aplicación incluye pruebas automatizadas con **Vitest** y **React Testing Library**:
-* **WCAG Compliance:** Se validan los estándares de accesibilidad en los componentes más críticos (como `Navbar`, `Footer`, `ShareModal` y `Skeletons`) utilizando `jest-axe` para garantizar que la web sea utilizable por personas con discapacidades visuales o de navegación.
-* **Pruebas de Componentes:** Cada componente central cuenta con su correspondiente archivo `.test.jsx` para comprobar estados de carga, renderizado y comportamientos interactivos.
+La interfaz se diseñó priorizando estándares de accesibilidad e interacción fluida:
+* **Estructura Semántica:** Uso mandatorio de etiquetas de HTML5 (`<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`) que permiten una correcta navegación mediante lectores de pantalla.
+* **Navegación por Teclado e Enfoque (Focus):** Todos los elementos interactivos (botones, enlaces, modales) soportan navegación por teclado (`Tab`, `Enter`, `Escape` para cerrar diálogos). Los modales implementan captura de foco (Focus Trapping) para evitar perder el cursor visual.
+* **Etiquetas descriptivas ARIA:** Elementos no textuales o interactivos complejos (tarjetas de campañas, botones de compartir) cuentan con atributos `aria-label` descriptivos.
+* **Velocidad Perceptual (Skeletons UI):** Para evitar la frustración por latencia, se desarrollaron componentes de esqueleto animados que emulan el diseño real mientras las APIs responden.
+* **Desplazamiento Inercial Suave:** Control de scroll mediante `@lenis/react` con contención activa en modales (`data-lenis-prevent`) para prevenir scroll encadenado.
+
+### 🧪 Pruebas Automatizadas de Accesibilidad
+El frontend incluye suites de prueba automatizadas con **Vitest** y **React Testing Library**:
+* **WCAG Compliance (`jest-axe`):** Los componentes centrales (`Navbar.test.jsx`, `Footer.test.jsx`, `ShareModal.test.jsx`) se auditan dinámicamente con `axe` para asegurar cero violaciones graves de accesibilidad en el renderizado inicial.
+* **Aislamiento de Tests:** Se comprueban comportamientos interactivos, mocks de peticiones Axios y respuestas visuales ante interacciones del usuario.
 
 ---
 

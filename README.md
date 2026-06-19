@@ -101,6 +101,53 @@ Ambas respuestas se ensamblan en un único objeto JSON unificado que se envía a
 
 ---
 
+## 🔌 Integraciones con Servicios Externos (Mercado Pago y SMTP)
+
+### 1. Pasarela de Pagos (Mercado Pago SDK)
+
+El sistema soporta donaciones únicas y suscripciones recurrentes de cuotas mensuales.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Socio
+    participant Frontend as Frontend (Vite)
+    participant Backend as Backend (Express)
+    participant MP as API Mercado Pago
+    participant Webhook as Webhook Endpoint
+
+    Socio->>Frontend: Desea Donar / Asociarse (Débito)
+    Frontend->>Backend: POST /api/donaciones/campanas/:id/donar-mp
+    Note over Backend: Instancia Preference() o PreApproval()<br/>con MP_ACCESS_TOKEN
+    Backend->>MP: Crear Preferencia o Suscripción
+    MP-->>Backend: Retorna init_point y preapproval_id
+    Backend-->>Frontend: Envía init_point
+    Frontend->>Socio: Redirecciona a Checkout de MP
+    Socio->>MP: Completa Pago / Autoriza Débito
+    MP->>Webhook: Notificación Asincrónica (POST /api/webhooks/mercadopago)
+    Note over Webhook: Valida Firma HMAC SHA256<br/>con MP_WEBHOOK_SECRET
+    Webhook->>MP: Consulta ID de pago/suscripción
+    MP-->>Webhook: Retorna estado (approved / authorized)
+    Webhook->>Backend: Actualiza SQL (Monto Campaña / Cuota Socio)
+    Webhook-->>MP: HTTP 200 OK
+```
+
+#### 🛡️ Validación de Webhooks y Seguridad (Anti-Spoofing)
+Para asegurar la autenticidad de los eventos reportados por Mercado Pago, el webhook (`POST /api/webhooks/mercadopago`) realiza una validación de firma criptográfica:
+1. Extrae la firma y metadatos provistos en las cabeceras HTTP de la pasarela.
+2. Genera un hash HMAC-SHA256 local utilizando la clave `MP_WEBHOOK_SECRET` y el cuerpo recibido.
+3. Si los hashes no coinciden, retorna un error de autenticación `401 Unauthorized` bloqueando inmediatamente la petición, evitando ataques de inyección de pagos falsos.
+
+---
+
+### 2. Notificaciones por Correo Electrónico (SMTP)
+
+El sistema utiliza `nodemailer` en el servidor para comunicarse con los socios cuando ocurren eventos significativos:
+* **Agradecimiento de Donaciones por Transferencia:** Al aprobarse manualmente una donación de transferencia en el panel de administración (`PUT /api/donaciones/transferencias/:id/aprobar`), se invoca al servicio `enviarMailAgradecimiento` para enviar de manera asíncrona un correo HTML formateado con los detalles del aporte.
+* **Modo Simulación:** En entornos de desarrollo donde no estén configuradas las variables `SMTP_*` en el `.env`, el transportador entra automáticamente en modo fallback e imprime el contenido completo del correo directamente en la consola para depuración.
+
+---
+
 ## 🔐 Seguridad: Gestión de Roles de Administrador
 
 El endpoint público `POST /api/auth/register` **siempre crea usuarios con rol `socio`**. No es posible auto-asignarse el rol `admin` desde el formulario de registro.
@@ -285,21 +332,36 @@ Cuando estés listo para dejar de simular pagos:
 3. Reemplaza el `VITE_MP_PUBLIC_KEY` en Vercel por el de producción.
 4. Reinicia ambos servidores. ¡A partir de ese momento, los cobros irán directo a la cuenta bancaria de la Cooperadora!
 
-## 🛠️ Comandos Git Utilizados (Estructura de Trabajo)
-Para mantener un orden profesional en el repositorio, la estructura de ramas se inicia en `develop`:
+## 🛠️ Convenciones de Desarrollo y Flujo de Trabajo (Git & Code Styles)
+
+Para mantener la calidad y consistencia del código a lo largo del ciclo de vida del software, el equipo sigue directrices estrictas:
+
+### 1. Modelo de Ramas (Git Flow Simplificado)
+* **`main`:** Contiene el código listo para producción y despliegue final (Vercel + Render).
+* **`develop`:** Rama de integración principal. Todas las nuevas funcionalidades se mezclan aquí para pruebas de integración antes de pasar a `main`.
+* **Ramas de Feature (`feat/...` o `fix/...`):** Ramas de desarrollo temporal creadas por cada desarrollador para implementar una funcionalidad o corregir un bug específico.
+
+### 2. Mensajes de Commit Semánticos
+Todos los commits deben seguir la convención de [Conventional Commits](https://www.conventionalcommits.org/):
+* `feat:` Para implementar nuevas características en el software (ej: `feat: agregar pasarela de Mercado Pago`).
+* `fix:` Para corregir errores o fallos detectados (ej: `fix: resolver desbordamiento de UI en buscador`).
+* `docs:` Para cambios o mejoras en la documentación (ej: `docs: actualizar diccionario de datos`).
+* `refactor:` Para reestructuraciones de código que no alteran la lógica de negocio ni corrigen fallos.
+* `test:` Para agregar o corregir pruebas unitarias o de accesibilidad.
+
 ```bash
-# Inicializar repositorio local
-git init
-
-# Agregar todos los archivos estructurados (filtrados por .gitignore)
+# Ejemplo de flujo de trabajo git ordinario:
+git checkout -b feat/mi-nueva-vista
 git add .
-
-# Hacer el primer commit
-git commit -m "feat: inicializar backend y frontend híbrido para Etapa 4"
-
-# Crear y cambiarse a la rama de desarrollo
-git checkout -b develop
+git commit -m "feat: implementar buscador de noticias con autocompletado"
+git checkout develop
+git merge feat/mi-nueva-vista
 ```
+
+### 3. Convenciones de Nomenclatura y Estilo
+* **Frontend (JavaScript/React):** Nombres de componentes en `PascalCase` (`CampaignCard.jsx`), funciones y variables en `camelCase`. Estilos encapsulados por componentes utilizando clases utilitarias Tailwind.
+* **Backend (Node.js/Express):** Archivos y variables en `camelCase`. Nombres de tablas SQL y columnas configurados explícitamente en minúsculas y usando guiones bajos (`underscored: true` en Sequelize) para consistencia con bases de datos relacionales tradicionales (ej: `numero_asociado`, `perfiles_socios`).
+* **Tipado Seguro:** Sanitizar siempre strings con `.trim()`, parsear IDs a enteros estrictos y manejar decimales en montos usando `parseFloat` de manera previa a interactuar con los modelos SQL/NoSQL.
 
 ---
 
