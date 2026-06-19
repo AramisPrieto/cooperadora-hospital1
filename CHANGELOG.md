@@ -416,7 +416,7 @@
 - **Protección contra Bucle de Redirecciones**:
   - Limpieza automática de las claves `user` y `token` del `localStorage` en [Navbar.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.jsx) ante respuestas de estado 401 por expiración o invalidez de sesión, previniendo bucles infinitos de redirección provocados por la protección de `GuestRoute`.
 
-### Versión 1.28.0 — Gestión Centralizada del Monorepo con pnpm Workspaces (Antigravity)
+### Versión 1.28.0 — Gestión Centralizada del Monorepo con pnpm Workspaces (Aramis Prieto)
 - **Monorepo Unificado y pnpm Workspaces**:
   - Creación de [pnpm-workspace.yaml](file:///Users/aramisprieto/Documents/cooperadora-hospital1/pnpm-workspace.yaml) y configuración del espacio de trabajo unificando los proyectos de `frontend` y `backend` bajo una misma gestión de dependencias.
   - Creación de [package.json](file:///Users/aramisprieto/Documents/cooperadora-hospital1/package.json) en la raíz para definir scripts globales simplificados de desarrollo y pruebas.
@@ -427,7 +427,7 @@
   - Creación de pruebas unitarias específicas en [Navbar.test.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.test.jsx) para certificar que el almacenamiento local se limpia de manera efectiva al cerrar sesión o al recibir errores de sesión expirada.
   - Implementación de un mock robusto de `localStorage` en [setupTests.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/setupTests.js) para evitar warnings de Node y fallos en entornos automatizados.
 
-### Versión 1.29.0 — Compartido Rápido con Vista Previa y Feedback de Copiado (Antigravity)
+### Versión 1.29.0 — Compartido Rápido con Vista Previa y Feedback de Copiado (Aramis Prieto)
 - **Módulo de Compartido Rápido (`ShareModal`)**:
   - Creación de [ShareModal.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/ShareModal.jsx) con plantilla visual de previsualización de tarjeta, botones rápidos para WhatsApp, Facebook, X (Twitter) y Telegram, y feedback de copiado al portapapeles ("¡Copiado!") con toast e indicación de estado.
   - Creación de pruebas unitarias y de accesibilidad en [ShareModal.test.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/ShareModal.test.jsx) usando `vitest` y `jest-axe`, garantizando cumplimiento de las pautas de accesibilidad WCAG.
@@ -435,7 +435,7 @@
   - Integración del modal de compartir en el detalle de campañas ([CampaignDetail.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/CampaignDetail.jsx)).
   - Adición del botón lateral "Compartir publicación" e integración del modal en el detalle de noticias ([NewsDetail.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/NewsDetail.jsx)).
 
-### Versión 1.30.0 — Notificaciones de Resend y Recuperación de Contraseñas (Antigravity)
+### Versión 1.30.0 — Notificaciones de Resend y Recuperación de Contraseñas (Aramis Prieto)
 - **Migración a la API de Resend (HTTP/HTTPS)**:
   - Reemplazo del cliente SMTP (Nodemailer) por una conexión HTTPS nativa por el puerto `443` utilizando la API REST de Resend. Esto soluciona por completo el bloqueo de puertos tradicionales (25/465/587) de la capa gratuita de Render.
   - Implementación del modo simulación/desarrollo por terminal cuando la clave de API no está presente.
