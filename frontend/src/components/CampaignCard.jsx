@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, CheckCircle } from 'lucide-react';
+import { Clock, CheckCircle, Stethoscope } from 'lucide-react';
 
 const getDaysLeft = (fechaLimite) => {
   if (!fechaLimite) return null;
@@ -75,8 +75,17 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
             className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-slate-100/70 text-slate-400 font-mono text-[10px] font-bold tracking-wider uppercase select-none">
-            IMG - {category}
+          <div className="w-full h-full relative flex items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 overflow-hidden">
+            {/* Dot grid overlay */}
+            <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+            {/* Subtle accent glow */}
+            <div className="absolute bottom-0 right-0 w-40 h-40 bg-accent-500/20 rounded-full blur-3xl" />
+            <div className="absolute top-0 left-0 w-28 h-28 bg-brand-500/10 rounded-full blur-2xl" />
+            {/* Icon + label */}
+            <div className="relative flex flex-col items-center gap-2 opacity-40">
+              <Stethoscope className="h-10 w-10 text-white" />
+              <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">{category}</span>
+            </div>
           </div>
         )}
       </div>

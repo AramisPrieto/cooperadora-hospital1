@@ -460,23 +460,29 @@ const ObrasConcretadas = () => {
         )}
 
         {/* ── Call to action footer ── */}
-        <div className="mt-20 bg-slate-900 rounded-[2.5rem] p-8 sm:p-12 text-center text-white relative overflow-hidden shadow-xl">
+        <div className="mt-20 bg-slate-900 rounded-[2.5rem] p-8 sm:p-12 text-center text-white relative isolate overflow-hidden shadow-xl">
           {/* Radial visual effect */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_var(--tw-gradient-stops))] from-accent-950/40 via-slate-900 to-slate-900 -z-10" />
-          <div className="absolute inset-0 opacity-[0.02] pointer-events-none -z-10" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+          <div className="absolute inset-0 opacity-[0.35] pointer-events-none" style={{ background: 'radial-gradient(circle at bottom right, rgba(5,150,105,0.25) 0%, transparent 70%)' }} />
+          <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
 
-          <div className="relative z-10 max-w-2xl mx-auto space-y-6">
+          <div className="relative max-w-2xl mx-auto space-y-6">
             <h2 className="text-3xl font-display font-black tracking-tight leading-none text-white">
-              ¿Quieres ayudarnos a seguir concretando obras?
+              ¿Querés ayudarnos a seguir concretando obras?
             </h2>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Cada aporte cuenta. Puedes sumarte como socio aportando una cuota mensual o realizar una donación directa para las campañas que se encuentran actualmente activas.
+              Cada aporte cuenta. Podés sumarte como socio aportando una cuota mensual o realizar una donación directa para las campañas actualmente en curso.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-              <Link to="/campanas" className="btn-brand bg-accent-600 hover:bg-accent-700 border-none px-8 py-3.5 text-sm">
+              <Link
+                to="/campanas"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold rounded-xl bg-accent-600 hover:bg-accent-700 text-white transition-all duration-300 shadow-sm hover:shadow-md"
+              >
                 Ver Campañas Activas
               </Link>
-              <Link to="/login?mode=register" className="btn-accent bg-transparent text-white border-white/20 hover:bg-white/10 hover:border-white/40 px-8 py-3.5 text-sm">
+              <Link
+                to="/login?mode=register"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 hover:border-white/40 transition-all duration-300"
+              >
                 Asociarse Ahora
               </Link>
             </div>

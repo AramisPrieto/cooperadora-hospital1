@@ -161,9 +161,6 @@ const NewsSearch = () => {
     return pages;
   };
 
-  const diagonalPlaceholderStyle = {
-    backgroundImage: 'repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 2px, transparent 2px, transparent 10px)'
-  };
 
   return (
     <div className="bg-slate-50 min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -321,16 +318,22 @@ const NewsSearch = () => {
                           src={noti.imagen_url}
                           alt={noti.titulo}
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                          onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
                         />
                       ) : null}
+                      {/* Fallback placeholder – shown when no image or image fails to load */}
                       <div
-                        className={`absolute inset-0 items-center justify-center ${noti.imagen_url ? 'hidden' : 'flex'}`}
-                        style={diagonalPlaceholderStyle}
+                        className={`absolute inset-0 items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 overflow-hidden ${noti.imagen_url ? 'hidden' : 'flex'}`}
                       >
-                        <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest bg-white/95 px-3.5 py-1.5 rounded-full shadow-sm border border-slate-100">
-                          IMG · {cat}
-                        </span>
+                        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+                        <div className="absolute bottom-0 right-0 w-40 h-40 bg-brand-500/20 rounded-full blur-3xl" />
+                        <div className="relative flex flex-col items-center gap-2 opacity-40">
+                          <Newspaper className="h-10 w-10 text-white" />
+                          <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">{cat}</span>
+                        </div>
                       </div>
                     </div>
 

@@ -687,10 +687,34 @@ const Home = () => {
                   <article
                     key={noti._id}
                     onClick={() => navigate(`/noticias/${noti._id}`)}
-                    className="card group overflow-hidden rounded-3xl flex flex-col cursor-pointer hover:border-brand-200 transition-all"
+                    className="bg-white rounded-[2rem] border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 flex flex-col group cursor-pointer"
                   >
-                    {/* Colored header strip */}
-                    <div className={`h-2 bg-gradient-to-r ${grad}`} />
+                    {/* Image with gradient fallback */}
+                    <div className="aspect-[16/9] w-full overflow-hidden relative shrink-0 bg-slate-50">
+                      {noti.imagen_url ? (
+                        <img
+                          src={noti.imagen_url}
+                          alt={noti.titulo}
+                          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      {/* Gradient fallback */}
+                      <div
+                        className={`absolute inset-0 items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 overflow-hidden ${noti.imagen_url ? 'hidden' : 'flex'}`}
+                      >
+                        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+                        <div className={`absolute inset-0 bg-gradient-to-br ${grad} opacity-20`} />
+                        <div className="relative flex flex-col items-center gap-2 opacity-40">
+                          <Newspaper className="h-10 w-10 text-white" />
+                        </div>
+                      </div>
+                      {/* Colored accent strip at bottom of image */}
+                      <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${grad}`} />
+                    </div>
 
                     <div className="p-6 flex flex-col flex-grow gap-3">
                       {/* Meta row */}
@@ -702,13 +726,13 @@ const Home = () => {
                       </div>
 
                       {/* Title */}
-                      <h3 className="text-lg font-display font-black text-slate-800 group-hover:text-brand-700 transition-colors leading-snug">
+                      <h3 className="text-base font-display font-black text-slate-800 group-hover:text-brand-700 transition-colors leading-snug line-clamp-2">
                         {noti.titulo}
                       </h3>
 
                       {/* Body */}
                       <div
-                        className="text-sm text-slate-600 font-light leading-relaxed line-clamp-4 flex-grow"
+                        className="text-sm text-slate-600 font-light leading-relaxed line-clamp-3 flex-grow"
                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(noti.cuerpo_html) }}
                       />
 

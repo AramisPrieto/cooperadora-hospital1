@@ -64,6 +64,10 @@
     @apply bg-accent-50 text-accent-700 border-accent-200;
   }
 
+  .badge-teal {
+    @apply bg-accent-50 text-accent-700 border-accent-200;
+  }
+
   .badge-slate {
     @apply bg-slate-50 text-slate-600 border-slate-200;
   }
