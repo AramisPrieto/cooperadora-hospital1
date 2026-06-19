@@ -125,9 +125,9 @@ export const crearPreferenciaDonacion = async ({ campanaTitulo, monto, campanaId
       }
     ],
     back_urls: {
-      success: `${getBackendUrl()}/api/donaciones/mp-redirect?status=donation_success`,
-      failure: `${getBackendUrl()}/api/donaciones/mp-redirect?status=donation_failure`,
-      pending: `${getBackendUrl()}/api/donaciones/mp-redirect?status=donation_pending`
+      success: `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=success`,
+      failure: `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=failure`,
+      pending: `${getBackendUrl()}/api/donaciones/mp-redirect?donation_status=pending`
     },
     auto_return: 'approved',
     external_reference: `donation_u${usuarioId}_c${campanaId}`,

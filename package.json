@@ -1,6 +1,6 @@
 {
   "name": "cooperadora-hospital1",
-  "version": "1.30.0",
+  "version": "1.32.0",
   "private": true,
   "packageManager": "pnpm@10.34.4",
   "scripts": {

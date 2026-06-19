@@ -166,17 +166,27 @@ const Home = () => {
         .catch(err => console.error('Error abriendo campaña desde URL:', err));
     }
 
-    const status = searchParams.get('status');
-    if (status === 'donation_success') {
+    const donationStatus = searchParams.get('donation_status') || searchParams.get('status');
+    if (donationStatus === 'success' || donationStatus === 'donation_success') {
       setGlobalSuccessMsg('¡Donación realizada con éxito a través de Mercado Pago! Tu aporte ya se encuentra acreditado en la campaña. ¡Muchas gracias por colaborar!');
-    } else if (status === 'donation_failure') {
+    } else if (donationStatus === 'failure' || donationStatus === 'donation_failure') {
       setGlobalErrorMsg('El pago de la donación a través de Mercado Pago fue rechazado o cancelado.');
     }
 
-    if (viewId || status) {
+    if (viewId || searchParams.has('donation_status') || searchParams.has('status')) {
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('view');
+      newParams.delete('donation_status');
       newParams.delete('status');
+
+      // Limpiar otros parámetros de Mercado Pago para dejar la URL limpia
+      const mpParams = [
+        'collection_id', 'collection_status', 'payment_id', 'payment_type',
+        'merchant_order_id', 'preference_id', 'site_id', 'processing_mode',
+        'merchant_account_id', 'external_reference'
+      ];
+      mpParams.forEach(param => newParams.delete(param));
+
       setSearchParams(newParams, { replace: true });
     }
   }, [searchParams]);

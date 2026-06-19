@@ -466,3 +466,10 @@
   - Remoción de la etiqueta "Visible" en la interfaz de gestión de Noticias.
   - Adición de un sistema de **Paginación de Resultados** (hasta 25 ítems por vista) en la lista de Transferencias para optimizar el rendimiento del navegador ante el historial extenso.
   - Implementación de un buscador en tiempo real en la tabla de **Transferencias**, permitiendo filtrar donaciones por email, nombre, apellido o DNI del remitente, requiriendo actualización en el controlador `donacionController.js` para incluir los datos del perfil del socio.
+
+### Versión 1.32.0 — Resolución de Colisión de Redirección de Mercado Pago (Antigravity)
+- **Corrección de Colisión en Redirecciones de Donaciones**:
+  - Reemplazo del parámetro query conflictivo `status` por `donation_status` en los `back_urls` de Mercado Pago en [mpService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/mpService.js) para prevenir la agrupación de duplicados en Express y la posterior corrupción en la serialización (`status=donation_success,null`).
+  - Adaptación de la vista principal del cliente ([Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx)) para verificar `donation_status` (`success`/`failure`/`pending`), manteniendo compatibilidad hacia atrás con el formato antiguo.
+- **Higienización de la Barra de Direcciones**:
+  - Implementación de la limpieza automática de todos los metadatos agregados por la pasarela de Mercado Pago (`collection_id`, `payment_id`, `preference_id`, etc.) en la URL del frontend tras confirmarse el estado, garantizando una URL final limpia y sin parámetros transaccionales.
