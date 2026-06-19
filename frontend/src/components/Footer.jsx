@@ -43,9 +43,14 @@ const Footer = () => {
           {/* Columna 1: Branding y Legal */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-brand-600 flex items-center justify-center shrink-0 shadow-md">
-                <Plus className="h-4 w-4 text-white stroke-[3.5px]" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="Logo Cooperadora Hospital Necochea"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
+                onError={e => { e.target.style.display = 'none'; }}
+              />
               <p className="text-sm font-display font-black text-white tracking-wide">
                 Cooperadora Hospital Necochea
               </p>
@@ -69,7 +74,7 @@ const Footer = () => {
                 <Link to="/campanas" className="hover:text-white transition-colors">Campañas</Link>
               </li>
               <li>
-                <button onClick={(e) => handleScrollTo(e, 'obras-section')} className="hover:text-white transition-colors text-left font-bold">Obras Concretadas</button>
+                <Link to="/obras-concretadas" className="hover:text-white transition-colors">Obras Concretadas</Link>
               </li>
               <li>
                 <Link to="/noticias" className="hover:text-white transition-colors">Noticias</Link>

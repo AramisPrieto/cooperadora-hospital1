@@ -351,7 +351,6 @@ const Home = () => {
       <section className="min-h-[620px] flex items-center border-b border-slate-100 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
         {/* Subtle decorative shapes for clinical aesthetic */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-50/80 rounded-full blur-[120px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent-50/80 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/4 translate-y-1/4" />
 
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
@@ -619,34 +618,27 @@ const Home = () => {
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {completedCampaigns.map(camp => (
-                <div key={camp.id} className="bg-white rounded-3xl overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 border border-emerald-100 flex flex-col group relative">
-                  <div className="absolute top-4 right-4 z-10">
-                    <span className="inline-flex items-center gap-1.5 bg-emerald-500 text-white px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg">
-                      <CheckCircle className="h-4 w-4" />
-                      100% Logrado
-                    </span>
-                  </div>
-                  <div className="h-32 bg-gradient-to-br from-emerald-500 to-teal-600 p-6 flex flex-col justify-end">
-                    <h3 className="text-white font-display font-black text-lg leading-tight line-clamp-2 shadow-sm">
-                      {camp.titulo}
-                    </h3>
-                  </div>
-                  <div className="p-5 flex flex-col gap-4">
-                    <p className="text-slate-500 text-sm">
-                      La comunidad logró recaudar <strong className="text-slate-800">{formatter.format(camp.monto_actual)}</strong> para hacer este proyecto realidad.
-                    </p>
-                    <button
-                      onClick={() => handleViewCampaignDetail(camp.id)}
-                      className="w-full mt-auto btn-outline text-emerald-700 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300 py-2.5 text-xs font-black uppercase tracking-widest"
-                    >
-                      <Search className="h-4 w-4" />
-                      Ver Detalles
-                    </button>
-                  </div>
-                </div>
+              {completedCampaigns.slice(0, 3).map(camp => (
+                <CampaignCard
+                  key={camp.id}
+                  campaign={camp}
+                  onClickDetail={handleViewCampaignDetail}
+                />
               ))}
             </div>
+
+            {/* Ver Más Logros */}
+            {completedCampaigns.length > 3 && (
+              <div className="flex justify-center mt-12">
+                <button
+                  onClick={() => navigate('/obras-concretadas')}
+                  className="btn-accent px-8 py-3.5 text-xs font-black uppercase tracking-widest flex items-center gap-2 border border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:border-emerald-300 hover:shadow-md"
+                >
+                  <Trophy className="h-4.5 w-4.5 text-emerald-600" />
+                  Ver todos los logros ({completedCampaigns.length})
+                </button>
+              </div>
+            )}
           </div>
         </section>
       )}

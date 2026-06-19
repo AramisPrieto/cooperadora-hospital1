@@ -118,7 +118,7 @@ const Navbar = () => {
               Inicio
             </NavLink>
             <NavLink to="/campanas" active={location.pathname === '/campanas'}>Campañas</NavLink>
-            <ScrollLink to="obras-section" active={activeSection === 'obras-section'}>Obras Concretadas</ScrollLink>
+            <NavLink to="/obras-concretadas" active={location.pathname === '/obras-concretadas'}>Obras Concretadas</NavLink>
             <NavLink to="/noticias" active={location.pathname === '/noticias'}>Noticias</NavLink>
             {isAuthenticated && isAdmin && (
               <NavLink to="/admin" active={location.pathname === '/admin'}>
@@ -197,7 +197,7 @@ const Navbar = () => {
               Inicio
             </MobileNavLink>
             <MobileNavLink to="/campanas" active={location.pathname === '/campanas'} onClick={() => setMobileOpen(false)}>Campañas</MobileNavLink>
-            <MobileScrollLink to="obras-section" active={activeSection === 'obras-section'} setMobileOpen={setMobileOpen}>Obras Concretadas</MobileScrollLink>
+            <MobileNavLink to="/obras-concretadas" active={location.pathname === '/obras-concretadas'} onClick={() => setMobileOpen(false)}>Obras Concretadas</MobileNavLink>
             <MobileNavLink to="/noticias" active={location.pathname === '/noticias'} onClick={() => setMobileOpen(false)}>Noticias</MobileNavLink>
             {isAuthenticated && isAdmin && (
               <MobileNavLink to="/admin" active={location.pathname === '/admin'}>
