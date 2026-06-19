@@ -34,3 +34,7 @@ yarn-error.log*
 
 # Uploaded files
 backend/uploads/
+
+# AI assistant metadata (never commit)
+.gemini/
+.agents/

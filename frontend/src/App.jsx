@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ReactLenis } from 'lenis/react'; // TEAM_001: Wrapper oficial para React
 
 import Navbar from './components/Navbar';
@@ -18,6 +18,16 @@ const NewsDetail = lazy(() => import('./views/NewsDetail'));
 const ObrasConcretadas = lazy(() => import('./views/ObrasConcretadas'));
 
 // Eliminadas funciones ProtectedRoute y SocioProtectedRoute inline
+
+// Redirige al inicio si el usuario ya está autenticado
+const GuestRoute = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  if (user) {
+    const dest = user.rol === 'admin' ? '/admin' : '/';
+    return <Navigate to={dest} replace />;
+  }
+  return children;
+};
 
 function App() {
   useEffect(() => {
@@ -45,7 +55,7 @@ function App() {
             }>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
+                <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
                 <Route path="/campanas" element={<CampaignSearch />} />
                 <Route path="/campanas/:id" element={<CampaignDetail />} />
                 <Route path="/noticias" element={<NewsSearch />} />
