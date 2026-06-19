@@ -143,11 +143,38 @@ Para asegurar la autenticidad de los eventos reportados por Mercado Pago, el web
 ### 2. Notificaciones por Correo Electrónico (Resend API - HTTPS)
 
 El sistema integra la API REST de **Resend** para el despacho de correos electrónicos transaccionales y de notificación a través de peticiones HTTPS seguras por el puerto **443** (evitando los bloqueos de puertos SMTP tradicionales en la capa gratuita de Render):
+
 * **Agradecimiento de Donaciones por Transferencia:** Al aprobarse manualmente una donación en el panel de administración (`PUT /api/donaciones/transferencias/:id/aprobar`), se envía un correo HTML con los detalles de la donación e impacto en la campaña.
 * **Bienvenida de Nuevos Socios:** Al registrarse de forma exitosa en el portal (`POST /api/auth/register`), se despacha un correo dando la bienvenida al socio e indicándole el estado de aprobación pendiente.
 * **Aprobación de Socio:** Al aprobarse la cuenta de un socio desde el panel de administración (`PUT /api/socios/:id`), se le notifica por correo electrónico que su cuenta está activa y puede ingresar a declarar cuotas.
 * **Recuperación de Contraseña:** Envío de enlaces seguros temporales (validez de 1 hora) al solicitar restablecer la contraseña.
 * **Modo Simulación:** En entornos de desarrollo donde no esté configurada `RESEND_API_KEY`, el servicio entra automáticamente en modo simulación e imprime los correos formateados por consola para depuración.
+
+#### ⚙️ Arquitectura del Sistema de Mails y Despacho Asíncrono (Non-Blocking)
+
+Para asegurar una experiencia de usuario fluida y evitar latencias innecesarias en la carga de las respuestas del servidor (por ejemplo, evitar que la respuesta HTTP se congele mientras se conecta con servidores de correos de terceros), el despacho de correos en el backend se realiza en segundo plano (**non-blocking asynchronous tasks / fire-and-forget**):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Cliente as Cliente (React App)
+    participant API as API Express (Backend)
+    participant DB as Base de Datos (SQL)
+    participant Resend as API Resend (HTTPS 443)
+
+    Cliente->>API: POST /api/auth/register (Crear Socio)
+    Note over API: Inicia Transacción SQL
+    API->>DB: Guarda credenciales y perfil del socio
+    Note over API: Commitea Transacción con éxito
+    API-->>Cliente: Retorna HTTP 201 Created (Instantáneo)
+    Note over API: Tarea en segundo plano:<br/>enviarMailBienvenida()
+    API->>Resend: POST https://api.resend.com/emails
+    Note over Resend: Despacha correo final
+```
+
+1. **API REST vs SMTP**: Los puertos SMTP estándar (`465` y `587`) suelen estar bloqueados en entornos Cloud como Render. Al usar la API REST de Resend mediante peticiones HTTP cifradas, el sistema se conecta por el puerto `443` estándar de navegación web, garantizando 100% de tasa de entrega sin configuraciones de cortafuegos complejas.
+2. **Ciclo de Registro y Mails**: Las operaciones de escritura primero impactan y aseguran la persistencia en las bases de datos correspondientes (SQL/MongoDB) dentro de una transacción. Tras retornar la respuesta exitosa al cliente en milisegundos, el hilo de Node.js despacha la solicitud HTTPS a la API de Resend sin bloquear el hilo principal.
+3. **Flujo de Tokens Temporales para Olvido de Clave**: Al solicitar recuperar contraseña, el servidor genera un token criptográfico fuerte de un solo uso (`crypto.randomBytes(20)`) con expiración de 1 hora y envía el enlace seguro apuntando al `FRONTEND_URL` configurado. Al ingresar a dicho enlace, se validan los parámetros y se permite la modificación de las credenciales.
 
 ---
 
