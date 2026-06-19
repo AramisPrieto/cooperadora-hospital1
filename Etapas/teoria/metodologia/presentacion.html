@@ -709,7 +709,7 @@
 
   <!-- Indicador de Slide -->
   <div class="slide-indicator" id="slideIndicator">
-    <span class="active" id="currentSlideNum">1</span> / <span id="totalSlideNum">6</span>
+    <span class="active" id="currentSlideNum">1</span> / <span id="totalSlideNum">5</span>
   </div>
 
   <!-- Controles flotantes -->
@@ -895,8 +895,8 @@
 
       <div class="archi-container">
         <!-- Columna de Diagrama Visual -->
-        <div style="display: flex; align-items: center; justify-content: center; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 1rem; box-shadow: var(--shadow-card);">
-          <img src="arquitectura.png" alt="Arquitectura Híbrida de Persistencia" style="max-width: 100%; max-height: 380px; object-fit: contain; border-radius: 6px;">
+        <div style="display: flex; align-items: center; justify-content: center; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 1rem; box-shadow: var(--shadow-card); overflow: hidden; height: 380px;">
+          <img src="arquitectura.png" alt="Arquitectura Híbrida de Persistencia" style="max-width: 100%; max-height: 100%; height: auto; width: auto; object-fit: contain; border-radius: 6px;">
         </div>
 
         <!-- Columna de Persistencia Híbrida -->
@@ -946,79 +946,7 @@
       </div>
     </div>
 
-    <!-- DIAPOSITIVA 5: OPTIMIZACIÓN Y SEGURIDAD -->
-    <div class="slide">
-      <div class="slide-header">
-        <div class="slide-category">Rendimiento, SEO y Hardening</div>
-        <h2 class="slide-title">Optimización y Seguridad para Producción</h2>
-      </div>
 
-      <div class="grid-container grid-opti">
-        <!-- COLUMNA FRONTEND & SEO -->
-        <div>
-          <div class="opti-group-title">
-            <span class="opti-check">✓</span> Frontend, SEO & UX
-          </div>
-          <div class="opti-list">
-            <div class="opti-item">
-              <span class="opti-check">✦</span>
-              <div class="opti-info">
-                <h4>Code Splitting y Lazy Loading</h4>
-                <p>Carga reactiva de paneles pesados mediante `React.lazy()` y `<Suspense>`, reduciendo el bundle inicial para asegurar un FCP veloz.</p>
-              </div>
-            </div>
-            
-            <div class="opti-item">
-              <span class="opti-check">✦</span>
-              <div class="opti-info">
-                <h4>Velocidad Perceptual con Skeletons</h4>
-                <p>Componentes esqueleto (`CampaignSkeleton`, `NewsSkeleton`) con animaciones de pulso que eliminan el salto visual durante cargas.</p>
-              </div>
-            </div>
-
-            <div class="opti-item">
-              <span class="opti-check">✦</span>
-              <div class="opti-info">
-                <h4>Optimización SEO y Semántica HTML5</h4>
-                <p>Uso estricto de etiquetas semánticas (`<main>`, `<section>`), etiquetas Open Graph para redes sociales y precarga DNS de fuentes.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- COLUMNA BACKEND & SEGURIDAD -->
-        <div>
-          <div class="opti-group-title">
-            <span class="opti-lock">🛡</span> Backend & Hardening
-          </div>
-          <div class="opti-list">
-            <div class="opti-item">
-              <span class="opti-lock">🔒</span>
-              <div class="opti-info">
-                <h4>Caché Reactivo Invalidador</h4>
-                <p>Uso de `NodeCache` con TTL de 5m en lecturas públicas (5m TTL), con limpieza automática mediante flushCache() en altas o modificaciones.</p>
-              </div>
-            </div>
-
-            <div class="opti-item">
-              <span class="opti-lock">🔒</span>
-              <div class="opti-info">
-                <h4>Rate Limiting & Confianza de Proxy</h4>
-                <p>Limites de tasas para prevenir DDoS en endpoints críticos, con configuración `trust proxy` para interpretar correctamente IPs de Render/Vercel.</p>
-              </div>
-            </div>
-
-            <div class="opti-item">
-              <span class="opti-lock">🔒</span>
-              <div class="opti-info">
-                <h4>Protecciones Helmet y Mongo Sanitize</h4>
-                <p>Bloqueo de Clickjacking y XSS mediante inyección de cabeceras seguras y saneo automático de parámetros query contra inyección NoSQL.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- DIAPOSITIVA 6: PROPUESTAS DE MEJORA -->
     <div class="slide">
