@@ -86,6 +86,7 @@ const Home = () => {
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   
   /* ── State for Campaigns ── */
   const [donationMethod, setDonationMethod] = useState('transferencia');
