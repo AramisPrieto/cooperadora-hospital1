@@ -887,8 +887,8 @@
     <!-- DIAPOSITIVA 4: ARQUITECTURA -->
     <div class="slide">
       <div class="slide-header">
-        <div class="slide-category">Arquitectura de Software</div>
-        <h2 class="slide-title">Persistencia Híbrida y Modelo Cliente-Servidor</h2>
+        <div class="slide-category">Persistencia Híbrida y Concurrencia</div>
+        <h2 class="slide-title">Arquitectura de Datos y Estrategia de Persistencia</h2>
       </div>
 
       <div class="archi-container">
@@ -897,6 +897,9 @@
           <div class="archi-node">
             <div class="archi-node-title">Cliente (Frontend SPA)</div>
             <div class="archi-node-tech">React.js · Vite · Tailwind CSS</div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem; line-height:1.3">
+              SPA responsiva cargada dinámicamente. Desacoplada del servidor para escalabilidad e independencia de despliegue.
+            </p>
           </div>
           
           <div class="archi-arrow">⇅ HTTPS / REST API + JWT</div>
@@ -904,6 +907,9 @@
           <div class="archi-node red-border">
             <div class="archi-node-title">API Server (Backend)</div>
             <div class="archi-node-tech">Node.js · Express · pnpm workspaces</div>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem; line-height:1.3">
+              Capa lógica central. Realiza el Data Mashup, gestiona el estado de caché en memoria y controla la concurrencia.
+            </p>
           </div>
         </div>
 
@@ -915,11 +921,15 @@
               <span class="icon-badge">SQL</span>
               Transaccional ACID
             </div>
+            <p style="font-size:0.72rem; color:var(--brand-emerald); font-weight:700; margin-bottom:0.4rem; text-transform:uppercase">Consistencia Financiera</p>
             <ul class="db-block-list">
               <li><strong>`usuarios`</strong>: Credenciales con contraseñas hasheadas en `bcryptjs`.</li>
-              <li><strong>`perfiles_socios`</strong>: Registro legal de asociados (DNI único).</li>
-              <li><strong>`campanas_eco`</strong>: Balances y metas financieras de campañas.</li>
+              <li><strong>`perfiles_socios`</strong>: Registro legal de asociados del hospital (DNI único).</li>
+              <li><strong>`campanas_eco`</strong>: Balances, metas de recaudación y control de saldos.</li>
             </ul>
+            <p style="font-size:0.72rem; color:var(--text-muted); margin-top:0.5rem; line-height:1.3">
+              <em>Justificación:</em> Datos estructurados críticos que requieren atomicidad, consistencia relacional e integridad transaccional estricta.
+            </p>
           </div>
 
           <!-- NOSQL BLOCK -->
@@ -928,18 +938,22 @@
               <span class="icon-badge" style="background:var(--brand-red-light); color:var(--brand-red); border-color:rgba(220,38,38,0.15)">NoSQL</span>
               Documental Flexible
             </div>
+            <p style="font-size:0.72rem; color:var(--brand-red); font-weight:700; margin-bottom:0.4rem; text-transform:uppercase">Flexibilidad y Multimedia</p>
             <ul class="db-block-list">
-              <li><strong>`noticias_actualidad`</strong>: Novedades con galerías y vídeos dinámicos.</li>
-              <li><strong>`campanas_detalle`</strong>: Narrativa enriquecida vinculada por `campana_id_ref`.</li>
+              <li><strong>`noticias_actualidad`</strong>: Artículos con arrays de imágenes y videos dinámicos.</li>
+              <li><strong>`campanas_detalle`</strong>: Narrativa larga, testimonios y estados de obras enlazados.</li>
             </ul>
+            <p style="font-size:0.72rem; color:var(--text-muted); margin-top:0.5rem; line-height:1.3">
+              <em>Justificación:</em> Ideal para almacenamiento jerárquico sin esquemas rígidos, agilizando la carga de galerías multimedia.
+            </p>
           </div>
 
           <!-- MASHUP AND LOCKS -->
           <div class="archi-mashup">
-            <h4 style="font-family:var(--font-display); font-size:0.9rem; font-weight:700; margin-bottom:0.3rem; color:var(--text-main)">⚡ Mecanismos Especiales de Datos:</h4>
-            <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4">
-              <strong>Data Mashup:</strong> Para evitar latencias de red, el backend consulta en paralelo SQL y NoSQL mediante <span class="pattern-accent-text">Promise.all</span> y unifica los datos en una única respuesta estructurada para el cliente.<br>
-              <strong>Evitación de Condiciones de Carrera:</strong> El endpoint de donación adquiere un bloqueo exclusivo sobre la fila SQL (<span class="pattern-accent-text">SELECT ... FOR UPDATE</span>) garantizando transacciones concurrentes seguras.
+            <h4 style="font-family:var(--font-display); font-size:0.9rem; font-weight:700; margin-bottom:0.4rem; color:var(--text-main)">⚡ Temas Clave de Exposición para el TFI:</h4>
+            <p style="font-size:0.73rem; color:var(--text-muted); line-height:1.45">
+              <strong>1. Data Mashup Sincrónico (Sequelize + Mongoose):</strong> El backend unifica las consultas paralelas mediante <span class="pattern-accent-text">Promise.all()</span> para obtener datos de SQL y NoSQL en una sola llamada REST, unificándolas en un JSON plano. Esto reduce la latencia de red eliminando peticiones redundantes desde el cliente.<br>
+              <strong>2. Prevención de Condiciones de Carrera:</strong> Las donaciones concurrentes en `donar` inician una transacción relacional que ejecuta un bloqueo exclusivo a nivel de fila (<span class="pattern-accent-text">SELECT ... FOR UPDATE</span>). Esto encola peticiones simultáneas, evitando que dos hilos actualicen el balance a la vez con valores desactualizados.
             </p>
           </div>
         </div>

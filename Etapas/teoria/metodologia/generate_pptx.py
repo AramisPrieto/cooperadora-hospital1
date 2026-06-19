@@ -367,23 +367,24 @@ def main():
             run.line_spacing = 1.15
 
     # ----------------------------------------------------
+    # ----------------------------------------------------
     # DIAPOSITIVA 4: ARQUITECTURA DE DATOS HÍBRIDA
     # ----------------------------------------------------
     slide4 = prs.slides.add_slide(blank_layout)
     set_slide_background(slide4, LIGHT_BG)
-    add_slide_header(slide4, "Arquitectura de Software", "Modelo Cliente-Servidor y Persistencia Híbrida")
+    add_slide_header(slide4, "Persistencia Híbrida y Concurrencia", "Arquitectura de Datos y Estrategia de Persistencia")
     add_slide_footer(slide4)
     
     # Columna 1: Arquitectura General (Esquema de Cajas)
     # SPA
-    spa = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.9), Inches(4.5), Inches(1.2))
+    spa = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(1.8), Inches(4.5), Inches(1.3))
     spa.fill.solid()
     spa.fill.fore_color.rgb = RGBColor(255, 255, 255)
     spa.line.color.rgb = BORDER_COLOR
     spa.line.width = Pt(1.5)
     spa.adjustments[0] = 0.1
     
-    tx_spa = slide4.shapes.add_textbox(Inches(1.0), Inches(2.1), Inches(4.1), Inches(0.8))
+    tx_spa = slide4.shapes.add_textbox(Inches(1.0), Inches(1.9), Inches(4.1), Inches(1.1))
     tf_spa = tx_spa.text_frame
     tf_spa.word_wrap = True
     p_spa = tf_spa.paragraphs[0]
@@ -392,33 +393,40 @@ def main():
     p_spa.font.size = Pt(13)
     p_spa.font.bold = True
     p_spa.font.color.rgb = TEXT_MAIN
+    p_spa.space_after = Pt(2)
     p_spa2 = tf_spa.add_paragraph()
     p_spa2.text = "React.js  ·  Vite  ·  Tailwind CSS"
     p_spa2.font.name = 'Inter'
-    p_spa2.font.size = Pt(10)
+    p_spa2.font.size = Pt(9.5)
     p_spa2.font.color.rgb = BRAND_EMERALD
     p_spa2.font.bold = True
+    p_spa2.space_after = Pt(4)
+    p_spa3 = tf_spa.add_paragraph()
+    p_spa3.text = "SPA responsiva cargada dinámicamente. Desacoplada del servidor para escalabilidad e independencia."
+    p_spa3.font.name = 'Inter'
+    p_spa3.font.size = Pt(8.5)
+    p_spa3.font.color.rgb = TEXT_MUTED
     
     # Flecha
-    arrow = slide4.shapes.add_textbox(Inches(0.8), Inches(3.1), Inches(4.5), Inches(0.5))
+    arrow = slide4.shapes.add_textbox(Inches(0.8), Inches(3.1), Inches(4.5), Inches(0.4))
     tf_arr = arrow.text_frame
     p_arr = tf_arr.paragraphs[0]
     p_arr.alignment = PP_ALIGN.CENTER
     p_arr.text = "⇅  HTTPS / REST API (JWT)"
     p_arr.font.name = 'Inter'
-    p_arr.font.size = Pt(11)
+    p_arr.font.size = Pt(10.5)
     p_arr.font.bold = True
     p_arr.font.color.rgb = TEXT_MUTED
     
     # API
-    api = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(3.6), Inches(4.5), Inches(1.2))
+    api = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(3.5), Inches(4.5), Inches(1.3))
     api.fill.solid()
     api.fill.fore_color.rgb = RGBColor(255, 255, 255)
     api.line.color.rgb = BRAND_RED
     api.line.width = Pt(1.5)
     api.adjustments[0] = 0.1
     
-    tx_api = slide4.shapes.add_textbox(Inches(1.0), Inches(3.8), Inches(4.1), Inches(0.8))
+    tx_api = slide4.shapes.add_textbox(Inches(1.0), Inches(3.6), Inches(4.1), Inches(1.1))
     tf_api = tx_api.text_frame
     tf_api.word_wrap = True
     p_api = tf_api.paragraphs[0]
@@ -427,84 +435,129 @@ def main():
     p_api.font.size = Pt(13)
     p_api.font.bold = True
     p_api.font.color.rgb = TEXT_MAIN
+    p_api.space_after = Pt(2)
     p_api2 = tf_api.add_paragraph()
     p_api2.text = "Node.js  ·  Express  ·  pnpm workspaces"
     p_api2.font.name = 'Inter'
-    p_api2.font.size = Pt(10)
+    p_api2.font.size = Pt(9.5)
     p_api2.font.color.rgb = BRAND_RED
     p_api2.font.bold = True
+    p_api2.space_after = Pt(4)
+    p_api3 = tf_api.add_paragraph()
+    p_api3.text = "Capa lógica central. Realiza el Data Mashup, gestiona el estado de caché en memoria y controla la concurrencia."
+    p_api3.font.name = 'Inter'
+    p_api3.font.size = Pt(8.5)
+    p_api3.font.color.rgb = TEXT_MUTED
     
     # Columna 2: Persistencia Híbrida
     # SQL
-    sql_box = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(5.8), Inches(1.9), Inches(3.2), Inches(2.2))
+    sql_box = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(5.8), Inches(1.8), Inches(3.2), Inches(2.4))
     sql_box.fill.solid()
     sql_box.fill.fore_color.rgb = RGBColor(255, 255, 255)
     sql_box.line.color.rgb = BRAND_EMERALD
     sql_box.line.width = Pt(1.5)
     sql_box.adjustments[0] = 0.1
     
-    tx_sql = slide4.shapes.add_textbox(Inches(6.0), Inches(2.1), Inches(2.8), Inches(1.8))
+    tx_sql = slide4.shapes.add_textbox(Inches(5.95), Inches(1.95), Inches(2.9), Inches(2.1))
     tf_sql = tx_sql.text_frame
     tf_sql.word_wrap = True
     p_sql = tf_sql.paragraphs[0]
     p_sql.text = "SQL (Transaccional ACID)"
     p_sql.font.name = 'Montserrat'
-    p_sql.font.size = Pt(12)
+    p_sql.font.size = Pt(11.5)
     p_sql.font.bold = True
     p_sql.font.color.rgb = TEXT_MAIN
-    p_sql.space_after = Pt(8)
     
-    sqls = ["• usuarios: claves bcryptjs", "• perfiles_socios: datos DNI", "• campanas_eco: balances"]
+    p_sql_s = tf_sql.add_paragraph()
+    p_sql_s.text = "CONSISTENCIA FINANCIERA"
+    p_sql_s.font.name = 'Inter'
+    p_sql_s.font.size = Pt(7.5)
+    p_sql_s.font.bold = True
+    p_sql_s.font.color.rgb = BRAND_EMERALD
+    p_sql_s.space_after = Pt(6)
+    
+    sqls = [
+        "• usuarios: Claves cifradas (bcryptjs)",
+        "• perfiles_socios: Libro social (DNI único)",
+        "• campanas_eco: Balances y metas"
+    ]
     for s in sqls:
         p_s = tf_sql.add_paragraph()
         p_s.text = s
         p_s.font.name = 'Inter'
-        p_s.font.size = Pt(9)
+        p_s.font.size = Pt(8.5)
         p_s.font.color.rgb = TEXT_MUTED
-        p_s.space_after = Pt(4)
+        p_s.space_after = Pt(3)
+        
+    p_sql_j = tf_sql.add_paragraph()
+    p_sql_j.text = "Justificación: Datos que exigen atomicidad, consistencia, aislamiento y durabilidad relacional."
+    p_sql_j.font.name = 'Inter'
+    p_sql_j.font.size = Pt(8)
+    p_sql_j.font.italic = True
+    p_sql_j.font.color.rgb = TEXT_MUTED
+    p_sql_j.space_before = Pt(6)
         
     # NoSQL
-    nosql_box = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(9.3), Inches(1.9), Inches(3.2), Inches(2.2))
+    nosql_box = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(9.3), Inches(1.8), Inches(3.2), Inches(2.4))
     nosql_box.fill.solid()
     nosql_box.fill.fore_color.rgb = RGBColor(255, 255, 255)
     nosql_box.line.color.rgb = BRAND_RED
     nosql_box.line.width = Pt(1.5)
     nosql_box.adjustments[0] = 0.1
     
-    tx_nosql = slide4.shapes.add_textbox(Inches(9.5), Inches(2.1), Inches(2.8), Inches(1.8))
+    tx_nosql = slide4.shapes.add_textbox(Inches(9.45), Inches(1.95), Inches(2.9), Inches(2.1))
     tf_nosql = tx_nosql.text_frame
     tf_nosql.word_wrap = True
     p_nosql = tf_nosql.paragraphs[0]
-    p_nosql.text = "NoSQL (Documental Flexible)"
+    p_nosql.text = "NoSQL (Documental)"
     p_nosql.font.name = 'Montserrat'
-    p_nosql.font.size = Pt(12)
+    p_nosql.font.size = Pt(11.5)
     p_nosql.font.bold = True
     p_nosql.font.color.rgb = TEXT_MAIN
-    p_nosql.space_after = Pt(8)
     
-    nosqls = ["• noticias_actualidad: galerías", "• campanas_detalle: multimedia", "  enlazado por campana_id_ref"]
+    p_nosql_s = tf_nosql.add_paragraph()
+    p_nosql_s.text = "FLEXIBILIDAD Y MULTIMEDIA"
+    p_nosql_s.font.name = 'Inter'
+    p_nosql_s.font.size = Pt(7.5)
+    p_nosql_s.font.bold = True
+    p_nosql_s.font.color.rgb = BRAND_RED
+    p_nosql_s.space_after = Pt(6)
+    
+    nosqls = [
+        "• noticias_actualidad: Novedades multimedia",
+        "• campanas_detalle: Historias de obras",
+        "  Enlazado por campana_id_ref"
+    ]
     for ns in nosqls:
         p_ns = tf_nosql.add_paragraph()
         p_ns.text = ns
         p_ns.font.name = 'Inter'
-        p_ns.font.size = Pt(9)
+        p_ns.font.size = Pt(8.5)
         p_ns.font.color.rgb = TEXT_MUTED
-        p_ns.space_after = Pt(4)
+        p_ns.space_after = Pt(3)
+        
+    p_nosql_j = tf_nosql.add_paragraph()
+    p_nosql_j.text = "Justificación: Formatos dinámicos sin esquemas rígidos, ideal para galerías y logs de noticias."
+    p_nosql_j.font.name = 'Inter'
+    p_nosql_j.font.size = Pt(8)
+    p_nosql_j.font.italic = True
+    p_nosql_j.font.color.rgb = TEXT_MUTED
+    p_nosql_j.space_before = Pt(6)
         
     # Data Mashup & Locks (Bottom)
-    mash_box = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(5.8), Inches(4.3), Inches(6.7), Inches(2.1))
+    mash_box = slide4.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(5.8), Inches(4.3), Inches(6.7), Inches(2.2))
     mash_box.fill.solid()
     mash_box.fill.fore_color.rgb = RGBColor(241, 245, 249) # Slate-100 background
     mash_box.line.color.rgb = BRAND_EMERALD
     mash_box.line.width = Pt(1)
     mash_box.adjustments[0] = 0.08
     
-    tx_mash = slide4.shapes.add_textbox(Inches(6.0), Inches(4.5), Inches(6.3), Inches(1.7))
+    tx_mash = slide4.shapes.add_textbox(Inches(6.0), Inches(4.45), Inches(6.3), Inches(1.9))
     tf_mash = tx_mash.text_frame
     tf_mash.word_wrap = True
     tf_mash.margin_left = tf_mash.margin_top = 0
     p_m = tf_mash.paragraphs[0]
-    p_m.text = "MECANISMOS AVANZADOS DE DATOS:"
+    p_m.text = "TEMAS CLAVE DE EXPOSICIÓN (DEFENSA TFI):"
     p_m.font.name = 'Montserrat'
     p_m.font.size = Pt(11)
     p_m.font.bold = True
@@ -512,26 +565,30 @@ def main():
     p_m.space_after = Pt(6)
     
     p_m2 = tf_mash.add_paragraph()
-    p_m2.text = "⚡  Data Mashup Sincrónico: "
+    p_m2.text = "⚡  1. Data Mashup Sincrónico (Optimización de Latencia): "
     p_m2.font.name = 'Inter'
-    p_m2.font.size = Pt(10)
+    p_m2.font.size = Pt(9)
     p_m2.font.bold = True
     p_m2.font.color.rgb = BRAND_RED
+    p_m2.space_after = Pt(2)
     run_m2 = p_m2.add_run()
-    run_m2.text = "Las consultas a SQL (finanzas) y NoSQL (multimedia) se ejecutan en paralelo con Promise.all y se unifican en un JSON plano enviado al cliente."
+    run_m2.text = "Para acelerar la red, el backend consulta Sequelize y Mongoose en paralelo usando Promise.all() y los unifica en un JSON plano antes de enviarlo al cliente."
     run_m2.font.bold = False
+    run_m2.font.size = Pt(8.5)
     run_m2.font.color.rgb = TEXT_MUTED
     p_m2.space_after = Pt(6)
     
     p_m3 = tf_mash.add_paragraph()
-    p_m3.text = "⚡  Evitación de Condiciones de Carrera: "
+    p_m3.text = "⚡  2. Control de Concurrencia Relacional (Integridad Financiera): "
     p_m3.font.name = 'Inter'
-    p_m3.font.size = Pt(10)
+    p_m3.font.size = Pt(9)
     p_m3.font.bold = True
     p_m3.font.color.rgb = BRAND_RED
+    p_m3.space_after = Pt(2)
     run_m3 = p_m3.add_run()
-    run_m3.text = "Las donaciones concurrentes bloquean la fila financiera en SQL (SELECT ... FOR UPDATE) garantizando consistencia y transaccionalidad ACID."
+    run_m3.text = "Al donar concurrentemente, se abre una transacción SQL que adquiere un bloqueo exclusivo de fila (SELECT ... FOR UPDATE), encolando otros hilos y evitando cálculos inconsistentes del balance."
     run_m3.font.bold = False
+    run_m3.font.size = Pt(8.5)
     run_m3.font.color.rgb = TEXT_MUTED
 
     # ----------------------------------------------------
@@ -679,8 +736,8 @@ def main():
     # ----------------------------------------------------
     # GUARDAR PRESENTACIÓN
     # ----------------------------------------------------
-    prs.save("/Users/aramisprieto/Documents/cooperadora-hospital1/presentacion_cooperadora.pptx")
-    print("Presentación PPTX generada con éxito en: presentacion_cooperadora.pptx")
+    prs.save("/Users/aramisprieto/Documents/cooperadora-hospital1/Etapas/teoria/metodologia/presentacion_cooperadora.pptx")
+    print("Presentación PPTX generada con éxito en: Etapas/teoria/metodologia/presentacion_cooperadora.pptx")
 
 if __name__ == '__main__':
     main()
