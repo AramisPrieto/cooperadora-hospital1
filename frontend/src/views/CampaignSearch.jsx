@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import CampaignCard from '../components/CampaignCard';
-import { Search, X, Target } from 'lucide-react';
+import { Search, X, Target, ChevronLeft, ChevronRight } from 'lucide-react';
 
 /* ── Skeleton ── */
 const CampaignSkeleton = () => (
@@ -47,7 +47,13 @@ const CampaignSearch = () => {
   const [searchInput, setSearchInput] = useState('');
   const [activeSort, setActiveSort] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todas');
+  const [currentPage, setCurrentPage] = useState(1);
   const debounceRef = useRef(null);
+
+  // Reset page when category, search input, sort, or underlying campaigns change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeCategory, searchInput, activeSort, campaigns]);
 
   const fetchCampaigns = useCallback(async (search = '', sort = '') => {
     setLoading(true);
@@ -109,6 +115,32 @@ const CampaignSearch = () => {
     if (activeCategory === 'Todas') return true;
     return getCategoryFromTitle(c.titulo) === activeCategory;
   });
+
+  // 3. Paginación (6 por página)
+  const ITEMS_PER_PAGE = 6;
+  const totalPages = Math.ceil(filteredCampaigns.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedCampaigns = filteredCampaigns.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => setCurrentPage(i)}
+          className={`h-9 w-9 rounded-xl text-xs font-bold transition-all duration-200 ${
+            currentPage === i
+              ? 'bg-brand-600 text-white shadow-sm'
+              : 'bg-slate-50 hover:bg-slate-100 text-slate-650 border border-slate-200/60'
+          }`}
+        >
+          {i}
+        </button>
+      );
+    }
+    return pages;
+  };
 
   return (
     <div className="min-h-screen bg-white pb-20 pt-6">
@@ -230,15 +262,48 @@ const CampaignSearch = () => {
             )}
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCampaigns.map(camp => (
-              <CampaignCard
-                key={camp.id}
-                campaign={camp}
-                onClickDetail={handleViewDetail}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedCampaigns.map(camp => (
+                <CampaignCard
+                  key={camp.id}
+                  campaign={camp}
+                  onClickDetail={handleViewDetail}
+                />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-1.5 mt-12 pt-6 border-t border-slate-100">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className={`h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-200 ${
+                    currentPage === 1
+                      ? 'bg-slate-50 border-slate-200 text-slate-350 cursor-not-allowed'
+                      : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600 hover:border-slate-350'
+                  }`}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                
+                {renderPageNumbers()}
+                
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className={`h-9 w-9 rounded-xl flex items-center justify-center border transition-all duration-200 ${
+                    currentPage === totalPages
+                      ? 'bg-slate-50 border-slate-200 text-slate-350 cursor-not-allowed'
+                      : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600 hover:border-slate-350'
+                  }`}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

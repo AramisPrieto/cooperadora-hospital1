@@ -476,5 +476,13 @@ git checkout -b develop
   - Actualización del enrutamiento de la aplicación en [App.jsx](file:///c:/Users/Santiago/Desktop/cooperadora-hospital1/frontend/src/App.jsx) con carga perezosa de la vista de noticias.
   - Modificación de [Navbar.jsx](file:///c:/Users/Santiago/Desktop/cooperadora-hospital1/frontend/src/components/Navbar.jsx) y [Footer.jsx](file:///c:/Users/Santiago/Desktop/cooperadora-hospital1/frontend/src/components/Footer.jsx) para redirigir directamente a la página independiente `/noticias` en lugar de scrollear al id de sección del Home.
 
+### Versión 1.22.0 — Ordenamiento de Noticias y Paginación (Santiago Ialungo)
+
+- **Ordenamiento por Fecha en Noticias**:
+  - Implementación de un selector de ordenamiento en [NewsSearch.jsx](file:///c:/Users/Santiago/Desktop/cooperadora-hospital1/frontend/src/views/NewsSearch.jsx) para listar las noticias por "Más recientes" o "Más antiguas".
+- **Paginación en el Frontend para Campañas y Noticias**:
+  - Incorporación de paginación de 6 elementos por página en las vistas independientes `/campanas` ([CampaignSearch.jsx](file:///c:/Users/Santiago/Desktop/cooperadora-hospital1/frontend/src/views/CampaignSearch.jsx)) y `/noticias` ([NewsSearch.jsx](file:///c:/Users/Santiago/Desktop/cooperadora-hospital1/frontend/src/views/NewsSearch.jsx)).
+  - Diseño de botonera de paginación adaptativa `< 1 2 3 >` en la parte inferior de los listados cuando superan los 6 elementos.
+  - Seteo dinámico para restablecer la página actual a 1 cada vez que cambien los filtros, ordenamiento o términos de búsqueda.
 
 
