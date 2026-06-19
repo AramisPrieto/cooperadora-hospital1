@@ -335,7 +335,7 @@ Para la gestión de este proyecto, se seleccionó el **Modelo Scrum combinado co
 
 ## 11. Priorización de Requerimientos
 
-La priorización se realizó bajo la metodología MoSCoW, enfocada en asegurar un Producto Mínimo Viable (MVP) completamente funcional antes del cierre del ciclo académico.
+La priorización esta enfocada en asegurar un Producto Mínimo Viable (MVP) completamente funcional antes del cierre del ciclo académico.
 
 * **Prioridad ALTA (Imprescindibles para el core de negocio):**
   - **RF-01, RF-02, RF-03, RF-05, RF-06, RF-10** y **RNF-01, RNF-02**.
