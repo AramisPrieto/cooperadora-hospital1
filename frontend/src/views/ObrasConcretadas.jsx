@@ -4,9 +4,9 @@ import {
   CheckCircle, 
   Search, 
   Calendar, 
-  Sparkles, 
   ChevronRight,
   Award,
+  X,
 } from 'lucide-react';
 import api from '../api/axios';
 
@@ -118,34 +118,40 @@ const ObrasConcretadas = () => {
         </nav>
 
         {/* ── Header Section ── */}
-        <div className="text-left max-w-3xl mb-12">
-          <div className="inline-flex items-center gap-2 mb-4 bg-accent-50 text-accent-700 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-accent-100 shadow-sm">
-            <Sparkles className="h-3.5 w-3.5" />
-            Impacto Comunitario
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-display font-black text-slate-900 tracking-tight leading-none mb-4">
+        <header className="pt-4 pb-6 space-y-3.5 text-left max-w-3xl">
+          <span className="block text-xs font-black uppercase text-brand-600 tracking-widest">
+            Obras Concretadas
+          </span>
+          <h1 className="text-4xl sm:text-5xl font-display font-black text-slate-900 tracking-tight leading-none">
             Proyectos hechos realidad
           </h1>
           <p className="text-slate-500 text-base sm:text-lg font-medium leading-relaxed">
             Gracias al compromiso inquebrantable de la comunidad, comercios y socios, transformamos fondos en infraestructura de salud pública de calidad. Aquí se detallan los logros alcanzados.
           </p>
-        </div>
+        </header>
 
-        {/* ── Filter Controls ── */}
-        <div className="bg-white rounded-3xl border border-slate-200/60 p-5 mb-10 flex items-center justify-between gap-6 shadow-sm">
-          {/* Search bar */}
-          <div className="relative w-full max-w-md">
-            <Search className="absolute left-4 top-3.5 h-4.5 w-4.5 text-slate-400" />
+        {/* ── BARRA DE BÚSQUEDA ── */}
+        <section className="pb-6">
+          <div className="relative max-w-xl">
+            <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400 pointer-events-none" />
             <input
               id="search-obras-input"
               type="text"
               placeholder="Buscar obra concretada..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-slate-50/80 rounded-2xl text-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 transition-all duration-200"
+              className="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all font-medium shadow-inner"
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 text-slate-550 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
-        </div>
+        </section>
 
         {/* ── Main View Panel ── */}
         {loading ? (
