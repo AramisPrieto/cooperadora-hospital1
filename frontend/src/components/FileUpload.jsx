@@ -8,7 +8,7 @@
  *   label: string
  *   className: string (extra classes para el wrapper)
  */
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, Image, FileText } from 'lucide-react';
 import api from '../api/axios';
 
@@ -25,6 +25,7 @@ const FileUpload = ({
   const [error, setError] = useState('');
   const [preview, setPreview] = useState(value || '');
   const inputRef = useRef(null);
+  const inputId = useId();
 
   // Sync preview with value when it changes externally
   useEffect(() => {
@@ -92,7 +93,7 @@ const FileUpload = ({
   return (
     <div className={`space-y-2 ${className}`}>
       {label && (
-        <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">
+        <label htmlFor={inputId} className="block text-[11px] font-black text-slate-500 uppercase tracking-widest">
           {label}
         </label>
       )}
@@ -128,6 +129,7 @@ const FileUpload = ({
             <button
               type="button"
               onClick={handleClear}
+              aria-label="Quitar imagen"
               className="absolute top-2 right-2 h-7 w-7 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-slate-600 hover:text-rose-600 shadow-sm transition-colors"
             >
               <X className="h-3.5 w-3.5" />
@@ -146,6 +148,7 @@ const FileUpload = ({
             <button
               type="button"
               onClick={handleClear}
+              aria-label="Quitar archivo"
               className="h-7 w-7 flex items-center justify-center rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors shrink-0"
             >
               <X className="h-4 w-4" />
@@ -188,11 +191,13 @@ const FileUpload = ({
 
       {/* Input oculto */}
       <input
+        id={inputId}
         ref={inputRef}
         type="file"
         accept={accept || defaultAccept}
         onChange={handleChange}
         className="hidden"
+        aria-label={label || 'Subir archivo'}
       />
 
       {/* Error */}

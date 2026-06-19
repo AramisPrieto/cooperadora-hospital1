@@ -1,0 +1,9 @@
+packages:
+  - 'frontend'
+  - 'backend'
+
+allowBuilds:
+  esbuild: true
+
+onlyBuiltDependencies:
+  - esbuild

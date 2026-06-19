@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { X, Save } from 'lucide-react';
 import FileUpload from '../FileUpload';
 
-const FormLabel = ({ children }) => (
-  <label className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
+const FormLabel = ({ children, htmlFor }) => (
+  <label htmlFor={htmlFor} className="block text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1.5">
     {children}
   </label>
 );
@@ -44,6 +44,7 @@ const NewsForm = ({ news, onSave, onCancel }) => {
         <button 
           type="button" 
           onClick={onCancel} 
+          aria-label="Cerrar"
           className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
         >
           <X className="h-4 w-4" />
@@ -51,8 +52,9 @@ const NewsForm = ({ news, onSave, onCancel }) => {
       </div>
 
       <div>
-        <FormLabel>Título</FormLabel>
+        <FormLabel htmlFor="titulo">Título</FormLabel>
         <input 
+          id="titulo"
           type="text" 
           required 
           value={form.titulo} 
@@ -62,8 +64,9 @@ const NewsForm = ({ news, onSave, onCancel }) => {
         />
       </div>
       <div>
-        <FormLabel>Cuerpo / Contenido <span className="normal-case text-slate-400 font-normal ml-1">(HTML permitido)</span></FormLabel>
+        <FormLabel htmlFor="cuerpo_html">Cuerpo / Contenido <span className="normal-case text-slate-400 font-normal ml-1">(HTML permitido)</span></FormLabel>
         <textarea
+          id="cuerpo_html"
           required 
           rows={5} 
           value={form.cuerpo_html}
@@ -73,8 +76,9 @@ const NewsForm = ({ news, onSave, onCancel }) => {
         />
       </div>
       <div>
-        <FormLabel>Fecha de Publicación</FormLabel>
+        <FormLabel htmlFor="fecha">Fecha de Publicación</FormLabel>
         <input 
+          id="fecha"
           type="date" 
           value={form.fecha} 
           onChange={e => handleChange('fecha', e.target.value)} 

@@ -189,28 +189,40 @@ sequenceDiagram
 
 ---
 
-## 💻 Guía Rápida de Ejecución Local (pnpm)
+## 💻 Guía Rápida de Ejecución Local (pnpm Workspaces)
 
-Este proyecto utiliza `pnpm` como gestor de paquetes principal (configurado mediante `pnpm-workspace.yaml`).
+Este proyecto está estructurado como un **Monorepo gestionado con pnpm Workspaces** (`pnpm-workspace.yaml`), permitiendo controlar el frontend y el backend de forma centralizada y eficiente desde el directorio raíz.
 
 1. **Instalar pnpm globalmente** (si no lo tienes):
    ```bash
    npm install -g pnpm
    ```
-2. **Instalar dependencias del proyecto:**
+2. **Instalar dependencias de todo el proyecto:**
    Posicionado en la raíz del repositorio, ejecuta:
    ```bash
    pnpm install
    ```
-   Esto instalará de forma enlazada y eficiente los módulos tanto para el `frontend` como para el `backend`.
+   Esto resolverá las dependencias de manera compartida y enlazada para `frontend` y `backend` usando un único archivo de bloqueo `pnpm-lock.yaml`.
 3. **Variables de entorno locales:**
    Duplica los archivos `.env.example` en las carpetas `backend` y `frontend`, y renómbralos a `.env`.
 4. **Ejecutar el entorno de desarrollo:**
-   Dentro del `frontend`: ejecuta `pnpm run dev`
-   Dentro del `backend`: ejecuta `pnpm run dev` (o utiliza el script `start-dev-with-tunnel.js` si necesitas recibir webhooks locales de Mercado Pago).
+   Desde la raíz del repositorio, puedes iniciar tanto el frontend (React/Vite) como el backend (Node/Express) de forma concurrente con un único comando:
+   ```bash
+   pnpm dev
+   ```
+   *(Si deseas correrlos por separado, puedes usar `pnpm dev:frontend` o `pnpm dev:backend` desde la raíz, o ingresar a sus respectivas carpetas).*
 5. **Ejecución de Pruebas Automatizadas:**
-   El backend cuenta con un entorno aislado de pruebas para garantizar la estabilidad de la API.
-   Dentro del `backend`: ejecuta `pnpm run test` para correr la suite de Vitest/Supertest.
+   Puedes correr las pruebas del monorepo directamente desde el directorio raíz:
+   * **Pruebas del Frontend (Componentes y Accesibilidad WCAG):**
+     ```bash
+     pnpm test
+     ```
+     *(Ejecuta la suite de 26 pruebas de la interfaz). En caso de querer usar modo watch, puedes correr `pnpm test:frontend` o ingresar a `frontend` y correr `pnpm run test:watch`.*
+   * **Pruebas del Backend (API REST):**
+     ```bash
+     pnpm test:backend
+     ```
+     *(Recuerda tener tus bases de datos de test locales Postgres/MongoDB en funcionamiento).*
 
 ---
 
