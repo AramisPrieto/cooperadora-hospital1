@@ -86,7 +86,6 @@ Diseñar, desarrollar e implementar una plataforma web con persistencia híbrida
 * **Registro en el Libro de Asociados:** Panel del socio para registrar sus datos personales (DNI obligatorio, nombre, dirección) con validación relacional estricta en PostgreSQL.
 * **Autogestión de Socios (SocioPanel):** Sección privada dividida en tres pestañas responsivas: "Mi Resumen" (datos de perfil y DNI), "Mis Cuotas" (períodos de facturación, pago manual y adhesión a débito automático) y "Mis Donaciones" (historial transaccional).
 * **Integración con Mercado Pago:** Soporte oficial para cobro de cuotas mensuales vía débito automático (suscripciones preapproval) y pasarela de pago online para campañas con callbacks de webhook validados criptográficamente (HMAC SHA256) e invalidación de caché selectiva.
-* **Visualización de la Campaña del Mes:** Sección destacada en la página de inicio que consume de manera síncrona los montos de PostgreSQL y las narrativas visuales de MongoDB (Data Mashup).
 * **Checkout de Declaración de Transferencia:** Formulario interactivo donde el socio declara la transferencia realizada detallando el monto, la fecha, y simula la carga del comprobante bancario.
 * **Panel de Administración Integral:** Panel interactivo para el operador de la cooperadora con:
   - Métricas agregadas y gráficos con datos reales de recaudaciones y nuevos asociados de los últimos 6 meses.
@@ -192,7 +191,7 @@ Para la gestión de este proyecto, se seleccionó el **Modelo Scrum combinado co
 
 ### HU-03: Visualización de Campaña Destacada
 * **Como** donante potencial,
-* **quiero** visualizar la Campaña del Mes en la página de inicio con su meta financiera y barra de progreso,
+* **quiero** visualizar una Campaña en la página de inicio con su meta financiera y barra de progreso,
 * **para** comprender la urgencia de la recaudación y decidir en qué colaborar.
 * **Criterios de Aceptación:**
   1. La barra de progreso debe calcular el porcentaje acumulado en tiempo real según las donaciones aprobadas.
@@ -332,7 +331,6 @@ Para la gestión de este proyecto, se seleccionó el **Modelo Scrum combinado co
 5. **RNF-05 (Disponibilidad y Tasa):** El sistema debe resistir ataques básicos de denegación de servicio (DoS) bloqueando mediante HTTP 429 a cualquier IP que supere las 100 peticiones globales por cada ventana de 15 minutos.
 6. **RNF-06 (Accesibilidad del Compartido):** El modal de compartido rápido (ShareModal) debe cumplir con las directrices de accesibilidad WCAG, validado mediante tests automatizados de `jest-axe`.
 7. **RNF-07 (Caché con Invalidación Selectiva):** Las consultas pesadas y agregados de campañas deben almacenarse en memoria en el servidor e invalidarse mediante patrones selectivos (`flushCachePattern`) ante mutaciones.
-8. **RNF-08 (Telemetría de Rendimiento en Nube):** La plataforma debe integrar los servicios de Vercel Analytics y Speed Insights para registrar y evaluar Core Web Vitals en producción de forma automatizada.
 
 ---
 
