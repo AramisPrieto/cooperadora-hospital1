@@ -8,7 +8,7 @@
 - [ ] configurar visible y no visible noticias o quitar visible y que esten siempre todas habalr en grupo
 - [ ] cuotas
 - [ ] no tener que refrescar para ver las transferenicaias
-- [ ] 
+- [ ] agregart en trasnferencias buscar por socio y que apartir de 25 transferencias cree otras presta;as 
 ## 🔄 En Progreso
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
