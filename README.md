@@ -151,10 +151,11 @@ El sistema integra la API REST de **Resend** para el despacho de correos electr�
 
 ---
 
-### 3. Métricas y Rendimiento (Vercel Analytics)
+### 3. Métricas y Rendimiento (Vercel Analytics & Speed Insights)
 
-El frontend integra `@vercel/analytics` para recopilar datos de tráfico, rendimiento y uso del portal de forma anónima y sin comprometer la privacidad del usuario:
-* **Despliegue y Captura:** El componente `<Analytics />` de React se inicializa en el componente raíz [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx). Recopila información de vistas de página y métricas de Web Vitals de manera automática una vez que el proyecto se encuentra activo en Vercel.
+El frontend integra herramientas oficiales de Vercel para analizar de forma anónima y optimizada la usabilidad y velocidad de carga del portal:
+* **Vercel Analytics (`@vercel/analytics`):** Mide el tráfico general, número de visitantes y comportamiento de navegación por sección, inicializándose en el componente raíz [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx).
+* **Vercel Speed Insights (`@vercel/speed-insights`):** Realiza un seguimiento pasivo del rendimiento real de los usuarios en producción (Core Web Vitals como LCP, FID, CLS), permitiendo analizar en el panel de Vercel posibles cuellos de botella en la renderización.
 
 ---
 

@@ -452,8 +452,8 @@
   - **Bienvenida:** Envío automático de un correo electrónico de bienvenida institucional a los nuevos socios al registrarse en [authService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/authService.js).
   - **Aprobación de Socio:** Envío de un mail automático notificando la aprobación del socio por la administración una vez que el admin cambia su estado a activo en `PUT /api/socios/:id` en [socioController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioController.js).
   - **Agradecimiento de Donaciones:** Envío de correo tras la validación de transferencias bancarias de donación en [donacionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/donacionController.js).
-- **Métricas y Rendimiento (Vercel Analytics)**:
-  - Instalación e integración del paquete de analíticas oficiales `@vercel/analytics` en el frontend React.
-  - Inicialización del componente `<Analytics />` en la raíz [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx) para recopilar métricas de visitas y Web Vitals de manera automática una vez que esté en producción.
+- **Métricas y Rendimiento (Vercel Analytics & Speed Insights)**:
+  - Instalación e integración de los paquetes de monitoreo oficiales `@vercel/analytics` y `@vercel/speed-insights` en el frontend React.
+  - Inicialización de los componentes `<Analytics />` y `<SpeedInsights />` en la raíz [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx) para recopilar métricas de visitas, Core Web Vitals y rendimiento real de carga del portal de manera automatizada en producción.
 
 
