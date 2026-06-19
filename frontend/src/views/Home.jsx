@@ -100,7 +100,7 @@ const Home = () => {
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
-  
+
   /* ── State for Campaigns ── */
   const [donationMethod, setDonationMethod] = useState('transferencia');
   const [globalSuccessMsg, setGlobalSuccessMsg] = useState('');
@@ -509,9 +509,8 @@ const Home = () => {
                           <button
                             key={idx}
                             onClick={() => handleCampaignChange(idx)}
-                            className={`h-1.5 rounded-full transition-all duration-300 ${
-                              idx === activeCampaignIndex ? 'w-4 bg-brand-500' : 'w-1.5 bg-slate-200 hover:bg-slate-300'
-                            }`}
+                            className={`h-1.5 rounded-full transition-all duration-300 ${idx === activeCampaignIndex ? 'w-4 bg-brand-500' : 'w-1.5 bg-slate-200 hover:bg-slate-300'
+                              }`}
                             aria-label={`Ir a campaña ${idx + 1}`}
                           />
                         ))}
@@ -554,10 +553,6 @@ const Home = () => {
               Tus aportes impactan en la comunidad en tiempo real, con trazabilidad garantizada.
             </p>
           </div>
-          <span className="badge badge-teal self-start md:self-end">
-            <div className="h-1.5 w-1.5 bg-brand-500 rounded-full animate-pulse" />
-            Transparencia Total
-          </span>
         </div>
 
         {globalSuccessMsg && (
@@ -612,12 +607,12 @@ const Home = () => {
       {!loadingCampaigns && completedCampaigns.length > 0 && (
         <section id="obras-section" className="bg-slate-50 py-16 px-4 border-t border-slate-200/60">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col items-center text-center mb-10 gap-2">
-              <div className="inline-flex items-center gap-2 mb-2 text-emerald-600 text-xs font-black uppercase tracking-widest">
+            <div className="mb-10 text-left">
+              <div className="inline-flex items-center gap-2 mb-3 text-brand-600 text-xs font-black uppercase tracking-widest">
                 Impacto Real
               </div>
-              <h2 className="section-title text-emerald-900">Obras Concretadas</h2>
-              <p className="section-subtitle max-w-2xl mx-auto">
+              <h2 className="section-title">Obras Concretadas</h2>
+              <p className="section-subtitle">
                 Gracias a la solidaridad de la comunidad, hemos alcanzado el 100% de la meta en estos proyectos clave para nuestro hospital.
               </p>
             </div>
@@ -632,18 +627,15 @@ const Home = () => {
               ))}
             </div>
 
-            {/* Ver Más Logros */}
-            {completedCampaigns.length > 3 && (
-              <div className="flex justify-center mt-12">
-                <button
-                  onClick={() => navigate('/obras-concretadas')}
-                  className="btn-accent px-8 py-3.5 text-xs font-black uppercase tracking-widest flex items-center gap-2 border border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:border-emerald-300 hover:shadow-md"
-                >
-                  <Trophy className="h-4.5 w-4.5 text-emerald-600" />
-                  Ver todos los logros ({completedCampaigns.length})
-                </button>
-              </div>
-            )}
+            <div className="mt-10 flex justify-center">
+              <button
+                onClick={() => navigate('/obras-concretadas')}
+                className="btn-accent px-8 py-3.5 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-300"
+              >
+                Ver más obras
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </section>
       )}
@@ -655,11 +647,10 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4">
           {/* Heading */}
           <div className="mb-10 text-left">
-            <div className="inline-flex items-center gap-2 mb-3 text-slate-500 text-xs font-black uppercase tracking-widest">
+            <div className="inline-flex items-center gap-2 mb-3 text-brand-600 text-xs font-black uppercase tracking-widest">
               Novedades Institucionales
             </div>
             <h2 className="section-title flex items-center gap-3">
-              <Newspaper className="h-8 w-8 text-brand-500" />
               Noticias e Impacto Social
             </h2>
             <p className="section-subtitle">
@@ -678,74 +669,85 @@ const Home = () => {
               <p className="text-slate-400 font-semibold">No se encontraron noticias.</p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {news.map((noti, idx) => {
-                const grad = NEWS_COLORS[idx % NEWS_COLORS.length];
-                const snippet = getPlainTextSnippet(noti.cuerpo_html, 90);
-                return (
-                  <article
-                    key={noti._id}
-                    onClick={() => navigate(`/noticias/${noti._id}`)}
-                    className="group bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
-                  >
-                    {/* Image with gradient fallback */}
-                    <div className="aspect-[16/10] w-full overflow-hidden relative shrink-0 bg-slate-50 border-b border-slate-100">
-                      {noti.imagen_url ? (
-                        <img
-                          src={noti.imagen_url}
-                          alt={noti.titulo}
-                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      ) : null}
-                      {/* Gradient fallback */}
-                      <div
-                        className={`absolute inset-0 items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 overflow-hidden ${noti.imagen_url ? 'hidden' : 'flex'}`}
-                      >
-                        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
-                        <div className={`absolute inset-0 bg-gradient-to-br ${grad} opacity-20`} />
-                        <div className="relative flex flex-col items-center gap-2 opacity-40">
-                          <Newspaper className="h-10 w-10 text-white" />
+            <>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {news.slice(0, 3).map((noti, idx) => {
+                  const grad = NEWS_COLORS[idx % NEWS_COLORS.length];
+                  const snippet = getPlainTextSnippet(noti.cuerpo_html, 90);
+                  return (
+                    <article
+                      key={noti._id}
+                      onClick={() => navigate(`/noticias/${noti._id}`)}
+                      className="group bg-white rounded-3xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col h-full cursor-pointer relative"
+                    >
+                      {/* Image with gradient fallback */}
+                      <div className="aspect-[16/10] w-full overflow-hidden relative shrink-0 bg-slate-50 border-b border-slate-100">
+                        {noti.imagen_url ? (
+                          <img
+                            src={noti.imagen_url}
+                            alt={noti.titulo}
+                            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        {/* Gradient fallback */}
+                        <div
+                          className={`absolute inset-0 items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 overflow-hidden ${noti.imagen_url ? 'hidden' : 'flex'}`}
+                        >
+                          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
+                          <div className={`absolute inset-0 bg-gradient-to-br ${grad} opacity-20`} />
+                          <div className="relative flex flex-col items-center gap-2 opacity-40">
+                            <Newspaper className="h-10 w-10 text-white" />
+                          </div>
+                        </div>
+                        {/* Colored accent strip at bottom of image */}
+                        <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${grad}`} />
+                      </div>
+
+                      <div className="p-5 flex flex-col flex-grow gap-3.5 text-left">
+                        {/* Meta row */}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(noti.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-base font-display font-black text-slate-800 group-hover:text-brand-700 transition-colors leading-snug line-clamp-2">
+                          {noti.titulo}
+                        </h3>
+
+                        {/* Body */}
+                        <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2 flex-grow">
+                          {snippet}
+                        </p>
+
+                        {/* Read more footer */}
+                        <div className="flex justify-end pt-3 border-t border-slate-100 mt-auto">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-brand-600 group-hover:text-brand-700">
+                            Leer noticia
+                            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                          </span>
                         </div>
                       </div>
-                      {/* Colored accent strip at bottom of image */}
-                      <div className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${grad}`} />
-                    </div>
-
-                    <div className="p-5 flex flex-col flex-grow gap-3.5 text-left">
-                      {/* Meta row */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(noti.fecha).toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
-                        </span>
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="text-base font-display font-black text-slate-800 group-hover:text-brand-700 transition-colors leading-snug line-clamp-2">
-                        {noti.titulo}
-                      </h3>
-
-                      {/* Body */}
-                      <p className="text-xs text-slate-500 font-medium leading-relaxed line-clamp-2 flex-grow">
-                        {snippet}
-                      </p>
-
-                      {/* Read more footer */}
-                      <div className="flex justify-end pt-3 border-t border-slate-100 mt-auto">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-brand-600 group-hover:text-brand-700">
-                          Leer noticia
-                          <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+                    </article>
+                  );
+                })}
+              </div>
+              <div className="mt-10 flex justify-center">
+                <button
+                  onClick={() => navigate('/noticias')}
+                  className="btn-accent px-8 py-3.5 text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-sm hover:shadow-md transition-all duration-300"
+                >
+                  Ver más noticias
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </>
           )}
         </div>
       </section>
@@ -758,7 +760,7 @@ const Home = () => {
           <div className="bg-slate-950 rounded-[2rem] p-8 md:p-12 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
             {/* Background elements for premium look */}
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-900/10 rounded-full blur-[100px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
-            
+
             {/* Left Column: Title, description, button */}
             <div className="relative z-10 space-y-6 max-w-xl text-left">
               <span className="text-brand-500 font-extrabold text-xs uppercase tracking-widest block">
@@ -847,192 +849,257 @@ const Home = () => {
               {/* Modal body */}
               <div className="p-6 space-y-5">
                 <div>
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                  <div className="h-0.5 w-4 bg-brand-400 rounded-full" />
-                  Información de Recaudación
-                  <div className="h-0.5 w-4 bg-brand-400 rounded-full" />
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                    <span className="block text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Meta Económica</span>
-                    <span className="text-xl font-display font-black text-slate-800">
-                      {formatter.format(selectedCampaign.monto_objetivo)}
-                    </span>
-                  </div>
-                  <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
-                    <span className="block text-[9px] text-emerald-600 font-black uppercase tracking-widest mb-1">Recaudación Real</span>
-                    <span className="text-xl font-display font-black text-emerald-700">
-                      {formatter.format(selectedCampaign.monto_actual)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Progress */}
-                <div className="mt-3 space-y-1.5">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span className="text-slate-500">Progreso colectivo</span>
-                    <span className="text-brand-600">{modalPct}%</span>
-                  </div>
-                  <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden relative shadow-inner">
-                    <div
-                      className="h-full bg-accent-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
-                      style={{ width: `${modalPct}%` }}
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.25)_50%,transparent_100%)] w-full translate-x-[-100%] animate-[shimmer_2.5s_infinite]" />
-                  </div>
-                </div>
-
-                {/* Información del Equipo Médico */}
-                {selectedCampaign.detalles?.equipamiento_info && (
-                  <div className="mt-5 border-t border-slate-100 pt-4 space-y-3">
-                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-1.5">
-                      <Info className="h-3.5 w-3.5 text-teal-600" />
-                      Equipo Médico a Adquirir
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-teal-50/20 rounded-2xl p-4 border border-teal-100/80 shadow-sm hover:shadow-md transition-shadow group">
-                      {selectedCampaign.detalles.equipamiento_imagen && (
-                        <div className="aspect-[4/3] rounded-xl overflow-hidden border border-slate-200 bg-white sm:col-span-1 shadow-inner relative">
-                          <img
-                            src={selectedCampaign.detalles.equipamiento_imagen}
-                            alt={`Imagen de ${selectedCampaign.titulo}`}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      )}
-                      <div className={selectedCampaign.detalles.equipamiento_imagen ? "sm:col-span-2 space-y-1.5" : "sm:col-span-3 space-y-1.5"}>
-                        <span className="inline-block text-[9px] text-teal-700 font-black uppercase tracking-wider bg-teal-50 border border-teal-100 px-2 py-0.5 rounded">
-                          Especificación Técnica
-                        </span>
-                        <p className="text-xs font-black text-slate-800 leading-tight">Equipo: {selectedCampaign.titulo}</p>
-                        <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
-                          {selectedCampaign.detalles.equipamiento_info}
-                        </p>
-                      </div>
+                  <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                    <div className="h-0.5 w-4 bg-brand-400 rounded-full" />
+                    Información de Recaudación
+                    <div className="h-0.5 w-4 bg-brand-400 rounded-full" />
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                      <span className="block text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Meta Económica</span>
+                      <span className="text-xl font-display font-black text-slate-800">
+                        {formatter.format(selectedCampaign.monto_objetivo)}
+                      </span>
+                    </div>
+                    <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+                      <span className="block text-[9px] text-emerald-600 font-black uppercase tracking-widest mb-1">Recaudación Real</span>
+                      <span className="text-xl font-display font-black text-emerald-700">
+                        {formatter.format(selectedCampaign.monto_actual)}
+                      </span>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
 
-
-            {/* Donation footer */}
-            <div className="border-t border-slate-100 bg-slate-50 p-6 space-y-4">
-              {donationSuccess ? (
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium p-4 rounded-2xl shadow-sm">
-                    <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
-                    <p className="leading-normal">{donationSuccess}</p>
+                  {/* Progress */}
+                  <div className="mt-3 space-y-1.5">
+                    <div className="flex justify-between text-xs font-bold">
+                      <span className="text-slate-500">Progreso colectivo</span>
+                      <span className="text-brand-600">{modalPct}%</span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden relative shadow-inner">
+                      <div
+                        className="h-full bg-accent-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
+                        style={{ width: `${modalPct}%` }}
+                      />
+                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.25)_50%,transparent_100%)] w-full translate-x-[-100%] animate-[shimmer_2.5s_infinite]" />
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className="w-full btn-brand py-3 text-sm justify-center"
-                  >
-                    Entendido
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {donationError && (
-                    <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold p-3.5 rounded-xl">
-                      <AlertCircle className="h-4 w-4 shrink-0" />
-                      {donationError}
+
+                  {/* Información del Equipo Médico */}
+                  {selectedCampaign.detalles?.equipamiento_info && (
+                    <div className="mt-5 border-t border-slate-100 pt-4 space-y-3">
+                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-1.5">
+                        <Info className="h-3.5 w-3.5 text-teal-600" />
+                        Equipo Médico a Adquirir
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-teal-50/20 rounded-2xl p-4 border border-teal-100/80 shadow-sm hover:shadow-md transition-shadow group">
+                        {selectedCampaign.detalles.equipamiento_imagen && (
+                          <div className="aspect-[4/3] rounded-xl overflow-hidden border border-slate-200 bg-white sm:col-span-1 shadow-inner relative">
+                            <img
+                              src={selectedCampaign.detalles.equipamiento_imagen}
+                              alt={`Imagen de ${selectedCampaign.titulo}`}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          </div>
+                        )}
+                        <div className={selectedCampaign.detalles.equipamiento_imagen ? "sm:col-span-2 space-y-1.5" : "sm:col-span-3 space-y-1.5"}>
+                          <span className="inline-block text-[9px] text-teal-700 font-black uppercase tracking-wider bg-teal-50 border border-teal-100 px-2 py-0.5 rounded">
+                            Especificación Técnica
+                          </span>
+                          <p className="text-xs font-black text-slate-800 leading-tight">Equipo: {selectedCampaign.titulo}</p>
+                          <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+                            {selectedCampaign.detalles.equipamiento_info}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
+                </div>
+              </div>
 
-                  {/* Selector de método de donación */}
-                  <div className="flex gap-2 mb-4">
+
+              {/* Donation footer */}
+              <div className="border-t border-slate-100 bg-slate-50 p-6 space-y-4">
+                {donationSuccess ? (
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium p-4 rounded-2xl shadow-sm">
+                      <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
+                      <p className="leading-normal">{donationSuccess}</p>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => setDonationMethod('transferencia')}
-                      className={`flex-1 text-xs py-2 px-3 rounded-xl font-bold uppercase tracking-wider border transition-all ${
-                        donationMethod === 'transferencia'
-                          ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
+                      onClick={handleCloseModal}
+                      className="w-full btn-brand py-3 text-sm justify-center"
                     >
-                      <Banknote className="h-3.5 w-3.5 inline mr-1.5" />
-                      CBU / Transferencia
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDonationMethod('mp')}
-                      className={`flex-1 text-xs py-2 px-3 rounded-xl font-bold uppercase tracking-wider border transition-all ${
-                        donationMethod === 'mp'
-                          ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <Heart className="h-3.5 w-3.5 inline mr-1.5" />
-                      Mercado Pago
+                      Entendido
                     </button>
                   </div>
-
-                  {donationMethod === 'transferencia' ? (
-                    /* Formulario Transferencia Bancaria */
-                    <form onSubmit={handleDeclareTransfer} className="space-y-4">
-                      {/* Datos de cuenta */}
-                      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-3 text-xs shadow-sm">
-                        <div className="flex justify-between border-b border-slate-100 pb-2">
-                          <span className="text-slate-400 font-medium">Entidad bancaria:</span>
-                          <span className="text-slate-800 font-black">Banco Provincia</span>
-                        </div>
-                        <div className="flex justify-between border-b border-slate-100 pb-2">
-                          <span className="text-slate-400 font-medium">Razón Social:</span>
-                          <span className="text-slate-800 font-black">Asoc. Cooperadora Hosp. Ferreyra</span>
-                        </div>
-                        <div className="flex justify-between border-b border-slate-100 pb-2">
-                          <span className="text-slate-400 font-medium">CUIT:</span>
-                          <span className="text-slate-800 font-black">30-67891234-5</span>
-                        </div>
-
-                        {/* Alias copiable */}
-                        <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2">
-                          <span className="text-slate-400 font-medium">Alias:</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">cooperadora.hospital.nec</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText('cooperadora.hospital.nec');
-                                setCopiedAlias(true);
-                                setTimeout(() => setCopiedAlias(false), 2000);
-                              }}
-                              className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
-                              title="Copiar Alias"
-                            >
-                              {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* CBU copiable */}
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="text-slate-400 font-medium">CBU:</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">0140354701354701354701</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText('0140354701354701354701');
-                                setCopiedCbu(true);
-                                setTimeout(() => setCopiedCbu(false), 2000);
-                              }}
-                              className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
-                              title="Copiar CBU"
-                            >
-                              {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
-                            </button>
-                          </div>
-                        </div>
+                ) : (
+                  <>
+                    {donationError && (
+                      <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold p-3.5 rounded-xl">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        {donationError}
                       </div>
+                    )}
 
-                      {/* Declarar detalles de transferencia */}
-                      <div className="space-y-4 pt-2 border-t border-slate-100">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Selector de método de donación */}
+                    <div className="flex gap-2 mb-4">
+                      <button
+                        type="button"
+                        onClick={() => setDonationMethod('transferencia')}
+                        className={`flex-1 text-xs py-2 px-3 rounded-xl font-bold uppercase tracking-wider border transition-all ${donationMethod === 'transferencia'
+                            ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
+                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                          }`}
+                      >
+                        <Banknote className="h-3.5 w-3.5 inline mr-1.5" />
+                        CBU / Transferencia
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDonationMethod('mp')}
+                        className={`flex-1 text-xs py-2 px-3 rounded-xl font-bold uppercase tracking-wider border transition-all ${donationMethod === 'mp'
+                            ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
+                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                          }`}
+                      >
+                        <Heart className="h-3.5 w-3.5 inline mr-1.5" />
+                        Mercado Pago
+                      </button>
+                    </div>
+
+                    {donationMethod === 'transferencia' ? (
+                      /* Formulario Transferencia Bancaria */
+                      <form onSubmit={handleDeclareTransfer} className="space-y-4">
+                        {/* Datos de cuenta */}
+                        <div className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-3 text-xs shadow-sm">
+                          <div className="flex justify-between border-b border-slate-100 pb-2">
+                            <span className="text-slate-400 font-medium">Entidad bancaria:</span>
+                            <span className="text-slate-800 font-black">Banco Provincia</span>
+                          </div>
+                          <div className="flex justify-between border-b border-slate-100 pb-2">
+                            <span className="text-slate-400 font-medium">Razón Social:</span>
+                            <span className="text-slate-800 font-black">Asoc. Cooperadora Hosp. Ferreyra</span>
+                          </div>
+                          <div className="flex justify-between border-b border-slate-100 pb-2">
+                            <span className="text-slate-400 font-medium">CUIT:</span>
+                            <span className="text-slate-800 font-black">30-67891234-5</span>
+                          </div>
+
+                          {/* Alias copiable */}
+                          <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2">
+                            <span className="text-slate-400 font-medium">Alias:</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">cooperadora.hospital.nec</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText('cooperadora.hospital.nec');
+                                  setCopiedAlias(true);
+                                  setTimeout(() => setCopiedAlias(false), 2000);
+                                }}
+                                className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
+                                title="Copiar Alias"
+                              >
+                                {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* CBU copiable */}
+                          <div className="flex items-center justify-between gap-4">
+                            <span className="text-slate-400 font-medium">CBU:</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">0140354701354701354701</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText('0140354701354701354701');
+                                  setCopiedCbu(true);
+                                  setTimeout(() => setCopiedCbu(false), 2000);
+                                }}
+                                className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
+                                title="Copiar CBU"
+                              >
+                                {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Declarar detalles de transferencia */}
+                        <div className="space-y-4 pt-2 border-t border-slate-100">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
+                                Monto de tu aporte ($) *
+                              </label>
+                              <div className="relative">
+                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
+                                <input
+                                  type="number"
+                                  min="1000"
+                                  step="any"
+                                  value={transferAmount}
+                                  onChange={(e) => setTransferAmount(e.target.value)}
+                                  placeholder="5000"
+                                  className="input-field pl-7 py-2.5 text-sm"
+                                  required
+                                  disabled={submittingDonation}
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
+                                Número de Transacción / Comprobante
+                              </label>
+                              <input
+                                type="text"
+                                value={transferNumber}
+                                onChange={(e) => setTransferNumber(e.target.value)}
+                                placeholder="Ej: TXN-1234567"
+                                className="input-field py-2.5 text-sm"
+                                disabled={submittingDonation}
+                              />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                              <FileUpload
+                                tipo="comprobante"
+                                value={transferReceiptUrl}
+                                onChange={setTransferReceiptUrl}
+                                label="Comprobante de transferencia (opcional)"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex gap-3 pt-2">
+                            <button
+                              type="button"
+                              onClick={handleCloseModal}
+                              disabled={submittingDonation}
+                              className="flex-1 px-4 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
+                            >
+                              Cerrar
+                            </button>
+                            <button
+                              type="submit"
+                              disabled={submittingDonation}
+                              className="flex-1 btn-brand text-xs py-3 px-6 whitespace-nowrap disabled:opacity-50 w-full"
+                            >
+                              {submittingDonation ? 'Procesando...' : 'Reportar Transferencia'}
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    ) : (
+                      /* Formulario Mercado Pago */
+                      <form onSubmit={handleDonationMP} className="space-y-4">
+                        <div className="space-y-3">
                           <div>
                             <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
-                              Monto de tu aporte ($) *
+                              Monto a donar ($) *
                             </label>
                             <div className="relative">
                               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
@@ -1048,29 +1115,6 @@ const Home = () => {
                                 disabled={submittingDonation}
                               />
                             </div>
-                          </div>
-
-                          <div>
-                            <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
-                              Número de Transacción / Comprobante
-                            </label>
-                            <input
-                              type="text"
-                              value={transferNumber}
-                              onChange={(e) => setTransferNumber(e.target.value)}
-                              placeholder="Ej: TXN-1234567"
-                              className="input-field py-2.5 text-sm"
-                              disabled={submittingDonation}
-                            />
-                          </div>
-
-                          <div className="sm:col-span-2">
-                            <FileUpload
-                              tipo="comprobante"
-                              value={transferReceiptUrl}
-                              onChange={setTransferReceiptUrl}
-                              label="Comprobante de transferencia (opcional)"
-                            />
                           </div>
                         </div>
 
@@ -1088,58 +1132,14 @@ const Home = () => {
                             disabled={submittingDonation}
                             className="flex-1 btn-brand text-xs py-3 px-6 whitespace-nowrap disabled:opacity-50 w-full"
                           >
-                            {submittingDonation ? 'Procesando...' : 'Reportar Transferencia'}
+                            {submittingDonation ? 'Redirigiendo...' : 'Donar con Mercado Pago'}
                           </button>
                         </div>
-                      </div>
-                    </form>
-                  ) : (
-                    /* Formulario Mercado Pago */
-                    <form onSubmit={handleDonationMP} className="space-y-4">
-                      <div className="space-y-3">
-                        <div>
-                          <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
-                            Monto a donar ($) *
-                          </label>
-                          <div className="relative">
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
-                            <input
-                              type="number"
-                              min="1000"
-                              step="any"
-                              value={transferAmount}
-                              onChange={(e) => setTransferAmount(e.target.value)}
-                              placeholder="5000"
-                              className="input-field pl-7 py-2.5 text-sm"
-                              required
-                              disabled={submittingDonation}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-3 pt-2">
-                        <button
-                          type="button"
-                          onClick={handleCloseModal}
-                          disabled={submittingDonation}
-                          className="flex-1 px-4 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
-                        >
-                          Cerrar
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={submittingDonation}
-                          className="flex-1 btn-brand text-xs py-3 px-6 whitespace-nowrap disabled:opacity-50 w-full"
-                        >
-                          {submittingDonation ? 'Redirigiendo...' : 'Donar con Mercado Pago'}
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </>
-              )}
-            </div>
+                      </form>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
