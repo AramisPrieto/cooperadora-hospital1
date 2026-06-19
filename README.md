@@ -10,7 +10,7 @@
 * **Thiago Masson**
 * **Santiago Ialungo**
 
-**Profesor:** Ing. Hernández Gauna, Jorge G.
+**Profesor:** Ing. Hernández Gauna, Jorge.
 
 ---
 
