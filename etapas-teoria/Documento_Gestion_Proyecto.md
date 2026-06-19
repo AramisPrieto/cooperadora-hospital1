@@ -64,7 +64,6 @@ Diseñar, desarrollar e implementar una plataforma web con persistencia híbrida
 5. **Notificaciones por API REST:** Reemplazar los servicios SMTP tradicionales por una integración directa con la API de Resend a través del puerto seguro HTTPS 443, enviando correos automatizados de bienvenida, restablecimiento de contraseña y confirmaciones de donación/pago.
 6. **Validación y Pruebas Automatizadas:** Desarrollar y ampliar la suite de pruebas de integración automatizadas utilizando Vitest y Supertest, alcanzando 79 pruebas para certificar la estabilidad de flujos transaccionales y de seguridad.
 7. **Adhesión Financiera e Integración Recurrente:** Integrar el SDK de Mercado Pago para procesar débitos recurrentes de cuotas mensuales y donaciones web con validaciones de webhooks en tiempo real e invalidación de caché selectiva.
-8. **Telemetría e Infraestructura:** Configurar proxies inversos en el frontend para Cookies Same-Origin y registrar Core Web Vitals en producción a través de Vercel Analytics y Speed Insights.
 
 ---
 
