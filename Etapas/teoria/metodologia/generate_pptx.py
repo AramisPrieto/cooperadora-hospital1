@@ -683,19 +683,40 @@ def main():
     add_slide_footer(slide6)
     
     patterns = [
-        ("Singleton Pattern", "CONEXIÓN DE BD ÚNICA", "Módulo: config/db.js\nAsegura que toda la aplicación de Express comparta una única instancia de conexión para los motores SQL y NoSQL.\n\nVentaja: Ahorro de memoria, previene la sobrecarga del pool de conexiones al evitar múltiples instancias redundantes."),
-        ("Factory Method Pattern", "CREACIÓN DE USUARIOS", "Módulo: services/userService.js\nDelegación de la creación de instancias del modelo según rol (Socio o Admin), precargando permisos específicos.\n\nVentaja: Cumple con el principio Open/Closed al poder añadir nuevos roles fácilmente sin alterar controladores."),
-        ("State Pattern + Async Worker", "CONCILIACIÓN AUTOMÁTICA", "Módulo: donacionController.js\nFlujo de transferencias manuales dividido en clases de estado (EstadoPendiente, EstadoAprobado, EstadoRechazado) con un Cron Job / Worker de conciliación automática en segundo plano.\n\nVentaja: Resuelve el cuello de botella manual.")
+        ("Abstracción e Interfaz", "PASARELA DE PAGOS GENÉRICA",
+         "Módulo: socioSubscriptionController.js y mpService.js (Cuotas transaccionales)\n"
+         "Solución: Crear un contrato abstracto IPaymentGateway con firmas abstractas (procesarPagoRecurrente, cancelarSuscripcion) para desacoplar el SDK directo de Mercado Pago.\n"
+         "Ventaja: Desacoplamiento de infraestructura. Migra a Stripe/MODO sin tocar controladores.\n"
+         "Desventaja: JS no tiene interfaces nativas; debe emularse manualmente en runtime."),
+        ("Factory Method Pattern", "CREACIÓN DE USUARIOS",
+         "Módulo: services/userService.js (Creación de cuentas)\n"
+         "Solución: Utilizar una fábrica que, dado el rol (Socio o Admin), instancie la clase correcta del modelo cargando sus respectivos permisos iniciales.\n"
+         "Ventaja: Desacopla la creación de objetos y cumple Open/Closed al agregar roles.\n"
+         "Desventaja: Puede ser sobreingeniería si la estructura de roles es fija."),
+        ("Singleton Pattern", "CONEXIÓN DE BD ÚNICA",
+         "Módulo: config/db.js (Conexiones PostgreSQL y MongoDB)\n"
+         "Solución: Implementar Singleton para asegurar que toda la aplicación comparta y reutilice una única instancia activa de conexión para ambos motores de base de datos.\n"
+         "Ventaja: Optimización y ahorro de memoria, previene la sobrecarga del pool.\n"
+         "Desventaja: Introduce estado global en la app, dificultando mocks en tests unitarios."),
+        ("State Pattern + Async Worker", "CONCILIACIÓN DE TRANSFERENCIAS",
+         "Módulo: donacionController.js (Validación de transferencias bancarias)\n"
+         "Solución: Delegar flujos de transferencias a clases de estado (EstadoPendiente, EstadoAprobado, EstadoRechazado) con un Worker/Cron en segundo plano de conciliación asíncrona.\n"
+         "Ventaja: Rompe el cuello de botella manual; barra de progreso en tiempo real y correos inmediatos.\n"
+         "Desventaja: Mayor complejidad técnica por cron o colas de tareas.")
     ]
     
-    col_width = Inches(3.64)
+    col_width = Inches(5.6)
+    box_height = Inches(2.2)
     start_x = Inches(0.8)
+    start_y = Inches(1.8)
     gap_x = Inches(0.4)
-    box_height = Inches(4.5)
+    gap_y = Inches(0.3)
     
     for i, (pat_name, pat_subtitle, pat_desc) in enumerate(patterns):
-        x = start_x + i * (col_width + gap_x)
-        y = Inches(1.9)
+        col = i % 2
+        row = i // 2
+        x = start_x + col * (col_width + gap_x)
+        y = start_y + row * (box_height + gap_y)
         
         # Tarjeta
         card = slide6.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, col_width, box_height)
@@ -703,10 +724,10 @@ def main():
         card.fill.fore_color.rgb = RGBColor(255, 255, 255)
         card.line.color.rgb = BORDER_COLOR
         card.line.width = Pt(1.5)
-        card.adjustments[0] = 0.06
+        card.adjustments[0] = 0.05
         
         # Texto
-        tx_box = slide6.shapes.add_textbox(x + Inches(0.2), y + Inches(0.3), col_width - Inches(0.4), box_height - Inches(0.5))
+        tx_box = slide6.shapes.add_textbox(x + Inches(0.15), y + Inches(0.15), col_width - Inches(0.3), box_height - Inches(0.3))
         tf = tx_box.text_frame
         tf.word_wrap = True
         tf.margin_left = tf.margin_top = tf.margin_right = tf.margin_bottom = 0
@@ -714,24 +735,24 @@ def main():
         p = tf.paragraphs[0]
         p.text = pat_name
         p.font.name = 'Montserrat'
-        p.font.size = Pt(13)
+        p.font.size = Pt(11)
         p.font.bold = True
         p.font.color.rgb = BRAND_EMERALD
         
         p_sub = tf.add_paragraph()
         p_sub.text = pat_subtitle
         p_sub.font.name = 'Montserrat'
-        p_sub.font.size = Pt(9.5)
+        p_sub.font.size = Pt(8.5)
         p_sub.font.bold = True
         p_sub.font.color.rgb = BRAND_RED
-        p_sub.space_after = Pt(12)
+        p_sub.space_after = Pt(6)
         
         p_desc = tf.add_paragraph()
         p_desc.text = pat_desc
         p_desc.font.name = 'Inter'
-        p_desc.font.size = Pt(9)
+        p_desc.font.size = Pt(8.2)
         p_desc.font.color.rgb = TEXT_MUTED
-        p_desc.line_spacing = 1.25
+        p_desc.line_spacing = 1.15
 
     # ----------------------------------------------------
     # GUARDAR PRESENTACIÓN

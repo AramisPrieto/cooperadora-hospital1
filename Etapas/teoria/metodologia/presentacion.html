@@ -593,8 +593,10 @@
 
     /* SLIDE 6: PATRONES Y MEJORAS */
     .grid-patterns {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.2rem;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 0.8rem;
     }
 
     .pattern-badge {
@@ -892,25 +894,9 @@
       </div>
 
       <div class="archi-container">
-        <!-- Columna de Arquitectura General -->
-        <div class="archi-flow">
-          <div class="archi-node">
-            <div class="archi-node-title">Cliente (Frontend SPA)</div>
-            <div class="archi-node-tech">React.js · Vite · Tailwind CSS</div>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem; line-height:1.3">
-              SPA responsiva cargada dinámicamente. Desacoplada del servidor para escalabilidad e independencia de despliegue.
-            </p>
-          </div>
-          
-          <div class="archi-arrow">⇅ HTTPS / REST API + JWT</div>
-          
-          <div class="archi-node red-border">
-            <div class="archi-node-title">API Server (Backend)</div>
-            <div class="archi-node-tech">Node.js · Express · pnpm workspaces</div>
-            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.3rem; line-height:1.3">
-              Capa lógica central. Realiza el Data Mashup, gestiona el estado de caché en memoria y controla la concurrencia.
-            </p>
-          </div>
+        <!-- Columna de Diagrama Visual -->
+        <div style="display: flex; align-items: center; justify-content: center; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 1rem; box-shadow: var(--shadow-card);">
+          <img src="arquitectura.png" alt="Arquitectura Híbrida de Persistencia" style="max-width: 100%; max-height: 380px; object-fit: contain; border-radius: 6px;">
         </div>
 
         <!-- Columna de Persistencia Híbrida -->
@@ -1042,44 +1028,62 @@
       </div>
 
       <div class="grid-container grid-patterns">
-        <!-- SINGLETON -->
-        <div class="card">
-          <span class="pattern-badge">Singleton Pattern</span>
-          <div class="card-title" style="margin-top:0.25rem">Conexión de BD Única</div>
-          <p class="card-desc">
-            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.8rem">backend/config/db.js</span><br>
-            Asegura una única instancia de conexión para los motores SQL y NoSQL, previniendo la fatiga del pool de conexiones.<br>
-            <span class="pattern-accent-text">Ventaja:</span> Ahorro sustancial de memoria y control centralizado del estado de la base de datos.
+        <!-- PASARELA DE PAGOS -->
+        <div class="card" style="padding:1rem 1.2rem;">
+          <span class="pattern-badge">Abstracción e Interfaz</span>
+          <div class="card-title" style="margin-top:0.15rem; font-size:1.05rem;">Pasarela de Pagos Genérica</div>
+          <p class="card-desc" style="font-size:0.78rem; line-height:1.4;">
+            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.72rem">socioSubscriptionController.js</span> y <span style="font-family:monospace; font-size:0.72rem">mpService.js</span><br>
+            <strong>Solución:</strong> Crear una interfaz/contrato abstracto (`IPaymentGateway`) con firmas (`procesarPagoRecurrente()`, `cancelarSuscripcion()`) para desacoplar el SDK de Mercado Pago.<br>
+            <strong>Ventaja:</strong> Desacoplamiento total. Permite migrar a Stripe, MODO u otros sin modificar controladores.<br>
+            <strong>Desventaja:</strong> Node.js/JS no tiene interfaces nativas; debe emularse estructuralmente.
           </p>
-          <div class="pattern-block">
-            class DB { static getInstance() { ... } }
+          <div class="pattern-block" style="font-size:0.65rem; padding:0.3rem 0.5rem; margin-top:0.35rem;">
+            class IPaymentGateway { procesarPagoRecurrente() { ... } }
           </div>
         </div>
 
         <!-- FACTORY METHOD -->
-        <div class="card">
-          <span class="pattern-badge">Factory Method</span>
-          <div class="card-title" style="margin-top:0.25rem">Creación de Usuarios</div>
-          <p class="card-desc">
-            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.8rem">services/userService.js</span><br>
-            Delegación de la creación de instancias del modelo según rol (<span class="pattern-accent-text">Socio</span> o <span class="pattern-accent-text">Admin</span>), precargando permisos específicos.<br>
-            <span class="pattern-accent-text">Ventaja:</span> Cumplimiento del principio Open/Closed al extender tipos de usuarios sin alterar el controlador.
+        <div class="card" style="padding:1rem 1.2rem;">
+          <span class="pattern-badge">Factory Method (Creacional)</span>
+          <div class="card-title" style="margin-top:0.15rem; font-size:1.05rem;">Creación de Usuarios</div>
+          <p class="card-desc" style="font-size:0.78rem; line-height:1.4;">
+            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.72rem">services/userService.js</span><br>
+            <strong>Solución:</strong> Utilizar una clase fábrica que, dado el rol (Socio o Admin), devuelva la instancia correcta del modelo con permisos específicos precargados.<br>
+            <strong>Ventaja:</strong> Centraliza la lógica de instanciación y cumple el principio Open/Closed al extender roles.<br>
+            <strong>Desventaja:</strong> Agrega sobreingeniería innecesaria si la jerarquía de roles es estática.
           </p>
-          <div class="pattern-block">
+          <div class="pattern-block" style="font-size:0.65rem; padding:0.3rem 0.5rem; margin-top:0.35rem;">
             UserFactory.createUser(role, data);
           </div>
         </div>
 
-        <!-- STATE PATTERN -->
-        <div class="card">
-          <span class="pattern-badge">State Pattern + Async Worker</span>
-          <div class="card-title" style="margin-top:0.25rem">Conciliación de Transferencias</div>
-          <p class="card-desc">
-            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.8rem">donacionController.js</span><br>
-            El flujo de transferencias pasa a delegarse en estados: <span class="pattern-accent-text">Pendiente</span>, <span class="pattern-accent-text">Aprobado</span> o <span class="pattern-accent-text">Rechazado</span>, combinándose con un Worker asíncrono secundario para notificaciones interbancarias automáticas.<br>
-            <span class="pattern-accent-text">UX:</span> Elimina el cuello de botella de aprobación manual.
+        <!-- SINGLETON -->
+        <div class="card" style="padding:1rem 1.2rem;">
+          <span class="pattern-badge">Singleton (Creacional)</span>
+          <div class="card-title" style="margin-top:0.15rem; font-size:1.05rem;">Conexión de BD Única</div>
+          <p class="card-desc" style="font-size:0.78rem; line-height:1.4;">
+            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.72rem">backend/config/db.js</span> (PostgreSQL & MongoDB).<br>
+            <strong>Solución:</strong> Implementar el patrón Singleton para asegurar que toda la aplicación de Express comparta y reutilice una única instancia activa de conexión para ambos motores.<br>
+            <strong>Ventaja:</strong> Ahorro óptimo de memoria y previene la saturación del pool de conexiones.<br>
+            <strong>Desventaja:</strong> Introduce estado global, dificultando mocks en tests unitarios.
           </p>
-          <div class="pattern-block">
+          <div class="pattern-block" style="font-size:0.65rem; padding:0.3rem 0.5rem; margin-top:0.35rem;">
+            class DB { static getInstance() { ... } }
+          </div>
+        </div>
+
+        <!-- STATE PATTERN -->
+        <div class="card" style="padding:1rem 1.2rem;">
+          <span class="pattern-badge">State Pattern + Async Worker</span>
+          <div class="card-title" style="margin-top:0.15rem; font-size:1.05rem;">Conciliación de Transferencias</div>
+          <p class="card-desc" style="font-size:0.78rem; line-height:1.4;">
+            <strong>Módulo:</strong> <span style="font-family:monospace; font-size:0.72rem">donacionController.js</span> (Aprobación de comprobantes).<br>
+            <strong>Solución:</strong> Delegar estados de donación a clases (`EstadoPendiente`, `EstadoAprobado`, `EstadoRechazado`) con un Worker/Cron en segundo plano de conciliación asíncrona automatizada.<br>
+            <strong>Ventaja:</strong> Elimina el cuello de botella de aprobación manual del operador; actualizaciones financieras inmediatas.<br>
+            <strong>Desventaja:</strong> Mayor complejidad técnica por el Cron/Worker secundario.
+          </p>
+          <div class="pattern-block" style="font-size:0.65rem; padding:0.3rem 0.5rem; margin-top:0.35rem;">
             donation.transitionTo(new ApprovedState());
           </div>
         </div>

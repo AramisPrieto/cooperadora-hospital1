@@ -13,6 +13,9 @@ const getMpClient = () => {
 
 const getBackendUrl = () => {
   if (process.env.NODE_ENV === 'production') {
+    if (!process.env.BACKEND_URL) {
+      console.error('❌ [Mercado Pago Service] ¡BACKEND_URL no está configurada en producción! Esto generará URLs de retorno relativas que Mercado Pago rechazará.');
+    }
     return process.env.BACKEND_URL || '';
   }
   return process.env.BACKEND_TUNNEL_URL || process.env.BACKEND_URL || 'http://localhost:5001';
