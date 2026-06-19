@@ -74,7 +74,7 @@ describe('Rutas de Campañas (/api/campanas)', () => {
         });
 
       expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('error', 'Los montos económicos no pueden ser negativos.');
+      expect(res.body).toHaveProperty('error', 'El monto objetivo debe ser un número no negativo.');
     });
 
     it('debe denegar la creación a usuarios no administradores', async () => {
