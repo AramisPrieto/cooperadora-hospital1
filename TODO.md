@@ -6,6 +6,7 @@
 - [ ] eliminar usuario
 - [ ] mail que te llegue cuando te aprueban como socio
 - [ ] configurar visible y no visible noticias o quitar visible y que esten siempre todas habalr en grupo
+- [ ] verificar lenis
 - [ ] agregar metodo en transferencia admin campañas
 ## 🔄 En Progreso
 ## ✅ Terminado
