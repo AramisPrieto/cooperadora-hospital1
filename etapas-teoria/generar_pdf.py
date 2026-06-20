@@ -82,6 +82,10 @@ def parse_markdown(filepath, styles):
     with open(filepath, 'r', encoding='utf-8') as f:
         lines = f.readlines()
         
+    # Skip first 14 lines containing duplicate cover page metadata
+    if len(lines) > 14 and lines[14].strip().startswith("# PARTE 1"):
+        lines = lines[14:]
+        
     in_table = False
     in_code_block = False
     table_lines = []
@@ -150,7 +154,8 @@ def parse_markdown(filepath, styles):
             heading_text_formatted = format_inline(heading_text)
             
             if level == 1:
-                story.append(PageBreak())  # Start major sections on a new page
+                if len(story) > 0:  # Avoid empty page before PARTE 1
+                    story.append(PageBreak())  # Start major sections on a new page
                 story.append(Paragraph(heading_text_formatted, styles['MDH1']))
                 story.append(Spacer(1, 10))
             elif level == 2:
