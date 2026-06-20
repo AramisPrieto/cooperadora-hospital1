@@ -23,15 +23,15 @@
     "jsonwebtoken": "^9.0.2",
     "mercadopago": "^3.1.0",
     "mongoose": "^8.3.1",
-    "multer": "^2.1.1",
+    "multer": "^2.2.0",
     "node-cache": "^5.1.2",
-    "nodemailer": "^8.0.10",
+    "nodemailer": "^9.0.1",
     "pg": "^8.11.5",
     "sequelize": "^6.37.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.0",
     "supertest": "^7.2.2",
-    "vitest": "^1.6.1"
+    "vitest": "^4.1.9"
   }
 }

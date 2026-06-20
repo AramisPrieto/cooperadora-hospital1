@@ -7,3 +7,7 @@ allowBuilds:
 
 onlyBuiltDependencies:
   - esbuild
+
+overrides:
+  uuid: ^11.1.1
+

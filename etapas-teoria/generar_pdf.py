@@ -183,6 +183,38 @@ def parse_markdown(filepath, styles):
             i += 1
             continue
             
+        # Handle Numbered list items
+        num_match = re.match(r'^(\d+)\.\s+(.*)$', stripped)
+        if num_match:
+            # Flush current paragraph first
+            flush_paragraph(current_para, story, styles)
+            current_para = []
+            
+            num = num_match.group(1)
+            item_text = num_match.group(2).strip()
+            item_text_formatted = format_inline(item_text)
+            story.append(Paragraph(f"{num}. {item_text_formatted}", styles['MDNumbered']))
+            story.append(Spacer(1, 4))
+            i += 1
+            continue
+            
+        # Handle Horizontal Rule
+        if stripped == "---":
+            flush_paragraph(current_para, story, styles)
+            current_para = []
+            
+            hr = Table([[""]], colWidths=[480], rowHeights=[1])
+            hr.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#cbd5e1")),
+                ('TOPPADDING', (0,0), (-1,-1), 0),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 0),
+            ]))
+            story.append(Spacer(1, 10))
+            story.append(hr)
+            story.append(Spacer(1, 10))
+            i += 1
+            continue
+            
         # Blank line
         if stripped == "":
             flush_paragraph(current_para, story, styles)
@@ -219,7 +251,7 @@ def process_table(table_lines, styles):
     rows_data = []
     for line in table_lines:
         # Check if it's separator like |---|---|
-        if re.match(r'^\|[\s:-|]+$', line):
+        if re.match(r'^\|[\s:|:-]+$', line):
             continue
         cells = [c.strip() for c in line.split("|")]
         # Remove empty first/last
@@ -293,7 +325,7 @@ def process_table(table_lines, styles):
             row_cells.append(p)
         table_rows.append(row_cells)
         
-    t = Table(table_rows, colWidths=col_widths)
+    t = Table(table_rows, colWidths=col_widths, repeatRows=1)
     t_cmds = [
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#005f73")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
@@ -381,6 +413,14 @@ def build_pdf(md_file, pdf_file):
 
     styles.add(ParagraphStyle(
         name='MDBullet',
+        parent=styles['Normal'],
+        leftIndent=20,
+        firstLineIndent=-10,
+        spaceAfter=4
+    ))
+    
+    styles.add(ParagraphStyle(
+        name='MDNumbered',
         parent=styles['Normal'],
         leftIndent=20,
         firstLineIndent=-10,
