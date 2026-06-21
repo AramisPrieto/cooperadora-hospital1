@@ -386,7 +386,7 @@ const Home = () => {
                 <div className="text-left">
                   <h4 className="text-xs font-black text-amber-800 uppercase tracking-wider leading-none">Registro en proceso de aprobación</h4>
                   <p className="text-[11px] text-amber-700 mt-1.5 font-semibold leading-normal">
-                    Hola, <strong className="text-amber-800">{user.perfil.nombre || user.email}</strong>. Tu perfil de socio ha sido registrado con éxito y está siendo procesado por la comisión directiva. Nos pondremos en contacto a la brevedad.
+                    Hola, <strong className="text-amber-800">{user.perfil.nombre || user.email}</strong>. Tu perfil de socio ha sido registrado con éxito y está siendo procesado por la comisión directiva. Te enviamos un correo de confirmación (revisá tu bandeja de entrada o spam).
                   </p>
                 </div>
               </div>
