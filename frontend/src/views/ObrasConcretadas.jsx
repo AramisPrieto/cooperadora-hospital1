@@ -42,6 +42,8 @@ const getDonorCount = (id, monto) => Math.round(parseFloat(monto) / 12000) + (id
 
 const ObrasConcretadas = () => {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const isSocioOrAdmin = user && (user.rol === 'socio' || user.rol === 'admin');
   
   // State
   const [campaigns, setCampaigns] = useState([]);
@@ -281,7 +283,9 @@ const ObrasConcretadas = () => {
               ¿Querés ayudarnos a seguir concretando obras?
             </h2>
             <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-              Cada aporte cuenta. Podés sumarte como socio aportando una cuota mensual o realizar una donación directa para las campañas actualmente en curso.
+              {isSocioOrAdmin 
+                ? "Como socio, tu apoyo constante hace posibles estos logros. Podés realizar una donación directa para las campañas que se encuentran en curso."
+                : "Cada aporte cuenta. Podés sumarte como socio aportando una cuota mensual o realizar una donación directa para las campañas actualmente en curso."}
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
               <Link
@@ -290,12 +294,14 @@ const ObrasConcretadas = () => {
               >
                 Ver Campañas Activas
               </Link>
-              <Link
-                to="/login?mode=register"
-                className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 hover:border-white/40 transition-all duration-300"
-              >
-                Asociarse Ahora
-              </Link>
+              {!isSocioOrAdmin && (
+                <Link
+                  to="/login?mode=register"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3.5 text-sm font-bold rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/25 hover:border-white/40 transition-all duration-300"
+                >
+                  Asociarse Ahora
+                </Link>
+              )}
             </div>
           </div>
         </div>
