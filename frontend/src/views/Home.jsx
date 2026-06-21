@@ -432,17 +432,10 @@ const Home = () => {
                 {/* Top badge */}
                 {!loadingCampaigns && currentHeroCampaign && (
                   <div className="absolute top-4 right-4 z-10">
-                    {currentHeroCampaign.es_campana_del_mes ? (
-                      <span className="badge badge-red animate-pulse">
-                        <Sparkles className="h-3 w-3" />
-                        Destacada
-                      </span>
-                    ) : (
-                      <span className="badge badge-teal">
-                        <Flame className="h-3 w-3" />
-                        Activa
-                      </span>
-                    )}
+                    <span className="badge badge-teal">
+                      <Flame className="h-3 w-3" />
+                      Activa
+                    </span>
                   </div>
                 )}
 

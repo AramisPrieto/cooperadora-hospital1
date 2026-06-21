@@ -42,7 +42,7 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
       testimoniosAutor: (form.testimoniosAutor || '').trim(),
       imagenUrl: (form.imagenUrl || '').trim(),
       obraStatus: (form.obraStatus || 'Planeada').trim(),
-      es_campana_del_mes: !!form.es_campana_del_mes,
+      es_campana_del_mes: false,
       equipamiento_info: (form.equipamiento_info || '').trim(),
       equipamiento_imagen: (form.equipamiento_imagen || '').trim()
     };
@@ -134,18 +134,7 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
               <option value="Suspendida">Suspendida</option>
             </select>
           </div>
-          <div className="md:col-span-2 flex items-center bg-slate-50 border border-slate-200/60 p-4 rounded-xl mt-2 select-none hover:bg-slate-100/50 transition-colors">
-            <input
-              type="checkbox"
-              id="esCampanaDelMesForm"
-              checked={form.es_campana_del_mes}
-              onChange={e => handleChange('es_campana_del_mes', e.target.checked)}
-              className="h-4.5 w-4.5 text-brand-600 focus:ring-brand-500 border-slate-300 rounded cursor-pointer"
-            />
-            <label htmlFor="esCampanaDelMesForm" className="ml-3 block text-xs font-black text-slate-700 uppercase tracking-wider cursor-pointer">
-              ★ Destacar como Campaña Activa del Mes (Hero del Home)
-            </label>
-          </div>
+
         </div>
       </div>
 
