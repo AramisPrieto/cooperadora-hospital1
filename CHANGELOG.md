@@ -499,3 +499,5 @@
 - **Cartel de Registro en Proceso (Feedback de Bienvenida)**:
   - Adición de un banner de alerta dinámico de color ámbar en la página de inicio ([Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx)) que se muestra de forma destacada solo a los usuarios logueados cuyo perfil se encuentra en estado `pendiente`.
   - El banner informa amigablemente sobre el proceso de validación por la comisión directiva, instruye a revisar la bandeja de entrada o spam para ver el correo de confirmación de registro y provee un enlace directo para que el socio acceda a su panel personal de control.
+- **Ocultamiento Contextual de "Hacete Socio"**:
+  - Configuración condicional en la página de inicio ([Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx)) para ocultar por completo el banner negro de invitación a asociarse si ya existe un usuario logueado en la plataforma (sea socio o administrador).

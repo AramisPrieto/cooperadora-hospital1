@@ -782,63 +782,59 @@ const Home = () => {
       {/* ════════════════════════════════════════
           4.2 HACETE SOCIO BANNER (CTA)
       ════════════════════════════════════════ */}
-      <section className="bg-slate-100 py-12 px-4 border-t border-slate-200/60">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-slate-950 rounded-[2rem] p-8 md:p-12 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
-            {/* Background elements for premium look */}
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-900/10 rounded-full blur-[100px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
+      {!user && (
+        <section className="bg-slate-100 py-12 px-4 border-t border-slate-200/60">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-slate-950 rounded-[2rem] p-8 md:p-12 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+              {/* Background elements for premium look */}
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-900/10 rounded-full blur-[100px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
 
-            {/* Left Column: Title, description, button */}
-            <div className="relative z-10 space-y-6 max-w-xl text-left">
-              <span className="text-brand-500 font-extrabold text-xs uppercase tracking-widest block">
-                Hacete socio
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-display font-black leading-tight text-white">
-                $4.500 al mes. <br />
-                Equipamiento todo el año.
-              </h2>
-              <p className="text-slate-400 text-sm leading-relaxed font-medium">
-                Tu cuota mensual financia el plan operativo del hospital de manera previsible.
-                Recibís comprobantes legales y podés deducir Ganancias.
-              </p>
-              <button
-                onClick={() => {
-                  if (!user) {
+              {/* Left Column: Title, description, button */}
+              <div className="relative z-10 space-y-6 max-w-xl text-left">
+                <span className="text-brand-500 font-extrabold text-xs uppercase tracking-widest block">
+                  Hacete socio
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-display font-black leading-tight text-white">
+                  $4.500 al mes. <br />
+                  Equipamiento todo el año.
+                </h2>
+                <p className="text-slate-400 text-sm leading-relaxed font-medium">
+                  Tu cuota mensual financia el plan operativo del hospital de manera previsible.
+                  Recibís comprobantes legales y podés deducir Ganancias.
+                </p>
+                <button
+                  onClick={() => {
                     navigate('/login?mode=register');
-                  } else if (user?.rol === 'admin') {
-                    navigate('/admin');
-                  } else {
-                    navigate('/mi-panel');
-                  }
-                }}
-                className="btn-brand bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all inline-flex items-center gap-2 text-sm shadow-md"
-              >
-                Asociarme ahora
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
+                  }}
+                  className="btn-brand bg-brand-600 hover:bg-brand-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all inline-flex items-center gap-2 text-sm shadow-md"
+                >
+                  Asociarme ahora
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
 
-            {/* Right Column: Benefits list */}
-            <div className="relative z-10 w-full md:w-auto shrink-0 md:max-w-xs space-y-4">
-              {[
-                "Comprobantes legales descargables",
-                "Cancelás cuando quieras",
-                "Auditoría externa anual",
-                "Voto en Asamblea Anual"
-              ].map((benefit, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-brand-600 flex items-center justify-center shrink-0 shadow-sm">
-                    <Check className="h-3.5 w-3.5 text-white stroke-[3px]" />
+              {/* Right Column: Benefits list */}
+              <div className="relative z-10 w-full md:w-auto shrink-0 md:max-w-xs space-y-4">
+                {[
+                  "Comprobantes legales descargables",
+                  "Cancelás cuando quieras",
+                  "Auditoría externa anual",
+                  "Voto en Asamblea Anual"
+                ].map((benefit, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className="h-5 w-5 rounded-full bg-brand-600 flex items-center justify-center shrink-0 shadow-sm">
+                      <Check className="h-3.5 w-3.5 text-white stroke-[3px]" />
+                    </div>
+                    <span className="text-slate-200 text-sm font-bold tracking-wide">
+                      {benefit}
+                    </span>
                   </div>
-                  <span className="text-slate-200 text-sm font-bold tracking-wide">
-                    {benefit}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ════════════════════════════════════════
           5. CAMPAIGN DETAIL MODAL
