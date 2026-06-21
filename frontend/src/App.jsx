@@ -20,6 +20,7 @@ const CampaignDetail = lazy(() => import('./views/CampaignDetail'));
 const NewsSearch = lazy(() => import('./views/NewsSearch'));
 const NewsDetail = lazy(() => import('./views/NewsDetail'));
 const ObrasConcretadas = lazy(() => import('./views/ObrasConcretadas'));
+const TermsAndConditions = lazy(() => import('./views/TermsAndConditions'));
 
 // Eliminadas funciones ProtectedRoute y SocioProtectedRoute inline
 
@@ -67,6 +68,7 @@ function App() {
                 <Route path="/noticias" element={<NewsSearch />} />
                 <Route path="/noticias/:id" element={<NewsDetail />} />
                 <Route path="/obras-concretadas" element={<ObrasConcretadas />} />
+                <Route path="/terminos-y-condiciones" element={<TermsAndConditions />} />
                 <Route
                   path="/admin"
                   element={

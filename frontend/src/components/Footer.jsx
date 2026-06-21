@@ -135,7 +135,7 @@ const Footer = () => {
             © 2026 Cooperadora Hospital Municipal Dr. Emilio Ferreyra
           </p>
           <p className="text-[11px] text-slate-500 font-bold">
-            Sitio seguro · SSL · Datos protegidos por Ley 25.326
+            Sitio seguro · SSL · <Link to="/terminos-y-condiciones" className="hover:text-white underline transition-colors">Términos y Condiciones</Link> · Datos protegidos por Ley 25.326
           </p>
         </div>
       </div>

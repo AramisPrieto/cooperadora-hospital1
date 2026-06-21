@@ -481,3 +481,17 @@
   - Mitigación de bloqueos de firma matemática en el Webhook de Mercado Pago ([socioSubscriptionController.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/controllers/socioSubscriptionController.js)) si la firma está desactivada (`BYPASS_WEBHOOK_SIGNATURE=true` o local) e inhabilitando la comprobación obligatoria de cabeceras en este modo de omisión.
 - **Higienización de la Barra de Direcciones**:
   - Implementación de la limpieza automática de todos los metadatos agregados por la pasarela de Mercado Pago (`collection_id`, `payment_id`, `preference_id`, etc.) en la URL del frontend tras confirmarse el estado, garantizando una URL final limpia y sin parámetros transaccionales.
+
+### Versión 1.33.0 — Responsividad en Administración de Socios y Remoción de Campaña del Mes (Antigravity)
+- **Responsividad en Listado de Socios (Mobile)**:
+  - Rediseño de la fila de socios en [AdminPanel.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/AdminPanel.jsx) para usar `flex-col sm:flex-row`.
+  - Reubicación de los botones de acción ("Activar", "Desactivar", badges) y el chevron a una segunda línea en móviles con alineación a la derecha (`self-end`), evitando solapamientos y desbordes del diseño.
+- **Rediseño de los Botones del Panel de Socio Expandido**:
+  - Reemplazo de los estilos antiguos de "Eliminar Socio" y "Editar Datos" para adoptar el diseño unificado de activación/desactivación (fondo claro con contraste del color del texto e íconos descriptivos).
+  - Adición de iconos de Lucide (`Trash` y `Pencil`) correspondientes a cada acción.
+- **Remoción de Campaña del Mes**:
+  - Eliminación definitiva de la opción "Destacar como Campaña Activa del Mes" en la creación y edición de campañas ([CampaignForm.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/admin/CampaignForm.jsx)).
+  - Remoción de los badges animados y estáticos de "Campaña del Mes" y "Destacada" del panel del administrador ([AdminPanel.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/AdminPanel.jsx)) y del Hero Carousel de la página principal ([Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx)).
+- **Página de Términos y Condiciones**:
+  - Creación de la vista [TermsAndConditions.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/TermsAndConditions.jsx) estructurando la política de donaciones, cuotas sociales, exención de responsabilidades y la confidencialidad de datos conforme a la Ley N° 25.326.
+  - Integración en las rutas de [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx) (con lazy loading) y agregado de enlace de navegación legal en la barra inferior de [Footer.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Footer.jsx).
