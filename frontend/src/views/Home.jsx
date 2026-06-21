@@ -998,10 +998,9 @@ const Home = () => {
                           </div>
 
                           {/* Alias copiable */}
-                          <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2">
+                          <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2.5">
                             <span className="text-slate-400 font-medium">Alias:</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">cooperadora.hospital.nec</span>
+                            <div className="relative">
                               <button
                                 type="button"
                                 onClick={() => {
@@ -1009,19 +1008,26 @@ const Home = () => {
                                   setCopiedAlias(true);
                                   setTimeout(() => setCopiedAlias(false), 2000);
                                 }}
-                                className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-150 active:bg-slate-200 rounded-xl border border-slate-200/60 text-slate-800 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-brand-500 active:scale-[0.98]"
                                 title="Copiar Alias"
                               >
-                                {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                                <span className="font-mono text-xs font-bold select-all">cooperadora.hospital.nec</span>
+                                <span className="p-1 rounded-lg bg-white border border-slate-150 transition-colors flex items-center justify-center">
+                                  {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5 text-slate-500" />}
+                                </span>
                               </button>
+                              {copiedAlias && (
+                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md animate-fade-in-tooltip pointer-events-none z-10 whitespace-nowrap">
+                                  ¡Copiado!
+                                </span>
+                              )}
                             </div>
                           </div>
 
                           {/* CBU copiable */}
-                          <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center justify-between gap-4 pt-1">
                             <span className="text-slate-400 font-medium">CBU:</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-slate-800 font-bold bg-slate-50 px-2 py-1 rounded border border-slate-100">0140354701354701354701</span>
+                            <div className="relative">
                               <button
                                 type="button"
                                 onClick={() => {
@@ -1029,11 +1035,19 @@ const Home = () => {
                                   setCopiedCbu(true);
                                   setTimeout(() => setCopiedCbu(false), 2000);
                                 }}
-                                className="p-1.5 hover:bg-slate-100 rounded text-slate-500 transition-colors"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-150 active:bg-slate-200 rounded-xl border border-slate-200/60 text-slate-800 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-brand-500 active:scale-[0.98]"
                                 title="Copiar CBU"
                               >
-                                {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+                                <span className="font-mono text-xs font-bold select-all">0140354701354701354701</span>
+                                <span className="p-1 rounded-lg bg-white border border-slate-150 transition-colors flex items-center justify-center">
+                                  {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5 text-slate-500" />}
+                                </span>
                               </button>
+                              {copiedCbu && (
+                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md animate-fade-in-tooltip pointer-events-none z-10 whitespace-nowrap">
+                                  ¡Copiado!
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>

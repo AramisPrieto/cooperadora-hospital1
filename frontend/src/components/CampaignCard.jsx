@@ -120,7 +120,7 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
           <div className="flex justify-between items-baseline text-xs">
             <span className="font-extrabold text-slate-800">
               {formatter.format(monto_actual)}{' '}
-              <span className="text-[10px] text-slate-450 font-medium">/ {formatter.format(monto_objetivo)}</span>
+              <span className="text-[10px] text-slate-500 font-medium">/ {formatter.format(monto_objetivo)}</span>
             </span>
             <span className={`font-black ${isUrgent ? 'text-rose-600' : isComplete ? 'text-emerald-600' : 'text-slate-700'}`}>
               {percentage}%
@@ -142,16 +142,16 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
           </div>
 
           {/* Footer metrics */}
-          <div className="flex justify-between items-center pt-2.5 border-t border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1">
+          <div className="flex justify-between items-center pt-2.5 border-t border-slate-100 text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">
             <span className="flex items-center gap-1">
               {isComplete ? (
-                <span className="text-slate-400">Cerrada</span>
+                <span className="text-slate-500">Cerrada</span>
               ) : daysLeft !== null ? (
-                <span className={isUrgent ? 'text-rose-600 font-black' : 'text-slate-500'}>
+                <span className={isUrgent ? 'text-rose-600 font-black' : 'text-slate-600'}>
                   • Quedan {daysLeft} {daysLeft === 1 ? 'día' : 'días'}
                 </span>
               ) : (
-                <span className="text-slate-500">• Activa</span>
+                <span className="text-slate-600">• Activa</span>
               )}
             </span>
             <span className="font-medium normal-case">{donorCount} donantes</span>
