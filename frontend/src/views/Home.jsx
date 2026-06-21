@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useLenis } from 'lenis/react';
 import api from '../api/axios';
@@ -376,6 +376,29 @@ const Home = () => {
         <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full" style={{ paddingTop: '8rem', paddingBottom: '6rem' }}>
+          
+          {user?.perfil?.estado === 'pendiente' && (
+            <div className="mb-8 p-4 bg-amber-50 border border-amber-200/80 rounded-2xl animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 bg-amber-100/80 rounded-xl flex items-center justify-center text-amber-700 shrink-0">
+                  <Info className="h-4 w-4" />
+                </div>
+                <div className="text-left">
+                  <h4 className="text-xs font-black text-amber-800 uppercase tracking-wider leading-none">Registro en proceso de aprobación</h4>
+                  <p className="text-[11px] text-amber-700 mt-1.5 font-semibold leading-normal">
+                    Hola, <strong className="text-amber-800">{user.perfil.nombre || user.email}</strong>. Tu perfil de socio ha sido registrado con éxito y está siendo procesado por la comisión directiva. Nos pondremos en contacto a la brevedad.
+                  </p>
+                </div>
+              </div>
+              <Link
+                to="/mi-panel"
+                className="shrink-0 text-[10px] font-black text-amber-800 hover:text-amber-900 uppercase tracking-widest bg-amber-100/60 hover:bg-amber-100 px-3.5 py-2 rounded-xl border border-amber-200 transition-colors"
+              >
+                Ver mi perfil
+              </Link>
+            </div>
+          )}
+
           <div className="grid lg:grid-cols-12 gap-12 items-center">
 
             {/* Left: text */}
