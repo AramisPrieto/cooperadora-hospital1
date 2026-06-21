@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import DashboardCharts from '../components/admin/DashboardCharts';
@@ -63,6 +63,27 @@ const AdminPanel = () => {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  // Lógica de scroll para pestañas en móviles
+  const tabsRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+
+  const checkScroll = () => {
+    if (!tabsRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = tabsRef.current;
+    setShowLeftArrow(scrollLeft > 5);
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 5);
+  };
+
+  useEffect(() => {
+    const t = setTimeout(checkScroll, 150);
+    window.addEventListener('resize', checkScroll);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [loading]); // Se vuelve a verificar al terminar de cargar los datos que renderizan el dashboard
 
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
@@ -389,7 +410,33 @@ const AdminPanel = () => {
             <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none z-10 md:hidden" />
             <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10 md:hidden" />
             
-            <div className="flex gap-1 overflow-x-auto scrollbar-none whitespace-nowrap">
+            {/* Scroll buttons for mobile tabs */}
+            {showLeftArrow && (
+              <button
+                type="button"
+                onClick={() => tabsRef.current?.scrollBy({ left: -100, behavior: 'smooth' })}
+                className="absolute left-1 top-1/2 -translate-y-1/2 bg-white border border-slate-200 shadow-md rounded-full p-1 z-20 md:hidden text-slate-500 hover:text-slate-800"
+                aria-label="Desplazar a la izquierda"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            )}
+            {showRightArrow && (
+              <button
+                type="button"
+                onClick={() => tabsRef.current?.scrollBy({ left: 100, behavior: 'smooth' })}
+                className="absolute right-1 top-1/2 -translate-y-1/2 bg-white border border-slate-200 shadow-md rounded-full p-1 z-20 md:hidden text-slate-500 hover:text-slate-800"
+                aria-label="Desplazar a la derecha"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            )}
+
+            <div 
+              ref={tabsRef}
+              onScroll={checkScroll}
+              className="flex gap-1 overflow-x-auto scrollbar-none whitespace-nowrap"
+            >
               {TABS.map(tab => {
                 const Icon = tab.icon;
                 return (
