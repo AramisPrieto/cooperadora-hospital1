@@ -28,6 +28,7 @@ const Login = () => {
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [genero, setGenero] = useState('');
   const [metodoPago, setMetodoPago] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   const expired = searchParams.get('expired');
   const redirectCampaign = searchParams.get('redirect') === 'campana';
@@ -38,6 +39,12 @@ const Login = () => {
     setLoading(true);
     setErrorMsg('');
     setSuccessMsg('');
+
+    if (!isLogin && !acceptTerms) {
+      setErrorMsg('Debe aceptar los términos y condiciones para registrarse.');
+      setLoading(false);
+      return;
+    }
 
     try {
       if (isLogin) {
@@ -328,6 +335,31 @@ const Login = () => {
                   </div>
                 </div>
               </>
+            )}
+
+            {!isLogin && (
+              <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200/60 p-3.5 rounded-xl select-none animate-fade-up mt-1">
+                <input
+                  type="checkbox"
+                  id="acceptTerms"
+                  required
+                  checked={acceptTerms}
+                  onChange={e => setAcceptTerms(e.target.checked)}
+                  className="h-4.5 w-4.5 text-brand-600 focus:ring-brand-500 border-slate-300 rounded cursor-pointer mt-0.5"
+                />
+                <label htmlFor="acceptTerms" className="text-[11px] font-semibold text-slate-600 leading-normal cursor-pointer text-left">
+                  Acepto los{' '}
+                  <Link 
+                    to="/terminos-y-condiciones" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-brand-600 hover:text-brand-700 underline font-bold"
+                  >
+                    Términos y Condiciones
+                  </Link>{' '}
+                  y el procesamiento de mis datos bajo la Ley N° 25.326.
+                </label>
+              </div>
             )}
 
             {/* Submit */}
