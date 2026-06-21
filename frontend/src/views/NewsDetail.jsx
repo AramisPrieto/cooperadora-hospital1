@@ -93,7 +93,7 @@ const NewsDetail = () => {
       <div className="min-h-screen bg-white pt-24 pb-20 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-600" />
-          <span className="text-slate-450 text-xs font-bold uppercase tracking-wider">Cargando noticia...</span>
+          <span className="text-slate-500 text-xs font-bold uppercase tracking-wider">Cargando noticia...</span>
         </div>
       </div>
     );

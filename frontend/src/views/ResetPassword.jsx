@@ -86,7 +86,7 @@ const ResetPassword = () => {
             <h2 className="text-2xl font-black text-slate-800 tracking-tight">
               Restablecer Contraseña
             </h2>
-            <p className="text-xs text-slate-450 leading-relaxed max-w-[280px] mx-auto font-medium">
+            <p className="text-xs text-slate-500 leading-relaxed max-w-[280px] mx-auto font-medium">
               Por favor ingresá tu nueva contraseña para acceder de nuevo a tu cuenta de socio.
             </p>
           </div>
@@ -147,15 +147,15 @@ const ResetPassword = () => {
                   <p className="font-bold text-slate-500 uppercase tracking-wider text-[9px] mb-1">Requisitos de Seguridad:</p>
                   <div className="flex items-center gap-2">
                     <div className={`h-1.5 w-1.5 rounded-full ${hasMinLength ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                    <span className={hasMinLength ? 'text-emerald-700 font-semibold' : 'text-slate-450'}>Al menos 8 caracteres</span>
+                    <span className={hasMinLength ? 'text-emerald-700 font-semibold' : 'text-slate-500'}>Al menos 8 caracteres</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`h-1.5 w-1.5 rounded-full ${hasUppercase ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                    <span className={hasUppercase ? 'text-emerald-700 font-semibold' : 'text-slate-450'}>Una letra Mayúscula</span>
+                    <span className={hasUppercase ? 'text-emerald-700 font-semibold' : 'text-slate-500'}>Una letra Mayúscula</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className={`h-1.5 w-1.5 rounded-full ${hasNumber ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                    <span className={hasNumber ? 'text-emerald-700 font-semibold' : 'text-slate-450'}>Al menos un Número</span>
+                    <span className={hasNumber ? 'text-emerald-700 font-semibold' : 'text-slate-500'}>Al menos un Número</span>
                   </div>
                 </div>
               </div>

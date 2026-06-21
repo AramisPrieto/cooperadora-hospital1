@@ -242,7 +242,7 @@ const Login = () => {
                 </button>
               </div>
               {!isLogin && (
-                <p className="text-[9px] text-slate-450 pl-0.5 mt-1 font-semibold">
+                <p className="text-[9px] text-slate-500 pl-0.5 mt-1 font-semibold">
                   Debe tener al menos 8 caracteres, una mayúscula y un número.
                 </p>
               )}
@@ -267,7 +267,7 @@ const Login = () => {
                       className="input-field pl-10"
                     />
                   </div>
-                  <p className="text-[9px] text-slate-450 flex items-center gap-1 pl-0.5 font-semibold">
+                  <p className="text-[9px] text-slate-500 flex items-center gap-1 pl-0.5 font-semibold">
                     <ShieldAlert className="h-3 w-3 text-amber-500 shrink-0" />
                     El DNI queda registrado permanentemente en el Libro de Asociados.
                   </p>

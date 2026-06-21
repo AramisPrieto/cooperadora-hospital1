@@ -141,4 +141,14 @@ html.lenis, html.lenis body {
   animation: fadeIn 0.15s ease-out forwards;
 }
 
+/* Ocultar barra de scroll para elementos horizontales */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+
 

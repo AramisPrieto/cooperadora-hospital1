@@ -266,7 +266,7 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white w-full sm:rounded-3xl sm:max-w-lg shadow-2xl overflow-hidden border border-slate-100 animate-fade-up max-h-[90vh] sm:max-h-[85vh] flex flex-col">
+      <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-lg shadow-2xl overflow-hidden border border-slate-100 animate-fade-up max-h-[90vh] sm:max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50 shrink-0">
           <div>
@@ -666,7 +666,7 @@ const CampaignDetail = () => {
                 className="relative aspect-[16/9] rounded-3xl border border-slate-200 bg-white shadow-sm flex items-center justify-center overflow-hidden"
                 style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #f9fafb, #f9fafb 15px, #f3f4f6 15px, #f3f4f6 30px)' }}
               >
-                <div className="text-slate-450 font-mono text-[10px] font-bold tracking-widest uppercase select-none text-center p-6 bg-white/85 backdrop-blur-sm rounded-xl border border-slate-100/60 shadow-sm max-w-xs sm:max-w-md">
+                <div className="text-slate-500 font-mono text-[10px] font-bold tracking-widest uppercase select-none text-center p-6 bg-white/85 backdrop-blur-sm rounded-xl border border-slate-100/60 shadow-sm max-w-xs sm:max-w-md">
                   IMG - {category} - equipo solicitado
                 </div>
               </div>
@@ -796,18 +796,23 @@ const CampaignDetail = () => {
             </div>
 
             {/* Section: Últimos Donantes */}
-            {donantes.length > 0 && (
-              <div className="bg-white rounded-3xl border border-slate-200/80 p-6 space-y-4 shadow-sm">
-                <h3 className="text-[10px] text-slate-450 font-black uppercase tracking-wider">
-                  Últimos donantes
-                </h3>
+            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 space-y-4 shadow-sm">
+              <h3 className="text-[10px] text-slate-500 font-black uppercase tracking-wider">
+                Últimos donantes
+              </h3>
+              {donantes.length > 0 ? (
                 <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto pr-1">
                   {donantes.map((d, i) => (
                     <DonanteItem key={i} {...d} />
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="text-center py-6 text-slate-400">
+                  <p className="text-xs font-semibold text-slate-600">¡Aún no hay donaciones aprobadas!</p>
+                  <p className="text-[10px] text-slate-500 mt-1">Sé el primero en colaborar con esta campaña.</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

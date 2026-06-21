@@ -832,7 +832,7 @@ const Home = () => {
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm"
           onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}
         >
-          <div className="bg-white w-full sm:rounded-3xl sm:max-w-2xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up max-h-[90vh] sm:max-h-[85vh] flex flex-col">
+          <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-2xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up max-h-[90vh] sm:max-h-[85vh] flex flex-col">
 
             {/* Modal header */}
             <div className="bg-slate-50 border-b border-slate-200 p-6 shrink-0">

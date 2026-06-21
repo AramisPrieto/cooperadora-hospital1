@@ -57,7 +57,7 @@ const ForgotPassword = () => {
             <h2 className="text-2xl font-black text-slate-800 tracking-tight">
               Recuperar Contraseña
             </h2>
-            <p className="text-xs text-slate-450 leading-relaxed max-w-[280px] mx-auto font-medium">
+            <p className="text-xs text-slate-500 leading-relaxed max-w-[280px] mx-auto font-medium">
               Ingresá tu correo electrónico y te enviaremos un enlace seguro para restablecer tu contraseña.
             </p>
           </div>
