@@ -735,10 +735,9 @@ const CampaignDetail = () => {
               {/* Red flat progress bar */}
               <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-3">
                 <div
-                  className="h-full rounded-full transition-all duration-500"
+                  className="h-full rounded-full transition-all duration-500 bg-emerald-600"
                   style={{
-                    width: `${pct}%`,
-                    backgroundColor: isComplete ? '#10b981' : isUrgent ? '#dc2626' : '#dc2626'
+                    width: `${pct}%`
                   }}
                 />
               </div>

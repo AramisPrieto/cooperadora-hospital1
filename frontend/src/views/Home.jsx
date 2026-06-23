@@ -509,11 +509,11 @@ const Home = () => {
                     <div className="space-y-2 mb-6">
                       <div className="flex justify-between text-xs">
                         <span className="text-slate-500 font-bold">Progreso de la obra</span>
-                        <span className="text-accent-600 font-black">{heroPct}%</span>
+                        <span className="text-emerald-600 font-black">{heroPct}%</span>
                       </div>
                       <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
                         <div
-                          className="h-full bg-accent-500 rounded-full transition-all duration-1000 ease-out"
+                          className="h-full bg-emerald-600 rounded-full transition-all duration-1000 ease-out"
                           style={{ width: `${heroPct}%` }}
                         />
                       </div>
@@ -896,11 +896,11 @@ const Home = () => {
                   <div className="mt-3 space-y-1.5">
                     <div className="flex justify-between text-xs font-bold">
                       <span className="text-slate-500">Progreso colectivo</span>
-                      <span className="text-brand-600">{modalPct}%</span>
+                      <span className="text-emerald-600">{modalPct}%</span>
                     </div>
                     <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden relative shadow-inner">
                       <div
-                        className="h-full bg-accent-500 rounded-full transition-all duration-1000 ease-out shadow-sm"
+                        className="h-full bg-emerald-600 rounded-full transition-all duration-1000 ease-out shadow-sm"
                         style={{ width: `${modalPct}%` }}
                       />
                       <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.25)_50%,transparent_100%)] w-full translate-x-[-100%] animate-[shimmer_2.5s_infinite]" />

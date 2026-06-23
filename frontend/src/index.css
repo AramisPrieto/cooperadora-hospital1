@@ -90,7 +90,7 @@
     @apply w-full bg-slate-100 rounded-full overflow-hidden;
   }
   .progress-fill {
-    @apply bg-accent-500 rounded-full h-full transition-all duration-1000 ease-out;
+    @apply bg-emerald-600 rounded-full h-full transition-all duration-1000 ease-out;
   }
 }
 

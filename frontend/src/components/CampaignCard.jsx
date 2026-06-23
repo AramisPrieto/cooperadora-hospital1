@@ -130,13 +130,7 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
           {/* Simple flat progress bar */}
           <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                isComplete
-                  ? 'bg-emerald-600'
-                  : isUrgent
-                    ? 'bg-rose-500'
-                    : 'bg-slate-900'
-              }`}
+              className="h-full rounded-full transition-all duration-500 bg-emerald-600"
               style={{ width: `${percentage}%` }}
             />
           </div>

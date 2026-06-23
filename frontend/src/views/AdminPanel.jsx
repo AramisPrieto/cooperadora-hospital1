@@ -555,7 +555,7 @@ const AdminPanel = () => {
                             <span className="text-emerald-600">Recaudado: ${parseFloat(camp.monto_actual).toLocaleString('es-AR')}</span>
                           </div>
                           <div className="mt-1.5 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                            <div className="h-full bg-accent-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${pct}%` }} />
+                            <div className="h-full bg-emerald-600 rounded-full transition-all duration-1000 ease-out" style={{ width: `${pct}%` }} />
                           </div>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
