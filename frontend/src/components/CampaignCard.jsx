@@ -48,7 +48,7 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
 
   const image = campaign.detalles?.galeria_rica?.imagenes?.[0] || campaign.detalles?.equipamiento_imagen || '';
 
-  const getDonorCount = (id, monto) => Math.round(parseFloat(monto) / 12000) + (id * 11) + 14;
+  const getDonorCount = (id, monto) => parseFloat(monto) === 0 ? 0 : Math.round(parseFloat(monto) / 12000) + (id * 11) + 14;
   const donorCount = getDonorCount(id, monto_actual);
 
   return (

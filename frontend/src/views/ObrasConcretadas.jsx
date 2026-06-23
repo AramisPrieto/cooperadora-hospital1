@@ -38,7 +38,7 @@ const formatter = new Intl.NumberFormat('es-AR', {
   maximumFractionDigits: 0,
 });
 
-const getDonorCount = (id, monto) => Math.round(parseFloat(monto) / 12000) + (id * 11) + 14;
+const getDonorCount = (id, monto) => parseFloat(monto) === 0 ? 0 : Math.round(parseFloat(monto) / 12000) + (id * 11) + 14;
 
 const ObrasConcretadas = () => {
   const navigate = useNavigate();

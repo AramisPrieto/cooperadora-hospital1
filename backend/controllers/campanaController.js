@@ -341,6 +341,10 @@ export const getDonantes = async (req, res) => {
   }
 
   try {
+    const total = await DonacionTransferencia.count({
+      where: { campana_id: parsedId, estado: 'aprobada' }
+    });
+
     const donaciones = await DonacionTransferencia.findAll({
       where: { campana_id: parsedId, estado: 'aprobada' },
       order: [['updated_at', 'DESC']],
@@ -355,7 +359,7 @@ export const getDonantes = async (req, res) => {
       timeAgo: getTimeAgo(d.updated_at)
     }));
 
-    return res.json({ donantes, total: donaciones.length });
+    return res.json({ donantes, total });
   } catch (error) {
     console.error('Error al obtener donantes:', error);
     return res.status(500).json({ error: 'Error al obtener donantes.' });

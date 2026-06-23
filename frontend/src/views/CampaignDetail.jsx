@@ -474,6 +474,7 @@ const CampaignDetail = () => {
 
   const [campaign, setCampaign] = useState(null);
   const [donantes, setDonantes] = useState([]);
+  const [totalDonors, setTotalDonors] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showDonationModal, setShowDonationModal] = useState(false);
@@ -525,6 +526,7 @@ const CampaignDetail = () => {
         }
         if (donRes.status === 'fulfilled') {
           setDonantes(donRes.value.data.donantes || []);
+          setTotalDonors(donRes.value.data.total || 0);
         }
       } catch {
         setError('Error al cargar la campaña.');
@@ -572,7 +574,11 @@ const CampaignDetail = () => {
   const categoryClass = CATEGORY_STYLES[category] || CATEGORY_STYLES.General;
   const equipmentSpecs = getEquipmentDetails(campaign.titulo);
   const timelineEvents = getTimelineEvents(campaign, pct, daysLeft);
-  const donorCount = donantes.length > 0 ? donantes.length : (Math.round(parseFloat(campaign.monto_actual) / 12000) + (campaign.id * 11) + 14);
+  const donorCount = totalDonors > 0
+    ? totalDonors
+    : (parseFloat(campaign.monto_actual) === 0
+        ? 0
+        : (Math.round(parseFloat(campaign.monto_actual) / 12000) + (campaign.id * 11) + 14));
 
   const isNeonatologia = campaign.titulo.toLowerCase().includes('neonato');
   const descriptionParagraphs = (equipamientoInfo && equipamientoInfo.trim())
