@@ -268,6 +268,7 @@ const AdminPanel = () => {
 
   /* ── Save campaign ── */
   const handleSaveCampaign = async (formData) => {
+    setSubmitting(true);
     setErrorMsg(''); setSuccessMsg('');
     const testimonios = (formData.testimoniosText && formData.testimoniosAutor)
       ? [{ autor: formData.testimoniosAutor, texto: formData.testimoniosText }]
@@ -297,6 +298,8 @@ const AdminPanel = () => {
       loadDashboardData();
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Error al guardar la campaña.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -325,6 +328,7 @@ const AdminPanel = () => {
 
   /* ── Save news ── */
   const handleSaveNews = async (formData) => {
+    setSubmitting(true);
     setErrorMsg(''); setSuccessMsg('');
     const payload = {
       titulo: formData.titulo, cuerpo_html: formData.cuerpo_html,
@@ -344,6 +348,8 @@ const AdminPanel = () => {
       loadDashboardData();
     } catch (err) {
       setErrorMsg(err.response?.data?.error || 'Error al guardar la noticia.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -510,6 +516,7 @@ const AdminPanel = () => {
                 campaign={campaigns.find(c => c.id === editingCampaignId)}
                 onSave={handleSaveCampaign}
                 onCancel={resetCampaignForm}
+                submitting={submitting}
               />
             )}
 
@@ -522,7 +529,8 @@ const AdminPanel = () => {
                 </h2>
                 <button
                   onClick={() => { resetCampaignForm(); setShowCampaignForm(true); }}
-                  className="btn-brand py-2 px-4 text-xs"
+                  disabled={submitting}
+                  className="btn-brand py-2 px-4 text-xs disabled:opacity-40"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Nueva
@@ -811,6 +819,7 @@ const AdminPanel = () => {
                 news={news.find(n => n._id === editingNewsId)}
                 onSave={handleSaveNews}
                 onCancel={resetNewsForm}
+                submitting={submitting}
               />
             )}
 
@@ -823,7 +832,8 @@ const AdminPanel = () => {
                 </h2>
                 <button
                   onClick={() => { resetNewsForm(); setShowNewsForm(true); }}
-                  className="btn-brand py-2 px-4 text-xs"
+                  disabled={submitting}
+                  className="btn-brand py-2 px-4 text-xs disabled:opacity-40"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Nueva

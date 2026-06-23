@@ -10,7 +10,7 @@ const FormLabel = ({ children, htmlFor }) => (
 
 const inputCls = "input-field";
 
-const NewsForm = ({ news, onSave, onCancel }) => {
+const NewsForm = ({ news, onSave, onCancel, submitting }) => {
   const isEditing = !!news;
 
   const [form, setForm] = useState({
@@ -44,8 +44,9 @@ const NewsForm = ({ news, onSave, onCancel }) => {
         <button 
           type="button" 
           onClick={onCancel} 
+          disabled={submitting}
           aria-label="Cerrar"
-          className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors"
+          className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors disabled:opacity-40"
         >
           <X className="h-4 w-4" />
         </button>
@@ -93,9 +94,13 @@ const NewsForm = ({ news, onSave, onCancel }) => {
         label="Imagen de portada (opcional)"
       />
 
-      <button type="submit" className="btn-brand w-full py-3.5 shine">
+      <button 
+        type="submit" 
+        disabled={submitting} 
+        className="btn-brand w-full py-3.5 shine disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         <Save className="h-4 w-4" />
-        {isEditing ? 'Guardar Cambios' : 'Publicar Noticia'}
+        {submitting ? 'Guardando...' : (isEditing ? 'Guardar Cambios' : 'Publicar Noticia')}
       </button>
     </form>
   );
