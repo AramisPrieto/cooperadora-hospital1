@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clock, CheckCircle, Stethoscope } from 'lucide-react';
 
 const getDaysLeft = (fechaLimite) => {
@@ -37,6 +37,7 @@ const formatter = new Intl.NumberFormat('es-AR', {
 
 const CampaignCard = ({ campaign, onClickDetail }) => {
   const { id, titulo, monto_objetivo, monto_actual, fecha_limite } = campaign;
+  const [imageError, setImageError] = useState(false);
 
   const percentage = Math.min(Math.round((parseFloat(monto_actual) / parseFloat(monto_objetivo)) * 100), 100);
   const daysLeft = getDaysLeft(fecha_limite);
@@ -67,15 +68,18 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
 
       {/* ── Top Image / Placeholder ── */}
       <div className="relative aspect-[16/10] overflow-hidden bg-slate-50 shrink-0 border-b border-slate-100">
-        {image ? (
+        {image && !imageError ? (
           <img
             src={image}
             alt={titulo}
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+            onError={() => setImageError(true)}
           />
         ) : (
-          <div className="w-full h-full relative flex items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 overflow-hidden">
+          <div
+            className="w-full h-full relative flex items-center justify-center bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900 overflow-hidden"
+          >
             {/* Dot grid overlay */}
             <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '14px 14px' }} />
             {/* Subtle accent glow */}
