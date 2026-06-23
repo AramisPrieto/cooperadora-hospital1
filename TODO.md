@@ -8,6 +8,7 @@
 - [ ] configurar visible y no visible noticias o quitar visible y que esten siempre todas habalr en grupo
 - [ ] verificar lenis
 - [ ] agregar metodo en transferencia admin campañas
+- [ ] arreglar ultimos donadores
 ## 🔄 En Progreso
 ## ✅ Terminado
 - [x] Inicializar repositorio Git
