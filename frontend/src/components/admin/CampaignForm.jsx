@@ -42,7 +42,7 @@ const CampaignForm = ({ campaign, onSave, onCancel }) => {
       testimoniosAutor: (form.testimoniosAutor || '').trim(),
       imagenUrl: (form.imagenUrl || '').trim(),
       obraStatus: (form.obraStatus || 'Planeada').trim(),
-      es_campana_del_mes: false,
+      es_campana_del_mes: form.es_campana_del_mes,
       equipamiento_info: (form.equipamiento_info || '').trim(),
       equipamiento_imagen: (form.equipamiento_imagen || '').trim()
     };

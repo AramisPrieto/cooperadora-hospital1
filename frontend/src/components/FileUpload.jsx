@@ -121,7 +121,7 @@ const FileUpload = ({
               src={preview}
               alt="Preview"
               className="w-full h-40 object-cover"
-              onError={() => setPreview('')}
+              onError={() => console.warn("Failed to load image preview:", preview)}
             />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
               <span className="text-white text-xs font-black">Cambiar imagen</span>
