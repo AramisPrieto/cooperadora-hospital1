@@ -228,7 +228,7 @@ async function runAudit() {
       }
     });
     const profileData = await profileRes.json();
-    const socioId = profileData.id;
+    const socioId = profileData.numero_asociado;
 
     // Eliminar socio
     const delRes = await fetch(`${BACKEND_URL}/api/socios/${socioId}`, {
