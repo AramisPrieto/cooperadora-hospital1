@@ -30,12 +30,19 @@ const storage = multer.diskStorage({
   }
 });
 
+// Extensiones permitidas correlacionadas
+const ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+const ALLOWED_DOC_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
+
 const fileFilter = (req, file, cb) => {
-  const allowed = req.query.tipo === 'comprobante' ? ALLOWED_DOC_TYPES : ALLOWED_IMAGE_TYPES;
-  if (allowed.includes(file.mimetype)) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  const allowedMime = req.query.tipo === 'comprobante' ? ALLOWED_DOC_TYPES : ALLOWED_IMAGE_TYPES;
+  const allowedExt = req.query.tipo === 'comprobante' ? ALLOWED_DOC_EXTENSIONS : ALLOWED_IMAGE_EXTENSIONS;
+
+  if (allowedMime.includes(file.mimetype) && allowedExt.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error(`Tipo de archivo no permitido: ${file.mimetype}`), false);
+    cb(new Error(`Tipo de archivo o extensión no permitida. Mimetype: ${file.mimetype}, Extensión: ${ext}`), false);
   }
 };
 

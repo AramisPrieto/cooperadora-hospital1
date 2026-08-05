@@ -54,11 +54,9 @@ app.use(cors({
       return callback(null, true);
     }
 
-    // Permitir subdominios .vercel.app específicos de este proyecto o dominios de la cooperadora (Cloudflare/Custom)
-    if (
-      (origin.startsWith('https://cooperadora-') && origin.endsWith('.vercel.app')) ||
-      (origin.startsWith('https://') && origin.includes('cooperadora'))
-    ) {
+    // Permitir únicamente subdominios .vercel.app específicos de este proyecto (incluyendo previews de Git)
+    const isVercelOrigin = /^https:\/\/cooperadora-hospital(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(origin);
+    if (isVercelOrigin) {
       return callback(null, true);
     }
 

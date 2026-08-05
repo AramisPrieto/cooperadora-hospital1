@@ -224,6 +224,14 @@ export const updateMyProfile = async (req, res) => {
       return res.status(403).json({ error: 'Los socios no pueden cambiar su propio estado de aprobación.' });
     }
 
+    // Los socios no pueden cambiar su fecha de último pago ni observaciones administrativas
+    if (fecha_ultimo_pago !== undefined && fecha_ultimo_pago !== socio.fecha_ultimo_pago) {
+      return res.status(403).json({ error: 'Los socios no pueden cambiar su propia fecha de último pago.' });
+    }
+    if (observaciones !== undefined && observaciones !== socio.observaciones) {
+      return res.status(403).json({ error: 'Los socios no pueden editar las observaciones administrativas.' });
+    }
+
     // Validar DNI único si se está modificando
     if (dni !== undefined) {
       const dniInt = parseInt(dni);
