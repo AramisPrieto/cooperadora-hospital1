@@ -50,9 +50,9 @@ async function generatePDF() {
           font-family: 'Outfit', sans-serif;
           color: #1e293b;
           line-height: 1.6;
-          max-width: 800px;
-          margin: 40px auto;
-          padding: 0 20px;
+          max-width: 100%;
+          margin: 0;
+          padding: 0;
         }
 
         h1, h2, h3, h4 {
@@ -121,6 +121,8 @@ async function generatePDF() {
           padding: 2px 6px;
           border-radius: 4px;
           font-size: 13px;
+          white-space: pre-wrap;
+          word-break: break-all;
         }
 
         pre {
@@ -129,6 +131,8 @@ async function generatePDF() {
           padding: 16px;
           border-radius: 12px;
           overflow-x: auto;
+          white-space: pre-wrap;
+          word-break: break-all;
           margin: 20px 0;
         }
 
