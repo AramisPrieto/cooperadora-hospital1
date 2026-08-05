@@ -540,6 +540,11 @@ def build_pdf(md_file, pdf_file):
     print(f"Successfully compiled {pdf_file} from {md_file}!")
 
 if __name__ == "__main__":
-    md_path = "Documento_Gestion_Proyecto.md"
-    pdf_path = "Documento_Gestion_Proyecto.pdf"
+    import sys
+    if len(sys.argv) > 2:
+        md_path = sys.argv[1]
+        pdf_path = sys.argv[2]
+    else:
+        md_path = "Documento_Gestion_Proyecto.md"
+        pdf_path = "Documento_Gestion_Proyecto.pdf"
     build_pdf(md_path, pdf_path)

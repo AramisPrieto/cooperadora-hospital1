@@ -10,6 +10,7 @@
  */
 import { useState, useEffect, useRef, useCallback, useId } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, Image, FileText } from 'lucide-react';
+import imageCompression from 'browser-image-compression';
 import api from '../api/axios';
 
 const FileUpload = ({
@@ -42,16 +43,29 @@ const FileUpload = ({
     setError('');
     setUploading(true);
 
-    // Preview local inmediato para imágenes
+    let fileToUpload = file;
+
+    // Compresión y Preview local inmediato para imágenes
     if (file.type.startsWith('image/')) {
+      try {
+        const options = {
+          maxSizeMB: 0.5,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        fileToUpload = await imageCompression(file, options);
+      } catch (error) {
+        console.warn('Error al comprimir la imagen:', error);
+      }
+
       const reader = new FileReader();
       reader.onloadend = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(fileToUpload);
     }
 
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', fileToUpload);
 
       const res = await api.post(`/uploads?tipo=${tipo}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
