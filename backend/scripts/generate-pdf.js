@@ -3,8 +3,8 @@ import path from 'path';
 import puppeteer from 'puppeteer';
 import { marked } from 'marked';
 
-const walkthoughPath = '/Users/aramisprieto/.gemini/antigravity/brain/bd74f749-1d2a-4091-a014-5b0087063849/walkthrough.md';
-const outputPath = '/Users/aramisprieto/Desktop/Reporte_QA_y_Seguridad.pdf';
+const walkthoughPath = process.env.INPUT || '/Users/aramisprieto/.gemini/antigravity/brain/bd74f749-1d2a-4091-a014-5b0087063849/walkthrough.md';
+const outputPath = process.env.OUTPUT || '/Users/aramisprieto/Desktop/Reporte_QA_y_Seguridad.pdf';
 
 async function generatePDF() {
   console.log('📄 Leyendo el archivo de walkthrough...');
