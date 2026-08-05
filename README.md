@@ -45,7 +45,9 @@ cooperadora-hospital1/
 │   ├── routes/               # Definición de endpoints de la API
 │   └── tests/                # Pruebas automatizadas de integración con Vitest
 └── etapas-teoria/            # Entregas teóricas, diagramas, informes y defensas
-    └── Augusto/              # Informe de gestión final, DER y preguntas de cátedra
+    ├── gestion-desarrollo-software/ # Informe de gestión, DER y preguntas de cátedra
+    ├── programacion-4/       # Enunciados, etapas 1-3 y wireframes
+    └── metodologia-sistemas-2/ # Metodología original de sistemas
 ```
 
 ---

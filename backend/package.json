@@ -8,7 +8,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "test": "vitest run --pool=forks --fileParallelism=false",
-    "test:watch": "vitest --pool=forks --fileParallelism=false"
+    "test:watch": "vitest --pool=forks --fileParallelism=false",
+    "db:restore": "node scripts/restore-backup.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
