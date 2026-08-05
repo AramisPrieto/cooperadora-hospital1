@@ -7,16 +7,34 @@ const walkthoughPath = process.env.INPUT || '/Users/aramisprieto/.gemini/antigra
 const outputPath = process.env.OUTPUT || '/Users/aramisprieto/Desktop/Reporte_QA_y_Seguridad.pdf';
 
 async function generatePDF() {
-  console.log('📄 Leyendo el archivo de walkthrough...');
+  console.log(`📄 Leyendo el archivo markdown: ${walkthoughPath}`);
   if (!fs.existsSync(walkthoughPath)) {
-    console.error('❌ No se encontró el archivo walkthrough.md en la ruta de artefactos.');
+    console.error('❌ No se encontró el archivo de entrada.');
     process.exit(1);
   }
 
   const markdownContent = fs.readFileSync(walkthoughPath, 'utf8');
 
+  // 1. Limpiar bloques de carrusel para que marked los procese como Markdown común
+  console.log('🧹 Procesando bloques de carrusel...');
+  const cleanedMarkdown = markdownContent
+    .replace(/````carousel\n([\s\S]*?)````/g, '$1')
+    .replace(/```carousel\n([\s\S]*?)```/g, '$1');
+
   console.log('🔄 Convirtiendo Markdown a HTML...');
-  const rawHtml = await marked(markdownContent);
+  const rawHtml = await marked(cleanedMarkdown);
+
+  // 2. Reemplazar código de mermaid con contenedor compatible y decode de símbolos HTML
+  console.log('📐 Configurando diagramas Mermaid...');
+  let processedHtml = rawHtml
+    .replace(/<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g, (match, code) => {
+      const decodedCode = code
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&');
+      return `<div class="mermaid">${decodedCode}</div>`;
+    })
+    .replace(/<!-- slide -->/g, '<div class="page-break"></div>');
 
   // Estilo premium CSS para el reporte PDF
   const styledHtml = `
@@ -24,7 +42,7 @@ async function generatePDF() {
     <html lang="es">
     <head>
       <meta charset="UTF-8">
-      <title>Reporte Final de QA y Ciberseguridad</title>
+      <title>Reporte Final Cooperadora</title>
       <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
         
@@ -60,6 +78,7 @@ async function generatePDF() {
 
         h3 {
           font-size: 1.2em;
+          margin-top: 25px;
         }
 
         p, li {
@@ -120,35 +139,46 @@ async function generatePDF() {
           font-size: 12px;
         }
 
+        img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 12px;
+          border: 1px solid #cbd5e1;
+          margin: 15px 0;
+          display: block;
+          page-break-inside: avoid;
+        }
+
         .page-break {
           page-break-before: always;
         }
 
-        /* Ocultar diagramas mermaid en la impresión del PDF ya que Puppeteer no renderiza los bloques de código mermaid de texto */
-        pre:has(code.language-mermaid) {
-          display: none;
+        .mermaid {
+          display: flex;
+          justify-content: center;
+          margin: 25px 0;
+          page-break-inside: avoid;
         }
-        
-        .mermaid-replacement {
-          background-color: #f8fafc;
-          border: 1px dashed #cbd5e1;
-          padding: 15px;
-          border-radius: 8px;
-          text-align: center;
-          font-style: italic;
-          font-size: 13px;
-          color: #64748b;
-          margin: 15px 0;
+
+        .mermaid svg {
+          max-width: 100% !important;
+          height: auto !important;
         }
       </style>
+      <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function() {
+          mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+        });
+      </script>
     </head>
     <body>
-      ${rawHtml.replace(/<pre><code class="language-mermaid">[\s\S]*?<\/code><\/pre>/g, '<div class="mermaid-replacement">Nota: El diagrama de flujo del ciclo E2E se omitió en formato PDF por compatibilidad de renderizado.</div>')}
+      ${processedHtml}
     </body>
     </html>
   `;
 
-  console.log('🚀 Iniciando Puppeteer para generar el PDF...');
+  console.log('🚀 Iniciando Puppeteer para renderizar el PDF...');
   const browser = await puppeteer.launch({
     headless: true,
     executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -156,7 +186,25 @@ async function generatePDF() {
   });
 
   const page = await browser.newPage();
-  await page.setContent(styledHtml, { waitUntil: 'networkidle0' });
+  await page.setContent(styledHtml, { waitUntil: 'networkidle2' });
+
+  // Esperar a que todos los diagramas de Mermaid se hayan renderizado
+  const hasMermaid = processedHtml.includes('class="mermaid"');
+  if (hasMermaid) {
+    console.log('⏳ Esperando renderizado de diagramas Mermaid...');
+    try {
+      await page.waitForFunction(
+        () => Array.from(document.querySelectorAll('.mermaid')).every(el => el.getAttribute('data-processed') === 'true'),
+        { timeout: 10000 }
+      );
+      console.log('✅ Diagramas Mermaid renderizados con éxito.');
+    } catch (err) {
+      console.warn('⚠️ Tiempo de espera agotado para el renderizado de Mermaid.');
+    }
+  }
+
+  // Esperar un momento adicional para asegurar carga de imágenes locales
+  await new Promise(r => setTimeout(r, 2000));
 
   console.log(`🖨️ Imprimiendo PDF en: ${outputPath}...`);
   await page.pdf({
@@ -173,13 +221,13 @@ async function generatePDF() {
     headerTemplate: '<span></span>',
     footerTemplate: `
       <div style="font-size: 9px; text-align: center; width: 100%; font-family: sans-serif; color: #94a3b8; padding-bottom: 5mm;">
-        Reporte QA y Ciberseguridad - Página <span class="pageNumber"></span> de <span class="totalPages"></span>
+        Reporte Oficial Cooperadora - Página <span class="pageNumber"></span> de <span class="totalPages"></span>
       </div>
     `
   });
 
   await browser.close();
-  console.log('✅ PDF generado con éxito.');
+  console.log('✅ PDF generado y guardado con éxito.');
 }
 
 generatePDF().catch(err => {
