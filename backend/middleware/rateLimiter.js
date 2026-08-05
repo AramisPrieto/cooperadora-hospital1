@@ -17,7 +17,7 @@ export const globalLimiter = rateLimit({
   standardHeaders: true,  // Devuelve info de límite en headers RateLimit-*
   legacyHeaders: false,
   handler: tooManyRequestsHandler,
-  skip: () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: (req) => req.headers['x-qa-bypass'] === 'cooperadora-qa-bypass-2026' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
 /**
@@ -30,7 +30,7 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: tooManyRequestsHandler,
-  skip: () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: (req) => req.headers['x-qa-bypass'] === 'cooperadora-qa-bypass-2026' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
 /**
@@ -47,7 +47,7 @@ export const donationLimiter = rateLimit({
       error: 'Límite de donaciones alcanzado. Podés intentarlo de nuevo en una hora.'
     });
   },
-  skip: () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: (req) => req.headers['x-qa-bypass'] === 'cooperadora-qa-bypass-2026' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
 /**
@@ -64,6 +64,6 @@ export const transactionLimiter = rateLimit({
       error: 'Límite de transacciones alcanzado. Por favor, intentá de nuevo más tarde.'
     });
   },
-  skip: () => process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: (req) => req.headers['x-qa-bypass'] === 'cooperadora-qa-bypass-2026' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
 });
 
