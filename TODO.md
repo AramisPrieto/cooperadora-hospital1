@@ -1,35 +1,31 @@
-# 📋 Registro y Seguimiento de Tareas (TODO)
-
-Este documento detalla el estado del plan de trabajo acordado para el desarrollo y optimización del portal de la **Asociación Cooperadora del Hospital Municipal "Dr. Emilio Ferreyra"**.
-
----
-
-## ✅ Tareas e Hitos de la Etapa Final (100% Completado)
-
-Todas las metas principales de implementación, seguridad y diseño han sido cubiertas:
-
-- **[x] Inicializar y Estructurar Repositorio Git:** Configuración de monorrepo mediante `pnpm workspaces`.
-- **[x] Vinculación Frontend-Backend:** Conexión segura mediante Axios con soporte de proxy inverso.
-- **[x] Registro de Socios Avanzado:** Formulario con sanitización de datos, DNI y campos ampliados.
-- **[x] Panel de Administración Premium:** Grillas interactivas de socios, auditoría de transferencias y edición de campañas/noticias.
-- **[x] Limites de Donación en Campañas:** Reglas de validación para impedir sobre-recaudación.
-- **[x] Integración de Mercado Pago:** Donaciones online y suscripción a débito automático de cuotas mediante Webhooks.
-- **[x] Sistema de Notificaciones por Correo:** Envío formal de bienvenida a socios y agradecimientos por donaciones vía SMTP.
-- **[x] Suite de Pruebas Automatizadas:** 79 pruebas de integración unitarias y de API en el backend con Vitest.
-- **[x] Accesibilidad (WCAG) y CLS:** Auditoría de contraste, navegación por teclado, soporte ARIA y optimización de CLS.
-- **[x] Hardening de Seguridad (OWASP):** Implementación de Helmet, rate limiters, validación HMAC en webhooks y prevención de inyecciones NoSQL.
-
----
-
-## 🔮 Roadmap de Futuras Versiones (Backlog de Evolución)
-
-Tareas planificadas para siguientes iteraciones y mantenimiento post-entrega:
-
-* **[ ] Autovalidación de Transferencias Bancarias:**
-  * *Objetivo:* Integrar conciliación automática de extractos bancarios mediante OCR o APIs bancarias abiertas para automatizar la aprobación.
-* **[ ] Eliminación y Depuración de Cuentas de Usuario:**
-  * *Objetivo:* Implementar la opción de autogestión de baja en cumplimiento con el derecho de supresión de datos (GDPR).
-* **[ ] Notificaciones de Activación de Cuenta:**
-  * *Objetivo:* Disparar una alerta automatizada por correo cuando el administrador cambie el estado del asociado de `pendiente` a `activo`.
-* **[ ] Visibilidad Selectiva de Novedades:**
-  * *Objetivo:* Permitir que el operador configure artículos de noticias en modo borrador ("No Visible") en lugar de publicación inmediata.
+# 📋 Plan de Trabajo y Pendientes
+## 🚀 Prioridades Actuales
+## 🛠️ Tareas por Hacer (Backlog)
+- [ ] Ver manera de autovalidar los socios/transferencias para no necesitar validacion manual(hablar coperadora) 
+- [ ] ver mails que habia echo kevo dejarlos andando
+- [ ] eliminar usuario
+- [ ] mail que te llegue cuando te aprueban como socio
+- [ ] configurar visible y no visible noticias o quitar visible y que esten siempre todas habalr en grupo
+- [ ] verificar lenis
+- [ ] agregar metodo en transferencia admin campañas
+- [ ] arreglar ultimos donadores
+## 🔄 En Progreso
+## ✅ Terminado
+- [x] Inicializar repositorio Git
+- [x] Vincular el frontend con el backend
+- [x] arreglar el registrarse (datos que pide) Aramis
+- [x] Diseñar el panel de administración
+- [x] Hacer que no se pueda seguir donando una vez terminada la campaña o llegado a su maximo, o no poder donar mas de lo necesario para la campaña
+- [x] Crear suite de pruebas de integración y automatizadas en la carpeta backend/tests
+- [x] elegir campañas del mes (Kevin)
+- [x] revisar scrols
+- [x] Minimo de donacion (Kevin)
+- [x] Armar panel de socio hecho en el wireframe
+- [x] agregar panel de socios(ver cuotas pagas,donaciones demas) - THIAGO
+- [x] añadir footer wireframe (THIAGO)
+- [x] agregar en gestion de socios el cambio a "inactivo" (THIAGO)
+- [x] añadir carrusel (THIAGO)
+- [x] quitar # en noticias
+- [x] arreglar visual de fecha en seccion noticias (THIAGO)
+- [x] en obras concretadas dejar unicamente linea de tiempo (THIAGO)
+- [x] actualizar verfcer
