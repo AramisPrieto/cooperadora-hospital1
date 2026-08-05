@@ -118,6 +118,9 @@ app.use((req, res, next) => {
 
 // Manejo global de errores
 app.use((err, req, res, next) => {
+  if (err.name === 'MulterError' || (err.message && err.message.includes('no permitida'))) {
+    return res.status(400).json({ error: err.message });
+  }
   console.error('Error no controlado:', err.stack);
   res.status(500).json({ error: 'Ha ocurrido un error interno en el servidor.' });
 });
