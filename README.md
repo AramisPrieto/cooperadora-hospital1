@@ -37,13 +37,15 @@ cooperadora-hospital1/
 │   │   └── views/            # Vistas principales (Home, ObrasConcretadas, etc.)
 │   ├── tailwind.config.js    # Configuración de estilos utilitarios
 │   └── vercel.json           # Reglas de proxy inverso para producción
-└── backend/                  # Servidor API REST (Node.js + Express)
-    ├── config/               # Configuraciones de entorno y base de datos
-    ├── controllers/          # Lógica de negocio (Capa de Control)
-    ├── middleware/           # Rate limiting, validaciones, caché y autenticación
-    ├── models/               # Modelos SQL (Sequelize) y NoSQL (Mongoose)
-    ├── routes/               # Definición de endpoints de la API
-    └── tests/                # Pruebas automatizadas de integración con Vitest
+├── backend/                  # Servidor API REST (Node.js + Express)
+│   ├── config/               # Configuraciones de entorno y base de datos
+│   ├── controllers/          # Lógica de negocio (Capa de Control)
+│   ├── middleware/           # Rate limiting, validaciones, caché y autenticación
+│   ├── models/               # Modelos SQL (Sequelize) y NoSQL (Mongoose)
+│   ├── routes/               # Definición de endpoints de la API
+│   └── tests/                # Pruebas automatizadas de integración con Vitest
+└── etapas-teoria/            # Entregas teóricas, diagramas, informes y defensas
+    └── Augusto/              # Informe de gestión final, DER y preguntas de cátedra
 ```
 
 ---
@@ -62,6 +64,8 @@ graph TD
         SQL -->|Tabla| users[usuarios]
         SQL -->|Tabla| members[perfiles_socios]
         SQL -->|Tabla| campaigns[campanas_eco]
+        SQL -->|Tabla| transfers[donaciones_transferencia]
+        SQL -->|Tabla| payments[pagos_cuotas]
     end
     
     subgraph Base NoSQL
@@ -75,6 +79,8 @@ Resguarda los datos sensibles que exigen trazabilidad estricta y consistencia **
 * **`usuarios`**: Credenciales de acceso (emails únicos, contraseñas hasheadas con `bcryptjs` y roles `admin` o `socio`).
 * **`perfiles_socios`**: Datos obligatorios del Libro Registro de Asociados (DNI únicos, fechas de alta y estado de aprobación).
 * **`campanas_eco`**: Control de metas financieras (monto objetivo y monto acumulado real no negativos).
+* **`donaciones_transferencia`**: Declaraciones bancarias realizadas por los socios para campañas que requieren aprobación por el operador.
+* **`pagos_cuotas`**: Registro histórico de cobro de membresías mensuales y adhesiones a débito automático de los asociados.
 
 ### 2. Motor Documental (NoSQL: MongoDB con Mongoose)
 Almacena documentos de formato libre de alta carga multimedia:

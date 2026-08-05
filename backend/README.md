@@ -123,13 +123,47 @@ Maneja las metas financieras de recaudación.
 | `numero_comprobante`| `VARCHAR(255)`| `NULL` | Número de transacción bancaria cargado por el socio. |
 | `comprobante_url`| `VARCHAR(255)`| `NULL` | Enlace al archivo adjunto del comprobante. |
 
+#### Tabla: `pagos_cuotas`
+Mantiene el registro de facturación de cuotas mensuales de los asociados.
+| Campo | Tipo | Nulidad | Descripción |
+| :--- | :--- | :--- | :--- |
+| `id` | `INTEGER` | `NOT NULL` | Llave primaria, auto-incremental. |
+| `socio_numero_asociado`| `INTEGER` | `NOT NULL` | Foránea apuntando a `perfiles_socios.numero_asociado` (Relación N:1, borrado en cascada). |
+| `mes` | `INTEGER` | `NULL` | Período de cobro (mes entre 1 y 12). |
+| `anio` | `INTEGER` | `NULL` | Período de cobro (año de facturación). |
+| `monto` | `DECIMAL(12,2)` | `NOT NULL` | Importe de la cuota mensual. |
+| `estado` | `ENUM('pagado', 'pendiente', 'vencido', 'aprobado', 'rechazado')`| `NOT NULL` | Por defecto `'pendiente'`. |
+| `fecha_pago` | `TIMESTAMP` | `NULL` | Fecha y hora de procesamiento de pago. |
+| `metodo_pago` | `ENUM('transferencia', 'efectivo', 'debito')` | `NULL` | Canal del cobro de la cuota. |
+| `mp_payment_id` | `VARCHAR(255)`| `NULL` | Único. ID de pago retornado por Mercado Pago. |
+| `numero_comprobante`| `VARCHAR(255)`| `NULL` | Número de comprobante de transferencia provisto por el socio. |
+| `comprobante_url` | `VARCHAR(255)`| `NULL` | Ruta de la imagen del comprobante de pago manual. |
+
 ### 2. Base de Datos Documental (NoSQL: MongoDB)
 
 #### Colección: `campanas_detalle`
-Almacena narrativa enriquecida y contenidos multimedia de campañas. Referencia SQL mediante `campana_id_ref`.
+Almacena narrativa enriquecida y contenidos multimedia de campañas. Vinculada mediante clave híbrida a SQL.
+| Atributo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `_id` | `ObjectId` | Identificador único autogenerado en MongoDB. |
+| `campana_id_ref`| `Number` | Indexado y Único. Llave de referencia híbrida al `id` numérico de `campanas_eco` en PostgreSQL. |
+| `testimonios` | `Array` | Listado de sub-documentos conteniendo `{ autor, texto, fecha }` de donantes o beneficiarios. |
+| `galeria_rica` | `Object` | Estructura `{ videos: [String], imagenes: [String] }` con las URLs de contenidos multimedia. |
+| `obra_status` | `String` | Estado de la obra física (por defecto `'Planeada'`, `'En Proceso'`, `'Finalizada'`). |
+| `equipamiento_info`| `String` | Descripción detallada del instrumental médico a adquirir. |
+| `equipamiento_imagen`| `String` | Enlace a la imagen del instrumental correspondiente. |
 
 #### Colección: `noticias_actualidad`
 Maneja las novedades y eventos publicados en el portal.
+| Atributo | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `_id` | `ObjectId` | Identificador único autogenerado en MongoDB. |
+| `titulo` | `String` | Título del artículo (requerido). |
+| `cuerpo_html` | `String` | Cuerpo del artículo enriquecido en HTML (requerido, sanitizado con DOMPurify). |
+| `multimedia` | `Array` | Listado de URLs de fotos/videos adicionales en el cuerpo. |
+| `tags` | `Array` | Listado de etiquetas para categorización del buscador. |
+| `imagen_url` | `String` | Portada principal de la novedad. |
+| `fecha` | `Date` | Fecha de publicación (por defecto `Date.now`). |
 
 ---
 
