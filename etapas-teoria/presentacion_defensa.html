@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Defensa de Proyecto - Cooperadora Hospital Ferreyra</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* VARIABLES Y DISEÑO CLÍNICO PREMIUM LIGHT */
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: rgba(15, 23, 42, 0.06);
+      --primary: #0f766e; /* Deep Teal */
+      --primary-light: #0d9488;
+      --primary-gradient: linear-gradient(135deg, #0f766e 0%, #10b981 100%);
+      --text-main: #0f172a; /* Slate oscuro para lectura */
+      --text-muted: #475569;
+      --font-title: 'Outfit', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      background-image: radial-gradient(at 0% 0%, #e2f8f0 0px, transparent 50%),
+                        radial-gradient(at 100% 100%, #e0f2fe 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* Ambient background orbs */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 15%;
+      left: 10%;
+      width: 300px;
+      height: 300px;
+      background: rgba(45, 212, 191, 0.15);
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: "";
+      position: absolute;
+      bottom: 15%;
+      right: 10%;
+      width: 350px;
+      height: 350px;
+      background: rgba(56, 189, 248, 0.12);
+      border-radius: 50%;
+      filter: blur(120px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* CONTENEDOR DE DIAPOSITIVAS */
+    .slides-container {
+      position: relative;
+      flex-grow: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* DIAPOSITIVA INDIVIDUAL */
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 3rem 6rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.97) translateY(20px);
+      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    .slide.prev {
+      opacity: 0;
+      transform: scale(0.97) translateY(-20px);
+    }
+
+    /* REJILLA Y LAYOUTS */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    /* ENCABEZADOS */
+    .slide-tag {
+      color: var(--primary-light);
+      font-family: var(--font-title);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    h1.slide-title {
+      font-family: var(--font-title);
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #0f172a 40%, var(--primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    /* CARDS PREMIUM LIGHT */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2.2rem;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03);
+    }
+
+    .card:hover {
+      transform: translateY(-6px) scale(1.005);
+      border-color: rgba(13, 148, 136, 0.2);
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    }
+
+    .card h3 {
+      font-family: var(--font-title);
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card h3 svg {
+      color: var(--primary-light);
+    }
+
+    .card p, .card li {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .card ul {
+      list-style-type: none;
+    }
+
+    .card li {
+      margin-bottom: 0.8rem;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .card li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55rem;
+      width: 6px;
+      height: 6px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(13, 148, 136, 0.3);
+    }
+
+    /* BADGES Y MÉTRICAS */
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-right: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+    .badge-primary { 
+      background: rgba(13, 148, 136, 0.08); 
+      color: var(--primary-light); 
+      border: 1px solid rgba(13, 148, 136, 0.15); 
+    }
+    .badge-secondary { 
+      background: rgba(16, 185, 129, 0.08); 
+      color: #047857; 
+      border: 1px solid rgba(16, 185, 129, 0.15); 
+    }
+
+    .metric-value {
+      font-family: var(--font-title);
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #0f172a 40%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.03em;
+    }
+
+    /* CONTROLES E INTERFAZ FLOTANTE */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 3rem;
+      margin: 0 6rem 2rem 6rem;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      background: #ffffff;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+      z-index: 100;
+    }
+
+    .nav-btn {
+      background: #f1f5f9;
+      border: 1px solid rgba(15, 23, 42, 0.05);
+      color: var(--text-main);
+      padding: 0.65rem 1.4rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-title);
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(15, 118, 110, 0.2);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .slide-counter {
+      font-family: var(--font-title);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      letter-spacing: -0.01em;
+    }
+
+    /* BARRA DE PROGRESO */
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(15, 23, 42, 0.03);
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--primary-gradient);
+      width: 0%;
+      transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* PORTADA E INTERFAZ HERO */
+    .hero-slide {
+      text-align: center;
+      align-items: center;
+    }
+
+    .hero-title {
+      font-family: var(--font-title);
+      font-size: 3.6rem;
+      font-weight: 800;
+      margin-bottom: 1.2rem;
+      line-height: 1.15;
+      max-width: 950px;
+      background: linear-gradient(135deg, #0f172a 40%, var(--primary) 80%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 2.8rem;
+      max-width: 650px;
+      line-height: 1.6;
+    }
+
+    .meta-box {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.8rem 3.5rem;
+      display: inline-grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 2rem 5rem;
+      text-align: left;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+    }
+
+    .meta-item span {
+      display: block;
+    }
+    .meta-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+    .meta-val { font-size: 1.05rem; font-weight: 600; color: #0f172a; margin-top: 0.35rem; }
+
+    /* DIAGRAMA DE FLUJO INTEGRADO */
+    .diagram-container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 2rem;
+      background: rgba(15, 23, 42, 0.02);
+      padding: 2.2rem;
+      border-radius: 16px;
+      border: 1px dashed var(--card-border);
+    }
+
+    .diagram-node {
+      background: #ffffff;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0.9rem 1.6rem;
+      text-align: center;
+      width: 190px;
+      font-weight: 600;
+      color: #0f172a;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.03);
+    }
+
+    .diagram-node.highlight {
+      border-color: var(--primary);
+      background: rgba(13, 148, 136, 0.03);
+      box-shadow: 0 0 15px rgba(13, 148, 136, 0.15);
+    }
+
+    .diagram-arrow {
+      color: var(--primary);
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA DE PROGRESO -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- CONTENEDOR DE SLIDES -->
+  <div class="slides-container">
+
+    <!-- DIAPOSITIVA 1: PORTADA -->
+    <div class="slide active hero-slide">
+      <span class="slide-tag">Defensa de Proyecto Final</span>
+      <h1 class="hero-title">Portal Web de la Asociación Cooperadora del Hospital "Dr. Emilio Ferreyra"</h1>
+      <p class="hero-subtitle">Gestión del Desarrollo de Software - Una solución transparente e integral de persistencia híbrida.</p>
+      
+      <div class="meta-box">
+        <div class="meta-item">
+          <span class="meta-label">Profesor</span>
+          <span class="meta-val">Cesar Augusto Fernández Carbonell</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Fecha de Defensa</span>
+          <span class="meta-val">22 de Junio, 2026</span>
+        </div>
+        <div class="meta-item" style="grid-column: span 2;">
+          <span class="meta-label">Integrantes del Grupo</span>
+          <span class="meta-val">Aramis Prieto • Kevin Nielsen • Thiago Masson • Santiago Ialungo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 2: EL PROBLEMA Y LA SOLUCIÓN -->
+    <div class="slide">
+      <span class="slide-tag">1. Contexto del Negocio</span>
+      <h1 class="slide-title">La Problemática vs. Nuestra Solución</h1>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            El Problema de Origen
+          </h3>
+          <ul>
+            <li><strong>Administración Analógica:</strong> Registros en fichas de papel propensas a extravíos y cobradores físicos ineficientes.</li>
+            <li><strong>Falta de Transparencia:</strong> Dificultad para que los vecinos de Necochea/Quequén auditen el destino real de sus fondos.</li>
+            <li><strong>Conciliación Engorrosa:</strong> Control visual manual de transferencias bancarias sin acuse inmediato de recibo.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            La Propuesta Digital
+          </h3>
+          <ul>
+            <li><strong>Libro de Socios Digitalizado:</strong> Centralización relacional segura en PostgreSQL (con DNI único obligatorio).</li>
+            <li><strong>Campañas Interactivas:</strong> Barras de progreso de recaudación en tiempo real para generar confianza comunitaria.</li>
+            <li><strong>Donaciones y Avisos Automáticos:</strong> Declaración fácil de transferencias, pagos online rápidos y avisos inmediatos al mail.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 3: MISIÓN, VISIÓN Y OBJETIVOS -->
+    <div class="slide">
+      <span class="slide-tag">1. Dirección Estratégica</span>
+      <h1 class="slide-title">Misión, Visión y Objetivos del Proyecto</h1>
+      
+      <div class="grid-3">
+        <div class="card">
+          <h3>Misión</h3>
+          <p>Proporcionar un portal digital transparente, seguro y eficiente que conecte a la comunidad con la Asociación Cooperadora, facilitando la recaudación de fondos y el registro de socios para potenciar el equipamiento y la infraestructura médica del Hospital Municipal.</p>
+        </div>
+
+        <div class="card">
+          <h3>Visión</h3>
+          <p>Ser el canal digital líder y referente absoluto de transparencia y confianza comunitaria en la salud pública local, logrando digitalizar el 100% de los asociados de la cooperadora y visibilizando en tiempo real el impacto de sus aportes.</p>
+        </div>
+
+        <div class="card">
+          <h3>Objetivos Clave</h3>
+          <ul>
+            <li><strong>General:</strong> Implementar una plataforma web híbrida estable y panel de control administrativo seguro en el primer semestre de 2026.</li>
+            <li><strong>Específicos:</strong> Integrar Mercado Pago recurrente, automatizar agradecimientos vía Resend, garantizar transacciones concurrentes robustas y certificar estabilidad con 79 tests de Vitest.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 4: ARQUITECTURA DE PERSISTENCIA HÍBRIDA -->
+    <div class="slide">
+      <span class="slide-tag">2. Diseño Tecnológico</span>
+      <h1 class="slide-title">La Persistencia Híbrida (SQL + NoSQL)</h1>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>PostgreSQL (ACID y Estructura Relacional)</h3>
+          <p style="margin-bottom: 1rem;">Utilizado para almacenar y asegurar la consistencia de los datos críticos y transaccionales de la cooperadora:</p>
+          <ul>
+            <li>Perfiles y datos legales de asociados (Libro de Asociados).</li>
+            <li>Historial de transacciones de donaciones y pagos.</li>
+            <li>Gestión y estado de las cuotas sociales mensuales.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>MongoDB Atlas (Flexibilidad Documental NoSQL)</h3>
+          <p style="margin-bottom: 1rem;">Utilizado en la nube para gestionar contenido flexible, dinámico y enriquecido que no requiere relaciones estrictas:</p>
+          <ul>
+            <li>Redacción y publicación de noticias de actualidad del hospital.</li>
+            <li>Narrativas, imágenes y detalles extendidos de las campañas de recaudación.</li>
+            <li>Estructuras de datos multimedia y texto enriquecido.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- DIAPOSITIVA 5: METODOLOGÍA SCRUM APLICADA -->
+    <div class="slide">
+      <span class="slide-tag">3. Metodología Ágil</span>
+      <h1 class="slide-title">Agilidad y Sprint Planning</h1>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>Roles de Scrum</h3>
+          <ul>
+            <li><strong>Product Owner:</strong> Cátedra y Directiva del Hospital (validan requerimientos).</li>
+            <li><strong>Scrum Master: Aramis Prieto</strong> (facilita y destraba dependencias técnicas de bases de datos).</li>
+            <li><strong>Dev Team:</strong> Kevin (Seguridad/Backend), Thiago (Monorepo/NoSQL), Santiago (UI/UX/Front), Aramis (DB/QA).</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Sprints y Entregas</h3>
+          <p style="margin-bottom: 1rem;">Ejecutamos <strong>Sprints quincenales</strong> combinados con entregas incrementales para adaptarnos rápidamente a los cambios del negocio:</p>
+          <div class="diagram-container">
+            <div class="diagram-node highlight">Sprint Planning</div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node">Desarrollo e Integración</div>
+            <div class="diagram-arrow">→</div>
+            <div class="diagram-node highlight">Vitest / Review</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 6: ESTIMACIÓN Y MÉTRICAS DE CONTROL -->
+    <div class="slide">
+      <span class="slide-tag">4. Estimaciones del Esfuerzo</span>
+      <h1 class="slide-title">Story Points frente a WBS</h1>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>Estructura de Desglose de Trabajo (WBS)</h3>
+          <p style="margin-bottom: 0.75rem; font-size: 0.85rem; color: var(--text-muted);">El proyecto se estructuró jerárquicamente en 8 ramas principales:</p>
+          <ul style="font-size: 0.85rem; columns: 2; gap: 1rem; margin-bottom: 1rem;">
+            <li><strong>1.0 INF:</strong> Infraestructura / Docker / Monorepo</li>
+            <li><strong>2.0 AUT:</strong> Auth JWT Backend & Client</li>
+            <li><strong>3.0 SOC:</strong> Libro de Socios y Autogestión</li>
+            <li><strong>4.0 CAM:</strong> Campañas Híbridas y Mashup</li>
+            <li><strong>5.0 DON:</strong> Donaciones y Mercado Pago</li>
+            <li><strong>6.0 ADM:</strong> Panel y Auditoría Admin</li>
+            <li><strong>7.0 SEG:</strong> Middlewares y Vitest Testing</li>
+            <li><strong>8.0 NAV:</strong> Timeline / Compartido / Proxy</li>
+          </ul>
+          <p style="font-size: 0.85rem;"><strong>Story Points:</strong> Abstraen el tiempo enfocándose en la complejidad y el riesgo relativo, mitigando discrepancias de horarios entre estudiantes.</p>
+        </div>
+
+        <div class="grid-2" style="margin-top: 0;">
+          <div class="card" style="text-align: center;">
+            <div class="metric-value">77 SP</div>
+            <p>Estimación Planificada Inicial</p>
+          </div>
+          <div class="card" style="text-align: center;">
+            <div class="metric-value">124 SP</div>
+            <p>Esfuerzo Real Quemado</p>
+          </div>
+          <div class="card" style="text-align: center; grid-column: span 2;">
+            <div class="metric-value">98%</div>
+            <p>Tareas de la WBS Finalizadas con Éxito</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 7: HERRAMIENTAS Y TECNOLOGÍAS (STACK) -->
+    <div class="slide">
+      <span class="slide-tag">5. Ecosistema de Desarrollo</span>
+      <h1 class="slide-title">Pila Tecnológica y Herramientas (Stack)</h1>
+      
+      <div class="grid-3">
+        <div class="card">
+          <h3>Desarrollo y Frameworks</h3>
+          <ul>
+            <li><strong>Frontend:</strong> React.js con Vite, Tailwind CSS para estilos, Lenis scroll e iconografía de Lucide React.</li>
+            <li><strong>Backend:</strong> Node.js con Express, Sequelize (ORM relacional SQL) y Mongoose (ODM documental NoSQL).</li>
+            <li><strong>Monorrepo:</strong> Estandarización y orquestación de dependencias con <strong>pnpm workspaces</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>APIs, Integración y BD</h3>
+          <ul>
+            <li><strong>Pasarela de Pagos:</strong> SDK de Mercado Pago para suscripciones recurrentes y pagos web directos.</li>
+            <li><strong>Servicio de Email:</strong> API REST HTTPS de Resend (notificaciones y forgot claves).</li>
+            <li><strong>Persistencia Cloud:</strong> PostgreSQL administrado y MongoDB Atlas.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Infraestructura y QA</h3>
+          <ul>
+            <li><strong>Hosting Nube:</strong> Vercel (Front con proxy Same-Site), Render (Backend y base SQL) y MongoDB Atlas (NoSQL en la nube).</li>
+            <li><strong>Local Dev:</strong> Docker Desktop (bases aisladas) y Pinggy para túneles HTTPS de webhooks de Mercado Pago.</li>
+            <li><strong>Testing Suite:</strong> Vitest, Supertest para HTTP y `jest-axe` (accesibilidad).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 8: COSTOS DEL PROYECTO -->
+    <div class="slide">
+      <span class="slide-tag">6. Ingeniería Económica</span>
+      <h1 class="slide-title">Costos de Desarrollo y Producción Anual</h1>
+      
+      <div class="grid-3">
+        <div class="card">
+          <h3>Desarrollo Humano</h3>
+          <div class="metric-value" style="font-size: 2.5rem;">$3.840 USD</div>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem;">Esfuerzo teórico basado en 256 horas totales de desarrollo del equipo cotizadas a una tasa de $15 USD/hora de mercado.</p>
+        </div>
+
+        <div class="card">
+          <h3>Infraestructura Cloud</h3>
+          <div class="metric-value" style="font-size: 2.5rem;">$183 USD/a</div>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem;">Mantenimiento cloud real: hosting del servidor Node.js ($84) y base relacional ($84) en Render, más Dominio .org.ar ($15). MongoDB Atlas gratis.</p>
+        </div>
+
+        <div class="card">
+          <h3>Soporte y Garantía</h3>
+          <div class="metric-value" style="font-size: 2.5rem;">$960 USD/a</div>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem;">4 horas mensuales estimadas para actualizaciones de seguridad de dependencias npm/pnpm, parches de seguridad y copias de backup contables.</p>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 2rem; color: var(--text-muted);">Costo total consolidado para el primer año de vida útil: <strong>$4.983 USD</strong>.</p>
+    </div>
+
+    <!-- DIAPOSITIVA 8: TESTING Y DEUDA TÉCNICA -->
+    <div class="slide">
+      <span class="slide-tag">7. Garantía de Calidad</span>
+      <h1 class="slide-title">Estrategia de Testing e Integración</h1>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>La Suite de Tests Automatizados</h3>
+          <ul>
+            <li><strong>79 pruebas de integración</strong> ejecutadas mediante Vitest y Supertest.</li>
+            <li>Aislamiento estricto de base relacional (`db_test`) y documental (`nosql_test`) con limpieza automática.</li>
+            <li>Validaciones de seguridad (Forgot password tokens, Rate limits, e inyecciones NoSQL) incorporadas en la suite.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Deuda Técnica Admitida</h3>
+          <p style="margin-bottom: 1rem;">Los atajos tomados para asegurar la entrega y que requerirán mitigación a futuro:</p>
+          <ul>
+            <li><strong>Sincronización Manual:</strong> La integridad relacional-documental se gestiona a nivel de código en el backend al no contar con un ORM híbrido.</li>
+            <li><strong>Conciliación Semi-Manual:</strong> El portal depende de la auditoría de un operador en lugar de un Webhook directo bancario automatizado.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 9: GESTIÓN DE CAMBIOS -->
+    <div class="slide">
+      <span class="slide-tag">8. Adaptabilidad Ágil</span>
+      <h1 class="slide-title">La Gestión de Cambios (Scope Creep)</h1>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>Los "Volantazos" del Alcance</h3>
+          <ul>
+            <li><strong>Remoción de tarjetas:</strong> Se pasó a transferencias y Mercado Pago por comisiones impositivas de la cooperadora.</li>
+            <li><strong>Bloqueo de puertos SMTP:</strong> Render gratuito bloquea los puertos de email estándar (465/587) por seguridad. Migramos a la <strong>API REST HTTPS (puerto 443) de Resend</strong>.</li>
+            <li><strong>Cookies SameSite en Vercel:</strong> Como el frontend (Vercel) y backend (Render) están en dominios distintos, el navegador bloqueaba las cookies de sesión. Lo resolvimos con un <strong>proxy inverso (rewrites en vercel.json)</strong> para simular un único origen.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>El Proceso de Control de Cambios</h3>
+          <ul>
+            <li><strong>1. Identificación y Registro:</strong> Tareas añadidas formalmente a TODO.md.</li>
+            <li><strong>2. Evaluación de Impacto:</strong> Análisis de desvío técnico y esfuerzo en Story Points (de 77 a 124 SP reales).</li>
+            <li><strong>3. Aprobación y Fusión:</strong> Validación del PO (Augusto) y tests automáticos antes de fusionar en develop/main.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAPOSITIVA 10: STAKEHOLDERS Y REQUERIMIENTOS -->
+    <div class="slide">
+      <span class="slide-tag">9. Negocio y Priorización</span>
+      <h1 class="slide-title">Requerimientos y Stakeholders</h1>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h3>Matriz de Interesados</h3>
+          <ul>
+            <li><strong>Comisión Directiva (PO):</strong> Alto interés/influencia. Requieren transparencia contable y captación ágil.</li>
+            <li><strong>Vecinos / Donantes:</strong> Buscan simplicidad en el checkout y barras de progreso financiero.</li>
+            <li><strong>Operadores Administrativos:</strong> Validan cuotas y noticias. Requieren botones sin clics múltiples accidentales.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Clasificación y Priorización</h3>
+          <ul>
+            <li><strong>Alta Prioridad (Core MVP):</strong> Autenticación JWT, Libro de Asociados, transacciones y control de concurrencia.</li>
+            <li><strong>Media Prioridad:</strong> Agregación síncrona paralela (Mashup), límites de recaudación de campañas y servicio de email.</li>
+            <li><strong>Baja Prioridad:</strong> CRUD de noticias multimedia en MongoDB.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+
+  </div>
+
+  <!-- CONTROLES Y NAVEGACIÓN -->
+  <div class="controls">
+    <button class="nav-btn" id="prevBtn" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7"/></svg>
+      Anterior
+    </button>
+    <div class="slide-counter" id="slideCounter">Diapositiva 1 de 11</div>
+    <button class="nav-btn" id="nextBtn">
+      Siguiente
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <script>
+    // LÓGICA DE NAVEGACIÓN DE DIAPOSITIVAS
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const slideCounter = document.getElementById('slideCounter');
+    const progressBar = document.getElementById('progressBar');
+    
+    let currentSlide = 0;
+    const totalSlides = slides.length;
+
+    function updatePresentation() {
+      // Activar slide actual, desactivar resto
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active', 'prev');
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        } else if (index < currentSlide) {
+          slide.classList.add('prev');
+        }
+      });
+
+      // Actualizar botones
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+
+      // Actualizar contador
+      slideCounter.textContent = `Diapositiva ${currentSlide + 1} de ${totalSlides}`;
+
+      // Actualizar barra de progreso
+      const progressPercent = ((currentSlide) / (totalSlides - 1)) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+    }
+
+    // Eventos Click
+    nextBtn.addEventListener('click', () => {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updatePresentation();
+      }
+    });
+
+    prevBtn.addEventListener('click', () => {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updatePresentation();
+      }
+    });
+
+    // Eventos Teclado (Flechas e barra espaciadora)
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Space') {
+        if (currentSlide < totalSlides - 1) {
+          currentSlide++;
+          updatePresentation();
+        }
+      } else if (e.key === 'ArrowLeft') {
+        if (currentSlide > 0) {
+          currentSlide--;
+          updatePresentation();
+        }
+      }
+    });
+
+    // Inicializar
+    updatePresentation();
+  </script>
+</body>
+</html>
