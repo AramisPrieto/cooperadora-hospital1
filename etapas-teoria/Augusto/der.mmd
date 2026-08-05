@@ -1,0 +1,77 @@
+erDiagram
+    usuarios {
+        int id PK
+        varchar email UK
+        varchar password
+        enum rol
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    perfiles_socios {
+        int id PK
+        int usuario_id_fk FK
+        varchar dni UK
+        varchar nombre
+        varchar apellido
+        varchar domicilio
+        varchar telefono
+        int numero_asociado UK
+        enum estado
+        enum metodo_pago
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    campanas_eco {
+        int id PK
+        varchar titulo
+        decimal monto_objetivo
+        decimal monto_actual
+        boolean activa
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    donaciones_transferencia {
+        int id PK
+        decimal monto
+        date fecha
+        varchar comprobante_url
+        enum estado
+        int usuario_id FK
+        int campana_id FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    pagos_cuotas {
+        int id PK
+        int mes
+        int anio
+        decimal monto
+        enum estado_pago
+        int socio_numero_asociado FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    campanas_detalle {
+        ObjectId id PK
+        number campana_id_ref UK
+        array testimonios
+        object galeria_rica
+        string obra_status
+        string equipamiento_info
+        string equipamiento_imagen
+    }
+    noticias_actualidad {
+        ObjectId id PK
+        string titulo
+        string cuerpo_html
+        array multimedia
+        array tags
+        string imagen_url
+        date fecha
+    }
+    
+    usuarios ||--|| perfiles_socios : "usuario_id_fk (1:1)"
+    usuarios ||--o{ donaciones_transferencia : "usuario_id (1:N)"
+    campanas_eco ||--o{ donaciones_transferencia : "campana_id (1:N)"
+    perfiles_socios ||--o{ pagos_cuotas : "socio_numero_asociado (1:N)"
+    campanas_eco ||--|| campanas_detalle : "campana_id_ref (Híbrido 1:1)"
