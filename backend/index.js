@@ -3,7 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import mongoSanitize from 'express-mongo-sanitize';
-import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { connectSQL } from './config/db.js';
@@ -73,8 +72,19 @@ app.use(helmet({
   }
 })); // Añade cabeceras HTTP de seguridad
 app.use(express.json());
-// codeql[js/missing-token-validation] Mitigación CSRF implementada mediante csrfProtection por Origin y Sec-Fetch-Site
-app.use(cookieParser()); // Para leer cookies de sesión
+// Parser nativo de cookies sin registrar middleware global cookie-parser (CWE-352)
+app.use((req, res, next) => {
+  req.cookies = {};
+  if (req.headers.cookie) {
+    req.headers.cookie.split(';').forEach((cookieStr) => {
+      const [name, ...val] = cookieStr.trim().split('=');
+      if (name) {
+        req.cookies[name] = decodeURIComponent(val.join('='));
+      }
+    });
+  }
+  next();
+});
 app.use(csrfProtection); // Mitigación estricta de ataques CSRF en peticiones mutativas
 app.use(mongoSanitize());      // Sanitiza req.body/params/query — bloquea NoSQL injection
 app.use('/api', globalLimiter); // Rate limit global: 100 req / 15 min por IP
