@@ -30,9 +30,7 @@ export const registerUserService = async (userData) => {
     fecha_nacimiento,
     genero,
     metodo_pago,
-    fecha_ultimo_pago,
-    localidad,
-    observaciones
+    localidad
   } = userData;
 
   // Validar seguridad de la contraseña
@@ -92,9 +90,9 @@ export const registerUserService = async (userData) => {
       fecha_nacimiento,
       genero,
       metodo_pago,
-      fecha_ultimo_pago,
+      fecha_ultimo_pago: null,
       localidad,
-      observaciones
+      observaciones: null
     }, { transaction });
 
     await transaction.commit();

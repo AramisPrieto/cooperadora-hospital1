@@ -390,12 +390,12 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
                       <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">Monto ($) *</label>
                       <div className="relative">
                         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
-                        <input type="number" min="1000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
+                        <input type="number" min="1000" max="10000000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
                       </div>
                     </div>
                     <div>
                       <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">N° Comprobante</label>
-                      <input type="text" value={txNumber} onChange={e => setTxNumber(e.target.value)} placeholder="TXN-1234567" className="input-field py-2.5 text-sm" disabled={submitting} />
+                      <input type="text" maxLength={100} value={txNumber} onChange={e => setTxNumber(e.target.value)} placeholder="TXN-1234567" className="input-field py-2.5 text-sm" disabled={submitting} />
                     </div>
                     <div className="sm:col-span-2">
                       <FileUpload
@@ -420,7 +420,7 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
                     <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">Monto a donar ($) *</label>
                     <div className="relative">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
-                      <input type="number" min="1000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
+                      <input type="number" min="1000" max="10000000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
                     </div>
                   </div>
                   <div className="flex gap-3">

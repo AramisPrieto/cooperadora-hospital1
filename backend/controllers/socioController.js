@@ -269,9 +269,7 @@ export const updateMyProfile = async (req, res) => {
       socio.metodo_pago = metodo_pago;
     }
     
-    if (fecha_ultimo_pago !== undefined) socio.fecha_ultimo_pago = fecha_ultimo_pago;
     if (localidad !== undefined) socio.localidad = localidad.trim();
-    if (observaciones !== undefined) socio.observaciones = observaciones;
 
     await socio.save();
 

@@ -322,6 +322,8 @@ const CuotasTab = ({
                       <input
                         type="number"
                         min="2000"
+                        max="10000000"
+                        step="any"
                         value={subMonto}
                         onChange={(e) => setSubMonto(e.target.value)}
                         className="input-field pl-7 py-2 text-xs"
@@ -429,6 +431,8 @@ const CuotasTab = ({
                       <input
                         type="number"
                         min="2000"
+                        max="10000000"
+                        step="any"
                         value={transferMonto}
                         onChange={(e) => setTransferMonto(e.target.value)}
                         placeholder="2000"
@@ -445,6 +449,7 @@ const CuotasTab = ({
                     </label>
                     <input
                       type="text"
+                      maxLength={100}
                       value={transferNumber}
                       onChange={(e) => setTransferNumber(e.target.value)}
                       placeholder="Ej: TXN-54321"

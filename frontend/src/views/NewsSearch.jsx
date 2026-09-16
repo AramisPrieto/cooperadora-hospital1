@@ -202,6 +202,7 @@ const NewsSearch = () => {
             value={searchInput}
             onChange={e => setSearchInput(e.target.value)}
             placeholder="Buscar noticias..."
+            maxLength={100}
             className="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-300 focus:bg-white transition-all font-medium shadow-inner"
           />
           {searchInput && (

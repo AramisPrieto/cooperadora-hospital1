@@ -901,6 +901,7 @@ const AdminPanel = () => {
                 <input
                   type="text"
                   placeholder="Buscar por email, socio o DNI..."
+                  maxLength={100}
                   value={transfersSearch}
                   onChange={(e) => setTransfersSearch(e.target.value)}
                   className="bg-transparent border-none outline-none text-xs w-full font-semibold text-slate-700"
@@ -1090,6 +1091,7 @@ const AdminPanel = () => {
                 <input
                   type="text"
                   placeholder="Buscar por socio o DNI..."
+                  maxLength={100}
                   value={cuotasSearch}
                   onChange={(e) => setCuotasSearch(e.target.value)}
                   className="bg-transparent border-none outline-none text-xs w-full font-semibold text-slate-700"

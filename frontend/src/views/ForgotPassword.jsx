@@ -92,6 +92,7 @@ const ForgotPassword = () => {
                     id="email"
                     type="email"
                     required
+                    maxLength={255}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="ejemplo@correo.com"

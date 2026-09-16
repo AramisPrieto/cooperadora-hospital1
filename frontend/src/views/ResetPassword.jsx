@@ -124,6 +124,8 @@ const ResetPassword = () => {
                     id="password"
                     type={showPass ? 'text' : 'password'}
                     required
+                    minLength={8}
+                    maxLength={128}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Mínimo 8 caracteres"
@@ -174,6 +176,8 @@ const ResetPassword = () => {
                     id="confirmPassword"
                     type={showPass ? 'text' : 'password'}
                     required
+                    minLength={8}
+                    maxLength={128}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repita la nueva contraseña"

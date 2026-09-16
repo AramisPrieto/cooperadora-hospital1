@@ -71,6 +71,7 @@ const NewsSearchForm = ({ onSearch }) => {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar noticias..."
+          maxLength={100}
           className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-l-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-brand-400 transition-all"
         />
       </div>
@@ -1076,6 +1077,7 @@ const Home = () => {
                                 <input
                                   type="number"
                                   min="1000"
+                                  max="10000000"
                                   step="any"
                                   value={transferAmount}
                                   onChange={(e) => setTransferAmount(e.target.value)}
@@ -1093,6 +1095,7 @@ const Home = () => {
                               </label>
                               <input
                                 type="text"
+                                maxLength={100}
                                 value={transferNumber}
                                 onChange={(e) => setTransferNumber(e.target.value)}
                                 placeholder="Ej: TXN-1234567"
@@ -1143,6 +1146,7 @@ const Home = () => {
                               <input
                                 type="number"
                                 min="1000"
+                                max="10000000"
                                 step="any"
                                 value={transferAmount}
                                 onChange={(e) => setTransferAmount(e.target.value)}

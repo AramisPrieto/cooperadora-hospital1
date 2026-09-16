@@ -30,7 +30,11 @@ export const ProtectedRoute = ({ children, allowedRoles }) => {
     );
   }
 
-  if (!isAuthenticated || !allowedRoles.includes(userRole)) {
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!allowedRoles.includes(userRole)) {
     return <Navigate to="/" replace />;
   }
 

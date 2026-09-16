@@ -18,7 +18,13 @@ import {
   handleSocioMpRedirect
 } from '../controllers/socioSubscriptionController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
-import { validateSocio, validateDeclararPago } from '../middleware/validators.js';
+import {
+  validateUpdateMyProfile,
+  validateAdminCreateSocio,
+  validateAdminUpdateSocio,
+  validateDeclararPago,
+  validateSqlId
+} from '../middleware/validators.js';
 import { transactionLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
@@ -46,16 +52,16 @@ router.post('/suscripcion/crear', transactionLimiter, iniciarSuscripcion);
 router.post('/suscripcion/cancelar', cancelarSuscripcion);
 
 // Autogestión: Actualizar propio perfil de socio (Socio edita su DNI/datos)
-router.put('/mi-perfil', validateSocio, updateMyProfile);
+router.put('/mi-perfil', validateUpdateMyProfile, updateMyProfile);
 
 // Admin: Actualizar perfil de cualquier socio por ID
-router.put('/:id', authorizeRoles('admin'), validateSocio, updateSocio);
+router.put('/:id', authorizeRoles('admin'), validateSqlId('id'), validateAdminUpdateSocio, updateSocio);
 
 // Rutas exclusivas de Administrador
 router.get('/admin/cuotas', authorizeRoles('admin'), getAllCuotas);
-router.put('/admin/cuotas/:id/validar', authorizeRoles('admin'), validarCuota);
+router.put('/admin/cuotas/:id/validar', authorizeRoles('admin'), validateSqlId('id'), validarCuota);
 router.get('/', authorizeRoles('admin'), getAllSocios);
-router.post('/', authorizeRoles('admin'), validateSocio, createSocio);
-router.delete('/:id', authorizeRoles('admin'), deleteSocio);
+router.post('/', authorizeRoles('admin'), validateAdminCreateSocio, createSocio);
+router.delete('/:id', authorizeRoles('admin'), validateSqlId('id'), deleteSocio);
 
 export default router;

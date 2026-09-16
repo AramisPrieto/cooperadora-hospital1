@@ -53,8 +53,10 @@ const Login = () => {
         setSuccessMsg('¡Sesión iniciada con éxito!');
         if (redirectCampaign && campaignId) {
           navigate('/?view=' + campaignId);
+        } else if (res.data.user?.rol === 'admin') {
+          navigate('/admin');
         } else {
-          navigate('/');
+          navigate('/mi-panel');
         }
       } else {
         const res = await api.post('/auth/register', {
@@ -73,7 +75,7 @@ const Login = () => {
         });
         localStorage.setItem('user', JSON.stringify(res.data.user));
         setSuccessMsg('¡Registro exitoso!');
-        navigate('/');
+        navigate('/mi-panel');
       }
     } catch (err) {
       console.error(err);
@@ -203,6 +205,7 @@ const Login = () => {
                   id="email"
                   type="email"
                   required
+                  maxLength={255}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="ejemplo@correo.com"
@@ -232,6 +235,8 @@ const Login = () => {
                   id="password"
                   type={showPass ? 'text' : 'password'}
                   required
+                  minLength={8}
+                  maxLength={128}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Ingrese su contraseña"
@@ -268,6 +273,9 @@ const Login = () => {
                       id="dni"
                       type="number"
                       required
+                      min="1000000"
+                      max="99999999"
+                      step="1"
                       value={dni}
                       onChange={e => setDni(e.target.value)}
                       placeholder="Sin puntos ej: 30123456"
@@ -287,31 +295,31 @@ const Login = () => {
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div className="space-y-1">
                       <label htmlFor="nombre" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nombre *</label>
-                      <input id="nombre" type="text" required value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Juan" className="input-field py-2 text-sm" />
+                      <input id="nombre" type="text" required maxLength={100} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Juan" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="apellido" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Apellido *</label>
-                      <input id="apellido" type="text" required value={apellido} onChange={e => setApellido(e.target.value)} placeholder="Pérez" className="input-field py-2 text-sm" />
+                      <input id="apellido" type="text" required maxLength={100} value={apellido} onChange={e => setApellido(e.target.value)} placeholder="Pérez" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="telefono" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Teléfono *</label>
-                      <input id="telefono" type="text" required value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="2262550000" className="input-field py-2 text-sm" />
+                      <input id="telefono" type="text" required maxLength={50} value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="2262550000" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="nacionalidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nacionalidad *</label>
-                      <input id="nacionalidad" type="text" required value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} placeholder="Argentina" className="input-field py-2 text-sm" />
+                      <input id="nacionalidad" type="text" required maxLength={100} value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} placeholder="Argentina" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="direccion" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Dirección *</label>
-                      <input id="direccion" type="text" required value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Calle 60 1234" className="input-field py-2 text-sm" />
+                      <input id="direccion" type="text" required maxLength={255} value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Calle 60 1234" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="localidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Localidad *</label>
-                      <input id="localidad" type="text" required value={localidad} onChange={e => setLocalidad(e.target.value)} placeholder="Necochea" className="input-field py-2 text-sm" />
+                      <input id="localidad" type="text" required maxLength={100} value={localidad} onChange={e => setLocalidad(e.target.value)} placeholder="Necochea" className="input-field py-2 text-sm" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="fechaNacimiento" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">F. Nacimiento *</label>
-                      <input id="fechaNacimiento" type="date" required value={fechaNacimiento} onChange={e => setFechaNacimiento(e.target.value)} className="input-field py-2.5 text-sm" />
+                      <input id="fechaNacimiento" type="date" required max={new Date().toISOString().split('T')[0]} value={fechaNacimiento} onChange={e => setFechaNacimiento(e.target.value)} className="input-field py-2.5 text-sm" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="genero" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Género *</label>

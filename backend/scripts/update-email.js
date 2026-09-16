@@ -1,5 +1,5 @@
-import { connectSQL } from './config/db.js';
-import { Usuario } from './models/index.js';
+import { connectSQL } from '../config/db.js';
+import { Usuario } from '../models/index.js';
 
 const newEmail = process.argv[2];
 

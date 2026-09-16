@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import { connectSQL } from './config/db.js';
-import { Usuario } from './models/index.js';
+import { connectSQL } from '../config/db.js';
+import { Usuario } from '../models/index.js';
 
 const createAdmin = async () => {
   try {

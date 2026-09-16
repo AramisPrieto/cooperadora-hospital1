@@ -58,6 +58,7 @@ const NewsForm = ({ news, onSave, onCancel, submitting }) => {
           id="titulo"
           type="text" 
           required 
+          maxLength={255}
           value={form.titulo} 
           onChange={e => handleChange('titulo', e.target.value)} 
           className={inputCls} 
@@ -69,6 +70,7 @@ const NewsForm = ({ news, onSave, onCancel, submitting }) => {
         <textarea
           id="cuerpo_html"
           required 
+          maxLength={50000}
           rows={5} 
           value={form.cuerpo_html}
           onChange={e => handleChange('cuerpo_html', e.target.value)}

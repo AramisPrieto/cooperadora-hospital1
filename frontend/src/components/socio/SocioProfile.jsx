@@ -197,6 +197,9 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
             <input
               type="number"
               required
+              min="1000000"
+              max="99999999"
+              step="1"
               value={form.dni}
               onChange={e => handleChange('dni', e.target.value)}
               className="input-field"
@@ -211,6 +214,7 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
             <input
               type="text"
               required
+              maxLength={50}
               value={form.telefono}
               onChange={e => handleChange('telefono', e.target.value)}
               className="input-field"
@@ -225,6 +229,7 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
             <input
               type="text"
               required
+              maxLength={255}
               value={form.direccion}
               onChange={e => handleChange('direccion', e.target.value)}
               className="input-field"
@@ -239,6 +244,7 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
             <input
               type="text"
               required
+              maxLength={100}
               value={form.localidad}
               onChange={e => handleChange('localidad', e.target.value)}
               className="input-field"

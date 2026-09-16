@@ -79,6 +79,7 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
               id="titulo"
               type="text" 
               required 
+              maxLength={255}
               value={form.titulo} 
               onChange={e => handleChange('titulo', e.target.value)} 
               className={inputCls} 
@@ -91,7 +92,9 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
               id="monto_objetivo"
               type="number" 
               required 
-              min="0" 
+              min="1000"
+              max="1000000000"
+              step="any"
               value={form.monto_objetivo} 
               onChange={e => handleChange('monto_objetivo', e.target.value)} 
               className={inputCls} 
@@ -103,7 +106,9 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
             <input 
               id="monto_actual"
               type="number" 
-              min="0" 
+              min="0"
+              max="1000000000"
+              step="any"
               value={form.monto_actual} 
               onChange={e => handleChange('monto_actual', e.target.value)} 
               className={inputCls} 
@@ -151,6 +156,7 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
             <input 
               id="testimoniosText"
               type="text" 
+              maxLength={1000}
               value={form.testimoniosText} 
               onChange={e => handleChange('testimoniosText', e.target.value)} 
               className={inputCls} 
@@ -162,6 +168,7 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
             <input 
               id="testimoniosAutor"
               type="text" 
+              maxLength={150}
               value={form.testimoniosAutor} 
               onChange={e => handleChange('testimoniosAutor', e.target.value)} 
               className={inputCls} 
@@ -188,6 +195,7 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
                 <FormLabel htmlFor="equipamiento_info">Información / Utilidad del Equipo</FormLabel>
                 <textarea
                   id="equipamiento_info"
+                  maxLength={2000}
                   value={form.equipamiento_info}
                   onChange={e => handleChange('equipamiento_info', e.target.value)}
                   className={`${inputCls} min-h-[100px] py-3`}

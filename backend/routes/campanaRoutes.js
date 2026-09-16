@@ -8,6 +8,11 @@ import {
   deleteCampana
 } from '../controllers/campanaController.js';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth.js';
+import {
+  validateSqlId,
+  validateCampana,
+  validateCampanaUpdate
+} from '../middleware/validators.js';
 
 const router = express.Router();
 
@@ -15,14 +20,14 @@ const router = express.Router();
 router.get('/', getAllCampanas);
 
 // Ver campaña individual completa (Público)
-router.get('/:id', getCampanaById);
+router.get('/:id', validateSqlId('id'), getCampanaById);
 
 // Últimos donantes de una campaña (Público - datos enmascarados)
-router.get('/:id/donantes', getDonantes);
+router.get('/:id/donantes', validateSqlId('id'), getDonantes);
 
 // Rutas de administración de campañas (Solo Admin)
-router.post('/', authenticateJWT, authorizeRoles('admin'), createCampana);
-router.put('/:id', authenticateJWT, authorizeRoles('admin'), updateCampana);
-router.delete('/:id', authenticateJWT, authorizeRoles('admin'), deleteCampana);
+router.post('/', authenticateJWT, authorizeRoles('admin'), validateCampana, createCampana);
+router.put('/:id', authenticateJWT, authorizeRoles('admin'), validateSqlId('id'), validateCampanaUpdate, updateCampana);
+router.delete('/:id', authenticateJWT, authorizeRoles('admin'), validateSqlId('id'), deleteCampana);
 
 export default router;

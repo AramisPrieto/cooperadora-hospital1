@@ -2,14 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import { connectSQL } from './config/db.js';
-import sequelize from './config/db.js';
-import { Usuario, PerfilSocio, CampanaEco, DonacionTransferencia, PagoCuota } from './models/index.js';
-
-dotenv.config();
+import { connectSQL } from '../config/db.js';
+import sequelize from '../config/db.js';
+import { Usuario, PerfilSocio, CampanaEco, DonacionTransferencia, PagoCuota } from '../models/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const backupPath = path.join(__dirname, 'old_db_backup.json');
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
+const backupPath = path.resolve(__dirname, '../old_db_backup.json');
 
 const restore = async () => {
   try {
