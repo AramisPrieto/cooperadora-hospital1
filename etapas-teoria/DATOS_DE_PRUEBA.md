@@ -54,17 +54,49 @@ Las campañas combinan datos numéricos en SQL con detalles enriquecidos (textos
    - **Monto Objetivo:** $1,200,000
    - **Estado Obra:** Finalizada y Entregada
    - **Activa:** No (Campaña pasada)
+6. **Modernización del Área de Neonatología y Cunas de Cuidados Especiales**
+   - **Monto Objetivo:** $18,500,000
+   - **Estado Obra:** En Ejecución
+   - **Activa:** Sí
+7. **Actualización Tecnológica de Tomografía y Diagnóstico por Imágenes**
+   - **Monto Objetivo:** $28,000,000
+   - **Estado Obra:** En Proceso de Licitación
+   - **Activa:** Sí
+8. **Acondicionamiento y Humanización de la Sala de Maternidad**
+   - **Monto Objetivo:** $9,200,000
+   - **Estado Obra:** Planeada
+   - **Activa:** Sí
+9. **Torre de Laparoscopía 4K para Cirugías Mínimamente Invasivas**
+   - **Monto Objetivo:** $22,000,000
+   - **Estado Obra:** En Ejecución
+   - **Activa:** Sí
+10. **Unidad Sanitaria Móvil para Atención y Vacunación en Barrios**
+    - **Monto Objetivo:** $12,400,000
+    - **Estado Obra:** En Ejecución
+    - **Activa:** Sí
+11. **Gimnasio de Rehabilitación Kinesiológica y Fisioterapia**
+    - **Monto Objetivo:** $7,800,000
+    - **Estado Obra:** Planeada
+    - **Activa:** Sí
 
 ---
 
 ## 📰 3. Noticias y Novedades (MongoDB)
 
-Artículos de prueba para la sección de Novedades / Blog de la web:
+Artículos de prueba para la sección de Novedades / Blog de la web con imágenes y formato enriquecido:
 
-1. **Gran Donación Anual de la Asociación de Comerciantes** (Tags: Donaciones, Pediatría)
-2. **Adquisición de Nuevo Cardiodesfibrilador para Guardia Médica** (Tags: Equipamiento, Socios)
+1. **Gran Donación Anual de la Asociación de Comerciantes** (Tags: Donaciones, Solidaridad, Pediatría)
+2. **Adquisición de Nuevo Cardiodesfibrilador para Guardia Médica** (Tags: Equipamiento, Guardia, Socios)
 3. **Reconocimiento a nuestros Socios Vitalicios** (Tags: Socios, Comunidad)
-4. **Lanzamiento de nuestra Nueva Plataforma Web** (Tags: Tecnología, Innovación)
+4. **Lanzamiento de nuestra Nueva Plataforma Web** (Tags: Tecnología, Innovación, Noticias)
+5. **Llegaron los nuevos ecógrafos Doppler color adquiridos gracias al aporte societario** (Tags: Equipamiento, Diagnóstico, Socios)
+6. **Exitosa Jornada Solidaria «Abrazo al Ferreyra»: Récord de participación comunitaria** (Tags: Comunidad, Solidaridad, Eventos)
+7. **Concluyó la renovación integral del sistema de aire filtrado en la Unidad de Terapia Intensiva** (Tags: Obras, Infraestructura, Salud)
+8. **Capacitación continua en reanimación cardiopulmonar avanzada para enfermería pediátrica** (Tags: Capacitación, Enfermería, Pediatría)
+9. **Firma de convenio académico y de cooperación asistencial con la Universidad Nacional** (Tags: Institucional, Educación, Medicina)
+10. **Colecta histórica del Banco de Sangre con más de 120 donantes voluntarios registrados** (Tags: Comunidad, Donaciones, Hemoterapia)
+11. **Inauguración de la nueva sala de espera amigable en consultorios externos pediátricos** (Tags: Pediatría, Humanización, Comunidad)
+12. **Presentación de memoria y balance 2025/2026: Compromiso con la transparencia** (Tags: Transparencia, Gestión, Asamblea)
 
 ---
 
