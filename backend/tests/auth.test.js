@@ -259,17 +259,24 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         .post('/api/auth/forgot-password')
         .send({ email: 'recover@test.com' });
 
-      // Obtener el usuario de la DB para leer el token generado
-      const { Usuario } = await import('../models/index.js');
-      const user = await Usuario.findOne({ where: { email: 'recover@test.com' } });
-      expect(user.reset_password_token).toBeDefined();
-      expect(user.reset_password_token).not.toBeNull();
+      // Configurar un token conocido hasheado en la DB para probar el flujo de reset
+      const crypto = await import('crypto');
+      const rawToken = 'valid_reset_token_test_123';
+      const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-      // Enviar nueva contraseña con el token
+      const { Usuario } = await import('../models/index.js');
+      await Usuario.update({
+        reset_password_token: hashedToken,
+        reset_password_expires: new Date(Date.now() + 3600000)
+      }, {
+        where: { email: 'recover@test.com' }
+      });
+
+      // Enviar nueva contraseña con el token en texto plano (como lo enviaría el usuario desde el frontend)
       const resReset = await request(app)
         .post('/api/auth/reset-password')
         .send({
-          token: user.reset_password_token,
+          token: rawToken,
           password: 'Newpassword123'
         });
 

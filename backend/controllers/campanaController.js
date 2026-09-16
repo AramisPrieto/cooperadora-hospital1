@@ -347,7 +347,7 @@ export const getDonantes = async (req, res) => {
 
     const donaciones = await DonacionTransferencia.findAll({
       where: { campana_id: parsedId, estado: 'aprobada' },
-      order: [['updatedAt', 'DESC']],
+      order: [['updated_at', 'DESC']],
       limit: 8,
       include: [
         {

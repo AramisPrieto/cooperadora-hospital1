@@ -310,6 +310,13 @@ describe('Rutas de Campañas (/api/campanas)', () => {
         nombre: 'Martín',
         apellido: 'Silva',
         dni: 30111222,
+        direccion: 'Calle Falsa 123',
+        localidad: 'Necochea',
+        nacionalidad: 'Argentina',
+        telefono: '2262112233',
+        fecha_nacimiento: '1990-01-01',
+        genero: 'masculino',
+        metodo_pago: 'transferencia',
         estado: 'activo'
       });
 

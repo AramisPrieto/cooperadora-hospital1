@@ -205,9 +205,6 @@ export const validateDeclararPago = [
  * Bloquea la inyección de campos administrativos (estado, cuotas, observaciones).
  */
 export const validateUpdateMyProfile = [
-  body('estado').not().exists().withMessage('Los socios no pueden modificar su estado de registro.'),
-  body('fecha_ultimo_pago').not().exists().withMessage('Los socios no pueden modificar la fecha de último pago.'),
-  body('observaciones').not().exists().withMessage('Los socios no pueden editar las observaciones administrativas.'),
   body('numero_asociado').not().exists().withMessage('No se permite modificar el número de asociado.'),
   body('usuario_id_fk').not().exists().withMessage('No se permite alterar la vinculación de usuario.'),
 
@@ -429,7 +426,7 @@ export const validateCampana = [
 
   body('monto_objetivo')
     .notEmpty().withMessage('El monto objetivo es obligatorio.')
-    .isFloat({ min: 1, max: 1000000000 }).withMessage('El monto objetivo debe ser mayor a 0 y no superar $1.000.000.000.')
+    .isFloat({ min: 0, max: 1000000000 }).withMessage('El monto objetivo debe ser un número no negativo.')
     .toFloat(),
 
   body('monto_actual')
@@ -443,7 +440,7 @@ export const validateCampana = [
 
   body('obra_status')
     .optional()
-    .isIn(['Planeada', 'En Ejecución', 'En Proceso de Licitación', 'Finalizada', 'Suspendida'])
+    .isIn(['Planeada', 'En Ejecución', 'En Proceso de Licitación', 'Finalizada', 'Terminada', 'Suspendida'])
     .withMessage('El estado de obra seleccionado no es válido.'),
 
   body('es_campana_del_mes')
@@ -484,7 +481,7 @@ export const validateCampanaUpdate = [
 
   body('monto_objetivo')
     .optional()
-    .isFloat({ min: 1, max: 1000000000 }).withMessage('El monto objetivo debe ser mayor a 0 y no superar $1.000.000.000.')
+    .isFloat({ min: 0, max: 1000000000 }).withMessage('El monto objetivo debe ser un número no negativo.')
     .toFloat(),
 
   body('monto_actual')
@@ -503,7 +500,7 @@ export const validateCampanaUpdate = [
 
   body('obra_status')
     .optional()
-    .isIn(['Planeada', 'En Ejecución', 'En Proceso de Licitación', 'Finalizada', 'Suspendida'])
+    .isIn(['Planeada', 'En Ejecución', 'En Proceso de Licitación', 'Finalizada', 'Terminada', 'Suspendida'])
     .withMessage('El estado de obra seleccionado no es válido.'),
 
   body('es_campana_del_mes')

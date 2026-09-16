@@ -446,23 +446,17 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
     });
 
     it('DELETE /:id debe permitir a admin eliminar un perfil de socio', async () => {
-      // Guardar el ID del usuario antes de la eliminación
-      const usuarioId = socioPerfil.usuario_id_fk;
-
       const res = await request(app)
         .delete(`/api/socios/${socioPerfil.numero_asociado}`)
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(res.status).toBe(200);
-      expect(res.body).toHaveProperty('message', 'Perfil de socio eliminado exitosamente.');
+      expect(res.body).toHaveProperty('message', 'Socio dado de baja exitosamente (marcado como inactivo).');
 
-      // Verificar que ya no exista el perfil
+      // Verificar que el perfil pase a estado inactivo (baja segura con preservación contable)
       const dbPerfil = await PerfilSocio.findByPk(socioPerfil.numero_asociado);
-      expect(dbPerfil).toBeNull();
-
-      // Verificar que tampoco exista el usuario asociado (evitando registros huérfanos)
-      const dbUsuario = await Usuario.findByPk(usuarioId);
-      expect(dbUsuario).toBeNull();
+      expect(dbPerfil).not.toBeNull();
+      expect(dbPerfil.estado).toBe('inactivo');
     });
   });
 });
