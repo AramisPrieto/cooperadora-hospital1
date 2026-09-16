@@ -109,7 +109,7 @@ Maneja las metas financieras de recaudación.
 | `monto_actual` | `DECIMAL(12,2)` | `NOT NULL` | Dinero acumulado (Por defecto `0.00`). |
 | `fecha_limite` | `TIMESTAMP` | `NULL` | Fecha límite para recibir aportes. |
 | `activo` | `BOOLEAN` | `NOT NULL` | Si la campaña está activa (Defecto `true`). |
-| `es_campana_del_mes`| `BOOLEAN` | `NOT NULL` | Flag de visualización destacada (Defecto `false`). |
+| `es_campana_del_mes`| `BOOLEAN` | `NOT NULL` | Preservado en SQL por compatibilidad; desacoplado de la UI en v1.33.0. |
 
 #### Tabla: `donaciones_transferencia`
 | Campo | Tipo | Nulidad | Descripción |
@@ -195,10 +195,13 @@ Toda la comunicación con el backend se realiza bajo el prefijo `/api`. Las peti
 * `POST /api/socios/suscripcion/crear`: Inicia la suscripción en Mercado Pago y retorna initPoints.
 * `POST /api/socios/suscripcion/cancelar`: Cancela suscripción activa en Mercado Pago.
 * `PUT /api/socios/mi-perfil`: (Autogestión) Permite que el socio actualice sus propios datos personales (DNI, teléfono, dirección, etc.).
+* `DELETE /api/socios/mi-cuenta`: (Autogestión) Baja voluntaria de membresía solicitada por el socio con validación de contraseña. Cancela débitos de Mercado Pago y preserva aportes históricos para trazabilidad contable.
 * `PUT /api/socios/:id`: (Solo Admin) Actualiza datos completos y estado de aprobación de cualquier socio. (Envía un correo de confirmación al socio si el estado cambia a `'activo'`).
 * `GET /api/socios`: (Admin) Listado de socios registrados.
 * `POST /api/socios`: (Admin) Registro manual de un socio.
-* `DELETE /api/socios/:id`: (Admin) Elimina un socio.
+* `DELETE /api/socios/:id`: (Admin) Baja de un socio y cancelación de su suscripción activa, preservando integridad contable.
+* `GET /api/socios/admin/cuotas`: (Admin) Listado completo de cuotas sociales de todos los socios con búsqueda en tiempo real y filtrado.
+* `PUT /api/socios/admin/cuotas/:id/validar`: (Admin) Aprueba o rechaza el pago declarado de una cuota social.
 
 ### 📢 Módulo de Campañas y Donaciones (`/api/campanas`, `/api/donaciones`)
 * `GET /api/campanas`: Listado de campañas (soporta ordenamientos `sort=urgente|cercana|mayor_meta` y búsquedas).

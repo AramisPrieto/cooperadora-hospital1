@@ -140,7 +140,7 @@ Para la gestión de este proyecto, se seleccionó el **Modelo Scrum combinado co
   - **Kevin Nielsen:** Desarrollo del Backend, middleware de rate limiting, validaciones robustas con regex y validator, pasarela de auditoría de transferencias bancarias y servicio de correos SMTP.
   - **Thiago Masson:** Configuración del entorno de dependencias monorrepo (migración a pnpm), integración del branding y logotipo oficial de la cooperadora, desarrollo del módulo documental de noticias e implementación de sanitización DOMPurify.
   - **Santiago Ialungo:** Diseño estético clínico de UI/UX, optimización de la paleta de colores y fondo, desarrollo del Navbar Scroll-Spy, integración de Lenis scroll y la maquetación responsiva del panel de administración.
-  - **Aramis Prieto:** Estructuración de la base de datos PostgreSQL y MongoDB, orquestación del Data Mashup, control transaccional de concurrencia mediante `SELECT FOR UPDATE` y programación de la suite de 47 tests automatizados en Vitest.
+  - **Aramis Prieto:** Estructuración de la base de datos PostgreSQL y MongoDB, orquestación del Data Mashup, control transaccional de concurrencia mediante `SELECT FOR UPDATE` y programación de la suite de 79 tests automatizados en Vitest.
 
 ### 8.2 Product Backlog Inicial
 

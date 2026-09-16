@@ -306,8 +306,8 @@ El proyecto está diseñado para ejecutarse en entornos Cloud Native modernos co
 Con la arquitectura en la nube, **ya no se requiere el uso de túneles locales (Ngrok/Pinggy)**. El backend desplegado en Render proporciona una URL HTTPS nativa y permanente.
 Mercado Pago envía las notificaciones POST directamente a la URL de Render (ej: `https://[TU-APP].onrender.com/api/webhooks/mercadopago`), y los proxies de retorno (`back_urls`) redirigen transparentemente al frontend en Vercel.
 
-*   **Contraseña Global de Acceso (Staging/Nube):** `X9$mK2#vLq7@pW4n` *(Se solicita en un recuadro al abrir la web para evitar accesos públicos)*
-*(Nota: Las cuentas locales de prueba no han sido provistas en esta versión de producción hasta que se ejecute la inicialización de la base de datos).*
+*   **Acceso Público en Producción:** El portal se encuentra desplegado y accesible públicamente sin barreras ni contraseñas provisorias para la comunidad.
+*(Nota: Para iniciar sesión en roles administrativos o realizar pruebas en staging, consulte las credenciales detalladas en [DATOS_DE_PRUEBA.md](etapas-teoria/DATOS_DE_PRUEBA.md) tras ejecutar la inicialización de la base de datos).*
 *   **Cuenta de Mercado Pago (El Comprador Sandbox):** Cuando seas redirigido al checkout de MP, debes iniciar sesión con esta cuenta ficticia para simular el pago:
     *   *Usuario:* `TESTUSER7385770550601504283`
     *   *Contraseña:* `5ZPkJK3MJX`

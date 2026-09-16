@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import DashboardCharts from '../components/admin/DashboardCharts';
@@ -51,6 +51,18 @@ const AdminPanel = () => {
   const [currentTransferPage, setCurrentTransferPage] = useState(1);
   const [expandedPartnerId, setExpandedPartnerId] = useState(null);
   const [editingPartnerId, setEditingPartnerId] = useState(null);
+
+  const filteredPartners = useMemo(() => {
+    const match = partnersSearch.toLowerCase().trim();
+    if (!match) return partners;
+    return partners.filter(part => {
+      const fullName = `${part.nombre || ''} ${part.apellido || ''}`.toLowerCase();
+      const email = (part.usuario?.email || '').toLowerCase();
+      const dni = String(part.dni || '');
+      const loc = (part.localidad || '').toLowerCase();
+      return fullName.includes(match) || email.includes(match) || dni.includes(match) || loc.includes(match);
+    });
+  }, [partners, partnersSearch]);
 
   /* Campaign form */
   const [showCampaignForm, setShowCampaignForm] = useState(false);
@@ -597,12 +609,25 @@ const AdminPanel = () => {
         {/* ══════════════ PARTNERS TAB ══════════════ */}
         {activeTab === 'partners' && (
           <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden">
-            <div className="p-5 border-b border-slate-100">
-              <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
-                <Users className="h-5 w-5 text-amber-500" />
-                Libro Registro de Asociados
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">Gestione los estados de aprobación de los socios.</p>
+            <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display font-black text-slate-800 text-lg flex items-center gap-2">
+                  <Users className="h-5 w-5 text-amber-500" />
+                  Libro Registro de Asociados
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">Gestione los estados de aprobación de los socios.</p>
+              </div>
+              <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 w-full md:w-64">
+                <Search className="h-4 w-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por nombre, email o DNI..."
+                  maxLength={100}
+                  value={partnersSearch}
+                  onChange={(e) => setPartnersSearch(e.target.value)}
+                  className="bg-transparent border-none outline-none text-xs w-full font-semibold text-slate-700"
+                />
+              </div>
             </div>
 
             {loading ? (
@@ -612,9 +637,14 @@ const AdminPanel = () => {
                 <Users className="h-10 w-10 text-slate-200 mx-auto mb-3" />
                 <p className="text-slate-400 text-sm font-semibold">No hay perfiles de socios registrados.</p>
               </div>
+            ) : filteredPartners.length === 0 ? (
+              <div className="p-12 text-center">
+                <Users className="h-10 w-10 text-slate-200 mx-auto mb-3" />
+                <p className="text-slate-400 text-sm font-semibold">No se encontraron socios que coincidan con "{partnersSearch}".</p>
+              </div>
             ) : (
               <div className="divide-y divide-slate-100">
-                {partners.map(part => {
+                {filteredPartners.map(part => {
                   const isExpanded = expandedPartnerId === part.numero_asociado;
                   return (
                     <div key={part.numero_asociado} className="border-b border-slate-50 last:border-none">

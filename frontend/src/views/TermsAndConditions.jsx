@@ -57,6 +57,7 @@ const TermsAndConditions = () => {
               <li><strong>Cuota Social:</strong> El valor de la cuota mensual es voluntario (con un monto mínimo sugerido para cubrir gastos administrativos).</li>
               <li><strong>Suscripción Recurrente:</strong> Si el usuario opta por la suscripción mensual a través de Mercado Pago, autoriza el cobro automático recurrente del monto seleccionado.</li>
               <li><strong>Baja de Suscripción:</strong> La baja de la cuota recurrente puede ser gestionada por el socio en cualquier momento ingresando a su panel personal o contactando directamente a la Cooperadora vía correo electrónico.</li>
+              <li><strong>Baja de Membresía y Cuenta:</strong> El socio puede solicitar en cualquier momento la baja voluntaria de su membresía y cuenta desde su perfil personal. Dicha acción cancela inmediatamente cualquier débito automático asociado en Mercado Pago. En cumplimiento con la normativa legal y contable vigente, los registros históricos de aportes y cuotas efectivamente percibidos permanecerán inmutables en la contabilidad de la institución.</li>
             </ul>
           </section>
 
