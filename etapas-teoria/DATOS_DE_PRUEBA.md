@@ -79,6 +79,32 @@ Las campañas combinan datos numéricos en SQL con detalles enriquecidos (textos
     - **Estado Obra:** Planeada
     - **Activa:** Sí
 
+### Obras Concretadas (100% Recaudadas y Finalizadas)
+12. **Adquisición de Nuevo Mamógrafo Digital Directo de Alta Resolución**
+    - **Monto Objetivo:** $16,000,000 | **Monto Recaudado:** $16,350,000 (102%)
+    - **Fecha de Concreción:** 18 de Abril de 2025
+    - **Estado Obra:** Finalizada
+13. **Renovación Integral de Cunas y Salas de Lactario del Pabellón de Maternidad**
+    - **Monto Objetivo:** $11,500,000 | **Monto Recaudado:** $11,500,000 (100%)
+    - **Fecha de Concreción:** 22 de Agosto de 2025
+    - **Estado Obra:** Finalizada
+14. **Reacondicionamiento Integral de la Guardia Médica y Central de Shock Room**
+    - **Monto Objetivo:** $14,200,000 | **Monto Recaudado:** $14,800,000 (104%)
+    - **Fecha de Concreción:** 30 de Noviembre de 2025
+    - **Estado Obra:** Finalizada
+15. **Incorporación de Respiradores y Monitores para la Unidad de Terapia Intensiva**
+    - **Monto Objetivo:** $24,000,000 | **Monto Recaudado:** $24,500,000 (102%)
+    - **Fecha de Concreción:** 20 de Enero de 2026
+    - **Estado Obra:** Finalizada
+16. **Automatización del Laboratorio Central con Analizador Hematológico Digital**
+    - **Monto Objetivo:** $8,900,000 | **Monto Recaudado:** $9,150,000 (103%)
+    - **Fecha de Concreción:** 14 de Marzo de 2026
+    - **Estado Obra:** Finalizada
+17. **Plaza Blanda y Espacio Lúdico en la Sala de Espera de Pediatría**
+    - **Monto Objetivo:** $3,800,000 | **Monto Recaudado:** $3,950,000 (104%)
+    - **Fecha de Concreción:** 10 de Mayo de 2026
+    - **Estado Obra:** Finalizada
+
 ---
 
 ## 📰 3. Noticias y Novedades (MongoDB)

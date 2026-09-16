@@ -442,7 +442,146 @@ const seed = async () => {
       equipamiento_imagen: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=800&q=80'
     });
 
-    console.log('🏥 Seeded 11 campaigns and details (5 existing + 6 new).');
+    // ── OBRAS CONCRETADAS (6 Campañas Finalizadas con 100% de recaudación y fechas distintas) ──
+    // Campaña 12 (Obra Concretada - Abril 2025)
+    const campana12 = await CampanaEco.create({
+      titulo: 'Adquisición de Nuevo Mamógrafo Digital Directo de Alta Resolución',
+      monto_objetivo: 16000000.00,
+      monto_actual: 16350000.00,
+      fecha_limite: new Date('2025-04-18'),
+      activo: true
+    });
+    await CampanaDetalle.create({
+      campana_id_ref: campana12.id,
+      testimonios: [],
+      galeria_rica: {
+        videos: [],
+        imagenes: [
+          'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=800&q=80'
+        ]
+      },
+      obra_status: 'Finalizada',
+      equipamiento_info: 'Mamógrafo digital directo con estereotaxia para biopsias mamarias no invasivas y detección oncológica precoz.',
+      equipamiento_imagen: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80'
+    });
+
+    // Campaña 13 (Obra Concretada - Agosto 2025)
+    const campana13 = await CampanaEco.create({
+      titulo: 'Renovación Integral de Cunas y Salas de Lactario del Pabellón de Maternidad',
+      monto_objetivo: 11500000.00,
+      monto_actual: 11500000.00,
+      fecha_limite: new Date('2025-08-22'),
+      activo: true
+    });
+    await CampanaDetalle.create({
+      campana_id_ref: campana13.id,
+      testimonios: [],
+      galeria_rica: {
+        videos: [],
+        imagenes: [
+          'https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80'
+        ]
+      },
+      obra_status: 'Finalizada',
+      equipamiento_info: 'Cunas térmicas, sillones de lactancia ergonómicos, refrigeradores biológicos para leche materna y pintura bactericida.',
+      equipamiento_imagen: 'https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&w=800&q=80'
+    });
+
+    // Campaña 14 (Obra Concretada - Noviembre 2025)
+    const campana14 = await CampanaEco.create({
+      titulo: 'Reacondicionamiento Integral de la Guardia Médica y Central de Shock Room',
+      monto_objetivo: 14200000.00,
+      monto_actual: 14800000.00,
+      fecha_limite: new Date('2025-11-30'),
+      activo: true
+    });
+    await CampanaDetalle.create({
+      campana_id_ref: campana14.id,
+      testimonios: [],
+      galeria_rica: {
+        videos: [],
+        imagenes: [
+          'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80'
+        ]
+      },
+      obra_status: 'Finalizada',
+      equipamiento_info: 'Dos camillas articuladas de trauma shock room, lámparas scialíticas móviles y paneles de oxígeno central.',
+      equipamiento_imagen: 'https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=800&q=80'
+    });
+
+    // Campaña 15 (Obra Concretada - Enero 2026)
+    const campana15 = await CampanaEco.create({
+      titulo: 'Incorporación de Respiradores y Monitores para la Unidad de Terapia Intensiva',
+      monto_objetivo: 24000000.00,
+      monto_actual: 24500000.00,
+      fecha_limite: new Date('2026-01-20'),
+      activo: true
+    });
+    await CampanaDetalle.create({
+      campana_id_ref: campana15.id,
+      testimonios: [],
+      galeria_rica: {
+        videos: [],
+        imagenes: [
+          'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1583324113626-70df0f4deaab?auto=format&fit=crop&w=800&q=80'
+        ]
+      },
+      obra_status: 'Finalizada',
+      equipamiento_info: 'Tres respiradores microprocesados de cuidados intensivos para adultos y bombas de infusión volumétricas.',
+      equipamiento_imagen: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80'
+    });
+
+    // Campaña 16 (Obra Concretada - Marzo 2026)
+    const campana16 = await CampanaEco.create({
+      titulo: 'Automatización del Laboratorio Central con Analizador Hematológico Digital',
+      monto_objetivo: 8900000.00,
+      monto_actual: 9150000.00,
+      fecha_limite: new Date('2026-03-14'),
+      activo: true
+    });
+    await CampanaDetalle.create({
+      campana_id_ref: campana16.id,
+      testimonios: [],
+      galeria_rica: {
+        videos: [],
+        imagenes: [
+          'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=800&q=80'
+        ]
+      },
+      obra_status: 'Finalizada',
+      equipamiento_info: 'Autoanalizador hematológico de 5 diferenciales con capacidad de 60 muestras/hora y conexión digital con historia clínica.',
+      equipamiento_imagen: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=800&q=80'
+    });
+
+    // Campaña 17 (Obra Concretada - Mayo 2026)
+    const campana17 = await CampanaEco.create({
+      titulo: 'Plaza Blanda y Espacio Lúdico en la Sala de Espera de Pediatría',
+      monto_objetivo: 3800000.00,
+      monto_actual: 3950000.00,
+      fecha_limite: new Date('2026-05-10'),
+      activo: true
+    });
+    await CampanaDetalle.create({
+      campana_id_ref: campana17.id,
+      testimonios: [],
+      galeria_rica: {
+        videos: [],
+        imagenes: [
+          'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=800&q=80',
+          'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=800&q=80'
+        ]
+      },
+      obra_status: 'Finalizada',
+      equipamiento_info: 'Mobiliario infantil de seguridad con bordes curvos, piso antigolpes, biblioteca interactiva y paneles sensoriales.',
+      equipamiento_imagen: 'https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=800&q=80'
+    });
+
+    console.log('🏥 Seeded 17 campaigns and details (5 base + 6 activas + 6 obras concretadas).');
 
     // 7. Noticias (NoSQL MongoDB)
     await NoticiaActualidad.create({
