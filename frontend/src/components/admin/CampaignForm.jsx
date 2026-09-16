@@ -174,14 +174,6 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
                   placeholder="Ej: Este respirador de alta frecuencia servirá para la sala de neonatología..."
                 />
               </div>
-              <div className="md:col-span-2">
-                <FileUpload
-                  tipo="imagen"
-                  value={form.equipamiento_imagen}
-                  onChange={val => handleChange('equipamiento_imagen', val)}
-                  label="Imagen del aparato a adquirir"
-                />
-              </div>
             </div>
           </div>
         </div>
