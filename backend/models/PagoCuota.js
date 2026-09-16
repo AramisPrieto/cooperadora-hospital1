@@ -68,6 +68,10 @@ const PagoCuota = sequelize.define('PagoCuota', {
       name: 'idx_pago_cuota_mp_payment_id',
       unique: true,
       fields: ['mp_payment_id']
+    },
+    {
+      name: 'idx_pago_cuota_estado',
+      fields: ['estado']
     }
   ]
 });

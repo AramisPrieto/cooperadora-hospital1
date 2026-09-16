@@ -5,6 +5,8 @@ import {
   forgotPasswordService,
   resetPasswordService
 } from '../services/authService.js';
+import jwt from 'jsonwebtoken';
+import { Usuario } from '../models/index.js';
 
 const setTokenCookie = (res, token) => {
   const isProd = process.env.NODE_ENV === 'production';
@@ -142,9 +144,21 @@ export const getMe = async (req, res, next) => {
   }
 };
 
-// Logout (Limpiar cookie)
+// Logout (Limpiar cookie y revocar sesión)
 export const logout = async (req, res, next) => {
   try {
+    const token = req.cookies?.token || (req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null);
+    if (token) {
+      try {
+        const decoded = jwt.decode(token);
+        if (decoded?.id) {
+          await Usuario.increment('token_version', { where: { id: decoded.id } });
+        }
+      } catch (err) {
+        // Ignorar si el token estaba malformado al desloguear
+      }
+    }
+
     const isProd = process.env.NODE_ENV === 'production';
     res.clearCookie('token', {
       httpOnly: true,

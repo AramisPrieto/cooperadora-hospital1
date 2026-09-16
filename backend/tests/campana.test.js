@@ -3,7 +3,7 @@ import request from 'supertest';
 import jwt from 'jsonwebtoken';
 import { initTestDatabase, resetTestDatabase, closeTestConnections } from './helpers/setup.js';
 import app from '../index.js';
-import { Usuario, CampanaEco } from '../models/index.js';
+import { Usuario, CampanaEco, DonacionTransferencia, PerfilSocio } from '../models/index.js';
 import CampanaDetalle from '../models/CampanaDetalle.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
@@ -276,4 +276,64 @@ describe('Rutas de Campañas (/api/campanas)', () => {
       expect(dbCampana2.es_campana_del_mes).toBe(true);
     });
   });
+
+  describe('GET /:id/donantes (Últimos Donantes)', () => {
+    it('debe retornar lista vacía y total 0 si no hay donaciones aprobadas', async () => {
+      const campana = await CampanaEco.create({
+        titulo: 'Campaña Sin Donantes',
+        monto_objetivo: 100000,
+        activo: true
+      });
+
+      const res = await request(app).get(`/api/campanas/${campana.id}/donantes`);
+      expect(res.status).toBe(200);
+      expect(res.body).toHaveProperty('donantes');
+      expect(res.body.donantes).toEqual([]);
+      expect(res.body.total).toBe(0);
+    });
+
+    it('debe retornar los donantes con iniciales reales, montos y formato de tiempo válido sin NaN', async () => {
+      const campana = await CampanaEco.create({
+        titulo: 'Campaña Con Donantes',
+        monto_objetivo: 500000,
+        activo: true
+      });
+
+      // Crear socio con nombre y apellido
+      const socio = await Usuario.create({
+        email: 'donante@test.com',
+        password_hash: 'hash',
+        rol: 'socio'
+      });
+      await PerfilSocio.create({
+        usuario_id_fk: socio.id,
+        nombre: 'Martín',
+        apellido: 'Silva',
+        dni: 30111222,
+        estado: 'activo'
+      });
+
+      // Crear donación aprobada
+      await DonacionTransferencia.create({
+        usuario_id: socio.id,
+        campana_id: campana.id,
+        monto: 25000.00,
+        estado: 'aprobada'
+      });
+
+      const res = await request(app).get(`/api/campanas/${campana.id}/donantes`);
+      expect(res.status).toBe(200);
+      expect(res.body.total).toBe(1);
+      expect(res.body.donantes.length).toBe(1);
+      expect(res.body.donantes[0].iniciales).toBe('M.S.');
+      expect(res.body.donantes[0].monto).toBe(25000);
+      expect(res.body.donantes[0].timeAgo).not.toContain('NaN');
+    });
+
+    it('debe retornar 400 si el ID es inválido', async () => {
+      const res = await request(app).get('/api/campanas/invalido/donantes');
+      expect(res.status).toBe(400);
+    });
+  });
 });
+

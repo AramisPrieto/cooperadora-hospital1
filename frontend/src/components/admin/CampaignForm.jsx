@@ -18,8 +18,6 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
     monto_objetivo: campaign?.monto_objetivo || '',
     monto_actual: campaign?.monto_actual || '',
     fecha_limite: campaign?.fecha_limite ? campaign.fecha_limite.split('T')[0] : '',
-    testimoniosText: campaign?.detalles?.testimonios?.[0]?.texto || '',
-    testimoniosAutor: campaign?.detalles?.testimonios?.[0]?.autor || '',
     imagenUrl: campaign?.detalles?.galeria_rica?.imagenes?.[0] || '',
     obraStatus: campaign?.detalles?.obra_status || 'Planeada',
     es_campana_del_mes: campaign?.es_campana_del_mes || false,
@@ -38,8 +36,6 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
       monto_objetivo: parseFloat(form.monto_objetivo) || 0,
       monto_actual: form.monto_actual !== '' ? (parseFloat(form.monto_actual) || 0) : 0,
       fecha_limite: form.fecha_limite ? form.fecha_limite : null,
-      testimoniosText: (form.testimoniosText || '').trim(),
-      testimoniosAutor: (form.testimoniosAutor || '').trim(),
       imagenUrl: (form.imagenUrl || '').trim(),
       obraStatus: (form.obraStatus || 'Planeada').trim(),
       es_campana_del_mes: form.es_campana_del_mes,
@@ -151,30 +147,6 @@ const CampaignForm = ({ campaign, onSave, onCancel, submitting }) => {
           Detalles Multimedia
         </p>
         <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <FormLabel htmlFor="testimoniosText">Testimonio (Texto)</FormLabel>
-            <input 
-              id="testimoniosText"
-              type="text" 
-              maxLength={1000}
-              value={form.testimoniosText} 
-              onChange={e => handleChange('testimoniosText', e.target.value)} 
-              className={inputCls} 
-              placeholder="Fue un gran aporte para el hospital..." 
-            />
-          </div>
-          <div>
-            <FormLabel htmlFor="testimoniosAutor">Testimonio (Autor)</FormLabel>
-            <input 
-              id="testimoniosAutor"
-              type="text" 
-              maxLength={150}
-              value={form.testimoniosAutor} 
-              onChange={e => handleChange('testimoniosAutor', e.target.value)} 
-              className={inputCls} 
-              placeholder="Dr. Juan Gómez" 
-            />
-          </div>
           <div className="md:col-span-2">
             <FileUpload
               tipo="imagen"

@@ -197,8 +197,6 @@ async function run() {
 
     await page.type('#titulo', campaignWithImgTitle);
     await page.type('#monto_objetivo', '250000');
-    await page.type('#testimoniosText', 'Test integral E2E con imagen.');
-    await page.type('#testimoniosAutor', 'Comisión Directiva QA');
     await page.type('#equipamiento_info', 'Ecógrafo portátil de alta resolución para emergencias.');
     
     console.log('🖼️ Subiendo imágenes en el formulario...');
@@ -226,8 +224,6 @@ async function run() {
 
     await page.type('#titulo', campaignWithoutImgTitle);
     await page.type('#monto_objetivo', '100000');
-    await page.type('#testimoniosText', 'Test integral E2E tolerante a campos nulos.');
-    await page.type('#testimoniosAutor', 'QA Tester');
     await page.type('#equipamiento_info', 'Kit básico de camillas clínicas sin ilustración.');
     await page.screenshot({ path: path.join(artifactDir, 'qa_5_form_campana_sin_imagen.png') });
     await page.click('button[type="submit"]');

@@ -33,10 +33,16 @@ const sslOptions = () => {
   };
 };
 
-// Inicializar Sequelize con la URL provista
+// Inicializar Sequelize con la URL provista y configuración explícita de Connection Pool
 const sequelize = new Sequelize(dbUrl, {
   dialectOptions: {
     ssl: sslOptions()
+  },
+  pool: {
+    max: parseInt(process.env.DB_POOL_MAX || '10', 10),
+    min: parseInt(process.env.DB_POOL_MIN || '2', 10),
+    acquire: parseInt(process.env.DB_POOL_ACQUIRE || '30000', 10),
+    idle: parseInt(process.env.DB_POOL_IDLE || '10000', 10),
   },
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
 });

@@ -1,4 +1,4 @@
-import { CampanaEco, DonacionTransferencia } from '../models/index.js';
+import { CampanaEco, DonacionTransferencia, Usuario, PerfilSocio } from '../models/index.js';
 import CampanaDetalle from '../models/CampanaDetalle.js';
 import sequelize from '../config/db.js';
 import { Op } from 'sequelize';
@@ -347,17 +347,54 @@ export const getDonantes = async (req, res) => {
 
     const donaciones = await DonacionTransferencia.findAll({
       where: { campana_id: parsedId, estado: 'aprobada' },
-      order: [['updated_at', 'DESC']],
+      order: [['updatedAt', 'DESC']],
       limit: 8,
-      attributes: ['monto', 'updated_at']
+      include: [
+        {
+          model: Usuario,
+          as: 'usuario',
+          attributes: ['id', 'email'],
+          include: [
+            {
+              model: PerfilSocio,
+              as: 'perfilSocio',
+              attributes: ['nombre', 'apellido']
+            }
+          ]
+        }
+      ]
     });
 
-    const INICIALES = ['M.S.', 'A.', 'F.G.', 'L.G.', 'P.R.', 'C.M.', 'J.L.', 'R.A.'];
-    const donantes = donaciones.map((d, idx) => ({
-      iniciales: INICIALES[idx % INICIALES.length],
-      monto: parseFloat(d.monto),
-      timeAgo: getTimeAgo(d.updated_at)
-    }));
+    const donantes = donaciones.map((d) => {
+      let iniciales = 'Anónimo';
+      const perfil = d.usuario?.perfilSocio;
+      if (perfil && (perfil.nombre || perfil.apellido)) {
+        const nombre = (perfil.nombre || '').trim();
+        const apellido = (perfil.apellido || '').trim();
+        if (nombre && apellido) {
+          iniciales = `${nombre.charAt(0).toUpperCase()}.${apellido.charAt(0).toUpperCase()}.`;
+        } else if (nombre) {
+          iniciales = `${nombre.charAt(0).toUpperCase()}.`;
+        } else if (apellido) {
+          iniciales = `${apellido.charAt(0).toUpperCase()}.`;
+        }
+      } else if (d.usuario?.email) {
+        const localPart = d.usuario.email.split('@')[0].trim();
+        if (localPart.length >= 2) {
+          iniciales = `${localPart.charAt(0).toUpperCase()}.${localPart.charAt(1).toUpperCase()}.`;
+        } else if (localPart.length === 1) {
+          iniciales = `${localPart.charAt(0).toUpperCase()}.`;
+        }
+      }
+
+      const donationDate = d.updatedAt || d.createdAt || d.dataValues?.updated_at || d.dataValues?.created_at;
+
+      return {
+        iniciales,
+        monto: parseFloat(d.monto),
+        timeAgo: getTimeAgo(donationDate)
+      };
+    });
 
     return res.json({ donantes, total });
   } catch (error) {
@@ -367,13 +404,20 @@ export const getDonantes = async (req, res) => {
 };
 
 function getTimeAgo(date) {
+  if (!date) return 'reciente';
   const now = new Date();
-  const diff = now - new Date(date);
+  const past = new Date(date);
+  const diff = now - past;
+  if (isNaN(diff) || diff < 0) return 'reciente';
+
   const mins = Math.floor(diff / 60000);
   const hrs = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
+
+  if (mins < 1) return 'hace un momento';
   if (mins < 60) return `hace ${mins}m`;
   if (hrs < 24) return `hace ${hrs}h`;
   if (days === 1) return 'ayer';
   return `hace ${days}d`;
 }
+

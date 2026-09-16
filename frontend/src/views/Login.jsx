@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, Heart, ShieldAlert, Award, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [searchParams] = useSearchParams();
 
   const [isLogin, setIsLogin] = useState(() => {
@@ -49,7 +51,7 @@ const Login = () => {
     try {
       if (isLogin) {
         const res = await api.post('/auth/login', { email, password });
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+        login(res.data.user);
         setSuccessMsg('¡Sesión iniciada con éxito!');
         if (redirectCampaign && campaignId) {
           navigate('/?view=' + campaignId);
@@ -73,7 +75,7 @@ const Login = () => {
           genero: genero || undefined,
           metodo_pago: metodoPago || undefined
         });
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+        login(res.data.user);
         setSuccessMsg('¡Registro exitoso!');
         navigate('/mi-panel');
       }

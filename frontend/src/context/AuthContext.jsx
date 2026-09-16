@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem('user') || 'null');
@@ -39,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      window.location.href = '/login?expired=true';
+      navigate('/login?expired=true');
     };
 
     window.addEventListener('auth-expired', handleAuthExpired);
@@ -47,11 +49,12 @@ export const AuthProvider = ({ children }) => {
       isMounted = false;
       window.removeEventListener('auth-expired', handleAuthExpired);
     };
-  }, []);
+  }, [navigate]);
 
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
+    setLoading(false);
   };
 
   const logout = async () => {
@@ -63,7 +66,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      navigate('/login');
     }
   };
 

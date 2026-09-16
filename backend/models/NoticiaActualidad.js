@@ -31,6 +31,10 @@ const noticiaActualidadSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Índices explícitos para optimizar búsquedas por palabra clave y ordenamiento cronológico
+noticiaActualidadSchema.index({ titulo: 'text', cuerpo_html: 'text' });
+noticiaActualidadSchema.index({ fecha: -1 });
+
 const NoticiaActualidad = mongoose.model('NoticiaActualidad', noticiaActualidadSchema);
 
 export default NoticiaActualidad;

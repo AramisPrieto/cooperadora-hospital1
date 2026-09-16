@@ -46,10 +46,10 @@ const GuestRoute = ({ children }) => {
 function App() {
   return (
     <ReactLenis root>
-      <AuthProvider>
-        <Router>
-        <ScrollToTop />
-        <div className="min-h-screen flex flex-col">
+      <Router>
+        <AuthProvider>
+          <ScrollToTop />
+          <div className="min-h-screen flex flex-col">
           <Navbar />
 
           <main className="flex-grow flex flex-col">
@@ -92,10 +92,10 @@ function App() {
 
           <Footer />
         </div>
+        <Analytics />
+        <SpeedInsights />
+        </AuthProvider>
       </Router>
-      <Analytics />
-      <SpeedInsights />
-      </AuthProvider>
     </ReactLenis>
   );
 }

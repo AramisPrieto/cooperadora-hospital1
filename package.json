@@ -9,7 +9,9 @@
     "dev": "concurrently \"pnpm dev:backend\" \"pnpm dev:frontend\"",
     "test:backend": "pnpm --filter cooperadora-backend test",
     "test:frontend": "pnpm --filter cooperadora-frontend test",
-    "test": "pnpm test:frontend"
+    "test": "pnpm test:frontend",
+    "lint": "pnpm --filter cooperadora-frontend lint",
+    "type-check": "pnpm --filter cooperadora-frontend type-check"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

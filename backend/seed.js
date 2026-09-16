@@ -226,10 +226,7 @@ const seed = async () => {
     // Detalle Campaña 1 (NoSQL MongoDB)
     await CampanaDetalle.create({
       campana_id_ref: campana1.id,
-      testimonios: [
-        { autor: 'Dra. María González (Jefa de Pediatría)', texto: 'Contar con este equipamiento nos permitirá atender casos complejos en Necochea sin necesidad de traslados urgentes.' },
-        { autor: 'Juan Pérez (Vecino de Quequén)', texto: 'El hospital atendió de maravilla a mi hijo el año pasado. Estoy feliz de colaborar con este gran avance.' }
-      ],
+      testimonios: [],
       galeria_rica: {
         videos: [],
         imagenes: [
@@ -252,9 +249,7 @@ const seed = async () => {
     // Detalle Campaña 2 (NoSQL MongoDB)
     await CampanaDetalle.create({
       campana_id_ref: campana2.id,
-      testimonios: [
-        { autor: 'Ing. Carlos Rossi (Director de Obras)', texto: 'Las filtraciones actuales ponen en riesgo equipamiento costoso. Esta obra es vital y urgente.' }
-      ],
+      testimonios: [],
       galeria_rica: {
         videos: [],
         imagenes: [
@@ -274,7 +269,7 @@ const seed = async () => {
     });
     await CampanaDetalle.create({
       campana_id_ref: campana3.id,
-      testimonios: [{ autor: 'Dr. López (Director Médico)', texto: 'Nuestros niños merecen un traslado seguro y rápido en emergencias.' }],
+      testimonios: [],
       galeria_rica: { videos: [], imagenes: ['https://images.unsplash.com/photo-1512426058092-23c218204b73?auto=format&fit=crop&w=600&q=80'] },
       obra_status: 'Recaudación'
     });
@@ -304,7 +299,7 @@ const seed = async () => {
     });
     await CampanaDetalle.create({
       campana_id_ref: campana5.id,
-      testimonios: [{ autor: 'Ana María (Enfermera)', texto: 'Gracias a esto, las habitaciones ahora son muy cálidas para nuestros pacientes.' }],
+      testimonios: [],
       galeria_rica: { videos: [], imagenes: ['https://images.unsplash.com/photo-1542485547-fc9bb02422fa?auto=format&fit=crop&w=600&q=80'] },
       obra_status: 'Finalizada y Entregada'
     });
@@ -342,25 +337,45 @@ const seed = async () => {
 
     console.log('📰 Seeded 4 news articles.');
 
-    // 8. Crear Donaciones por Transferencia (SQL) vinculadas a los socios Juan y María
-    await DonacionTransferencia.create({
-      usuario_id: userJuan.id,
-      campana_id: campana1.id,
-      monto: 15000.00,
-      estado: 'pendiente',
-      numero_comprobante: 'TXN-987654321',
-      comprobante_url: 'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&w=600&q=80'
-    });
+    // 8. Crear Donaciones por Transferencia (SQL) vinculadas a los socios
+    const now = Date.now();
+    const seedDonations = [
+      { usuario_id: userJuan.id, campana_id: campana1.id, monto: 15000.00, estado: 'aprobada', numero_comprobante: 'TXN-1001', hoursAgo: 2 },
+      { usuario_id: userMaria.id, campana_id: campana1.id, monto: 1000.00, estado: 'aprobada', numero_comprobante: 'TXN-1002', hoursAgo: 6 },
+      { usuario_id: userPedro.id, campana_id: campana1.id, monto: 5000.00, estado: 'aprobada', numero_comprobante: 'TXN-1003', hoursAgo: 18 },
+      { usuario_id: userCarlos.id, campana_id: campana1.id, monto: 2000.00, estado: 'aprobada', numero_comprobante: 'TXN-1004', hoursAgo: 30 },
+      { usuario_id: userSofia.id, campana_id: campana1.id, monto: 1500.00, estado: 'pendiente', numero_comprobante: 'TXN-1005', hoursAgo: 40 },
 
-    await DonacionTransferencia.create({
-      usuario_id: userMaria.id,
-      campana_id: campana2.id,
-      monto: 30000.00,
-      estado: 'aprobada',
-      numero_comprobante: 'TXN-123456789',
-      comprobante_url: 'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&w=600&q=80'
-    });
-    console.log('💰 Seeded 2 mock transfer donations.');
+      { usuario_id: userMaria.id, campana_id: campana2.id, monto: 30000.00, estado: 'aprobada', numero_comprobante: 'TXN-2001', hoursAgo: 3 },
+      { usuario_id: userPedro.id, campana_id: campana2.id, monto: 12000.00, estado: 'aprobada', numero_comprobante: 'TXN-2002', hoursAgo: 8 },
+      { usuario_id: userJuan.id, campana_id: campana2.id, monto: 8000.00, estado: 'aprobada', numero_comprobante: 'TXN-2003', hoursAgo: 24 },
+      { usuario_id: userAna.id, campana_id: campana2.id, monto: 4500.00, estado: 'aprobada', numero_comprobante: 'TXN-2004', hoursAgo: 52 },
+
+      { usuario_id: userPedro.id, campana_id: campana3.id, monto: 50000.00, estado: 'aprobada', numero_comprobante: 'TXN-3001', hoursAgo: 4 },
+      { usuario_id: userJuan.id, campana_id: campana3.id, monto: 25000.00, estado: 'aprobada', numero_comprobante: 'TXN-3002', hoursAgo: 14 },
+      { usuario_id: userMaria.id, campana_id: campana3.id, monto: 15000.00, estado: 'aprobada', numero_comprobante: 'TXN-3003', hoursAgo: 36 },
+
+      { usuario_id: userSofia.id, campana_id: campana4.id, monto: 10000.00, estado: 'aprobada', numero_comprobante: 'TXN-4001', hoursAgo: 5 },
+      { usuario_id: userCarlos.id, campana_id: campana4.id, monto: 7500.00, estado: 'aprobada', numero_comprobante: 'TXN-4002', hoursAgo: 20 },
+      { usuario_id: userAna.id, campana_id: campana4.id, monto: 5000.00, estado: 'aprobada', numero_comprobante: 'TXN-4003', hoursAgo: 44 }
+    ];
+
+    for (const item of seedDonations) {
+      const targetDate = new Date(now - (item.hoursAgo * 3600 * 1000));
+      const don = await DonacionTransferencia.create({
+        usuario_id: item.usuario_id,
+        campana_id: item.campana_id,
+        monto: item.monto,
+        estado: item.estado,
+        numero_comprobante: item.numero_comprobante,
+        comprobante_url: 'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&w=600&q=80'
+      });
+      await DonacionTransferencia.update(
+        { updatedAt: targetDate, createdAt: targetDate },
+        { where: { id: don.id }, silent: true }
+      );
+    }
+    console.log(`💰 Seeded ${seedDonations.length} mock transfer donations with realistic donors and timestamps.`);
 
     console.log('🌱 Seeding completed successfully!');
     process.exit(0);

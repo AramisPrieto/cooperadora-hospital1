@@ -37,7 +37,21 @@ const DonacionTransferencia = sequelize.define('DonacionTransferencia', {
 }, {
   tableName: 'donaciones_transferencia',
   timestamps: true,
-  underscored: true
+  underscored: true,
+  indexes: [
+    {
+      name: 'idx_donacion_estado',
+      fields: ['estado']
+    },
+    {
+      name: 'idx_donacion_campana_id',
+      fields: ['campana_id']
+    },
+    {
+      name: 'idx_donacion_usuario_id',
+      fields: ['usuario_id']
+    }
+  ]
 });
 
 export default DonacionTransferencia;

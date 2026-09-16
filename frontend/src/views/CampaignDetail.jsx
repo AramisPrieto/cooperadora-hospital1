@@ -172,20 +172,23 @@ const DetailSkeleton = () => (
 );
 
 /* ── Donante item ───────────────────────────────────────── */
-const DonanteItem = ({ iniciales, monto, timeAgo }) => (
-  <div className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0 group">
-    <div className="flex items-center gap-3">
-      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-[11px] font-black text-slate-600 shrink-0 group-hover:from-brand-100 group-hover:to-brand-200 group-hover:text-brand-700 transition-all">
-        {iniciales[0]}
+const DonanteItem = ({ iniciales, monto, timeAgo }) => {
+  const safeTimeAgo = (!timeAgo || timeAgo.includes('NaN')) ? 'reciente' : timeAgo;
+  return (
+    <div className="flex items-center justify-between py-2.5 border-b border-slate-50 last:border-0 group">
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center text-[11px] font-black text-slate-600 shrink-0 group-hover:from-brand-100 group-hover:to-brand-200 group-hover:text-brand-700 transition-all">
+          {iniciales?.[0] || 'D'}
+        </div>
+        <div>
+          <p className="text-sm font-black text-slate-700">{iniciales}</p>
+          <p className="text-[11px] text-slate-400 font-medium">{safeTimeAgo}</p>
+        </div>
       </div>
-      <div>
-        <p className="text-sm font-black text-slate-700">{iniciales}</p>
-        <p className="text-[11px] text-slate-400 font-medium">{timeAgo}</p>
-      </div>
+      <span className="text-sm font-black text-emerald-600">{formatter.format(monto)}</span>
     </div>
-    <span className="text-sm font-black text-emerald-600">{formatter.format(monto)}</span>
-  </div>
-);
+  );
+};
 
 /* ── Modal Donación ─────────────────────────────────────── */
 const DonationModal = ({ campaign, onClose, onSuccess }) => {
@@ -565,7 +568,6 @@ const CampaignDetail = () => {
   const gradientClass = CARD_GRADIENTS[campaign.id % CARD_GRADIENTS.length];
   const images = campaign.detalles?.galeria_rica?.imagenes || [];
   const obraStatus = campaign.detalles?.obra_status || '';
-  const testimonios = campaign.detalles?.testimonios || [];
   const equipamientoInfo = campaign.detalles?.equipamiento_info || '';
   const equipamientoImagen = campaign.detalles?.equipamiento_imagen || '';
   const faltante = Math.max(0, parseFloat(campaign.monto_objetivo) - parseFloat(campaign.monto_actual));
@@ -687,33 +689,6 @@ const CampaignDetail = () => {
                 ))}
               </div>
             </div>
-
-
-
-
-
-            {/* Testimonials (Optional, rendered below timeline if present) */}
-            {testimonios.length > 0 && (
-              <div className="space-y-4 pt-4">
-                <h2 className="text-lg font-display font-black text-slate-900 tracking-tight">Testimonios de profesionales</h2>
-                <div className="space-y-6">
-                  {testimonios.map((t, i) => (
-                    <blockquote key={i} className="border-l-4 border-slate-350 pl-5 py-1.5 space-y-2.5">
-                      <p className="text-slate-600 text-sm leading-relaxed italic font-medium">"{t.texto}"</p>
-                      <footer className="text-[9px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-2">
-                        <span className="text-slate-700 font-bold">— {t.autor}</span>
-                        {t.fecha && (
-                          <>
-                            <span className="text-slate-200 font-normal">·</span>
-                            <span className="font-normal normal-case">{new Date(t.fecha).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' })}</span>
-                          </>
-                        )}
-                      </footer>
-                    </blockquote>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* ══ RIGHT COLUMN ══ */}
@@ -828,8 +803,12 @@ const CampaignDetail = () => {
           campaign={campaign}
           onClose={() => setShowDonationModal(false)}
           onSuccess={() => {
-            // Refrescar datos de la campaña tras donar
+            // Refrescar datos de la campaña y lista de donantes tras donar
             api.get(`/campanas/${id}`).then(r => setCampaign(r.data)).catch(() => {});
+            api.get(`/campanas/${id}/donantes`).then(r => {
+              setDonantes(r.data.donantes || []);
+              setTotalDonors(r.data.total || 0);
+            }).catch(() => {});
           }}
         />
       )}

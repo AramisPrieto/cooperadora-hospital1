@@ -3,47 +3,18 @@ import { Op } from 'sequelize';
 import bcrypt from 'bcryptjs';
 import { enviarMailAprobacionSocio } from '../services/emailService.js';
 import { cancelarSuscripcionSocio } from '../services/mpService.js';
+import {
+  listarSociosService,
+  aprobarSocioService,
+  rechazarSocioService,
+  listarCuotasService
+} from '../services/socioService.js';
 
 // Obtener todos los perfiles de socios (Solo Admin - Soporta Paginación y Búsqueda)
 export const getAllSocios = async (req, res) => {
-  const { limit, page, search } = req.query;
   try {
-    // Si no se proveen parámetros, retornamos la lista completa para mantener retrocompatibilidad
-    if (!limit && !page && !search) {
-      const socios = await PerfilSocio.findAll({
-        include: [{ model: Usuario, as: 'usuario', attributes: ['email', 'rol'] }],
-        order: [['numero_asociado', 'ASC']]
-      });
-      return res.json(socios);
-    }
-
-    const parsedLimit = parseInt(limit || '20', 10);
-    const parsedPage = parseInt(page || '1', 10);
-
-    const whereCondition = search
-      ? {
-          [Op.or]: [
-            { nombre: { [Op.iLike]: `%${search}%` } },
-            { apellido: { [Op.iLike]: `%${search}%` } },
-            { dni: parseInt(search) || 0 }
-          ]
-        }
-      : {};
-
-    const { count, rows: socios } = await PerfilSocio.findAndCountAll({
-      where: whereCondition,
-      include: [{ model: Usuario, as: 'usuario', attributes: ['email', 'rol'] }],
-      limit: parsedLimit,
-      offset: (parsedPage - 1) * parsedLimit,
-      order: [['numero_asociado', 'ASC']]
-    });
-
-    return res.json({
-      socios,
-      total: count,
-      totalPages: Math.ceil(count / parsedLimit),
-      currentPage: parsedPage
-    });
+    const result = await listarSociosService(req.query);
+    return res.json(result);
   } catch (error) {
     console.error('Error al obtener socios:', error);
     return res.status(500).json({ error: 'Error al obtener los socios registrados.' });
@@ -503,41 +474,9 @@ export const darDeBajaMiCuenta = async (req, res) => {
 
 // Obtener todas las cuotas (Solo Admin - Soporta Paginación y Búsqueda por Socio)
 export const getAllCuotas = async (req, res) => {
-  const { limit, page, search } = req.query;
   try {
-    const parsedLimit = parseInt(limit || '50', 10);
-    const parsedPage = parseInt(page || '1', 10);
-
-    let whereCondition = {};
-    if (search) {
-      whereCondition = {
-        [Op.or]: [
-          { '$perfilSocio.nombre$': { [Op.iLike]: `%${search}%` } },
-          { '$perfilSocio.apellido$': { [Op.iLike]: `%${search}%` } },
-          ...(isNaN(parseInt(search)) ? [] : [{ '$perfilSocio.dni$': parseInt(search) }])
-        ]
-      };
-    }
-
-    const { count, rows: cuotas } = await PagoCuota.findAndCountAll({
-      where: whereCondition,
-      include: [{ 
-        model: PerfilSocio, 
-        as: 'perfilSocio', 
-        attributes: ['numero_asociado', 'nombre', 'apellido', 'dni', 'usuario_id_fk'],
-        include: [{ model: Usuario, as: 'usuario', attributes: ['email'] }]
-      }],
-      limit: parsedLimit,
-      offset: (parsedPage - 1) * parsedLimit,
-      order: [['fecha_pago', 'DESC']]
-    });
-
-    return res.json({
-      cuotas,
-      total: count,
-      totalPages: Math.ceil(count / parsedLimit),
-      currentPage: parsedPage
-    });
+    const result = await listarCuotasService(req.query);
+    return res.json(result);
   } catch (error) {
     console.error('Error al obtener cuotas:', error);
     return res.status(500).json({ error: 'Error al obtener el historial de cuotas.' });

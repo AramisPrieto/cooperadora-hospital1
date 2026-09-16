@@ -105,6 +105,14 @@ const PerfilSocio = sequelize.define('PerfilSocio', {
       name: 'idx_perfil_socio_dni',
       unique: true,
       fields: ['dni']
+    },
+    {
+      name: 'idx_perfil_socio_estado',
+      fields: ['estado']
+    },
+    {
+      name: 'idx_perfil_socio_apellido_nombre',
+      fields: ['apellido', 'nombre']
     }
   ]
 });

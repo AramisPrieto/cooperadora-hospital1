@@ -108,9 +108,9 @@ export const registerUserService = async (userData) => {
     throw err;
   }
 
-  // Generar token JWT
+  // Generar token JWT con control de versión para revocación
   const token = jwt.sign(
-    { id: user.id, email: user.email, rol: user.rol },
+    { id: user.id, email: user.email, rol: user.rol, token_version: user.token_version || 0 },
     JWT_SECRET,
     { expiresIn: '8h' }
   );
@@ -146,9 +146,9 @@ export const loginUserService = async (email, password) => {
     throw error;
   }
 
-  // Generar token JWT
+  // Generar token JWT con control de versión para revocación
   const token = jwt.sign(
-    { id: user.id, email: user.email, rol: user.rol },
+    { id: user.id, email: user.email, rol: user.rol, token_version: user.token_version || 0 },
     JWT_SECRET,
     { expiresIn: '8h' }
   );
@@ -250,10 +250,11 @@ export const resetPasswordService = async (token, newPassword) => {
   const salt = await bcrypt.genSalt(10);
   const password_hash = await bcrypt.hash(newPassword, salt);
 
-  // Guardar nueva contraseña y limpiar campos de recuperación
+  // Guardar nueva contraseña, limpiar campos de recuperación e invalidar sesiones activas
   user.password_hash = password_hash;
   user.reset_password_token = null;
   user.reset_password_expires = null;
+  user.token_version = (user.token_version || 0) + 1;
   await user.save();
 
   return { success: true };

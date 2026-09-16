@@ -10,6 +10,7 @@ import { connectSQL } from './config/db.js';
 import { connectMongoDB } from './config/mongo.js';
 import sequelize from './config/db.js';
 import { globalLimiter } from './middleware/rateLimiter.js';
+import { csrfProtection } from './middleware/csrfProtection.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -73,6 +74,7 @@ app.use(helmet({
 })); // Añade cabeceras HTTP de seguridad
 app.use(express.json());
 app.use(cookieParser()); // Para leer cookies de sesión
+app.use(csrfProtection); // Mitigación estricta de ataques CSRF en peticiones mutativas
 app.use(mongoSanitize());      // Sanitiza req.body/params/query — bloquea NoSQL injection
 app.use('/api', globalLimiter); // Rate limit global: 100 req / 15 min por IP
 

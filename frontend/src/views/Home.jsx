@@ -3,30 +3,15 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { useLenis } from 'lenis/react';
 import api from '../api/axios';
-import FileUpload from '../components/FileUpload';
-
+import DonationModal from '../components/home/DonationModal';
 import CampaignCard from '../components/CampaignCard';
 import { NewsSkeleton, CampaignSkeleton } from '../components/Skeletons';
 import {
   Newspaper, Heart, Search, FileText, Users, Target,
   TrendingUp, ArrowRight, X, CheckCircle, AlertCircle,
-  ChevronRight, ChevronLeft, Banknote, Calendar, Sparkles, Copy, Check,
+  ChevronRight, ChevronLeft, Banknote, Calendar, Check,
   Flame, Trophy, SlidersHorizontal, Info
 } from 'lucide-react';
-
-
-/* ── Stat item ── */
-const StatItem = ({ value, label, icon: Icon, color }) => (
-  <div className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm animate-fade-up transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-    <div className={`h-12 w-12 flex items-center justify-center rounded-xl shrink-0 ${color}`}>
-      <Icon className="h-6 w-6 text-white" />
-    </div>
-    <div>
-      <div className="text-2xl font-display font-black text-slate-800 leading-none mb-1">{value}</div>
-      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-snug">{label}</div>
-    </div>
-  </div>
-);
 
 
 /* ── getPlainTextSnippet ── */
@@ -102,8 +87,7 @@ const Home = () => {
   const [loadingNews, setLoadingNews] = useState(true);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
 
-  /* ── State for Campaigns ── */
-  const [donationMethod, setDonationMethod] = useState('transferencia');
+  /* ── Notification messages ── */
   const [globalSuccessMsg, setGlobalSuccessMsg] = useState('');
   const [globalErrorMsg, setGlobalErrorMsg] = useState('');
 
@@ -111,15 +95,6 @@ const Home = () => {
   const [activeCampaignIndex, setActiveCampaignIndex] = useState(0);
   const [fade, setFade] = useState(true);
   const [touchStartX, setTouchStartX] = useState(null);
-
-  const [donationSuccess, setDonationSuccess] = useState('');
-  const [donationError, setDonationError] = useState('');
-  const [submittingDonation, setSubmittingDonation] = useState(false);
-  const [transferAmount, setTransferAmount] = useState('');
-  const [transferNumber, setTransferNumber] = useState('');
-  const [transferReceiptUrl, setTransferReceiptUrl] = useState('');
-  const [copiedAlias, setCopiedAlias] = useState(false);
-  const [copiedCbu, setCopiedCbu] = useState(false);
 
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
@@ -222,73 +197,6 @@ const Home = () => {
     }
   };
 
-  const handleCloseModal = () => {
-    setSelectedCampaign(null);
-    setTransferAmount('');
-    setTransferNumber('');
-    setTransferReceiptUrl('');
-    setDonationSuccess('');
-    setDonationError('');
-    setDonationMethod('transferencia');
-  };
-
-  // TEAM_001: Envía al backend la declaración de la transferencia del socio
-  const handleDeclareTransfer = async (e) => {
-    e.preventDefault();
-    if (!transferAmount || isNaN(transferAmount) || parseFloat(transferAmount) < 1000) {
-      setDonationError('El monto mínimo para donar es $1.000.');
-      return;
-    }
-    setSubmittingDonation(true);
-    setDonationError('');
-    setDonationSuccess('');
-    try {
-      await api.post(`/donaciones/campanas/${selectedCampaign.id}/donar-transferencia`, {
-        monto: parseFloat(transferAmount),
-        numero_comprobante: transferNumber,
-        comprobante_url: transferReceiptUrl
-      });
-      setDonationSuccess('¡Muchas gracias por su donación! Pronto le llegará un mail con la confirmación de que nos llegó la transferencia. El impacto en la campaña se verá reflejado una vez que nuestro equipo valide el movimiento bancario.');
-      setTransferAmount('');
-      setTransferNumber('');
-      setTransferReceiptUrl('');
-    } catch (err) {
-      console.error('Error al registrar transferencia:', err);
-      setDonationError(err.response?.data?.error || 'Error al procesar la declaración en el servidor.');
-    } finally {
-      setSubmittingDonation(false);
-    }
-  };
-
-  // Iniciar el flujo de donación online con Mercado Pago
-  const handleDonationMP = async (e) => {
-    e.preventDefault();
-    if (!transferAmount || isNaN(transferAmount) || parseFloat(transferAmount) < 1000) {
-      setDonationError('El monto mínimo para donar es $1.000.');
-      return;
-    }
-    setSubmittingDonation(true);
-    setDonationError('');
-    setDonationSuccess('');
-    try {
-      const res = await api.post(`/donaciones/campanas/${selectedCampaign.id}/donar-mp`, {
-        monto: parseFloat(transferAmount),
-        frontend_url: window.location.origin
-      });
-      const checkoutUrl = res.data.sandboxInitPoint || res.data.initPoint;
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
-      } else {
-        setDonationError('No se pudo generar la URL de pago de Mercado Pago.');
-        setSubmittingDonation(false);
-      }
-    } catch (err) {
-      console.error('Error al iniciar donación MP:', err);
-      setDonationError(err.response?.data?.error || 'Error al iniciar el pago con Mercado Pago.');
-      setSubmittingDonation(false);
-    }
-  };
-
 
   const handleHeroAssociate = () => {
     if (!user) navigate('/login');
@@ -357,10 +265,6 @@ const Home = () => {
 
   const heroPct = currentHeroCampaign
     ? Math.min(100, Math.round((parseFloat(currentHeroCampaign.monto_actual) / parseFloat(currentHeroCampaign.monto_objetivo)) * 100))
-    : 0;
-
-  const modalPct = selectedCampaign
-    ? Math.min(100, Math.round((parseFloat(selectedCampaign.monto_actual) / parseFloat(selectedCampaign.monto_objetivo)) * 100))
     : 0;
 
   return (
@@ -838,352 +742,14 @@ const Home = () => {
       )}
 
       {/* ════════════════════════════════════════
-          5. CAMPAIGN DETAIL MODAL
+          5. CAMPAIGN DETAIL / DONATION MODAL
       ════════════════════════════════════════ */}
       {selectedCampaign && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}
-        >
-          <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-2xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up max-h-[90vh] sm:max-h-[85vh] flex flex-col">
-
-            {/* Modal header */}
-            <div className="bg-slate-50 border-b border-slate-200 p-6 shrink-0">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-2">
-                  <span className="badge badge-red">
-                    <Sparkles className="h-3 w-3" />
-                    Campaña en Curso
-                  </span>
-                  <h3 className="text-2xl font-display font-black text-slate-900 leading-tight">
-                    {selectedCampaign.titulo}
-                  </h3>
-                </div>
-                <button
-                  onClick={handleCloseModal}
-                  className="shrink-0 h-8 w-8 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors shadow-sm"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Scrollable content wrapper */}
-            <div className="overflow-y-auto flex-grow" data-lenis-prevent>
-              {/* Modal body */}
-              <div className="p-6 space-y-5">
-                <div>
-                  <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                    <div className="h-0.5 w-4 bg-brand-400 rounded-full" />
-                    Información de Recaudación
-                    <div className="h-0.5 w-4 bg-brand-400 rounded-full" />
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                      <span className="block text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Meta Económica</span>
-                      <span className="text-xl font-display font-black text-slate-800">
-                        {formatter.format(selectedCampaign.monto_objetivo)}
-                      </span>
-                    </div>
-                    <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
-                      <span className="block text-[9px] text-emerald-600 font-black uppercase tracking-widest mb-1">Recaudación Real</span>
-                      <span className="text-xl font-display font-black text-emerald-700">
-                        {formatter.format(selectedCampaign.monto_actual)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Progress */}
-                  <div className="mt-3 space-y-1.5">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-500">Progreso colectivo</span>
-                      <span className="text-emerald-600">{modalPct}%</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden relative shadow-inner">
-                      <div
-                        className="h-full bg-emerald-600 rounded-full transition-all duration-1000 ease-out shadow-sm"
-                        style={{ width: `${modalPct}%` }}
-                      />
-                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.25)_50%,transparent_100%)] w-full translate-x-[-100%] animate-[shimmer_2.5s_infinite]" />
-                    </div>
-                  </div>
-
-                  {/* Información del Equipo Médico */}
-                  {selectedCampaign.detalles?.equipamiento_info && (
-                    <div className="mt-5 border-t border-slate-100 pt-4 space-y-3">
-                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest flex items-center gap-1.5">
-                        <Info className="h-3.5 w-3.5 text-teal-600" />
-                        Equipo Médico a Adquirir
-                      </p>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-teal-50/20 rounded-2xl p-4 border border-teal-100/80 shadow-sm hover:shadow-md transition-shadow group">
-                        {selectedCampaign.detalles.equipamiento_imagen && (
-                          <div className="aspect-[4/3] rounded-xl overflow-hidden border border-slate-200 bg-white sm:col-span-1 shadow-inner relative">
-                            <img
-                              src={selectedCampaign.detalles.equipamiento_imagen}
-                              alt={`Imagen de ${selectedCampaign.titulo}`}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                          </div>
-                        )}
-                        <div className={selectedCampaign.detalles.equipamiento_imagen ? "sm:col-span-2 space-y-1.5" : "sm:col-span-3 space-y-1.5"}>
-                          <span className="inline-block text-[9px] text-teal-700 font-black uppercase tracking-wider bg-teal-50 border border-teal-100 px-2 py-0.5 rounded">
-                            Especificación Técnica
-                          </span>
-                          <p className="text-xs font-black text-slate-800 leading-tight">Equipo: {selectedCampaign.titulo}</p>
-                          <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
-                            {selectedCampaign.detalles.equipamiento_info}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-
-              {/* Donation footer */}
-              <div className="border-t border-slate-100 bg-slate-50 p-6 space-y-4">
-                {donationSuccess ? (
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium p-4 rounded-2xl shadow-sm">
-                      <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
-                      <p className="leading-normal">{donationSuccess}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleCloseModal}
-                      className="w-full btn-brand py-3 text-sm justify-center"
-                    >
-                      Entendido
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    {donationError && (
-                      <div className="flex items-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold p-3.5 rounded-xl">
-                        <AlertCircle className="h-4 w-4 shrink-0" />
-                        {donationError}
-                      </div>
-                    )}
-
-                    {/* Selector de método de donación */}
-                    <div className="flex gap-2 mb-4">
-                      <button
-                        type="button"
-                        onClick={() => setDonationMethod('transferencia')}
-                        className={`flex-1 text-xs py-2 px-3 rounded-xl font-bold uppercase tracking-wider border transition-all ${donationMethod === 'transferencia'
-                            ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
-                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                          }`}
-                      >
-                        <Banknote className="h-3.5 w-3.5 inline mr-1.5" />
-                        CBU / Transferencia
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDonationMethod('mp')}
-                        className={`flex-1 text-xs py-2 px-3 rounded-xl font-bold uppercase tracking-wider border transition-all ${donationMethod === 'mp'
-                            ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
-                            : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                          }`}
-                      >
-                        <Heart className="h-3.5 w-3.5 inline mr-1.5" />
-                        Mercado Pago
-                      </button>
-                    </div>
-
-                    {donationMethod === 'transferencia' ? (
-                      /* Formulario Transferencia Bancaria */
-                      <form onSubmit={handleDeclareTransfer} className="space-y-4">
-                        {/* Datos de cuenta */}
-                        <div className="bg-white border border-slate-200/80 p-4 rounded-2xl space-y-3 text-xs shadow-sm">
-                          <div className="flex justify-between border-b border-slate-100 pb-2">
-                            <span className="text-slate-400 font-medium">Entidad bancaria:</span>
-                            <span className="text-slate-800 font-black">Banco Provincia</span>
-                          </div>
-                          <div className="flex justify-between border-b border-slate-100 pb-2">
-                            <span className="text-slate-400 font-medium">Razón Social:</span>
-                            <span className="text-slate-800 font-black">Asoc. Cooperadora Hosp. Ferreyra</span>
-                          </div>
-                          <div className="flex justify-between border-b border-slate-100 pb-2">
-                            <span className="text-slate-400 font-medium">CUIT:</span>
-                            <span className="text-slate-800 font-black">30-67891234-5</span>
-                          </div>
-
-                          {/* Alias copiable */}
-                          <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-2.5">
-                            <span className="text-slate-400 font-medium">Alias:</span>
-                            <div className="relative">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  navigator.clipboard.writeText('cooperadora.hospital.nec');
-                                  setCopiedAlias(true);
-                                  setTimeout(() => setCopiedAlias(false), 2000);
-                                }}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-150 active:bg-slate-200 rounded-xl border border-slate-200/60 text-slate-800 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-brand-500 active:scale-[0.98]"
-                                title="Copiar Alias"
-                              >
-                                <span className="font-mono text-xs font-bold select-all">cooperadora.hospital.nec</span>
-                                <span className="p-1 rounded-lg bg-white border border-slate-150 transition-colors flex items-center justify-center">
-                                  {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5 text-slate-500" />}
-                                </span>
-                              </button>
-                              {copiedAlias && (
-                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md animate-fade-in-tooltip pointer-events-none z-10 whitespace-nowrap">
-                                  ¡Copiado!
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* CBU copiable */}
-                          <div className="flex items-center justify-between gap-4 pt-1">
-                            <span className="text-slate-400 font-medium">CBU:</span>
-                            <div className="relative">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  navigator.clipboard.writeText('0140354701354701354701');
-                                  setCopiedCbu(true);
-                                  setTimeout(() => setCopiedCbu(false), 2000);
-                                }}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-150 active:bg-slate-200 rounded-xl border border-slate-200/60 text-slate-800 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-brand-500 active:scale-[0.98]"
-                                title="Copiar CBU"
-                              >
-                                <span className="font-mono text-xs font-bold select-all">0140354701354701354701</span>
-                                <span className="p-1 rounded-lg bg-white border border-slate-150 transition-colors flex items-center justify-center">
-                                  {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5 text-slate-500" />}
-                                </span>
-                              </button>
-                              {copiedCbu && (
-                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md animate-fade-in-tooltip pointer-events-none z-10 whitespace-nowrap">
-                                  ¡Copiado!
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Declarar detalles de transferencia */}
-                        <div className="space-y-4 pt-2 border-t border-slate-100">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
-                                Monto de tu aporte ($) *
-                              </label>
-                              <div className="relative">
-                                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
-                                <input
-                                  type="number"
-                                  min="1000"
-                                  max="10000000"
-                                  step="any"
-                                  value={transferAmount}
-                                  onChange={(e) => setTransferAmount(e.target.value)}
-                                  placeholder="5000"
-                                  className="input-field pl-7 py-2.5 text-sm"
-                                  required
-                                  disabled={submittingDonation}
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
-                                Número de Transacción / Comprobante
-                              </label>
-                              <input
-                                type="text"
-                                maxLength={100}
-                                value={transferNumber}
-                                onChange={(e) => setTransferNumber(e.target.value)}
-                                placeholder="Ej: TXN-1234567"
-                                className="input-field py-2.5 text-sm"
-                                disabled={submittingDonation}
-                              />
-                            </div>
-
-                            <div className="sm:col-span-2">
-                              <FileUpload
-                                tipo="comprobante"
-                                value={transferReceiptUrl}
-                                onChange={setTransferReceiptUrl}
-                                label="Comprobante de transferencia (opcional)"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="flex gap-3 pt-2">
-                            <button
-                              type="button"
-                              onClick={handleCloseModal}
-                              disabled={submittingDonation}
-                              className="flex-1 px-4 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
-                            >
-                              Cerrar
-                            </button>
-                            <button
-                              type="submit"
-                              disabled={submittingDonation}
-                              className="flex-1 btn-brand text-xs py-3 px-6 whitespace-nowrap disabled:opacity-50 w-full"
-                            >
-                              {submittingDonation ? 'Procesando...' : 'Reportar Transferencia'}
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-                    ) : (
-                      /* Formulario Mercado Pago */
-                      <form onSubmit={handleDonationMP} className="space-y-4">
-                        <div className="space-y-3">
-                          <div>
-                            <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
-                              Monto a donar ($) *
-                            </label>
-                            <div className="relative">
-                              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
-                              <input
-                                type="number"
-                                min="1000"
-                                max="10000000"
-                                step="any"
-                                value={transferAmount}
-                                onChange={(e) => setTransferAmount(e.target.value)}
-                                placeholder="5000"
-                                className="input-field pl-7 py-2.5 text-sm"
-                                required
-                                disabled={submittingDonation}
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex gap-3 pt-2">
-                          <button
-                            type="button"
-                            onClick={handleCloseModal}
-                            disabled={submittingDonation}
-                            className="flex-1 px-4 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors whitespace-nowrap disabled:opacity-50"
-                          >
-                            Cerrar
-                          </button>
-                          <button
-                            type="submit"
-                            disabled={submittingDonation}
-                            className="flex-1 btn-brand text-xs py-3 px-6 whitespace-nowrap disabled:opacity-50 w-full"
-                          >
-                            {submittingDonation ? 'Redirigiendo...' : 'Donar con Mercado Pago'}
-                          </button>
-                        </div>
-                      </form>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <DonationModal
+          selectedCampaign={selectedCampaign}
+          onClose={() => setSelectedCampaign(null)}
+          onDonationSuccess={() => fetchCampaigns()}
+        />
       )}
 
       {/* ════════════════════════════════════════

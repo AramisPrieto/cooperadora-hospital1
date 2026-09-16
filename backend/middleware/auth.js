@@ -10,9 +10,11 @@ if (!JWT_SECRET) {
 }
 
 
+import Usuario from '../models/Usuario.js';
+
 // Middleware principal de autenticación
-export const authenticateJWT = (req, res, next) => {
-  let token = req.cookies.token; // Prioridad a la cookie
+export const authenticateJWT = async (req, res, next) => {
+  let token = req.cookies?.token; // Prioridad a la cookie
 
   // Fallback opcional por si el token viene en header de todos modos (para compatibilidad temporal)
   if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
@@ -26,19 +28,45 @@ export const authenticateJWT = (req, res, next) => {
     });
   }
 
+  let decoded;
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    return res.status(401).json({
+      error: 'Token inválido',
+      message: 'El token provisto es inválido o ha expirado.'
+    });
+  }
+
+  try {
+    let userRole = decoded.rol;
+
+    // Si el token tiene versión, validar que no haya sido revocado
+    if (decoded.token_version !== undefined) {
+      const userRecord = await Usuario.findByPk(decoded.id, { attributes: ['id', 'token_version', 'rol'] });
+      if (!userRecord || (userRecord.token_version ?? 0) !== (decoded.token_version ?? 0)) {
+        return res.status(401).json({
+          error: 'Sesión revocada',
+          message: 'La sesión ha expirado o ha sido revocada por un cambio de credenciales.'
+        });
+      }
+      if (userRecord.rol) {
+        userRole = userRecord.rol;
+      }
+    }
+
     // Agregamos la información del usuario desencriptada al request
     req.user = {
       id: decoded.id,
       email: decoded.email,
-      rol: decoded.rol
+      rol: userRole
     };
     next();
-  } catch (error) {
-    return res.status(403).json({
-      error: 'Token inválido',
-      message: 'El token provisto es inválido o ha expirado.'
+  } catch (dbError) {
+    console.error('Error al validar sesión en base de datos:', dbError);
+    return res.status(500).json({
+      error: 'Error interno',
+      message: 'Error al verificar la validez de la sesión.'
     });
   }
 };
