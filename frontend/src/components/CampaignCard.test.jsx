@@ -33,6 +33,13 @@ describe('CampaignCard - UI Skills Standard', () => {
     expect(handleClick).toHaveBeenCalledWith(1);
   });
 
+  it('debería manejar monto_objetivo en 0 sin mostrar NaN%', () => {
+    const zeroCampaign = { ...mockCampaign, monto_objetivo: 0, monto_actual: 0 };
+    render(<CampaignCard campaign={zeroCampaign} onClickDetail={() => {}} />);
+    expect(screen.getByText('0%')).toBeInTheDocument();
+    expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
+  });
+
   it('debería cumplir con las reglas de accesibilidad WCAG', async () => {
     const { container } = render(<CampaignCard campaign={mockCampaign} onClickDetail={() => {}} />);
     const results = await axe(container);

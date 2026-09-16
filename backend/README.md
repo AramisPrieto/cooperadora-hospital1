@@ -255,7 +255,7 @@ Toda la comunicación con el backend se realiza bajo el prefijo `/api`. Las peti
 
 ### 1. Error de conexión SSL con la base de datos SQL (`SequelizeConnectionError`)
 * **Causa:** Las bases de datos de producción (como Render PostgreSQL) exigen conexiones cifradas SSL.
-* **Solución:** El archivo [db.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/config/db.js) fuerza automáticamente el cifrado SSL si la URL de conexión contiene `render.com`. Si usas otra nube y experimentas fallos de conexión por certificado, asegúrate de configurar la variable `DB_CA_CERT` o activar el modo tolerante en desarrollo local configurando `DATABASE_URL` sin SSL.
+* **Solución:** El archivo [db.js](config/db.js) fuerza automáticamente el cifrado SSL si la URL de conexión contiene `render.com`. Si usas otra nube y experimentas fallos de conexión por certificado, asegúrate de configurar la variable `DB_CA_CERT` o activar el modo tolerante en desarrollo local configurando `DATABASE_URL` sin SSL.
 
 ### 2. Conflicto de puertos (`Error: listen EADDRINUSE: address already in use :::5000`)
 * **Causa:** Hay otra instancia del backend corriendo en segundo plano o el puerto 5000 está ocupado por AirPlay Receiver en macOS.
@@ -269,4 +269,4 @@ Toda la comunicación con el backend se realiza bajo el prefijo `/api`. Las peti
 
 ### 4. Caídas del controlador por inyecciones NoSQL
 * **Causa:** Intentos de inyección enviando objetos JSON con operadores de MongoDB (como `{"$gt": ""}`).
-* **Solución:** El backend implementa `express-mongo-sanitize` a nivel global en [index.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/index.js), el cual remueve de forma automática caracteres especiales de `req.body`, `req.params` y `req.query`, neutralizando este vector de ataque.
+* **Solución:** El backend implementa `express-mongo-sanitize` a nivel global en [index.js](index.js), el cual remueve de forma automática caracteres especiales de `req.body`, `req.params` y `req.query`, neutralizando este vector de ataque.
