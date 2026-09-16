@@ -193,15 +193,17 @@ export const forgotPasswordService = async (email, frontendUrl) => {
     return { success: true };
   }
 
-  // Generar token seguro
+  // Generar token seguro para enviar por email
   const token = crypto.randomBytes(20).toString('hex');
+  // Almacenar en la BD únicamente el hash SHA-256 para evitar explotación en caso de filtración
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
   const expiration = new Date(Date.now() + 3600000); // 1 hora de validez
 
-  user.reset_password_token = token;
+  user.reset_password_token = hashedToken;
   user.reset_password_expires = expiration;
   await user.save();
 
-  // Enviar correo de recuperación
+  // Enviar correo de recuperación con el token original en el enlace
   const nombre = user.perfilSocio ? user.perfilSocio.nombre : 'Socio';
   await enviarMailRecuperacion({
     email: user.email,
@@ -225,10 +227,13 @@ export const resetPasswordService = async (token, newPassword) => {
     throw error;
   }
 
+  // Hashear el token recibido para buscar su coincidencia en la base de datos
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
   // Buscar usuario con el token que no haya expirado
   const user = await Usuario.findOne({
     where: {
-      reset_password_token: token,
+      reset_password_token: hashedToken,
       reset_password_expires: {
         [Op.gt]: new Date()
       }

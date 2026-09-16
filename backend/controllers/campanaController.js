@@ -135,8 +135,8 @@ export const createCampana = async (req, res) => {
   }
 
   const parsedMontoObjetivo = parseFloat(monto_objetivo);
-  if (isNaN(parsedMontoObjetivo) || parsedMontoObjetivo < 0) {
-    return res.status(400).json({ error: 'El monto objetivo debe ser un número no negativo.' });
+  if (isNaN(parsedMontoObjetivo) || parsedMontoObjetivo <= 0) {
+    return res.status(400).json({ error: 'El monto objetivo debe ser mayor a 0.' });
   }
 
   let parsedMontoActual = 0.00;
@@ -218,8 +218,8 @@ export const updateCampana = async (req, res) => {
   let parsedMontoObjetivo;
   if (monto_objetivo !== undefined) {
     parsedMontoObjetivo = parseFloat(monto_objetivo);
-    if (isNaN(parsedMontoObjetivo) || parsedMontoObjetivo < 0) {
-      return res.status(400).json({ error: 'El monto objetivo debe ser un número no negativo.' });
+    if (isNaN(parsedMontoObjetivo) || parsedMontoObjetivo <= 0) {
+      return res.status(400).json({ error: 'El monto objetivo debe ser mayor a 0.' });
     }
   }
 

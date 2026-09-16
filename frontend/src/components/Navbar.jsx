@@ -2,14 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Shield, LogOut, User, Menu, X, Heart, Target } from 'lucide-react';
 import { useLenis } from 'lenis/react';
-
 import api from '../api/axios';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || 'null');
+    } catch {
+      return null;
+    }
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('user'));
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('inicio');
@@ -20,6 +25,7 @@ const Navbar = () => {
         const response = await api.get('/auth/me');
         setUser(response.data.user);
         setIsAuthenticated(true);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
       } catch (error) {
         setUser(null);
         setIsAuthenticated(false);
@@ -64,13 +70,14 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await api.post('/auth/logout');
+    } catch (error) {
+      console.error('Error al cerrar sesión', error);
+    } finally {
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       navigate('/');
-    } catch (error) {
-      console.error('Error al cerrar sesión', error);
     }
   };
 

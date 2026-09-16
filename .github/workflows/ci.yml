@@ -8,8 +8,28 @@ on:
 
 jobs:
   test:
-    name: Ejecutar Pruebas de Frontend
+    name: Pruebas y Compilación del Proyecto
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin123
+          POSTGRES_DB: cooperadora_db_test
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mongodb:
+        image: mongo:7-jammy
+        ports:
+          - 27017:27017
 
     steps:
       - name: Checkout del código
@@ -27,5 +47,16 @@ jobs:
       - name: Instalar dependencias
         run: pnpm install --no-frozen-lockfile
 
-      - name: Ejecutar pruebas
-        run: pnpm test
+      - name: Compilar Frontend (Build Check)
+        run: pnpm --filter cooperadora-frontend build
+
+      - name: Ejecutar Pruebas de Frontend
+        run: pnpm test:frontend
+
+      - name: Ejecutar Pruebas de Backend
+        env:
+          DATABASE_URL: postgres://postgres:admin123@localhost:5435/cooperadora_db_test
+          MONGODB_URI: mongodb://localhost:27017/cooperadora_nosql_test
+          NODE_ENV: test
+          JWT_SECRET: ci_secret_key_test_hospital_2026
+        run: pnpm test:backend

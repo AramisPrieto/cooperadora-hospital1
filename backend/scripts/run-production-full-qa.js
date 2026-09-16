@@ -53,8 +53,8 @@ async function run() {
     }
   });
 
-  const artifactDir = '/Users/aramisprieto/.gemini/antigravity/brain/bd74f749-1d2a-4091-a014-5b0087063849';
-  const dummyFilePath = '/Users/aramisprieto/Documents/cooperadora-hospital1/etapas-teoria/gestion-desarrollo-software/der.png';
+  const artifactDir = process.env.ARTIFACT_DIR || path.resolve(process.cwd(), 'reports');
+  const dummyFilePath = process.env.DUMMY_FILE || path.resolve(process.cwd(), '../etapas-teoria/gestion-desarrollo-software/der.png');
 
   const randId = Math.floor(Math.random() * 10000);
   const socioEmail = `qa_test_socio_${randId}@cooperadora.org`;

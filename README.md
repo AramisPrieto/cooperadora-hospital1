@@ -91,14 +91,15 @@ Almacena documentos de formato libre de alta carga multimedia:
 
 ### ⚛️ Transacciones ACID y Concurrencia en Donaciones
 
-El endpoint `POST /api/campanas/:id/donar` utiliza una transacción SQL con **bloqueo de fila** (`SELECT ... FOR UPDATE`) para garantizar consistencia bajo carga concurrente:
+El procesamiento financiero de donaciones (tanto en la aprobación administrativa de transferencias bancarias en `PUT /api/donaciones/transferencias/:id/aprobar` como en las notificaciones del Webhook de Mercado Pago en `POST /api/webhooks/mercadopago`) utiliza transacciones SQL con **bloqueo pesimista de fila** (`SELECT ... FOR UPDATE`) sobre la campaña económica objetivo:
 
-1. Se abre una transacción Sequelize.
+1. Se abre una transacción Sequelize atómica y aislada.
 2. Se adquiere un lock exclusivo sobre la fila de la campaña (`lock: transaction.LOCK.UPDATE`).
-3. Se actualiza el `monto_actual` y se hace commit.
-4. Cualquier otra donación simultánea sobre la misma campaña espera en cola hasta que la transacción anterior libere el lock.
+3. Se verifica que el aporte no sobrepase el saldo restante necesario para completar la meta financiera de la campaña.
+4. Se incrementa el `monto_actual` de forma segura y se realiza el commit.
+5. Cualquier otra transacción concurrente sobre la misma campaña espera en cola ordenada hasta que se libere el lock.
 
-Esto evita la condición de carrera donde dos donaciones simultáneas leen el mismo valor y sobreescriben la suma del otro.
+Esto neutraliza de raíz las condiciones de carrera (*Race Conditions*) impidiendo que dos donaciones simultáneas lean un saldo desfasado o sobreescriban erróneamente la recaudación acumulada.
 
 ### 🔄 Fusión Sincrónica: Data Mashup
 Cuando un usuario ingresa a ver los detalles de una campaña completa (`GET /api/campanas/:id`), el backend utiliza `Promise.all` para ejecutar de manera paralela y sincrónica dos consultas:
@@ -162,7 +163,7 @@ El sistema integra la API REST de **Resend** para el despacho de correos electr�
 ### 3. Métricas y Rendimiento (Vercel Analytics & Speed Insights)
 
 El frontend integra herramientas oficiales de Vercel para analizar de forma anónima y optimizada la usabilidad y velocidad de carga del portal:
-* **Vercel Analytics (`@vercel/analytics`):** Mide el tráfico general, número de visitantes y comportamiento de navegación por sección, inicializándose en el componente raíz [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx).
+* **Vercel Analytics (`@vercel/analytics`):** Mide el tráfico general, número de visitantes y comportamiento de navegación por sección, inicializándose en el componente raíz [App.jsx](frontend/src/App.jsx).
 * **Vercel Speed Insights (`@vercel/speed-insights`):** Realiza un seguimiento pasivo del rendimiento real de los usuarios en producción (Core Web Vitals como LCP, FID, CLS), permitiendo analizar en el panel de Vercel posibles cuellos de botella en la renderización.
 
 ---

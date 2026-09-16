@@ -24,9 +24,18 @@ const TermsAndConditions = lazy(() => import('./views/TermsAndConditions'));
 
 // Eliminadas funciones ProtectedRoute y SocioProtectedRoute inline
 
+import { AuthProvider, useAuth } from './context/AuthContext';
+
 // Redirige al inicio si el usuario ya está autenticado
 const GuestRoute = ({ children }) => {
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-600"></div>
+      </div>
+    );
+  }
   if (user) {
     const dest = user.rol === 'admin' ? '/admin' : '/';
     return <Navigate to={dest} replace />;
@@ -35,19 +44,10 @@ const GuestRoute = ({ children }) => {
 };
 
 function App() {
-  useEffect(() => {
-    const handleAuthExpired = () => {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login?expired=true';
-    };
-    window.addEventListener('auth-expired', handleAuthExpired);
-    return () => window.removeEventListener('auth-expired', handleAuthExpired);
-  }, []);
-
   return (
     <ReactLenis root>
-      <Router>
+      <AuthProvider>
+        <Router>
         <ScrollToTop />
         <div className="min-h-screen flex flex-col">
           <Navbar />
@@ -95,6 +95,7 @@ function App() {
       </Router>
       <Analytics />
       <SpeedInsights />
+      </AuthProvider>
     </ReactLenis>
   );
 }

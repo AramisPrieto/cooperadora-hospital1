@@ -1,6 +1,8 @@
 import { PerfilSocio, Usuario, PagoCuota } from '../models/index.js';
 import { Op } from 'sequelize';
+import bcrypt from 'bcryptjs';
 import { enviarMailAprobacionSocio } from '../services/emailService.js';
+import { cancelarSuscripcionSocio } from '../services/mpService.js';
 
 // Obtener todos los perfiles de socios (Solo Admin - Soporta Paginación y Búsqueda)
 export const getAllSocios = async (req, res) => {
@@ -381,28 +383,121 @@ export const updateSocio = async (req, res) => {
   }
 };
 
-// Eliminar perfil de socio (Solo Admin)
+// Baja de perfil de socio por Administrador (con preservación contable de pagos y donaciones)
 export const deleteSocio = async (req, res) => {
   const { id } = req.params; // numero_asociado
+  const { purgarDatos } = req.query; // Si se solicita anonimizar datos personales sensibles
 
   try {
-    const socio = await PerfilSocio.findByPk(id);
+    const socio = await PerfilSocio.findByPk(id, {
+      include: [{ model: Usuario, as: 'usuario' }]
+    });
+
     if (!socio) {
       return res.status(404).json({ error: 'Socio no encontrado.' });
     }
 
-    const usuarioId = socio.usuario_id_fk;
-    if (usuarioId) {
-      // Eliminar el Usuario asociado; esto eliminará en cascada el PerfilSocio y PagoCuota
-      await Usuario.destroy({ where: { id: usuarioId } });
-    } else {
-      await socio.destroy();
+    // 1. Si tenía suscripción activa en Mercado Pago, cancelarla
+    if (socio.mp_preapproval_id && socio.mp_subscription_status === 'authorized') {
+      try {
+        await cancelarSuscripcionSocio(socio.mp_preapproval_id);
+      } catch (mpErr) {
+        console.warn('Advertencia al cancelar suscripción en MP durante baja administrativa:', mpErr.message);
+      }
+      socio.mp_subscription_status = 'cancelled';
     }
 
-    return res.json({ message: 'Perfil de socio eliminado exitosamente.' });
+    const fechaBaja = new Date().toLocaleDateString('es-AR');
+
+    if (purgarDatos === 'true') {
+      // Anonimización contable: preserva registros de cuotas y donaciones para auditoría
+      socio.nombre = 'Ex-Socio';
+      socio.apellido = `#${socio.numero_asociado}`;
+      socio.telefono = '0000000000';
+      socio.direccion = 'Anonimizado por baja';
+      socio.localidad = 'Necochea';
+      socio.estado = 'inactivo';
+      socio.observaciones = `${socio.observaciones || ''}\n[Baja administrativa con anonimización: ${fechaBaja}]`.trim();
+      await socio.save();
+
+      if (socio.usuario) {
+        socio.usuario.email = `baja_${socio.numero_asociado}_${Date.now()}@anonimizado.local`;
+        socio.usuario.password_hash = 'DISABLED_ACCOUNT';
+        await socio.usuario.save();
+      }
+
+      return res.json({ message: 'Socio dado de baja y datos anonimizados preservando el balance contable.' });
+    } else {
+      // Baja lógica estándar
+      socio.estado = 'inactivo';
+      socio.observaciones = `${socio.observaciones || ''}\n[Baja administrativa: ${fechaBaja}]`.trim();
+      await socio.save();
+
+      return res.json({ message: 'Socio dado de baja exitosamente (marcado como inactivo).' });
+    }
   } catch (error) {
-    console.error('Error al eliminar socio:', error);
-    return res.status(500).json({ error: 'Error al eliminar el socio.' });
+    console.error('Error al dar de baja al socio:', error);
+    return res.status(500).json({ error: 'Error al procesar la baja del socio.' });
+  }
+};
+
+// Baja voluntaria de membresía solicitada por el propio socio autenticado
+export const darDeBajaMiCuenta = async (req, res) => {
+  const usuarioId = req.user.id;
+  const { password, motivo } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ error: 'Debes confirmar tu contraseña actual para dar de baja tu membresía.' });
+  }
+
+  try {
+    const usuario = await Usuario.findByPk(usuarioId, {
+      include: [{ model: PerfilSocio, as: 'perfilSocio' }]
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+
+    const passwordValida = await bcrypt.compare(password, usuario.password_hash);
+    if (!passwordValida) {
+      return res.status(401).json({ error: 'La contraseña ingresada es incorrecta.' });
+    }
+
+    const perfil = usuario.perfilSocio;
+    if (perfil) {
+      // 1. Cancelar suscripción activa de Mercado Pago si la tuviera
+      if (perfil.mp_preapproval_id && perfil.mp_subscription_status === 'authorized') {
+        try {
+          await cancelarSuscripcionSocio(perfil.mp_preapproval_id);
+        } catch (mpErr) {
+          console.warn('Advertencia al cancelar suscripción en MP durante baja voluntaria:', mpErr.message);
+        }
+        perfil.mp_subscription_status = 'cancelled';
+      }
+
+      // 2. Pasar a inactivo y registrar la baja (preservando pagos históricos)
+      perfil.estado = 'inactivo';
+      const fechaBaja = new Date().toLocaleDateString('es-AR');
+      const obsMotivo = motivo ? ` Motivo: ${motivo.trim().substring(0, 200)}.` : '';
+      perfil.observaciones = `${perfil.observaciones || ''}\n[Baja voluntaria de membresía: ${fechaBaja}.${obsMotivo}]`.trim();
+      await perfil.save();
+    }
+
+    // 3. Limpiar cookie de sesión
+    const isProd = process.env.NODE_ENV === 'production';
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax'
+    });
+
+    return res.json({
+      message: 'Tu cuenta y membresía han sido dadas de baja correctamente. Lamentamos que te vayas.'
+    });
+  } catch (error) {
+    console.error('Error al dar de baja la cuenta del socio:', error);
+    return res.status(500).json({ error: 'Error interno al procesar la baja de la cuenta.' });
   }
 };
 

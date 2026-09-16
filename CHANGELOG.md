@@ -416,7 +416,7 @@
 - **Protección contra Bucle de Redirecciones**:
   - Limpieza automática de las claves `user` y `token` del `localStorage` en [Navbar.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.jsx) ante respuestas de estado 401 por expiración o invalidez de sesión, previniendo bucles infinitos de redirección provocados por la protección de `GuestRoute`.
 
-### Versión 1.28.0 — Gestión Centralizada del Monorepo con pnpm Workspaces (Antigravity)
+### Versión 1.28.0 — Gestión Centralizada del Monorepo con pnpm Workspaces (Thiago Masson & Aramis Prieto)
 - **Monorepo Unificado y pnpm Workspaces**:
   - Creación de [pnpm-workspace.yaml](file:///Users/aramisprieto/Documents/cooperadora-hospital1/pnpm-workspace.yaml) y configuración del espacio de trabajo unificando los proyectos de `frontend` y `backend` bajo una misma gestión de dependencias.
   - Creación de [package.json](file:///Users/aramisprieto/Documents/cooperadora-hospital1/package.json) en la raíz para definir scripts globales simplificados de desarrollo y pruebas.
@@ -427,7 +427,7 @@
   - Creación de pruebas unitarias específicas en [Navbar.test.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/Navbar.test.jsx) para certificar que el almacenamiento local se limpia de manera efectiva al cerrar sesión o al recibir errores de sesión expirada.
   - Implementación de un mock robusto de `localStorage` en [setupTests.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/setupTests.js) para evitar warnings de Node y fallos en entornos automatizados.
 
-### Versión 1.29.0 — Compartido Rápido con Vista Previa y Feedback de Copiado (Antigravity)
+### Versión 1.29.0 — Compartido Rápido con Vista Previa y Feedback de Copiado (Santiago Ialungo & Thiago Masson)
 - **Módulo de Compartido Rápido (`ShareModal`)**:
   - Creación de [ShareModal.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/ShareModal.jsx) con plantilla visual de previsualización de tarjeta, botones rápidos para WhatsApp, Facebook, X (Twitter) y Telegram, y feedback de copiado al portapapeles ("¡Copiado!") con toast e indicación de estado.
   - Creación de pruebas unitarias y de accesibilidad en [ShareModal.test.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/components/ShareModal.test.jsx) usando `vitest` y `jest-axe`, garantizando cumplimiento de las pautas de accesibilidad WCAG.
@@ -435,7 +435,7 @@
   - Integración del modal de compartir en el detalle de campañas ([CampaignDetail.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/CampaignDetail.jsx)).
   - Adición del botón lateral "Compartir publicación" e integración del modal en el detalle de noticias ([NewsDetail.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/NewsDetail.jsx)).
 
-### Versión 1.30.0 — Notificaciones de Resend y Recuperación de Contraseñas (Antigravity)
+### Versión 1.30.0 — Notificaciones de Resend y Recuperación de Contraseñas (Kevin Nielsen & Aramis Prieto)
 - **Migración a la API de Resend (HTTP/HTTPS)**:
   - Reemplazo del cliente SMTP (Nodemailer) por una conexión HTTPS nativa por el puerto `443` utilizando la API REST de Resend. Esto soluciona por completo el bloqueo de puertos tradicionales (25/465/587) de la capa gratuita de Render.
   - Implementación del modo simulación/desarrollo por terminal cuando la clave de API no está presente.
@@ -456,7 +456,7 @@
   - Instalación e integración de los paquetes de monitoreo oficiales `@vercel/analytics` y `@vercel/speed-insights` en el frontend React.
   - Inicialización de los componentes `<Analytics />` y `<SpeedInsights />` en la raíz [App.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/App.jsx) para recopilar métricas de visitas, Core Web Vitals y rendimiento real de carga del portal de manera automatizada en producción.
 
-### Versión 1.31.0 - Mejoras de Interfaz y Panel Administrativo
+### Versión 1.31.0 — Mejoras de Interfaz y Panel Administrativo (Santiago Ialungo & Thiago Masson)
 - **Nacionalidad y Localidad en Registro**:
   - Se configuraron los campos de *Nacionalidad* y *Localidad* como campos de texto libre, estableciendo "Argentina" y "Necochea" respectivamente como valores prellenados por defecto en el registro público (`Login.jsx`) y en el formulario del panel administrativo (`PartnerForm.jsx`), permitiendo mayor flexibilidad a los usuarios.
 - **Gestión de Cuotas Sociales**:
@@ -467,7 +467,7 @@
   - Adición de un sistema de **Paginación de Resultados** (hasta 25 ítems por vista) en la lista de Transferencias para optimizar el rendimiento del navegador ante el historial extenso.
   - Implementación de un buscador en tiempo real en la tabla de **Transferencias**, permitiendo filtrar donaciones por email, nombre, apellido o DNI del remitente, requiriendo actualización en el controlador `donacionController.js` para incluir los datos del perfil del socio.
 
-### Versión 1.32.0 — Resolución de Colisión y Redirección Dinámica de Mercado Pago (Antigravity)
+### Versión 1.32.0 — Resolución de Colisión y Redirección Dinámica de Mercado Pago (Aramis Prieto & Kevin Nielsen)
 - **Corrección de Colisión en Redirecciones de Donaciones**:
   - Reemplazo del parámetro query conflictivo `status` por `donation_status` en los `back_urls` de Mercado Pago en [mpService.js](file:///Users/aramisprieto/Documents/cooperadora-hospital1/backend/services/mpService.js) para prevenir la agrupación de duplicados en Express y la posterior corrupción en la serialización (`status=donation_success,null`).
   - Adaptación de la vista principal del cliente ([Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx)) para verificar `donation_status` (`success`/`failure`/`pending`), manteniendo compatibilidad hacia atrás con el formato antiguo.
@@ -482,7 +482,7 @@
 - **Higienización de la Barra de Direcciones**:
   - Implementación de la limpieza automática de todos los metadatos agregados por la pasarela de Mercado Pago (`collection_id`, `payment_id`, `preference_id`, etc.) en la URL del frontend tras confirmarse el estado, garantizando una URL final limpia y sin parámetros transaccionales.
 
-### Versión 1.33.0 — Responsividad en Administración de Socios y Remoción de Campaña del Mes (Antigravity)
+### Versión 1.33.0 — Responsividad en Administración de Socios y Remoción de Campaña del Mes (Thiago Masson & Santiago Ialungo)
 - **Responsividad en Listado de Socios (Mobile)**:
   - Rediseño de la fila de socios en [AdminPanel.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/AdminPanel.jsx) para usar `flex-col sm:flex-row`.
   - Reubicación de los botones de acción ("Activar", "Desactivar", badges) y el chevron a una segunda línea en móviles con alineación a la derecha (`self-end`), evitando solapamientos y desbordes del diseño.
@@ -501,3 +501,19 @@
   - El banner informa amigablemente sobre el proceso de validación por la comisión directiva, instruye a revisar la bandeja de entrada o spam para ver el correo de confirmación de registro y provee un enlace directo para que el socio acceda a su panel personal de control.
 - **Ocultamiento Contextual de "Hacete Socio"**:
   - Configuración condicional en la página de inicio ([Home.jsx](file:///Users/aramisprieto/Documents/cooperadora-hospital1/frontend/src/views/Home.jsx)) para ocultar por completo el banner negro de invitación a asociarse si ya existe un usuario logueado en la plataforma (sea socio o administrador).
+
+### Versión 1.34.0 — Endurecimiento Integral de Seguridad, Baja de Usuarios y DevOps (Aramis Prieto, Kevin Nielsen, Thiago Masson & Santiago Ialungo)
+- **Flujo de Baja Segura con Preservación Contable**:
+  - Implementación del endpoint `DELETE /api/socios/mi-cuenta` para que los socios puedan solicitar la baja voluntaria de su membresía confirmando su contraseña actual y cancelando de manera automática sus suscripciones recurrentes en Mercado Pago.
+  - Actualización del endpoint administrativo `DELETE /api/socios/:id` para realizar bajas lógicas (marcando al socio como `inactivo`) u opción de anonimización sensible, preservando de manera intacta todos los registros históricos de cuotas (`pagos_cuotas`) y donaciones (`donaciones_transferencia`) para auditorías contables.
+  - Creación de la sección "Zona de Peligro" y modal de confirmación interactivo en [SocioProfile.jsx](file:///Users/aramisprieto/Documents/proyectos%20prog/cooperadora-hospital1/frontend/src/components/socio/SocioProfile.jsx) y actualización de alertas en el panel del administrador.
+- **Endurecimiento Criptográfico y Seguridad**:
+  - Eliminación de claves bypass fijas en [rateLimiter.js](file:///Users/aramisprieto/Documents/proyectos%20prog/cooperadora-hospital1/backend/middleware/rateLimiter.js) para requerir control de variables de entorno privadas.
+  - Hasheo con algoritmo criptográfico SHA-256 de los tokens de recuperación de contraseñas almacenados en la base de datos relacional ([authService.js](file:///Users/aramisprieto/Documents/proyectos%20prog/cooperadora-hospital1/backend/services/authService.js)), mitigando vectores de ataque ante filtraciones de bases de datos.
+- **Estado Global y Desacoplamiento Frontend**:
+  - Creación de [AuthContext.jsx](file:///Users/aramisprieto/Documents/proyectos%20prog/cooperadora-hospital1/frontend/src/context/AuthContext.jsx) (`AuthProvider` y hook `useAuth`) centralizando la reactividad de sesión, roles y expiración de tokens.
+  - Integración en [App.jsx](file:///Users/aramisprieto/Documents/proyectos%20prog/cooperadora-hospital1/frontend/src/App.jsx) y refactorización de rutas protegidas ([ProtectedRoute.jsx](file:///Users/aramisprieto/Documents/proyectos%20prog/cooperadora-hospital1/frontend/src/components/auth/ProtectedRoute.jsx)).
+- **DevOps y Pipeline de Integración Continua**:
+  - Creación de [docker-compose.yml](file:///Users/aramisprieto/Documents/proyectos%20prog/cooperadora-hospital1/docker-compose.yml) con PostgreSQL (puerto 5435) y MongoDB (puerto 27017) listos para desarrollo local.
+  - Actualización de [.github/workflows/ci.yml](file:///Users/aramisprieto/Documents/proyectos%20prog/cooperadora-hospital1/.github/workflows/ci.yml) incorporando servicios de bases de datos automatizados, chequeo de compilación de producción y ejecución de suites de pruebas tanto de backend como de frontend.
+  - Eliminación del archivo redundante de configuración `frontend/pnpm-workspace.yaml`.

@@ -57,7 +57,7 @@ const ObrasConcretadas = () => {
       try {
         const res = await api.get('/campanas?all=true');
         // Filter campaigns that reached 100% of their objective
-        const completed = res.data.filter(c => parseFloat(c.monto_actual) >= parseFloat(c.monto_objetivo));
+        const completed = res.data.filter(c => parseFloat(c.monto_objetivo) > 0 && parseFloat(c.monto_actual) >= parseFloat(c.monto_objetivo));
         setCampaigns(completed);
       } catch (err) {
         console.error('Error cargando obras concretadas:', err);

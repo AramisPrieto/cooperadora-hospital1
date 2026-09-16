@@ -39,7 +39,9 @@ const CampaignCard = ({ campaign, onClickDetail }) => {
   const { id, titulo, monto_objetivo, monto_actual, fecha_limite } = campaign;
   const [imageError, setImageError] = useState(false);
 
-  const percentage = Math.min(Math.round((parseFloat(monto_actual) / parseFloat(monto_objetivo)) * 100), 100);
+  const percentage = parseFloat(monto_objetivo) > 0
+    ? Math.min(Math.round((parseFloat(monto_actual) / parseFloat(monto_objetivo)) * 100), 100)
+    : 0;
   const daysLeft = getDaysLeft(fecha_limite);
   const isUrgent = daysLeft !== null && daysLeft <= 14 && daysLeft >= 0 && percentage < 100;
   const isComplete = percentage >= 100;

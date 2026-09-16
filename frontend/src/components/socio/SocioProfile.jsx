@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { User, FileText, CheckCircle, Calendar, Phone, MapPin, CreditCard, ShieldAlert, Save } from 'lucide-react';
+import { User, FileText, CheckCircle, Calendar, Phone, MapPin, CreditCard, ShieldAlert, Save, X, AlertCircle } from 'lucide-react';
+import api from '../../api/axios';
 
 const SocioProfile = ({ profile, onUpdate, submitting }) => {
+  const [showBajaModal, setShowBajaModal] = useState(false);
+  const [bajaPassword, setBajaPassword] = useState('');
+  const [bajaMotivo, setBajaMotivo] = useState('');
+  const [bajaSubmitting, setBajaSubmitting] = useState(false);
+  const [bajaError, setBajaError] = useState('');
   const [form, setForm] = useState({
     dni: profile?.dni ? profile.dni.toString() : '',
     telefono: profile?.telefono || '',
@@ -34,6 +40,27 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
       direccion: (form.direccion || '').trim(),
       localidad: (form.localidad || '').trim()
     });
+  };
+
+  const handleConfirmBaja = async (e) => {
+    e.preventDefault();
+    if (!bajaPassword) {
+      setBajaError('Debes ingresar tu contraseña para confirmar la baja.');
+      return;
+    }
+    setBajaSubmitting(true);
+    setBajaError('');
+    try {
+      await api.delete('/socios/mi-cuenta', {
+        data: { password: bajaPassword, motivo: bajaMotivo }
+      });
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      window.location.href = '/login?baja=true';
+    } catch (err) {
+      setBajaError(err.response?.data?.error || 'Error al procesar la baja de membresía.');
+      setBajaSubmitting(false);
+    }
   };
 
   const isUnchanged = 
@@ -265,6 +292,110 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
           </button>
         </form>
       </div>
+
+      {/* ── Zona de Peligro: Baja de Membresía ── */}
+      <div className="md:col-span-3 bg-rose-50/60 border border-rose-200/80 rounded-3xl p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+        <div>
+          <h3 className="text-sm font-bold text-rose-800 flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4 text-rose-600" />
+            Baja de Membresía y Cuenta
+          </h3>
+          <p className="text-xs text-rose-700/80 mt-1 max-w-xl">
+            Podés dar de baja tu membresía como socio en cualquier momento. Si tenés una suscripción activa por débito automático en Mercado Pago, se cancelará inmediatamente. Tus aportes y donaciones históricas quedarán preservados en la contabilidad del hospital.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setBajaError('');
+            setBajaPassword('');
+            setBajaMotivo('');
+            setShowBajaModal(true);
+          }}
+          className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition shadow-sm shrink-0"
+        >
+          Solicitar baja de membresía
+        </button>
+      </div>
+
+      {/* ── Modal de Confirmación de Baja ── */}
+      {showBajaModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-slate-200 max-w-md w-full p-6 space-y-5 shadow-xl animate-fade-up">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2 text-rose-600">
+                <ShieldAlert className="h-5 w-5" />
+                <h3 className="text-base font-bold text-slate-900">Confirmar Baja de Membresía</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBajaModal(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Por favor confirmá tu contraseña para procesar la baja. Tu condición de socio pasará a <span className="font-bold text-rose-600">inactivo</span> y tu débito recurrente será cancelado.
+            </p>
+
+            {bajaError && (
+              <div className="flex items-center gap-2 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold rounded-xl">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{bajaError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleConfirmBaja} className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Contraseña Actual
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={bajaPassword}
+                  onChange={e => setBajaPassword(e.target.value)}
+                  className="input-field"
+                  placeholder="Ingresá tu contraseña"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Motivo de la baja (opcional)
+                </label>
+                <textarea
+                  rows="2"
+                  maxLength="200"
+                  value={bajaMotivo}
+                  onChange={e => setBajaMotivo(e.target.value)}
+                  className="input-field resize-none text-xs"
+                  placeholder="Contanos brevemente el motivo..."
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowBajaModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={bajaSubmitting}
+                  className="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition shadow-sm disabled:opacity-50"
+                >
+                  {bajaSubmitting ? 'Procesando baja...' : 'Confirmar Baja Definitiva'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

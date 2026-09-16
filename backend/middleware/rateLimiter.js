@@ -7,6 +7,18 @@ const tooManyRequestsHandler = (req, res) => {
   });
 };
 
+// Helper para validar si debe saltearse el rate limiter de forma segura
+const shouldSkip = (req) => {
+  if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
+    return true;
+  }
+  const qaKey = process.env.QA_BYPASS_KEY;
+  if (qaKey && req.headers['x-qa-bypass'] === qaKey) {
+    return true;
+  }
+  return false;
+};
+
 /**
  * globalLimiter — Se aplica a toda la API como primera línea de defensa.
  * 100 requests por IP cada 15 minutos.
@@ -17,7 +29,7 @@ export const globalLimiter = rateLimit({
   standardHeaders: true,  // Devuelve info de límite en headers RateLimit-*
   legacyHeaders: false,
   handler: tooManyRequestsHandler,
-  skip: (req) => req.headers['x-qa-bypass'] === 'cooperadora-qa-bypass-2026' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: shouldSkip,
 });
 
 /**
@@ -30,7 +42,7 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   handler: tooManyRequestsHandler,
-  skip: (req) => req.headers['x-qa-bypass'] === 'cooperadora-qa-bypass-2026' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: shouldSkip,
 });
 
 /**
@@ -47,7 +59,7 @@ export const donationLimiter = rateLimit({
       error: 'Límite de donaciones alcanzado. Podés intentarlo de nuevo en una hora.'
     });
   },
-  skip: (req) => req.headers['x-qa-bypass'] === 'cooperadora-qa-bypass-2026' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: shouldSkip,
 });
 
 /**
@@ -64,6 +76,6 @@ export const transactionLimiter = rateLimit({
       error: 'Límite de transacciones alcanzado. Por favor, intentá de nuevo más tarde.'
     });
   },
-  skip: (req) => req.headers['x-qa-bypass'] === 'cooperadora-qa-bypass-2026' || process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development',
+  skip: shouldSkip,
 });
 

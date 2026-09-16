@@ -6,7 +6,15 @@ const router = express.Router();
 
 // Middleware para verificar permisos según el tipo de upload
 const verifyUploadPermission = (req, res, next) => {
-  const tipo = req.query.tipo;
+  const tipo = req.query.tipo || 'imagen';
+
+  if (tipo !== 'comprobante' && tipo !== 'imagen') {
+    return res.status(400).json({
+      error: 'Tipo de carga no válido',
+      message: 'El tipo de archivo debe ser "comprobante" o "imagen".'
+    });
+  }
+
   if (tipo === 'imagen' && req.user?.rol !== 'admin') {
     return res.status(403).json({
       error: 'Permisos insuficientes',

@@ -47,6 +47,7 @@ const AdminPanel = () => {
   const [cuotas, setCuotas] = useState([]);
   const [cuotasSearch, setCuotasSearch] = useState('');
   const [transfersSearch, setTransfersSearch] = useState('');
+  const [partnersSearch, setPartnersSearch] = useState('');
   const [currentTransferPage, setCurrentTransferPage] = useState(1);
   const [expandedPartnerId, setExpandedPartnerId] = useState(null);
   const [editingPartnerId, setEditingPartnerId] = useState(null);
@@ -210,21 +211,21 @@ const AdminPanel = () => {
     }
   };
 
-  /* ── Delete partner ── */
+  /* ── Delete partner (Baja con preservación contable) ── */
   const handleDeletePartner = async (id) => {
-    if (!window.confirm('¿Seguro que desea eliminar por completo a este socio y su cuenta de usuario? Esta acción no se puede deshacer.')) return;
+    if (!window.confirm('¿Seguro que desea dar de baja a este socio? Su membresía pasará a estado inactivo y se cancelará su débito automático si correspondiera, preservando su historial de aportes y cuotas para la contabilidad del hospital.')) return;
     setSubmitting(true);
     setErrorMsg('');
     setSuccessMsg('');
     try {
-      await api.delete(`/socios/${id}`);
-      setSuccessMsg('Socio y su cuenta eliminados correctamente.');
+      const res = await api.delete(`/socios/${id}`);
+      setSuccessMsg(res.data?.message || 'Socio dado de baja correctamente.');
       if (expandedPartnerId === id) setExpandedPartnerId(null);
       if (editingPartnerId === id) setEditingPartnerId(null);
       loadDashboardData();
     } catch (err) {
       console.error(err);
-      setErrorMsg(err.response?.data?.error || 'Error al eliminar el socio.');
+      setErrorMsg(err.response?.data?.error || 'Error al procesar la baja del socio.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setSubmitting(false);

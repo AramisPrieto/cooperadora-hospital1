@@ -40,7 +40,7 @@ async function run() {
     }
   });
 
-  const artifactDir = '/Users/aramisprieto/.gemini/antigravity/brain/bd74f749-1d2a-4091-a014-5b0087063849';
+  const artifactDir = process.env.ARTIFACT_DIR || path.resolve(process.cwd(), 'reports');
 
   try {
     console.log('🔑 Logueando como Admin...');

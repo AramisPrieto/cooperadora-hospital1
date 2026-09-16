@@ -7,6 +7,7 @@ import {
   updateSocio,
   updateMyProfile,
   deleteSocio,
+  darDeBajaMiCuenta,
   getAllCuotas,
   validarCuota
 } from '../controllers/socioController.js';
@@ -53,6 +54,9 @@ router.post('/suscripcion/cancelar', cancelarSuscripcion);
 
 // Autogestión: Actualizar propio perfil de socio (Socio edita su DNI/datos)
 router.put('/mi-perfil', validateUpdateMyProfile, updateMyProfile);
+
+// Autogestión: Baja voluntaria de la propia membresía/cuenta
+router.delete('/mi-cuenta', darDeBajaMiCuenta);
 
 // Admin: Actualizar perfil de cualquier socio por ID
 router.put('/:id', authorizeRoles('admin'), validateSqlId('id'), validateAdminUpdateSocio, updateSocio);
