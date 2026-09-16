@@ -277,12 +277,37 @@ export const crearDonacionMercadoPago = async (req, res) => {
   }
 };
 
+const isAllowedFrontendHost = (candidate) => {
+  if (!candidate || typeof candidate !== 'string') return false;
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return true;
+    if (/^cooperadora-hospital(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(url.hostname)) return true;
+    if (process.env.FRONTEND_URL) {
+      const configured = new URL(process.env.FRONTEND_URL);
+      if (url.origin === configured.origin) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
+
 // Redireccionar de vuelta al frontend (desde el túnel HTTPS al localhost HTTP)
 export const handleMpRedirect = (req, res) => {
-  const frontendHost = req.query.frontend_url || process.env.FRONTEND_URL || 'http://localhost:3000';
+  const candidateHost = req.query.frontend_url;
+  const defaultHost = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const frontendOrigin = isAllowedFrontendHost(candidateHost)
+    ? new URL(candidateHost).origin
+    : (isAllowedFrontendHost(defaultHost) ? new URL(defaultHost).origin : 'http://localhost:3000');
+
   const cleanParams = new URLSearchParams(req.query);
   cleanParams.delete('frontend_url');
-  const frontendUrl = `${frontendHost}/?${cleanParams.toString()}`;
-  res.redirect(frontendUrl);
+
+  const redirectUrl = new URL('/', frontendOrigin);
+  redirectUrl.search = cleanParams.toString();
+
+  res.redirect(redirectUrl.toString());
 };
 

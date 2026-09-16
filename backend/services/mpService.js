@@ -78,7 +78,7 @@ export const obtenerSuscripcion = async (preapprovalId) => {
   try {
     return await preapproval.get({ id: preapprovalId });
   } catch (error) {
-    console.error(`[Mercado Pago Service] Error al obtener suscripción ${preapprovalId}:`, error);
+    console.error('[Mercado Pago Service] Error al obtener suscripción:', preapprovalId, error);
     throw error;
   }
 };
@@ -101,7 +101,7 @@ export const cancelarSuscripcionSocio = async (preapprovalId) => {
       }
     });
   } catch (error) {
-    console.error(`[Mercado Pago Service] Error al cancelar la suscripción ${preapprovalId}:`, error);
+    console.error('[Mercado Pago Service] Error al cancelar la suscripción:', preapprovalId, error);
     throw error;
   }
 };

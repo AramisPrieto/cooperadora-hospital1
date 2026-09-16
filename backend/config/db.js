@@ -15,8 +15,17 @@ if (!dbUrl) {
   process.exit(1);
 }
 
+const isRenderHost = () => {
+  try {
+    const parsed = new URL(dbUrl);
+    return parsed.hostname === 'render.com' || parsed.hostname.endsWith('.render.com');
+  } catch {
+    return false;
+  }
+};
+
 const sslOptions = () => {
-  if (process.env.NODE_ENV !== 'production' && !dbUrl.includes('render.com')) {
+  if (process.env.NODE_ENV !== 'production' && !isRenderHost()) {
     return false;
   }
   if (process.env.DB_CA_CERT) {

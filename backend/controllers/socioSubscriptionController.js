@@ -282,7 +282,7 @@ export const webhookMercadoPago = async (req, res) => {
       const extRef = paymentDetails.external_reference;
 
       if (!extRef) {
-        console.log(`ℹ️ [Webhook MP] Pago ${data.id} no posee external_reference.`);
+        console.log('ℹ️ [Webhook MP] Pago no posee external_reference:', data?.id);
         return;
       }
 
@@ -293,16 +293,42 @@ export const webhookMercadoPago = async (req, res) => {
       }
     }
   } catch (error) {
-    console.error(`❌ [Webhook Mercado Pago Error] Falló al procesar evento de ID ${data.id}:`, error);
+    console.error('❌ [Webhook Mercado Pago Error] Falló al procesar evento de ID:', data?.id, error);
+  }
+};
+
+const isAllowedFrontendHost = (candidate) => {
+  if (!candidate || typeof candidate !== 'string') return false;
+  try {
+    const url = new URL(candidate);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return true;
+    if (/^cooperadora-hospital(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(url.hostname)) return true;
+    if (process.env.FRONTEND_URL) {
+      const configured = new URL(process.env.FRONTEND_URL);
+      if (url.origin === configured.origin) return true;
+    }
+    return false;
+  } catch {
+    return false;
   }
 };
 
 // Redireccionar suscripción de socio de vuelta al panel
 export const handleSocioMpRedirect = (req, res) => {
-  const frontendHost = req.query.frontend_url || process.env.FRONTEND_URL || 'http://localhost:3000';
+  const candidateHost = req.query.frontend_url;
+  const defaultHost = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const frontendOrigin = isAllowedFrontendHost(candidateHost)
+    ? new URL(candidateHost).origin
+    : (isAllowedFrontendHost(defaultHost) ? new URL(defaultHost).origin : 'http://localhost:3000');
+
   const cleanParams = new URLSearchParams(req.query);
   cleanParams.delete('frontend_url');
-  const frontendUrl = `${frontendHost}/mi-panel?status=sub_callback&${cleanParams.toString()}`;
-  res.redirect(frontendUrl);
+  cleanParams.set('status', 'sub_callback');
+
+  const redirectUrl = new URL('/mi-panel', frontendOrigin);
+  redirectUrl.search = cleanParams.toString();
+
+  res.redirect(redirectUrl.toString());
 };
 

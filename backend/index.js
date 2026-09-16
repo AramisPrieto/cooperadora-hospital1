@@ -73,6 +73,7 @@ app.use(helmet({
   }
 })); // Añade cabeceras HTTP de seguridad
 app.use(express.json());
+// codeql[js/missing-token-validation] Mitigación CSRF implementada mediante csrfProtection por Origin y Sec-Fetch-Site
 app.use(cookieParser()); // Para leer cookies de sesión
 app.use(csrfProtection); // Mitigación estricta de ataques CSRF en peticiones mutativas
 app.use(mongoSanitize());      // Sanitiza req.body/params/query — bloquea NoSQL injection
