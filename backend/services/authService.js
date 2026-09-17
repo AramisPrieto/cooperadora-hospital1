@@ -33,6 +33,8 @@ export const registerUserService = async (userData) => {
     localidad
   } = userData;
 
+  const cleanEmail = (email || '').trim().toLowerCase();
+
   // Validar seguridad de la contraseña
   const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
   if (!passwordRegex.test(password)) {
@@ -47,8 +49,13 @@ export const registerUserService = async (userData) => {
     throw error;
   }
 
-  // Validar si el usuario ya existe
-  const existingUser = await Usuario.findOne({ where: { email } });
+  // Validar si el usuario ya existe (insensible a mayúsculas/minúsculas)
+  const existingUser = await Usuario.findOne({
+    where: sequelize.where(
+      sequelize.fn('LOWER', sequelize.col('email')),
+      cleanEmail
+    )
+  });
   if (existingUser) {
     const error = new Error('Ya existe una cuenta registrada con este correo electrónico.');
     error.status = 400;
@@ -65,7 +72,7 @@ export const registerUserService = async (userData) => {
 
   try {
     user = await Usuario.create({
-      email,
+      email: cleanEmail,
       password_hash,
       rol: 'socio'
     }, { transaction });
@@ -126,9 +133,13 @@ export const registerUserService = async (userData) => {
  * Servicio para autenticar un usuario
  */
 export const loginUserService = async (email, password) => {
-  // Buscar usuario por email
+  const cleanEmail = (email || '').trim().toLowerCase();
+  // Buscar usuario por email (insensible a mayúsculas/minúsculas)
   const user = await Usuario.findOne({
-    where: { email },
+    where: sequelize.where(
+      sequelize.fn('LOWER', sequelize.col('email')),
+      cleanEmail
+    ),
     include: [{ model: PerfilSocio, as: 'perfilSocio' }]
   });
 
@@ -180,9 +191,13 @@ export const getSessionService = async (userId) => {
  * Servicio para solicitar el restablecimiento de contraseña (genera token y envía mail)
  */
 export const forgotPasswordService = async (email, frontendUrl) => {
+  const cleanEmail = (email || '').trim().toLowerCase();
   // Buscar usuario y su perfil
   const user = await Usuario.findOne({
-    where: { email },
+    where: sequelize.where(
+      sequelize.fn('LOWER', sequelize.col('email')),
+      cleanEmail
+    ),
     include: [{ model: PerfilSocio, as: 'perfilSocio' }]
   });
 
