@@ -99,8 +99,13 @@ if (process.env.NODE_ENV === 'development') {
 
 import { cacheMiddleware } from './middleware/cacheMiddleware.js';
 
-// Servir archivos subidos estáticamente
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Servir archivos subidos estáticamente permitiendo su embebido en iframes y visualización cruzada
+app.use('/uploads', (req, res, next) => {
+  res.removeHeader('X-Frame-Options');
+  res.removeHeader('Content-Security-Policy');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
 
 // Montar Rutas de la API
 app.use('/api/auth', authRoutes);

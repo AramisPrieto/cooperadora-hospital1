@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { Banknote, Search, CheckCircle, XCircle, FileText, ChevronLeft, ChevronRight, X, ExternalLink } from 'lucide-react';
+import { Banknote, Search, CheckCircle, XCircle, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import ComprobanteModal from './ComprobanteModal.jsx';
 
 export const AdminTransfersTab = ({
   transfers = [],
@@ -202,45 +203,13 @@ export const AdminTransfersTab = ({
       )}
 
       {/* Comprobante Preview Modal */}
-      {previewUrl && (() => {
-        const isPdf = previewUrl.toLowerCase().includes('.pdf');
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade">
-            <div className="bg-white rounded-3xl max-w-2xl w-full p-6 relative shadow-2xl">
-              <button
-                onClick={() => setPreviewUrl(null)}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
-                title="Cerrar"
-              >
-                <X className="h-5 w-5" />
-              </button>
-              <div className="flex items-center justify-between mb-4 pr-10">
-                <h3 className="font-display font-black text-slate-800 text-lg">Comprobante Adjunto</h3>
-                <a
-                  href={previewUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  Abrir en nueva pestaña
-                </a>
-              </div>
-              <div className="max-h-[70vh] overflow-auto rounded-xl border border-slate-100 flex items-center justify-center bg-slate-50">
-                {isPdf ? (
-                  <iframe
-                    src={previewUrl}
-                    title="Comprobante PDF"
-                    className="w-full h-[65vh] rounded-xl border-none"
-                  />
-                ) : (
-                  <img src={previewUrl} alt="Comprobante de donación" className="w-full object-contain max-h-[65vh]" />
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      {previewUrl && (
+        <ComprobanteModal
+          url={previewUrl}
+          title="Comprobante Adjunto"
+          onClose={() => setPreviewUrl(null)}
+        />
+      )}
     </div>
   );
 };
