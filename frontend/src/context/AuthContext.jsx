@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
-  const logout = async () => {
+  const logout = async (redirectTo = '/login') => {
     try {
       await api.post('/auth/logout');
     } catch (err) {
@@ -66,7 +66,9 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       localStorage.removeItem('user');
       localStorage.removeItem('token');
-      navigate('/login');
+      if (redirectTo) {
+        navigate(redirectTo);
+      }
     }
   };
 
@@ -104,7 +106,16 @@ export const useAuth = () => {
         isAdmin: user?.rol === 'admin',
         isSocio: user?.rol === 'socio',
         login: () => {},
-        logout: () => {},
+        logout: async () => {
+          try {
+            await api.post('/auth/logout');
+          } catch (err) {
+            console.error('Error logging out:', err);
+          } finally {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+          }
+        },
         updateUser: () => {}
       };
     } catch {
@@ -115,7 +126,16 @@ export const useAuth = () => {
         isAdmin: false,
         isSocio: false,
         login: () => {},
-        logout: () => {},
+        logout: async () => {
+          try {
+            await api.post('/auth/logout');
+          } catch (err) {
+            console.error('Error logging out:', err);
+          } finally {
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+          }
+        },
         updateUser: () => {}
       };
     }

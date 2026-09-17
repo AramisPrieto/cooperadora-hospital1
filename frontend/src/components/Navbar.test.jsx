@@ -39,28 +39,19 @@ describe('Navbar - UI Skills Standard', () => {
   });
 
   it('debería cumplir con las reglas de accesibilidad WCAG', async () => {
-    api.get.mockRejectedValueOnce(new Error('No autenticado'));
-    
     const { container } = render(
       <BrowserRouter>
         <Navbar />
       </BrowserRouter>
     );
-    
-    // Wait for useEffect
-    await waitFor(() => {
-      expect(api.get).toHaveBeenCalled();
-    });
 
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
 
-  it('debería limpiar localStorage si el fetchSession falla', async () => {
+  it('no debería realizar peticiones HTTP redundantes a /auth/me al renderizarse', async () => {
     localStorage.setItem('user', JSON.stringify({ email: 'test@example.com', rol: 'admin' }));
     localStorage.setItem('token', 'fake-token');
-
-    api.get.mockRejectedValueOnce(new Error('No autenticado'));
 
     render(
       <BrowserRouter>
@@ -68,25 +59,14 @@ describe('Navbar - UI Skills Standard', () => {
       </BrowserRouter>
     );
 
-    await waitFor(() => {
-      expect(api.get).toHaveBeenCalled();
-    });
-
-    await waitFor(() => {
-      expect(localStorage.getItem('user')).toBeNull();
-      expect(localStorage.getItem('token')).toBeNull();
-    });
+    expect(screen.getByText('test@example.com')).toBeInTheDocument();
+    // Confirma que el Navbar consume useAuth y no genera peticiones GET redundantes
+    expect(api.get).not.toHaveBeenCalled();
   });
 
   it('debería llamar a la API de logout y limpiar localStorage al hacer clic en Salir', async () => {
     localStorage.setItem('user', JSON.stringify({ email: 'test@example.com', rol: 'admin' }));
     localStorage.setItem('token', 'fake-token');
-
-    api.get.mockResolvedValueOnce({
-      data: {
-        user: { email: 'test@example.com', rol: 'admin' }
-      }
-    });
 
     api.post.mockResolvedValueOnce({});
 
