@@ -29,7 +29,7 @@ import { webhookMercadoPago } from './controllers/socioSubscriptionController.js
 dotenv.config();
 
 const app = express();
-app.set('trust proxy', 1); // Confiar en el proxy reverso (Render/Vercel) para la lectura correcta de IPs en express-rate-limit
+app.set('trust proxy', true); // Confiar en la cadena de proxies reversos (Vercel + Render Cloudflare) para resolver la IP real del cliente
 const PORT = process.env.PORT || 5000;
 
 // Deshabilitar la cabecera X-Powered-By de Express para ocultar la tecnología del servidor
@@ -87,7 +87,19 @@ app.use((req, res, next) => {
 });
 app.use(csrfProtection); // Mitigación estricta de ataques CSRF en peticiones mutativas
 app.use(mongoSanitize());      // Sanitiza req.body/params/query — bloquea NoSQL injection
-app.use('/api', globalLimiter); // Rate limit global: 100 req / 15 min por IP
+// Ruta de estado de la API (Pública, exenta de rate limit)
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date(),
+    services: {
+      sql: 'Connected (Authenticated)',
+      mongodb: 'Connected (Mongoose)'
+    }
+  });
+});
+
+app.use('/api', globalLimiter); // Rate limit global: 1000 req / 15 min por IP
 
 // Log de peticiones simple en desarrollo
 if (process.env.NODE_ENV === 'development') {
@@ -123,19 +135,6 @@ app.use('/api/noticias', cacheMiddleware, noticiaRoutes);
 app.use('/api/donaciones', donacionRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.post('/api/webhooks/mercadopago', webhookMercadoPago);
-
-
-// Ruta de estado de la API (Pública)
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    timestamp: new Date(),
-    services: {
-      sql: 'Connected (Authenticated)',
-      mongodb: 'Connected (Mongoose)'
-    }
-  });
-});
 
 // Manejo global de rutas no encontradas (404)
 app.use((req, res, next) => {

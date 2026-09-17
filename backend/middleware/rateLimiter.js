@@ -21,11 +21,11 @@ const shouldSkip = (req) => {
 
 /**
  * globalLimiter — Se aplica a toda la API como primera línea de defensa.
- * 100 requests por IP cada 15 minutos.
+ * 1000 requests por IP cada 15 minutos (permite navegación fluida y tráfico compartido en proxies/presentaciones).
  */
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100,
+  max: 1000,
   standardHeaders: true,  // Devuelve info de límite en headers RateLimit-*
   legacyHeaders: false,
   handler: tooManyRequestsHandler,
@@ -34,11 +34,11 @@ export const globalLimiter = rateLimit({
 
 /**
  * authLimiter — Protege los endpoints de login y registro contra brute force.
- * 10 requests por IP cada 15 minutos.
+ * 50 requests por IP cada 15 minutos.
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 10,
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
   handler: tooManyRequestsHandler,
@@ -47,11 +47,11 @@ export const authLimiter = rateLimit({
 
 /**
  * donationLimiter — Evita spam de donaciones desde la misma IP.
- * 5 requests por IP cada hora.
+ * 50 requests por IP cada hora.
  */
 export const donationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hora
-  max: 5,
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
@@ -64,11 +64,11 @@ export const donationLimiter = rateLimit({
 
 /**
  * transactionLimiter — Evita spam de operaciones de pago o suscripciones.
- * 5 requests por IP cada 15 minutos.
+ * 50 requests por IP cada 15 minutos.
  */
 export const transactionLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5,
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
   handler: (req, res) => {
