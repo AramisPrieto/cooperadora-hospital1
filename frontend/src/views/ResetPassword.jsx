@@ -63,22 +63,21 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 bg-slate-50">
-      <div className="w-full max-w-md space-y-6">
-        
-        {/* Enlace de regreso */}
-        <div className="text-left">
-          <Link
-            to="/login"
-            className="inline-flex items-center text-xs font-bold text-slate-500 hover:text-slate-700 uppercase tracking-wider transition-colors"
-          >
-            <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
-            Volver al Ingreso
-          </Link>
-        </div>
+    <div className="flex-grow flex items-center justify-center py-12 pt-28 sm:pt-32 px-4 relative overflow-hidden bg-slate-50 min-h-[90vh]">
+      {/* Decorative Blur Spheres */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-brand-50/50 rounded-full blur-[100px] pointer-events-none transform -translate-x-1/3 -translate-y-1/3" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-accent-50/50 rounded-full blur-[100px] pointer-events-none transform translate-x-1/3 translate-y-1/3" />
 
-        {/* Tarjeta principal */}
-        <div className="bg-white rounded-2xl shadow-xl shadow-slate-100 border border-slate-100 p-8 sm:p-10 space-y-6">
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200/60 p-8 sm:p-10 space-y-6 z-10 animate-fade-up">
+        {/* Botón de regreso discreto en la esquina */}
+        <Link
+          to="/login"
+          className="absolute top-6 left-6 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100/80 transition-all flex items-center gap-1.5"
+          title="Volver al ingreso"
+          aria-label="Volver al ingreso"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
           <div className="text-center space-y-2.5">
             <div className="inline-flex items-center justify-center p-3 bg-brand-50 rounded-2xl text-brand-600 mb-2">
               <Lock className="h-7 w-7" />
@@ -214,6 +213,16 @@ const ResetPassword = () => {
               </button>
             </form>
           )}
+
+        {/* Enlace de regreso al ingreso */}
+        <div className="pt-2 text-center border-t border-slate-100">
+          <Link
+            to="/login"
+            className="inline-flex items-center justify-center gap-2 text-xs font-bold text-slate-500 hover:text-brand-600 uppercase tracking-wider transition-colors"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            Volver al Ingreso
+          </Link>
         </div>
       </div>
     </div>

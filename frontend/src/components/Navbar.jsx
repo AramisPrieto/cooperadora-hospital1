@@ -211,12 +211,12 @@ const Navbar = () => {
             <MobileNavLink to="/obras-concretadas" active={location.pathname === '/obras-concretadas'} onClick={() => setMobileOpen(false)}>Obras Concretadas</MobileNavLink>
             <MobileNavLink to="/noticias" active={location.pathname === '/noticias'} onClick={() => setMobileOpen(false)}>Noticias</MobileNavLink>
             {isAuthenticated && isAdmin && (
-              <MobileNavLink to="/admin" active={location.pathname === '/admin'}>
+              <MobileNavLink to="/admin" active={location.pathname === '/admin'} onClick={() => setMobileOpen(false)}>
                 Panel Administrativo
               </MobileNavLink>
             )}
             {isAuthenticated && !isAdmin && (
-              <MobileNavLink to="/mi-panel" active={location.pathname === '/mi-panel'}>
+              <MobileNavLink to="/mi-panel" active={location.pathname === '/mi-panel'} onClick={() => setMobileOpen(false)}>
                 Mi Panel de Socio
               </MobileNavLink>
             )}

@@ -181,8 +181,8 @@ export const AdminPartnersTab = ({
                       <PartnerForm
                         partner={part}
                         submitting={submitting}
-                        onSave={async (formData) => {
-                          await onSavePartnerDetails(formData);
+                        onSave={async (numeroAsociado, cleanedForm) => {
+                          await onSavePartnerDetails(numeroAsociado, cleanedForm);
                           setEditingPartnerId(null);
                         }}
                         onCancel={() => setEditingPartnerId(null)}

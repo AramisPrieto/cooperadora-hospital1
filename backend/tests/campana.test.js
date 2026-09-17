@@ -104,6 +104,17 @@ describe('Rutas de Campañas (/api/campanas)', () => {
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toHaveProperty('titulo', 'Campaña Activa');
     });
+
+    it('debe retornar todas las campañas (activas e inactivas) si se provee include_inactive=true', async () => {
+      await CampanaEco.create({ titulo: 'Campaña Activa 2', monto_objetivo: 100000, activo: true });
+      await CampanaEco.create({ titulo: 'Campaña Inactiva 2', monto_objetivo: 200000, activo: false });
+
+      const res = await request(app)
+        .get('/api/campanas?include_inactive=true');
+
+      expect(res.status).toBe(200);
+      expect(res.body.length).toBeGreaterThanOrEqual(2);
+    });
   });
 
   describe('GET /:id (Data Mashup)', () => {

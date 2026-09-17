@@ -42,11 +42,21 @@ export const procesarWebhookPreapproval = async (preapprovalId) => {
  * Procesa el pago de una donación a campaña recibido de Mercado Pago
  */
 export const procesarPagoDonacionCampana = async ({ extRef, paymentDetails, paymentId }) => {
-  const parts = extRef.split('_'); // ['donation', 'u2', 'c1']
+  const parts = extRef.split('_'); // ['donation', 'u2', 'c1', 'm1500']
   const usuarioId = parseInt(parts[1].substring(1), 10);
   const campanaId = parseInt(parts[2].substring(1), 10);
 
-  if (paymentDetails.status !== 'approved') return;
+  const status = paymentDetails?.status || 'approved';
+  if (status !== 'approved') return;
+
+  const montoDonacion = parseFloat(
+    paymentDetails?.transaction_amount || (parts[3] ? parts[3].substring(1) : 0)
+  );
+
+  if (!montoDonacion || isNaN(montoDonacion) || montoDonacion <= 0) {
+    console.warn(`⚠️ [Webhook MP] Monto inválido para donación ${paymentId}: ${montoDonacion}`);
+    return;
+  }
 
   const transaction = await sequelize.transaction();
   try {
@@ -76,23 +86,24 @@ export const procesarPagoDonacionCampana = async ({ extRef, paymentDetails, paym
     await DonacionTransferencia.create({
       usuario_id: usuarioId,
       campana_id: campanaId,
-      monto: paymentDetails.transaction_amount,
+      monto: montoDonacion,
       estado: 'aprobada',
+      metodo: 'mercadopago',
       numero_comprobante: paymentId.toString(),
       comprobante_url: ''
     }, { transaction });
 
-    campana.monto_actual = parseFloat(campana.monto_actual) + parseFloat(paymentDetails.transaction_amount);
+    campana.monto_actual = parseFloat(campana.monto_actual) + montoDonacion;
     await campana.save({ transaction });
 
     await transaction.commit();
     flushCachePattern('/api/campanas');
 
-    console.log(`✅ [Webhook MP] Donación de $${paymentDetails.transaction_amount} para campaña #${campanaId} registrada con éxito.`);
+    console.log(`✅ [Webhook MP] Donación de $${montoDonacion} para campaña #${campanaId} registrada con éxito.`);
 
     enviarMailAgradecimiento({
       email: usuario.email,
-      monto: paymentDetails.transaction_amount,
+      monto: montoDonacion,
       campanaTitulo: campana.titulo
     }).catch(err => {
       console.error('Error al enviar email de agradecimiento por donación MP:', err);

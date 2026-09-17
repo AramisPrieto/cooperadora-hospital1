@@ -217,7 +217,7 @@ const CuotasTab = ({
           <div className="flex flex-col gap-2">
             <p className="text-xs text-slate-500">Seleccioná cómo preferís abonar tu cuota social:</p>
             <div className="flex gap-2">
-              {['debito', 'transferencia', 'cobrador'].map((method) => {
+              {['debito', 'transferencia', 'cobrador', 'efectivo'].map((method) => {
                 const currentMonth = new Date().toISOString().substring(0, 7);
                 const cantCambios = profile?.mes_ultimo_cambio_metodo_pago === currentMonth 
                   ? (profile?.cant_cambios_metodo_pago || 0) 
@@ -242,7 +242,7 @@ const CuotasTab = ({
                     }`}
                     disabled={isDisabled}
                   >
-                    {method === 'debito' ? 'Débito MP' : method === 'transferencia' ? 'CBU / Alias' : 'Cobrador'}
+                    {method === 'debito' ? 'Débito MP' : method === 'transferencia' ? 'CBU / Alias' : method === 'cobrador' ? 'Cobrador' : 'Efectivo'}
                   </button>
                 );
               })}
@@ -488,6 +488,24 @@ const CuotasTab = ({
               <p className="text-slate-400 text-[10px] leading-normal">
                 Por favor, asegurate de que tu domicilio y tu teléfono de contacto en la pestaña <strong>Mi Resumen</strong> estén actualizados.
               </p>
+            </div>
+          )}
+
+          {/* Pago en efectivo en sede */}
+          {profile?.metodo_pago === 'efectivo' && (
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs space-y-3">
+              <div className="flex items-center gap-2 text-slate-800 font-bold">
+                <Banknote className="h-4 w-4 text-emerald-600" />
+                <span>Pago en Efectivo en Sede</span>
+              </div>
+              <p className="text-slate-600 font-medium leading-relaxed">
+                Podés abonar tu cuota social de forma presencial en la tesorería de la Cooperadora del Hospital Municipal Dr. Emilio Ferreyra.
+              </p>
+              <div className="bg-white p-3 rounded-xl border border-slate-100 text-[11px] text-slate-500 space-y-1">
+                <p><strong>Horario de atención:</strong> Lunes a viernes de 8:00 a 13:00 hs.</p>
+                <p><strong>Ubicación:</strong> Sede de la Cooperadora (dentro del Hospital Ferreyra).</p>
+                <p className="text-[10px] text-slate-400">Recordá solicitar tu recibo oficial emitido por tesorería al momento de pagar.</p>
+              </div>
             </div>
           )}
         </div>

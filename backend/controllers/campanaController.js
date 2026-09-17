@@ -5,9 +5,9 @@ import { Op } from 'sequelize';
 import { flushCachePattern } from '../middleware/cacheMiddleware.js';
 
 // 1. OBTENER TODAS LAS CAMPAÑAS (SQL Básicas - Públicas)
-// ?sort=urgente|cercana|mayor_meta  ?search=texto  ?limit=N  ?page=N  ?all=true
+// ?sort=urgente|cercana|mayor_meta  ?search=texto  ?limit=N  ?page=N  ?all=true  ?include_inactive=true
 export const getAllCampanas = async (req, res) => {
-  const { limit = 10, page = 1, sort, search, all } = req.query;
+  const { limit = 10, page = 1, sort, search, all, include_inactive } = req.query;
   try {
     let parsedLimit = all === 'true' ? 1000 : parseInt(limit, 10);
     if (isNaN(parsedLimit) || parsedLimit <= 0) {
@@ -18,8 +18,11 @@ export const getAllCampanas = async (req, res) => {
       parsedPage = 1;
     }
 
-    // Filtro de búsqueda por título
-    const where = { activo: true };
+    // Filtro de búsqueda por título y estado
+    const where = {};
+    if (include_inactive !== 'true') {
+      where.activo = true;
+    }
     if (search && search.trim()) {
       where.titulo = { [Op.like]: `%${search.trim()}%` };
     }

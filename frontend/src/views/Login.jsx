@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -12,8 +12,15 @@ const Login = () => {
   const [isLogin, setIsLogin] = useState(() => {
     return searchParams.get('mode') !== 'register';
   });
+
+  useEffect(() => {
+    setIsLogin(searchParams.get('mode') !== 'register');
+  }, [searchParams]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [dni, setDni] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -33,6 +40,7 @@ const Login = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const expired = searchParams.get('expired');
+  const bajaConfirmada = searchParams.get('baja') === 'true';
   const redirectCampaign = searchParams.get('redirect') === 'campana';
   const campaignId = searchParams.get('id');
 
@@ -42,10 +50,17 @@ const Login = () => {
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (!isLogin && !acceptTerms) {
-      setErrorMsg('Debe aceptar los términos y condiciones para registrarse.');
-      setLoading(false);
-      return;
+    if (!isLogin) {
+      if (password !== confirmPassword) {
+        setErrorMsg('Las contraseñas no coinciden. Por favor verifíquelas.');
+        setLoading(false);
+        return;
+      }
+      if (!acceptTerms) {
+        setErrorMsg('Debe aceptar los términos y condiciones para registrarse.');
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -148,7 +163,7 @@ const Login = () => {
         </div>
 
         {/* Right Side: Form Content */}
-        <div className="col-span-12 md:col-span-7 p-8 sm:p-12 flex flex-col justify-center space-y-6 text-left">
+        <div className="col-span-12 md:col-span-7 p-6 sm:p-12 flex flex-col justify-center space-y-6 text-left">
           
           {/* Header */}
           <div className="space-y-2">
@@ -189,6 +204,11 @@ const Login = () => {
           </div>
 
           {/* Alerts */}
+          {bajaConfirmada && (
+            <Alert color="emerald" icon={<Award className="h-4 w-4" />}>
+              Tu solicitud de baja como socio ha sido procesada correctamente. Lamentamos verte partir y agradecemos tu valioso apoyo a la Cooperadora.
+            </Alert>
+          )}
           {expired && <Alert color="amber" icon={<ShieldAlert className="h-4 w-4" />}>Sesión expirada. Por favor vuelva a ingresar.</Alert>}
           {errorMsg && <Alert color="rose" icon={<ShieldAlert className="h-4 w-4" />}>{errorMsg}</Alert>}
           {successMsg && <Alert color="emerald" icon={<Award className="h-4 w-4" />}>{successMsg}</Alert>}
@@ -262,6 +282,39 @@ const Login = () => {
               )}
             </div>
 
+            {/* Confirmar Contraseña (sólo registro) */}
+            {!isLogin && (
+              <div className="space-y-1.5 animate-fade-up">
+                <label htmlFor="confirmPassword" className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                  Confirmar Contraseña *
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPass ? 'text' : 'password'}
+                    required
+                    minLength={8}
+                    maxLength={128}
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    placeholder="Repita su contraseña"
+                    className="input-field pl-10 pr-11"
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPass(!showConfirmPass)}
+                    aria-label={showConfirmPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showConfirmPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* DNI (sólo registro) */}
             {!isLogin && (
               <>
@@ -294,7 +347,7 @@ const Login = () => {
                   <p className="text-[10px] font-black text-brand-600 uppercase tracking-widest">
                     Completar Datos de Socio
                   </p>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div className="space-y-1">
                       <label htmlFor="nombre" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nombre *</label>
                       <input id="nombre" type="text" required maxLength={100} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Juan" className="input-field py-2 text-sm" />
@@ -332,7 +385,7 @@ const Login = () => {
                         <option value="otro">Otro</option>
                       </select>
                     </div>
-                    <div className="col-span-2 space-y-1">
+                    <div className="sm:col-span-2 space-y-1">
                       <label htmlFor="metodoPago" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Método de Pago Preferido *</label>
                       <select id="metodoPago" required value={metodoPago} onChange={e => setMetodoPago(e.target.value)} className="input-field py-2 text-sm">
                         <option value="">Seleccione...</option>

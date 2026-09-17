@@ -48,7 +48,7 @@ const AdminPanel = () => {
     try {
       const [pRes, cRes, nRes, tRes, cuoRes] = await Promise.all([
         api.get('/socios'),
-        api.get('/campanas'),
+        api.get('/campanas?include_inactive=true&all=true'),
         api.get('/noticias'),
         api.get('/donaciones/transferencias'),
         api.get('/socios/admin/cuotas?limit=1000')
@@ -185,10 +185,12 @@ const AdminPanel = () => {
     }
   };
 
-  const handleSavePartnerDetails = async (formData) => {
+  const handleSavePartnerDetails = async (partnerIdOrData, maybeData) => {
     setSubmitting(true);
     try {
-      await api.put(`/socios/${formData.numero_asociado}`, formData);
+      const numeroAsociado = maybeData ? partnerIdOrData : partnerIdOrData?.numero_asociado;
+      const data = maybeData || partnerIdOrData;
+      await api.put(`/socios/${numeroAsociado}`, data);
       setSuccessMsg('Datos del socio actualizados.');
       loadDashboardData();
     } catch (err) {
@@ -358,6 +360,11 @@ const AdminPanel = () => {
                                 }`}
                               />
                               <h3 className="font-bold text-slate-800 text-sm">{camp.titulo}</h3>
+                              {!camp.activo && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                                  Inactiva
+                                </span>
+                              )}
                             </div>
                             <p className="text-xs text-slate-500 line-clamp-1">{camp.descripcion}</p>
                             <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider pt-1">

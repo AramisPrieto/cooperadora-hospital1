@@ -145,7 +145,7 @@ export const crearPreferenciaDonacion = async ({ campanaTitulo, monto, campanaId
       pending: pendingUrl
     },
     auto_return: 'approved',
-    external_reference: `donation_u${usuarioId}_c${campanaId}`,
+    external_reference: `donation_u${usuarioId}_c${campanaId}_m${monto}`,
     notification_url: `${getBackendUrl()}/api/webhooks/mercadopago`
   };
 

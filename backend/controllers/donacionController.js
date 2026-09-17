@@ -4,6 +4,8 @@ import sequelize from '../config/db.js';
 import { enviarMailAgradecimiento } from '../services/emailService.js';
 import { crearPreferenciaDonacion } from '../services/mpService.js';
 import { flushCachePattern } from '../middleware/cacheMiddleware.js';
+import { procesarPagoDonacionCampana } from '../services/subscriptionService.js';
+import { MercadoPagoConfig, Payment } from 'mercadopago';
 
 // 1. Declarar una transferencia bancaria (Socio)
 export const declararTransferencia = async (req, res) => {
@@ -45,6 +47,7 @@ export const declararTransferencia = async (req, res) => {
       campana_id: parseInt(campanaId),
       monto: parseFloat(monto),
       estado: 'pendiente',
+      metodo: 'transferencia',
       numero_comprobante,
       comprobante_url
     });
@@ -295,7 +298,7 @@ const isAllowedFrontendHost = (candidate) => {
 };
 
 // Redireccionar de vuelta al frontend (desde el túnel HTTPS al localhost HTTP)
-export const handleMpRedirect = (req, res) => {
+export const handleMpRedirect = async (req, res) => {
   const candidateHost = req.query.frontend_url;
   const defaultHost = process.env.FRONTEND_URL || 'http://localhost:3000';
   const frontendOrigin = isAllowedFrontendHost(candidateHost)
@@ -304,6 +307,31 @@ export const handleMpRedirect = (req, res) => {
 
   const cleanParams = new URLSearchParams(req.query);
   cleanParams.delete('frontend_url');
+
+  const paymentId = req.query.payment_id || req.query.collection_id;
+  const status = req.query.collection_status || req.query.status;
+  const extRef = req.query.external_reference;
+
+  if (paymentId && (status === 'approved' || req.query.donation_status === 'success') && extRef && extRef.startsWith('donation_')) {
+    try {
+      let paymentDetails = null;
+      try {
+        const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN || 'TEST-TOKEN' });
+        const paymentInstance = new Payment(client);
+        paymentDetails = await paymentInstance.get({ id: paymentId });
+      } catch (mpErr) {
+        console.warn('[handleMpRedirect] No se pudo obtener información detallada del pago directamente de MP:', mpErr.message);
+      }
+
+      await procesarPagoDonacionCampana({
+        extRef,
+        paymentDetails,
+        paymentId
+      });
+    } catch (err) {
+      console.error('[handleMpRedirect] Error al procesar donación desde redirección de MP:', err);
+    }
+  }
 
   const redirectUrl = new URL('/', frontendOrigin);
   redirectUrl.search = cleanParams.toString();

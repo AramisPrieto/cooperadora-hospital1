@@ -361,7 +361,7 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
                       </div>
                     </div>
                     {/* CBU copiable */}
-                    <div className="flex items-center justify-between gap-4 pt-1">
+                    <div className="flex items-center justify-between gap-2 sm:gap-4 pt-1 flex-wrap">
                       <span className="text-slate-400 font-medium">CBU:</span>
                       <div className="relative">
                         <button

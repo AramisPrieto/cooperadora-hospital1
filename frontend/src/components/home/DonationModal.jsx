@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../api/axios';
 import FileUpload from '../FileUpload';
 import {
@@ -14,6 +15,8 @@ const formatter = new Intl.NumberFormat('es-AR', {
 });
 
 export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) => {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
   const [donationMethod, setDonationMethod] = useState('transferencia');
   const [customDonationAmount, setCustomDonationAmount] = useState('5000');
   const [transferenciaMonto, setTransferenciaMonto] = useState('5000');
@@ -26,6 +29,37 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
   const [donationSuccess, setDonationSuccess] = useState('');
 
   if (!selectedCampaign) return null;
+
+  if (!user) {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center space-y-5 animate-fade-up">
+          <div className="h-16 w-16 bg-brand-50 rounded-2xl flex items-center justify-center mx-auto">
+            <Heart className="h-8 w-8 text-brand-600 fill-brand-200" />
+          </div>
+          <h3 className="text-xl font-display font-black text-slate-900">Iniciar sesión para donar</h3>
+          <p className="text-slate-500 text-sm leading-relaxed">
+            Necesitás una cuenta para realizar tu donación y recibir el comprobante legal de tu aporte.
+          </p>
+          <button
+            onClick={() => navigate('/login')}
+            className="w-full btn-brand py-3 text-sm justify-center"
+          >
+            Iniciar sesión
+          </button>
+          <button
+            onClick={onClose}
+            className="text-slate-400 text-sm hover:text-slate-600 transition-colors block w-full"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const modalPct = Math.min(
     100,
@@ -293,7 +327,7 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
                       </div>
 
                       {/* CBU */}
-                      <div className="flex items-center justify-between gap-4 pt-1">
+                      <div className="flex items-center justify-between gap-2 sm:gap-4 pt-1 flex-wrap">
                         <span className="text-slate-400 font-medium">CBU:</span>
                         <div className="relative">
                           <button
@@ -348,10 +382,10 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
 
                     {/* Comprobante upload */}
                     <FileUpload
-                      label="Adjuntar Comprobante (Opcional)"
                       tipo="comprobante"
-                      onUploadSuccess={(url) => setComprobanteUrl(url)}
-                      onRemove={() => setComprobanteUrl('')}
+                      value={comprobanteUrl}
+                      onChange={setComprobanteUrl}
+                      label="Adjuntar Comprobante (Opcional)"
                     />
 
                     <button

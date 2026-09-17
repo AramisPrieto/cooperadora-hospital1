@@ -280,7 +280,7 @@ const Home = () => {
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full" style={{ paddingTop: '8rem', paddingBottom: '6rem' }}>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-28 sm:pt-32 pb-16 sm:pb-24">
           
           {user?.perfil?.estado === 'pendiente' && (
             <div className="mb-8 p-4 bg-amber-50 border border-amber-200/80 rounded-2xl animate-fade-in flex flex-col sm:flex-row items-center justify-between gap-4">

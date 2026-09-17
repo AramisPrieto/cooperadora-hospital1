@@ -15,6 +15,11 @@ const DonacionTransferencia = sequelize.define('DonacionTransferencia', {
       min: 0.01
     }
   },
+  metodo: {
+    type: DataTypes.ENUM('transferencia', 'mercadopago'),
+    allowNull: false,
+    defaultValue: 'transferencia'
+  },
   estado: {
     type: DataTypes.ENUM('pendiente', 'aprobada', 'rechazada'),
     allowNull: false,

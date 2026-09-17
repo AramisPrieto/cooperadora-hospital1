@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { CreditCard, Search, CheckCircle, XCircle } from 'lucide-react';
+import { CreditCard, Search, CheckCircle, XCircle, Eye, X, ExternalLink } from 'lucide-react';
 
 export const AdminCuotasTab = ({
   cuotas = [],
@@ -8,6 +8,7 @@ export const AdminCuotasTab = ({
   onValidateCuota
 }) => {
   const [search, setSearch] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const filteredCuotas = useMemo(() => {
     if (!search.trim()) return cuotas;
@@ -59,6 +60,7 @@ export const AdminCuotasTab = ({
                 <th className="p-4 text-right">Monto</th>
                 <th className="p-4">Fecha Pago</th>
                 <th className="p-4">Método</th>
+                <th className="p-4 text-center">Comprobante</th>
                 <th className="p-4">Estado</th>
                 <th className="p-4 text-center">Acciones</th>
               </tr>
@@ -88,6 +90,24 @@ export const AdminCuotasTab = ({
                   </td>
                   <td className="p-4 uppercase text-[10px] tracking-wider text-slate-500 font-bold">
                     {c.metodo_pago}
+                  </td>
+                  <td className="p-4 text-center">
+                    {c.comprobante_url ? (
+                      <button
+                        onClick={() => setPreviewUrl(c.comprobante_url)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold transition-colors"
+                        title="Ver comprobante adjunto"
+                      >
+                        <Eye className="h-3 w-3 text-slate-500" />
+                        Ver
+                      </button>
+                    ) : c.numero_comprobante ? (
+                      <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                        #{c.numero_comprobante}
+                      </span>
+                    ) : (
+                      <span className="text-slate-300 text-[10px] italic">Sin adjunto</span>
+                    )}
                   </td>
                   <td className="p-4">
                     <span
@@ -132,6 +152,47 @@ export const AdminCuotasTab = ({
           </table>
         </div>
       )}
+
+      {/* Comprobante Preview Modal */}
+      {previewUrl && (() => {
+        const isPdf = previewUrl.toLowerCase().includes('.pdf');
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade">
+            <div className="bg-white rounded-3xl max-w-2xl w-full p-6 relative shadow-2xl">
+              <button
+                onClick={() => setPreviewUrl(null)}
+                className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
+                title="Cerrar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <div className="flex items-center justify-between mb-4 pr-10">
+                <h3 className="font-display font-black text-slate-800 text-lg">Comprobante de Cuota</h3>
+                <a
+                  href={previewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  Abrir en nueva pestaña
+                </a>
+              </div>
+              <div className="max-h-[70vh] overflow-auto rounded-xl border border-slate-100 flex items-center justify-center bg-slate-50">
+                {isPdf ? (
+                  <iframe
+                    src={previewUrl}
+                    title="Comprobante de Cuota PDF"
+                    className="w-full h-[65vh] rounded-xl border-none"
+                  />
+                ) : (
+                  <img src={previewUrl} alt="Comprobante de cuota" className="w-full object-contain max-h-[65vh]" />
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
