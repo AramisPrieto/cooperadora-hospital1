@@ -525,8 +525,16 @@ export const limpiarCuentasSantiago = async (req, res) => {
     const passwordHashReciente = user16 ? user16.password_hash : null;
 
     // 2. Eliminar registros vinculados de cuotas y transferencias de 15 y 16
-    await PagoCuota.destroy({ where: { socio_id_fk: [15, 16] } });
-    await DonacionTransferencia.destroy({ where: { usuario_id_fk: [20, 21] } });
+    try {
+      await PagoCuota.destroy({ where: { socio_numero_asociado: [15, 16] } });
+    } catch (e) {
+      console.warn('Sin cuotas vinculadas:', e.message);
+    }
+    try {
+      await DonacionTransferencia.destroy({ where: { usuario_id: [20, 21] } });
+    } catch (e) {
+      console.warn('Sin donaciones vinculadas:', e.message);
+    }
 
     // 3. Eliminar los perfiles de socio 15 y 16
     const sociosEliminados = await PerfilSocio.destroy({ where: { numero_asociado: [15, 16] } });

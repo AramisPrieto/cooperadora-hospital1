@@ -166,8 +166,12 @@ const startServer = async () => {
       const user16 = await Usuario.findOne({ where: { id: 21 } });
       const passwordHashReciente = user16 ? user16.password_hash : null;
 
-      await PagoCuota.destroy({ where: { socio_id_fk: [15, 16] } });
-      await DonacionTransferencia.destroy({ where: { usuario_id_fk: [20, 21] } });
+      try {
+        await PagoCuota.destroy({ where: { socio_numero_asociado: [15, 16] } });
+      } catch (e) {}
+      try {
+        await DonacionTransferencia.destroy({ where: { usuario_id: [20, 21] } });
+      } catch (e) {}
       await PerfilSocio.destroy({ where: { numero_asociado: [15, 16] } });
       await Usuario.destroy({ where: { id: [20, 21] } });
 
