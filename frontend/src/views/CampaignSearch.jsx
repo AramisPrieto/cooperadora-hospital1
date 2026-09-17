@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
 import CampaignCard from '../components/CampaignCard';
@@ -26,38 +26,21 @@ const getCategoryFromTitle = (title) => {
   return 'General';
 };
 
+const isFinished = (c) => parseFloat(c.monto_objetivo) > 0 && parseFloat(c.monto_actual) >= parseFloat(c.monto_objetivo);
+
 const CampaignSearch = () => {
   const navigate = useNavigate();
-  const [rawCampaigns, setRawCampaigns] = useState([]);
-  const [activeStatus, setActiveStatus] = useState('activas'); // 'activas' | 'terminadas' | 'todas'
+  const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState('');
   const [activeSort, setActiveSort] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todas');
   const [currentPage, setCurrentPage] = useState(1);
 
-  const isFinished = (c) => parseFloat(c.monto_objetivo) > 0 && parseFloat(c.monto_actual) >= parseFloat(c.monto_objetivo);
-
-  const statusCounts = useMemo(() => ({
-    todas: rawCampaigns.length,
-    activas: rawCampaigns.filter((c) => !isFinished(c)).length,
-    terminadas: rawCampaigns.filter(isFinished).length
-  }), [rawCampaigns]);
-
-  const campaigns = useMemo(() => {
-    if (activeStatus === 'activas') {
-      return rawCampaigns.filter((c) => !isFinished(c));
-    }
-    if (activeStatus === 'terminadas') {
-      return rawCampaigns.filter(isFinished);
-    }
-    return rawCampaigns;
-  }, [rawCampaigns, activeStatus]);
-
-  // Reset page when category, search input, sort, status or underlying campaigns change
+  // Reset page when category, search input, sort, or underlying campaigns change
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeCategory, searchInput, activeSort, activeStatus, campaigns]);
+  }, [activeCategory, searchInput, activeSort, campaigns]);
 
   const fetchCampaigns = useCallback(async (search = '', sort = '') => {
     setLoading(true);
@@ -66,7 +49,8 @@ const CampaignSearch = () => {
       if (search.trim()) params.set('search', search.trim());
       if (sort) params.set('sort', sort);
       const res = await api.get(`/campanas?${params.toString()}`);
-      setRawCampaigns(res.data);
+      const active = res.data.filter((c) => !isFinished(c));
+      setCampaigns(active);
     } catch (err) {
       console.error('Error cargando campañas:', err);
     } finally {
@@ -200,67 +184,6 @@ const CampaignSearch = () => {
               <X className="h-3.5 w-3.5" />
             </button>
           )}
-        </div>
-      </section>
-
-      {/* ── BARRA DE VISTAS POR ESTADO (ACTIVAS / TERMINADAS / TODAS) ── */}
-      <section className="pb-4">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] font-black uppercase text-slate-400 tracking-wider mr-1">
-            Vista:
-          </span>
-          <button
-            type="button"
-            onClick={() => setActiveStatus('activas')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeStatus === 'activas'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200'
-            }`}
-          >
-            <span className={`h-2 w-2 rounded-full ${activeStatus === 'activas' ? 'bg-white' : 'bg-emerald-500'}`} />
-            Activas
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-extrabold ${
-              activeStatus === 'activas' ? 'bg-white/25 text-white' : 'bg-emerald-100 text-emerald-800'
-            }`}>
-              {statusCounts.activas}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveStatus('terminadas')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeStatus === 'terminadas'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'bg-white text-indigo-700 hover:bg-indigo-50 border border-indigo-200'
-            }`}
-          >
-            <span className={`h-2 w-2 rounded-full ${activeStatus === 'terminadas' ? 'bg-white' : 'bg-indigo-500'}`} />
-            Terminadas
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-extrabold ${
-              activeStatus === 'terminadas' ? 'bg-white/25 text-white' : 'bg-indigo-100 text-indigo-800'
-            }`}>
-              {statusCounts.terminadas}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveStatus('todas')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeStatus === 'todas'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-            }`}
-          >
-            Todas
-            <span className={`text-[10px] px-1.5 py-0.2 rounded-md font-extrabold ${
-              activeStatus === 'todas' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
-            }`}>
-              {statusCounts.todas}
-            </span>
-          </button>
         </div>
       </section>
 
