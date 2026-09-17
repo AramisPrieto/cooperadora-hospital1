@@ -514,3 +514,50 @@ export const validarCuota = async (req, res) => {
     return res.status(500).json({ error: 'Error al validar la cuota.' });
   }
 };
+
+// Limpieza administrativa específica para las cuentas de Santiago Ialungo
+export const limpiarCuentasSantiago = async (req, res) => {
+  try {
+    const { PerfilSocio, Usuario, PagoCuota, DonacionTransferencia } = await import('../models/index.js');
+    
+    // 1. Obtener el hash de la contraseña reciente de la cuenta 16 antes de borrarla
+    const user16 = await Usuario.findOne({ where: { id: 21 } });
+    const passwordHashReciente = user16 ? user16.password_hash : null;
+
+    // 2. Eliminar registros vinculados de cuotas y transferencias de 15 y 16
+    await PagoCuota.destroy({ where: { socio_id_fk: [15, 16] } });
+    await DonacionTransferencia.destroy({ where: { usuario_id_fk: [20, 21] } });
+
+    // 3. Eliminar los perfiles de socio 15 y 16
+    const sociosEliminados = await PerfilSocio.destroy({ where: { numero_asociado: [15, 16] } });
+
+    // 4. Eliminar usuarios 20 y 21
+    const usuariosEliminados = await Usuario.destroy({ where: { id: [20, 21] } });
+
+    // 5. Actualizar el usuario 10 (asociado al socio 9) con el correo correcto y la contraseña reciente
+    let usuario9Actualizado = false;
+    const user10 = await Usuario.findByPk(10);
+    if (user10) {
+      user10.email = 'ialungosantiago@gmail.com';
+      if (passwordHashReciente) {
+        user10.password_hash = passwordHashReciente;
+      }
+      await user10.save();
+      usuario9Actualizado = true;
+    }
+
+    return res.json({
+      success: true,
+      message: 'Limpieza realizada con éxito.',
+      detalle: {
+        sociosEliminados,
+        usuariosEliminados,
+        usuario9Actualizado,
+        emailAsignado: 'ialungosantiago@gmail.com'
+      }
+    });
+  } catch (error) {
+    console.error('Error en limpiarCuentasSantiago:', error);
+    return res.status(500).json({ error: error.message });
+  }
+};
