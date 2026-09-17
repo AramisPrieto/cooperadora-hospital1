@@ -127,7 +127,7 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-2xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up max-h-[90dvh] sm:max-h-[85vh] flex flex-col pb-safe sm:pb-0">
+      <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-2xl md:max-w-3xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up max-h-[92dvh] sm:max-h-[90vh] flex flex-col pb-safe sm:pb-0">
         {/* Modal header */}
         <div className="bg-slate-50 border-b border-slate-200 p-6 shrink-0">
           <div className="flex items-start justify-between gap-4">
@@ -352,11 +352,30 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
                     </div>
 
                     {/* Inputs */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-3">
                       <div>
-                        <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
-                          Monto transferido ($) *
-                        </label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider">
+                            Monto transferido ($) *
+                          </label>
+                          <span className="text-[10px] text-slate-400 font-bold">Mínimo $1.000</span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-1.5 mb-2">
+                          {[2000, 5000, 10000, 20000].map((amt) => (
+                            <button
+                              key={amt}
+                              type="button"
+                              onClick={() => setTransferenciaMonto(String(amt))}
+                              className={`py-1.5 px-2 rounded-xl text-xs font-black border transition-all ${
+                                transferenciaMonto === String(amt)
+                                  ? 'bg-brand-50 border-brand-500 text-brand-700 shadow-sm'
+                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                              }`}
+                            >
+                              ${amt.toLocaleString('es-AR')}
+                            </button>
+                          ))}
+                        </div>
                         <input
                           type="number"
                           inputMode="decimal"
@@ -369,7 +388,7 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
                       </div>
                       <div>
                         <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">
-                          N° Comprobante / Transacción
+                          N° Comprobante / Transacción (opcional)
                         </label>
                         <input
                           type="text"

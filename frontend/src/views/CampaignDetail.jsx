@@ -8,7 +8,7 @@ import {
   Heart, ArrowLeft, Calendar, Clock, Target, TrendingUp,
   Share2, CheckCircle, AlertCircle, ShieldCheck, Banknote,
   ImageOff, ChevronRight, Copy, Check, Users, Sparkles,
-  BadgeAlert, X, Info
+  BadgeAlert, X, Info, Landmark
 } from 'lucide-react';
 
 /* ── Helpers ────────────────────────────────────────────── */
@@ -193,7 +193,7 @@ const DonanteItem = ({ iniciales, monto, timeAgo }) => {
 /* ── Modal Donación ─────────────────────────────────────── */
 const DonationModal = ({ campaign, onClose, onSuccess }) => {
   const [method, setMethod] = useState('transferencia');
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState('5000');
   const [txNumber, setTxNumber] = useState('');
   const [receiptUrl, setReceiptUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -269,21 +269,29 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-lg shadow-2xl overflow-hidden border border-slate-100 animate-fade-up max-h-[90dvh] sm:max-h-[85vh] flex flex-col pb-safe sm:pb-0">
+      <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-xl md:max-w-3xl lg:max-w-4xl shadow-2xl overflow-hidden border border-slate-100 animate-fade-up max-h-[92dvh] sm:max-h-[90vh] flex flex-col pb-safe sm:pb-0 transition-all duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50 shrink-0">
-          <div>
-            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Donar a</p>
-            <h3 className="text-lg font-display font-black text-slate-900 leading-snug">{campaign.titulo}</h3>
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 border-b border-slate-100 bg-slate-50/80 shrink-0">
+          <div className="min-w-0 pr-4">
+            <span className="text-[10px] text-brand-600 font-black uppercase tracking-widest bg-brand-50 px-2 py-0.5 rounded-md border border-brand-100 inline-block mb-0.5">
+              Donación a Campaña
+            </span>
+            <h3 className="text-base sm:text-lg font-display font-black text-slate-900 leading-snug truncate">
+              {campaign.titulo}
+            </h3>
           </div>
-          <button onClick={onClose} aria-label="Cerrar modal de donación" className="h-8 w-8 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors shadow-sm">
+          <button
+            onClick={onClose}
+            aria-label="Cerrar modal de donación"
+            className="h-8 w-8 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors shadow-sm shrink-0"
+          >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="p-6 space-y-5 overflow-y-auto flex-grow" data-lenis-prevent>
+        <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-grow" data-lenis-prevent>
           {success ? (
-            <div className="space-y-4">
+            <div className="space-y-4 max-w-md mx-auto py-6">
               <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium p-4 rounded-2xl">
                 <CheckCircle className="h-5 w-5 shrink-0 text-emerald-600 mt-0.5" />
                 <p>{success}</p>
@@ -300,107 +308,168 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
               )}
 
               {/* Tabs método */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/60 max-w-md mx-auto md:max-w-none">
                 {[
-                  { key: 'transferencia', label: 'Transferencia / CBU', icon: Banknote },
+                  { key: 'transferencia', label: 'Transferencia bancaria / CBU', icon: Banknote },
                   { key: 'mp', label: 'Mercado Pago', icon: Heart }
                 ].map(({ key, label, icon: Icon }) => (
                   <button
                     key={key}
+                    type="button"
                     onClick={() => setMethod(key)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 text-xs py-2.5 px-3 rounded-xl font-bold uppercase tracking-wider border transition-all ${
+                    className={`flex-1 flex items-center justify-center gap-2 text-xs py-2.5 px-3 rounded-xl font-bold uppercase tracking-wider transition-all ${
                       method === key
-                        ? 'bg-brand-600 border-brand-600 text-white shadow-sm'
-                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                        ? 'bg-brand-600 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                     }`}
                   >
-                    <Icon className="h-3.5 w-3.5" />
-                    {label}
+                    <Icon className="h-4 w-4" />
+                    <span>{label}</span>
                   </button>
                 ))}
               </div>
 
               {method === 'transferencia' ? (
-                <form onSubmit={handleTransfer} className="space-y-4">
-                  {/* Datos bancarios */}
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs space-y-2.5">
-                    {[
-                      { label: 'Banco', value: 'Banco Provincia' },
-                      { label: 'Razón Social', value: 'Asoc. Cooperadora Hosp. Ferreyra' },
-                      { label: 'CUIT', value: '30-67891234-5' },
-                    ].map(({ label, value }) => (
-                      <div key={label} className="flex justify-between border-b border-slate-100 pb-2">
-                        <span className="text-slate-400 font-medium">{label}:</span>
-                        <span className="text-slate-800 font-black">{value}</span>
+                <form onSubmit={handleTransfer} className="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6 items-start">
+                  {/* Columna Izquierda: Datos bancarios e instrucciones */}
+                  <div className="md:col-span-5 space-y-3.5">
+                    <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 text-xs space-y-2.5">
+                      <div className="flex items-center gap-1.5 pb-1 border-b border-slate-200/60 text-slate-500 font-black text-[11px] uppercase tracking-wider">
+                        <Landmark className="h-3.5 w-3.5 text-brand-600" />
+                        <span>Datos bancarios</span>
                       </div>
-                    ))}
-                    {/* Alias copiable */}
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                      <span className="text-slate-400 font-medium">Alias:</span>
-                      <div className="relative">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText('cooperadora.hospital.nec');
-                            setCopiedAlias(true);
-                            setTimeout(() => setCopiedAlias(false), 2000);
-                          }}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-150 active:bg-slate-200 rounded-xl border border-slate-200/60 text-slate-800 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-brand-500 active:scale-[0.98]"
-                          title="Copiar Alias"
-                        >
-                          <span className="font-mono text-xs font-bold select-all">cooperadora.hospital.nec</span>
-                          <span className="p-1 rounded-lg bg-white border border-slate-150 transition-colors flex items-center justify-center">
-                            {copiedAlias ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5 text-slate-500" />}
-                          </span>
-                        </button>
-                        {copiedAlias && (
-                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md animate-fade-in-tooltip pointer-events-none z-10 whitespace-nowrap">
-                            ¡Copiado!
-                          </span>
-                        )}
+                      {[
+                        { label: 'Banco', value: 'Banco Provincia' },
+                        { label: 'Razón Social', value: 'Asoc. Cooperadora Hosp. Ferreyra' },
+                        { label: 'CUIT', value: '30-67891234-5' },
+                      ].map(({ label, value }) => (
+                        <div key={label} className="flex justify-between border-b border-slate-100 pb-2">
+                          <span className="text-slate-400 font-medium">{label}:</span>
+                          <span className="text-slate-800 font-black text-right">{value}</span>
+                        </div>
+                      ))}
+
+                      {/* Alias copiable */}
+                      <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
+                        <span className="text-slate-400 font-medium">Alias:</span>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText('cooperadora.hospital.nec');
+                              setCopiedAlias(true);
+                              setTimeout(() => setCopiedAlias(false), 2000);
+                            }}
+                            className="flex items-center gap-2 px-2.5 py-1.5 bg-white hover:bg-slate-100 active:bg-slate-200 rounded-xl border border-slate-200 text-slate-800 transition-all text-xs font-bold"
+                            title="Copiar Alias"
+                          >
+                            <span className="font-mono text-xs select-all">cooperadora.hospital.nec</span>
+                            <span className="p-1 rounded-md bg-slate-50 border border-slate-200">
+                              {copiedAlias ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3 text-slate-500" />}
+                            </span>
+                          </button>
+                          {copiedAlias && (
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow animate-fade-in-tooltip pointer-events-none z-10 whitespace-nowrap">
+                              ¡Copiado!
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* CBU copiable */}
+                      <div className="flex items-center justify-between gap-2 pt-0.5">
+                        <span className="text-slate-400 font-medium">CBU:</span>
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText('0140354701354701354701');
+                              setCopiedCbu(true);
+                              setTimeout(() => setCopiedCbu(false), 2000);
+                            }}
+                            className="flex items-center gap-2 px-2.5 py-1.5 bg-white hover:bg-slate-100 active:bg-slate-200 rounded-xl border border-slate-200 text-slate-800 transition-all text-xs font-bold"
+                            title="Copiar CBU"
+                          >
+                            <span className="font-mono text-xs select-all truncate max-w-[130px] sm:max-w-none">0140354701354701354701</span>
+                            <span className="p-1 rounded-md bg-slate-50 border border-slate-200">
+                              {copiedCbu ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3 text-slate-500" />}
+                            </span>
+                          </button>
+                          {copiedCbu && (
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow animate-fade-in-tooltip pointer-events-none z-10 whitespace-nowrap">
+                              ¡Copiado!
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    {/* CBU copiable */}
-                    <div className="flex items-center justify-between gap-2 sm:gap-4 pt-1 flex-wrap">
-                      <span className="text-slate-400 font-medium">CBU:</span>
-                      <div className="relative">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText('0140354701354701354701');
-                            setCopiedCbu(true);
-                            setTimeout(() => setCopiedCbu(false), 2000);
-                          }}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 hover:bg-slate-150 active:bg-slate-200 rounded-xl border border-slate-200/60 text-slate-800 transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-brand-500 active:scale-[0.98]"
-                          title="Copiar CBU"
-                        >
-                          <span className="font-mono text-xs font-bold select-all">0140354701354701354701</span>
-                          <span className="p-1 rounded-lg bg-white border border-slate-150 transition-colors flex items-center justify-center">
-                            {copiedCbu ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5 text-slate-500" />}
-                          </span>
-                        </button>
-                        {copiedCbu && (
-                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-slate-900 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-md animate-fade-in-tooltip pointer-events-none z-10 whitespace-nowrap">
-                            ¡Copiado!
-                          </span>
-                        )}
-                      </div>
+
+                    <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-3 text-[11px] text-amber-900/90 leading-relaxed">
+                      <p className="font-bold text-amber-950 mb-0.5">Paso a paso</p>
+                      Transferí desde tu app bancaria con el Alias o CBU, e ingresá el monto y comprobante a la derecha para acreditar tu donación.
+                    </div>
+
+                    <div className="flex items-center gap-2 text-[11px] text-emerald-700 font-semibold bg-emerald-50/80 border border-emerald-200/60 rounded-xl px-3 py-2">
+                      <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                      <span>Comprobante validado por la administración</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  {/* Columna Derecha: Formulario de carga */}
+                  <div className="md:col-span-7 space-y-4">
                     <div>
-                      <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">Monto ($) *</label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider">Monto transferido ($) *</label>
+                        <span className="text-[10px] text-slate-400 font-bold">Mínimo $1.000</span>
+                      </div>
+                      <div className="grid grid-cols-4 gap-1.5 mb-2">
+                        {[2000, 5000, 10000, 20000].map(val => (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setAmount(String(val))}
+                            className={`py-1.5 px-2 rounded-xl text-xs font-black border transition-all ${
+                              amount === String(val)
+                                ? 'bg-brand-50 border-brand-500 text-brand-700 shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                            }`}
+                          >
+                            ${val.toLocaleString('es-AR')}
+                          </button>
+                        ))}
+                      </div>
                       <div className="relative">
                         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
-                        <input type="number" inputMode="decimal" min="1000" max="10000000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="1000"
+                          max="10000000"
+                          step="any"
+                          value={amount}
+                          onChange={e => setAmount(e.target.value)}
+                          placeholder="5000"
+                          className="input-field pl-7 py-2.5 text-sm"
+                          required
+                          disabled={submitting}
+                        />
                       </div>
                     </div>
+
                     <div>
-                      <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">N° Comprobante</label>
-                      <input type="text" maxLength={100} value={txNumber} onChange={e => setTxNumber(e.target.value)} placeholder="TXN-1234567" className="input-field py-2.5 text-sm" disabled={submitting} />
+                      <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">N° Comprobante / Transacción</label>
+                      <input
+                        type="text"
+                        maxLength={100}
+                        value={txNumber}
+                        onChange={e => setTxNumber(e.target.value)}
+                        placeholder="Ej: TXN-1234567 o 9821873"
+                        className="input-field py-2.5 text-sm"
+                        disabled={submitting}
+                      />
                     </div>
-                    <div className="sm:col-span-2">
+
+                    <div>
                       <FileUpload
                         tipo="comprobante"
                         value={receiptUrl}
@@ -408,38 +477,103 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
                         label="Comprobante de transferencia (opcional)"
                       />
                     </div>
-                  </div>
 
-                  <div className="flex gap-3 pt-1">
-                    <button type="button" onClick={onClose} disabled={submitting} className="flex-1 px-4 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50">Cancelar</button>
-                    <button type="submit" disabled={submitting} className="flex-1 btn-brand text-xs py-3 disabled:opacity-50">
-                      {submitting ? 'Enviando…' : 'Confirmar donación'}
-                    </button>
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        disabled={submitting}
+                        className="px-4 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className="flex-1 btn-brand text-xs py-3 disabled:opacity-50 font-black uppercase tracking-wider shadow-sm"
+                      >
+                        {submitting ? 'Enviando…' : 'Confirmar donación'}
+                      </button>
+                    </div>
                   </div>
                 </form>
               ) : (
-                <form onSubmit={handleMP} className="space-y-4">
-                  <div>
-                    <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">Monto a donar ($) *</label>
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
-                      <input type="number" inputMode="decimal" min="1000" max="10000000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
+                <form onSubmit={handleMP} className="grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-6 items-center">
+                  <div className="md:col-span-5 bg-gradient-to-b from-sky-50 to-blue-50/40 border border-sky-100 rounded-2xl p-5 space-y-3">
+                    <div className="h-10 w-10 bg-sky-100 rounded-xl flex items-center justify-center text-sky-600">
+                      <Heart className="h-5 w-5 fill-sky-200" />
+                    </div>
+                    <div>
+                      <h4 className="font-display font-black text-slate-900 text-sm">Pago online instantáneo</h4>
+                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                        Aboná con saldo de Mercado Pago, tarjeta de débito o crédito. La donación impactará automáticamente en la recaudación de la campaña.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 text-[11px] text-sky-700 font-semibold pt-1">
+                      <ShieldCheck className="h-4 w-4 text-sky-600 shrink-0" />
+                      <span>Transacción cifrada y segura</span>
                     </div>
                   </div>
-                  <div className="flex gap-3">
-                    <button type="button" onClick={onClose} disabled={submitting} className="flex-1 px-4 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50">Cancelar</button>
-                    <button type="submit" disabled={submitting} className="flex-1 btn-brand text-xs py-3 disabled:opacity-50">
-                      {submitting ? 'Redirigiendo…' : 'Pagar con Mercado Pago'}
-                    </button>
+
+                  <div className="md:col-span-7 space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider">Monto a donar ($) *</label>
+                        <span className="text-[10px] text-slate-400 font-bold">Mínimo $1.000</span>
+                      </div>
+                      <div className="grid grid-cols-4 gap-1.5 mb-2">
+                        {[2000, 5000, 10000, 20000].map(val => (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setAmount(String(val))}
+                            className={`py-1.5 px-2 rounded-xl text-xs font-black border transition-all ${
+                              amount === String(val)
+                                ? 'bg-brand-50 border-brand-500 text-brand-700 shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+                            }`}
+                          >
+                            ${val.toLocaleString('es-AR')}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="relative">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="1000"
+                          max="10000000"
+                          step="any"
+                          value={amount}
+                          onChange={e => setAmount(e.target.value)}
+                          placeholder="5000"
+                          className="input-field pl-7 py-2.5 text-sm"
+                          required
+                          disabled={submitting}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        disabled={submitting}
+                        className="px-4 py-3 border border-slate-200 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-black uppercase tracking-wider transition-colors disabled:opacity-50"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className="flex-1 btn-brand text-xs py-3 disabled:opacity-50 font-black uppercase tracking-wider shadow-sm"
+                      >
+                        {submitting ? 'Redirigiendo…' : 'Pagar con Mercado Pago'}
+                      </button>
+                    </div>
                   </div>
                 </form>
               )}
-
-              {/* Security badge */}
-              <div className="flex items-center justify-center gap-2 text-[11px] text-emerald-600 font-semibold pt-1">
-                <ShieldCheck className="h-4 w-4" />
-                Pago seguro vía Mercado Pago o transferencia bancaria
-              </div>
             </>
           )}
         </div>

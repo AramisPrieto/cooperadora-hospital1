@@ -16,8 +16,34 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
     observaciones: partner.observaciones || ''
   });
 
+  const sanitizeInput = (field, val) => {
+    if (typeof val !== 'string') return val;
+    switch (field) {
+      case 'nombre':
+      case 'apellido':
+      case 'nacionalidad':
+        // Solo letras, acentos, espacios, apóstrofes y guiones
+        return val.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]/g, '');
+      case 'telefono':
+        // Solo números, +, espacios, guiones y paréntesis
+        return val.replace(/[^0-9+\s\-()]/g, '');
+      case 'direccion':
+        // Letras, números, espacios y puntuación de domicilio
+        return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s,.'#°º\-\/]/g, '');
+      case 'localidad':
+        // Letras, números, espacios, apóstrofes, guiones y puntos
+        return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s'.-]/g, '');
+      case 'observaciones':
+        // Bloquear etiquetas HTML
+        return val.replace(/<[^>]*>/g, '');
+      default:
+        return val;
+    }
+  };
+
   const handleChange = (field, val) => {
-    setForm(prev => ({ ...prev, [field]: val }));
+    const cleanVal = sanitizeInput(field, val);
+    setForm(prev => ({ ...prev, [field]: cleanVal }));
   };
 
   const handleSubmit = (e) => {
@@ -56,6 +82,8 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
                 minLength={2}
                 maxLength={100}
                 pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$"
+                title="Solo letras y espacios (2 a 100 caracteres)"
+                placeholder="Ej: Juan Carlos"
                 value={form.nombre} 
                 onChange={e => handleChange('nombre', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
@@ -70,6 +98,8 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
                 minLength={2}
                 maxLength={100}
                 pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$"
+                title="Solo letras y espacios (2 a 100 caracteres)"
+                placeholder="Ej: Pérez"
                 value={form.apellido} 
                 onChange={e => handleChange('apellido', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
@@ -112,6 +142,8 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
                 minLength={2}
                 maxLength={100}
                 pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$"
+                title="Solo letras y espacios (2 a 100 caracteres)"
+                placeholder="Ej: Argentina"
                 value={form.nacionalidad} 
                 onChange={e => handleChange('nacionalidad', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
@@ -150,6 +182,8 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
                 type="text" 
                 minLength={3}
                 maxLength={255}
+                title="Dirección válida (3 a 255 caracteres)"
+                placeholder="Ej: Calle 60 Nº 2550"
                 value={form.direccion} 
                 onChange={e => handleChange('direccion', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
@@ -164,6 +198,8 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
                 minLength={2}
                 maxLength={100}
                 pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s'.-]{2,100}$"
+                title="Localidad válida (2 a 100 caracteres)"
+                placeholder="Ej: Necochea"
                 value={form.localidad} 
                 onChange={e => handleChange('localidad', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 

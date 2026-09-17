@@ -25,8 +25,23 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
     }
   }, [profile]);
 
+  const sanitizeInput = (field, val) => {
+    if (typeof val !== 'string') return val;
+    switch (field) {
+      case 'telefono':
+        return val.replace(/[^0-9+\s\-()]/g, '');
+      case 'direccion':
+        return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s,.'#°º\-\/]/g, '');
+      case 'localidad':
+        return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s'.-]/g, '');
+      default:
+        return val;
+    }
+  };
+
   const handleChange = (field, val) => {
-    setForm(prev => ({ ...prev, [field]: val }));
+    const cleanVal = sanitizeInput(field, val);
+    setForm(prev => ({ ...prev, [field]: cleanVal }));
   };
 
   const handleSubmit = (e) => {

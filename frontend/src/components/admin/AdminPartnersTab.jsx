@@ -14,25 +14,64 @@ export const AdminPartnersTab = ({
   onDeletePartner
 }) => {
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('todos'); // 'todos' | 'activos' | 'inactivos' | 'no_aprobados'
   const [expandedPartnerId, setExpandedPartnerId] = useState(null);
   const [editingPartnerId, setEditingPartnerId] = useState(null);
 
+  const counts = useMemo(() => {
+    return {
+      todos: partners.length,
+      activos: partners.filter((p) => p.estado === 'activo').length,
+      inactivos: partners.filter((p) => p.estado === 'inactivo').length,
+      no_aprobados: partners.filter((p) => p.estado === 'pendiente').length
+    };
+  }, [partners]);
+
   const filteredPartners = useMemo(() => {
+    let result = partners;
+
+    if (statusFilter === 'activos') {
+      result = result.filter((part) => part.estado === 'activo');
+    } else if (statusFilter === 'inactivos') {
+      result = result.filter((part) => part.estado === 'inactivo');
+    } else if (statusFilter === 'no_aprobados') {
+      result = result.filter((part) => part.estado === 'pendiente');
+    }
+
     const match = search.toLowerCase().trim();
-    if (!match) return partners;
-    return partners.filter((part) => {
-      const fullName = `${part.nombre || ''} ${part.apellido || ''}`.toLowerCase();
-      const email = (part.usuario?.email || '').toLowerCase();
-      const dni = String(part.dni || '');
-      const loc = (part.localidad || '').toLowerCase();
-      return (
-        fullName.includes(match) ||
-        email.includes(match) ||
-        dni.includes(match) ||
-        loc.includes(match)
-      );
-    });
-  }, [partners, search]);
+    if (match) {
+      result = result.filter((part) => {
+        const fullName = `${part.nombre || ''} ${part.apellido || ''}`.toLowerCase();
+        const email = (part.usuario?.email || '').toLowerCase();
+        const dni = String(part.dni || '');
+        const loc = (part.localidad || '').toLowerCase();
+        return (
+          fullName.includes(match) ||
+          email.includes(match) ||
+          dni.includes(match) ||
+          loc.includes(match)
+        );
+      });
+    }
+
+    return result;
+  }, [partners, statusFilter, search]);
+
+  const getEmptyMessage = () => {
+    if (search.trim()) {
+      return `No se encontraron socios que coincidan con "${search}" en esta vista.`;
+    }
+    switch (statusFilter) {
+      case 'activos':
+        return 'No hay socios activos registrados actualmente.';
+      case 'inactivos':
+        return 'No hay socios inactivos registrados.';
+      case 'no_aprobados':
+        return 'No hay socios pendientes de aprobación.';
+      default:
+        return 'No hay perfiles de socios registrados.';
+    }
+  };
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden">
@@ -58,19 +97,112 @@ export const AdminPartnersTab = ({
         </div>
       </div>
 
+      {/* Tabs / Vistas de Socios */}
+      <div className="px-5 py-3 bg-slate-50/60 border-b border-slate-100 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setStatusFilter('todos')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'todos'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+          }`}
+        >
+          <span>Todos</span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'todos' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+            }`}
+          >
+            {counts.todos}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter('activos')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'activos'
+              ? 'bg-emerald-600 text-white shadow-sm'
+              : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200/80'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                statusFilter === 'activos' ? 'bg-white' : 'bg-emerald-500'
+              }`}
+            />
+            Activos
+          </span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'activos' ? 'bg-white/25 text-white' : 'bg-emerald-100 text-emerald-800'
+            }`}
+          >
+            {counts.activos}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter('inactivos')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'inactivos'
+              ? 'bg-rose-600 text-white shadow-sm'
+              : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200/80'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                statusFilter === 'inactivos' ? 'bg-white' : 'bg-rose-500'
+              }`}
+            />
+            Inactivos
+          </span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'inactivos' ? 'bg-white/25 text-white' : 'bg-rose-100 text-rose-800'
+            }`}
+          >
+            {counts.inactivos}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter('no_aprobados')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'no_aprobados'
+              ? 'bg-amber-500 text-white shadow-sm'
+              : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200/80'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                statusFilter === 'no_aprobados' ? 'bg-white' : 'bg-amber-500'
+              }`}
+            />
+            No aprobados
+          </span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'no_aprobados' ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-800'
+            }`}
+          >
+            {counts.no_aprobados}
+          </span>
+        </button>
+      </div>
+
       {loading ? (
         <div className="p-8 text-center text-slate-400 text-sm">Cargando socios...</div>
-      ) : partners.length === 0 ? (
-        <div className="p-12 text-center">
-          <Users className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-400 text-sm font-semibold">No hay perfiles de socios registrados.</p>
-        </div>
       ) : filteredPartners.length === 0 ? (
         <div className="p-12 text-center">
           <Users className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-400 text-sm font-semibold">
-            No se encontraron socios que coincidan con "{search}".
-          </p>
+          <p className="text-slate-400 text-sm font-semibold">{getEmptyMessage()}</p>
         </div>
       ) : (
         <div className="divide-y divide-slate-100">
