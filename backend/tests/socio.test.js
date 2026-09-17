@@ -102,10 +102,36 @@ describe('Rutas de Perfiles de Socio (/api/socios)', () => {
   });
 
   describe('Actualización de perfiles (PUT)', () => {
-    it('debe permitir a un socio actualizar su propio DNI', async () => {
+    it('debe denegar (status 403) si un socio intenta modificar su propio DNI registrado', async () => {
       const res = await request(app)
         .put('/api/socios/mi-perfil')
         .set('Authorization', `Bearer ${socioToken}`)
+        .send({
+          dni: 99887766
+        });
+
+      expect(res.status).toBe(403);
+      expect(res.body).toHaveProperty('error', 'El DNI no puede ser modificado por el socio. Por razones estatutarias y del Libro de Asociados, cualquier corrección debe solicitarse a la administración.');
+    });
+
+    it('debe permitir a un socio actualizar sus datos de contacto (teléfono y dirección)', async () => {
+      const res = await request(app)
+        .put('/api/socios/mi-perfil')
+        .set('Authorization', `Bearer ${socioToken}`)
+        .send({
+          telefono: '2262998877',
+          direccion: 'Nueva Dirección 123'
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.socio).toHaveProperty('telefono', '2262998877');
+      expect(res.body.socio).toHaveProperty('direccion', 'Nueva Dirección 123');
+    });
+
+    it('debe permitir a un admin actualizar el DNI de un socio mediante PUT /:id', async () => {
+      const res = await request(app)
+        .put(`/api/socios/${socioPerfil.numero_asociado}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .send({
           dni: 99887766
         });
