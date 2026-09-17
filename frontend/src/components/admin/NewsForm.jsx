@@ -63,13 +63,13 @@ const NewsForm = ({ news, newsItem, onSave, onCancel, submitting }) => {
         </div>
       </div>
 
-      {/* ── Cuerpo con Scroll Fluido y data-lenis-prevent ── */}
+      {/* ── Cuerpo con Scroll Fluido (Diseño 1 sola columna) ── */}
       <div 
         className="p-5 sm:p-6 md:p-8 overflow-y-auto overscroll-contain flex-1 min-h-0 bg-slate-50/30"
         data-lenis-prevent
       >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Columna Izquierda: Metadatos e Imagen */}
+        <div className="space-y-6 max-w-2xl mx-auto">
+          {/* Tarjeta 1: Información de la Noticia */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
               <span className="h-2 w-2 rounded-full bg-accent-600" />
@@ -113,7 +113,7 @@ const NewsForm = ({ news, newsItem, onSave, onCancel, submitting }) => {
             </div>
           </div>
 
-          {/* Columna Derecha: Contenido del artículo */}
+          {/* Tarjeta 2: Contenido del artículo */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-4 shadow-sm flex flex-col">
             <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
               <FileText className="h-3.5 w-3.5 text-accent-600" />
