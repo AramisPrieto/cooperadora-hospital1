@@ -9,17 +9,54 @@ export const AdminCuotasTab = ({
   onValidateCuota
 }) => {
   const [search, setSearch] = useState('');
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('todas'); // 'todas' | 'aprobadas' | 'desaprobadas' | 'pendientes'
+  const [previewData, setPreviewData] = useState(null);
+
+  const counts = useMemo(() => ({
+    todas: cuotas.length,
+    aprobadas: cuotas.filter((c) => c.estado === 'aprobado' || c.estado === 'pagado').length,
+    desaprobadas: cuotas.filter((c) => c.estado === 'rechazado').length,
+    pendientes: cuotas.filter((c) => c.estado === 'pendiente').length
+  }), [cuotas]);
 
   const filteredCuotas = useMemo(() => {
-    if (!search.trim()) return cuotas;
-    const match = search.toLowerCase();
-    return cuotas.filter((c) => {
-      const fullName = `${c.perfilSocio?.nombre || ''} ${c.perfilSocio?.apellido || ''}`.toLowerCase();
-      const dni = String(c.perfilSocio?.dni || '');
-      return fullName.includes(match) || dni.includes(match);
-    });
-  }, [cuotas, search]);
+    let result = cuotas;
+
+    if (statusFilter === 'aprobadas') {
+      result = result.filter((c) => c.estado === 'aprobado' || c.estado === 'pagado');
+    } else if (statusFilter === 'desaprobadas') {
+      result = result.filter((c) => c.estado === 'rechazado');
+    } else if (statusFilter === 'pendientes') {
+      result = result.filter((c) => c.estado === 'pendiente');
+    }
+
+    if (search.trim()) {
+      const match = search.toLowerCase();
+      result = result.filter((c) => {
+        const fullName = `${c.perfilSocio?.nombre || ''} ${c.perfilSocio?.apellido || ''}`.toLowerCase();
+        const dni = String(c.perfilSocio?.dni || '');
+        return fullName.includes(match) || dni.includes(match);
+      });
+    }
+
+    return result;
+  }, [cuotas, statusFilter, search]);
+
+  const getEmptyMessage = () => {
+    if (search.trim()) {
+      return `No se encontraron cuotas que coincidan con "${search}" en esta vista.`;
+    }
+    switch (statusFilter) {
+      case 'aprobadas':
+        return 'No hay cuotas aprobadas registradas.';
+      case 'desaprobadas':
+        return 'No hay cuotas desaprobadas (rechazadas).';
+      case 'pendientes':
+        return 'No hay cuotas pendientes de validación.';
+      default:
+        return 'No hay cuotas registradas.';
+    }
+  };
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden animate-fade-up">
@@ -45,12 +82,112 @@ export const AdminCuotasTab = ({
         </div>
       </div>
 
+      {/* Tabs / Vistas de Cuotas */}
+      <div className="px-5 py-3 bg-slate-50/60 border-b border-slate-100 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setStatusFilter('todas')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'todas'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+          }`}
+        >
+          <span>Todas</span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'todas' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+            }`}
+          >
+            {counts.todas}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter('aprobadas')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'aprobadas'
+              ? 'bg-emerald-600 text-white shadow-sm'
+              : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200/80'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                statusFilter === 'aprobadas' ? 'bg-white' : 'bg-emerald-500'
+              }`}
+            />
+            Aprobadas
+          </span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'aprobadas' ? 'bg-white/25 text-white' : 'bg-emerald-100 text-emerald-800'
+            }`}
+          >
+            {counts.aprobadas}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter('desaprobadas')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'desaprobadas'
+              ? 'bg-rose-600 text-white shadow-sm'
+              : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200/80'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                statusFilter === 'desaprobadas' ? 'bg-white' : 'bg-rose-500'
+              }`}
+            />
+            Desaprobadas
+          </span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'desaprobadas' ? 'bg-white/25 text-white' : 'bg-rose-100 text-rose-800'
+            }`}
+          >
+            {counts.desaprobadas}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStatusFilter('pendientes')}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'pendientes'
+              ? 'bg-amber-500 text-white shadow-sm'
+              : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200/80'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                statusFilter === 'pendientes' ? 'bg-white' : 'bg-amber-500'
+              }`}
+            />
+            Pendientes
+          </span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'pendientes' ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-800'
+            }`}
+          >
+            {counts.pendientes}
+          </span>
+        </button>
+      </div>
+
       {loading ? (
         <div className="p-8 text-center text-slate-400 text-sm">Cargando cuotas...</div>
-      ) : cuotas.length === 0 ? (
+      ) : filteredCuotas.length === 0 ? (
         <div className="p-12 text-center">
           <CreditCard className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-400 text-sm font-semibold">No hay cuotas registradas.</p>
+          <p className="text-slate-400 text-sm font-semibold">{getEmptyMessage()}</p>
         </div>
       ) : (
         <>
@@ -109,7 +246,12 @@ export const AdminCuotasTab = ({
                     <span className="text-slate-500 font-medium">Comprobante:</span>
                     {c.comprobante_url ? (
                       <button
-                        onClick={() => setPreviewUrl(c.comprobante_url)}
+                        onClick={() =>
+                          setPreviewData({
+                            url: c.comprobante_url,
+                            numero: c.numero_comprobante || '',
+                          })
+                        }
                         className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-bold underline"
                       >
                         <Eye className="h-3.5 w-3.5" />
@@ -192,7 +334,12 @@ export const AdminCuotasTab = ({
                     <td className="p-4 text-center">
                       {c.comprobante_url ? (
                         <button
-                          onClick={() => setPreviewUrl(c.comprobante_url)}
+                          onClick={() =>
+                            setPreviewData({
+                              url: c.comprobante_url,
+                              numero: c.numero_comprobante || '',
+                            })
+                          }
                           className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-bold transition-colors"
                           title="Ver comprobante adjunto"
                         >
@@ -253,11 +400,12 @@ export const AdminCuotasTab = ({
       )}
 
       {/* Comprobante Preview Modal */}
-      {previewUrl && (
+      {previewData && (
         <ComprobanteModal
-          url={previewUrl}
+          url={previewData.url}
+          numeroComprobante={previewData.numero}
           title="Comprobante de Cuota"
-          onClose={() => setPreviewUrl(null)}
+          onClose={() => setPreviewData(null)}
         />
       )}
     </div>

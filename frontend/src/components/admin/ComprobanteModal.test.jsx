@@ -87,6 +87,23 @@ describe('ComprobanteModal', () => {
     );
   });
 
+  it('muestra estado alternativo amigable si falla la carga de la imagen', () => {
+    render(
+      <ComprobanteModal
+        url="https://cooperadora-backend.onrender.com/uploads/comprobantes/foto.jpg"
+        numeroComprobante="TRF-987654"
+        title="Comprobante"
+        onClose={() => {}}
+      />
+    );
+
+    const img = screen.getByRole('img');
+    fireEvent.error(img);
+
+    expect(screen.getByText('Vista previa no disponible directamente')).toBeInTheDocument();
+    expect(screen.getAllByText(/TRF-987654/).length).toBeGreaterThanOrEqual(1);
+  });
+
   it('llama a onClose al hacer clic en el botón de cerrar y con la tecla Escape', () => {
     const handleClose = vi.fn();
     render(

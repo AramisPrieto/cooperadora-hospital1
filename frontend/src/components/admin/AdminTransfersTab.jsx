@@ -10,25 +10,62 @@ export const AdminTransfersTab = ({
   onReject
 }) => {
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('todas'); // 'todas' | 'aprobadas' | 'desaprobadas' | 'pendientes'
   const [currentPage, setCurrentPage] = useState(1);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewData, setPreviewData] = useState(null);
+
+  const counts = useMemo(() => ({
+    todas: transfers.length,
+    aprobadas: transfers.filter((tr) => tr.estado === 'aprobada').length,
+    desaprobadas: transfers.filter((tr) => tr.estado === 'rechazada').length,
+    pendientes: transfers.filter((tr) => tr.estado === 'pendiente').length
+  }), [transfers]);
 
   const filteredTransfers = useMemo(() => {
-    if (!search.trim()) return transfers;
-    const match = search.toLowerCase();
-    return transfers.filter((tr) => {
-      const email = (tr.usuario?.email || '').toLowerCase();
-      const nombreSocio = `${tr.usuario?.perfilSocio?.nombre || ''} ${tr.usuario?.perfilSocio?.apellido || ''}`.toLowerCase();
-      const dni = String(tr.usuario?.perfilSocio?.dni || '');
-      return email.includes(match) || nombreSocio.includes(match) || dni.includes(match);
-    });
-  }, [transfers, search]);
+    let result = transfers;
+
+    if (statusFilter === 'aprobadas') {
+      result = result.filter((tr) => tr.estado === 'aprobada');
+    } else if (statusFilter === 'desaprobadas') {
+      result = result.filter((tr) => tr.estado === 'rechazada');
+    } else if (statusFilter === 'pendientes') {
+      result = result.filter((tr) => tr.estado === 'pendiente');
+    }
+
+    if (search.trim()) {
+      const match = search.toLowerCase();
+      result = result.filter((tr) => {
+        const email = (tr.usuario?.email || '').toLowerCase();
+        const nombreSocio = `${tr.usuario?.perfilSocio?.nombre || ''} ${tr.usuario?.perfilSocio?.apellido || ''}`.toLowerCase();
+        const dni = String(tr.usuario?.perfilSocio?.dni || '');
+        return email.includes(match) || nombreSocio.includes(match) || dni.includes(match);
+      });
+    }
+
+    return result;
+  }, [transfers, statusFilter, search]);
 
   const transfersPerPage = 25;
   const totalPages = Math.ceil(filteredTransfers.length / transfersPerPage) || 1;
   const indexOfLastTransfer = currentPage * transfersPerPage;
   const indexOfFirstTransfer = indexOfLastTransfer - transfersPerPage;
   const currentTransfers = filteredTransfers.slice(indexOfFirstTransfer, indexOfLastTransfer);
+
+  const getEmptyMessage = () => {
+    if (search.trim()) {
+      return `No se encontraron transferencias que coincidan con "${search}" en esta vista.`;
+    }
+    switch (statusFilter) {
+      case 'aprobadas':
+        return 'No hay transferencias aprobadas registradas.';
+      case 'desaprobadas':
+        return 'No hay transferencias desaprobadas (rechazadas).';
+      case 'pendientes':
+        return 'No hay transferencias pendientes de validación.';
+      default:
+        return 'No hay transferencias registradas.';
+    }
+  };
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden animate-fade-up">
@@ -59,12 +96,124 @@ export const AdminTransfersTab = ({
         </div>
       </div>
 
+      {/* Tabs / Vistas de Transferencias */}
+      <div className="px-5 py-3 bg-slate-50/60 border-b border-slate-100 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setStatusFilter('todas');
+            setCurrentPage(1);
+          }}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'todas'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+          }`}
+        >
+          <span>Todas</span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'todas' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
+            }`}
+          >
+            {counts.todas}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setStatusFilter('aprobadas');
+            setCurrentPage(1);
+          }}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'aprobadas'
+              ? 'bg-emerald-600 text-white shadow-sm'
+              : 'bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200/80'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                statusFilter === 'aprobadas' ? 'bg-white' : 'bg-emerald-500'
+              }`}
+            />
+            Aprobadas
+          </span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'aprobadas' ? 'bg-white/25 text-white' : 'bg-emerald-100 text-emerald-800'
+            }`}
+          >
+            {counts.aprobadas}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setStatusFilter('desaprobadas');
+            setCurrentPage(1);
+          }}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'desaprobadas'
+              ? 'bg-rose-600 text-white shadow-sm'
+              : 'bg-white text-rose-700 hover:bg-rose-50 border border-rose-200/80'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                statusFilter === 'desaprobadas' ? 'bg-white' : 'bg-rose-500'
+              }`}
+            />
+            Desaprobadas
+          </span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'desaprobadas' ? 'bg-white/25 text-white' : 'bg-rose-100 text-rose-800'
+            }`}
+          >
+            {counts.desaprobadas}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setStatusFilter('pendientes');
+            setCurrentPage(1);
+          }}
+          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            statusFilter === 'pendientes'
+              ? 'bg-amber-500 text-white shadow-sm'
+              : 'bg-white text-amber-700 hover:bg-amber-50 border border-amber-200/80'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                statusFilter === 'pendientes' ? 'bg-white' : 'bg-amber-500'
+              }`}
+            />
+            Pendientes
+          </span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-md font-extrabold ${
+              statusFilter === 'pendientes' ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-800'
+            }`}
+          >
+            {counts.pendientes}
+          </span>
+        </button>
+      </div>
+
       {loading ? (
         <div className="p-8 text-center text-slate-400 text-sm">Cargando transferencias...</div>
-      ) : transfers.length === 0 ? (
+      ) : filteredTransfers.length === 0 ? (
         <div className="p-12 text-center">
           <Banknote className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-          <p className="text-slate-400 text-sm font-semibold">No hay transferencias registradas.</p>
+          <p className="text-slate-400 text-sm font-semibold">{getEmptyMessage()}</p>
         </div>
       ) : (
         <>
@@ -126,7 +275,12 @@ export const AdminTransfersTab = ({
                     <span className="text-slate-500 font-medium">Comprobante:</span>
                     {tr.comprobante_url ? (
                       <button
-                        onClick={() => setPreviewUrl(tr.comprobante_url)}
+                        onClick={() =>
+                          setPreviewData({
+                            url: tr.comprobante_url,
+                            numero: tr.numero_comprobante || '',
+                          })
+                        }
                         className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-bold underline"
                       >
                         <FileText className="h-3.5 w-3.5" />
@@ -202,7 +356,12 @@ export const AdminTransfersTab = ({
                     <td className="p-4">
                       {tr.comprobante_url ? (
                         <button
-                          onClick={() => setPreviewUrl(tr.comprobante_url)}
+                          onClick={() =>
+                            setPreviewData({
+                              url: tr.comprobante_url,
+                              numero: tr.numero_comprobante || '',
+                            })
+                          }
                           className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-bold underline transition-colors"
                         >
                           <FileText className="h-3.5 w-3.5" />
@@ -304,11 +463,12 @@ export const AdminTransfersTab = ({
       )}
 
       {/* Comprobante Preview Modal */}
-      {previewUrl && (
+      {previewData && (
         <ComprobanteModal
-          url={previewUrl}
+          url={previewData.url}
+          numeroComprobante={previewData.numero}
           title="Comprobante Adjunto"
-          onClose={() => setPreviewUrl(null)}
+          onClose={() => setPreviewData(null)}
         />
       )}
     </div>

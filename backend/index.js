@@ -98,8 +98,16 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 import { cacheMiddleware } from './middleware/cacheMiddleware.js';
+import { serveUploadedFile } from './controllers/uploadController.js';
 
-// Servir archivos subidos estáticamente permitiendo su embebido en iframes y visualización cruzada
+// Servir archivos subidos estáticamente con fallback a MongoDB Atlas
+app.get('/uploads/:folder/:filename', (req, res, next) => {
+  res.removeHeader('X-Frame-Options');
+  res.removeHeader('Content-Security-Policy');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, serveUploadedFile);
+
 app.use('/uploads', (req, res, next) => {
   res.removeHeader('X-Frame-Options');
   res.removeHeader('Content-Security-Policy');
