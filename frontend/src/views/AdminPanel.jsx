@@ -362,7 +362,7 @@ const AdminPanel = () => {
                 <AdminModal
                   isOpen={showCampaignForm}
                   onClose={resetCampaignForm}
-                  maxWidth="max-w-3xl"
+                  maxWidth="max-w-4xl"
                 >
                   <CampaignForm
                     campaign={campaigns.find((c) => c.id === editingCampaignId)}
@@ -612,7 +612,7 @@ const AdminPanel = () => {
                 <AdminModal
                   isOpen={showNewsForm}
                   onClose={resetNewsForm}
-                  maxWidth="max-w-2xl"
+                  maxWidth="max-w-3xl"
                 >
                   <NewsForm
                     newsItem={news.find((n) => n._id === editingNewsId)}
