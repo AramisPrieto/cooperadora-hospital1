@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#f8fafc] text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Defensa de Tesis — Ecosistema Digital Cooperadora Hospital Municipal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter & Montserrat (Idénticas a la Web Oficial) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', 'sans-serif'],
+            display: ['"Montserrat"', '"Inter"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50:  '#fef2f2',
+              100: '#fee2e2',
+              200: '#fecaca',
+              300: '#fca5a5',
+              400: '#f87171',
+              500: '#ef4444',
+              600: '#dc2626', // Main Brand Color (Rojo Hospital / Cruz)
+              700: '#b91c1c',
+              800: '#991b1b',
+              900: '#7f1d1d',
+              950: '#450a0a',
+            },
+            accent: {
+              50:  '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669', // Main Accent Color (Verde Clínico)
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+              950: '#022c22',
+            }
+          },
+          boxShadow: {
+            'card': '0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.03)',
+            'card-hover': '0 4px 14px rgba(0,0,0,0.08), 0 16px 32px rgba(0,0,0,0.05)',
+            'nav': '0 1px 2px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.02)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Cuadrícula Clínica Idéntica a frontend/src/index.css */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image: 
+        linear-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.18) 1px, transparent 1px),
+        linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+      background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+      background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+    }
+
+    .slide-transition {
+      transition: opacity 0.3s ease-in-out, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Scrollbars elegantes */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+
+<body class="h-full flex flex-col font-sans overflow-hidden select-none bg-[#f8fafc] text-slate-800">
+
+  <!-- ============================================================ -->
+  <!-- BARRA SUPERIOR DE CONTROL (ESTILO OFICIAL NAVBAR COOPERADORA) -->
+  <!-- ============================================================ -->
+  <header class="h-20 border-b border-slate-200/80 bg-white/90 backdrop-blur-md px-6 flex items-center justify-between z-30 shrink-0 shadow-nav">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3">
+        <img 
+          src="logo.png" 
+          alt="Logo Oficial Cooperadora" 
+          class="h-11 w-11 object-contain"
+          onerror="this.onerror=null; this.src='../frontend/public/logo.png';"
+        />
+        <div class="border-l border-slate-200 pl-3 py-0.5">
+          <span class="block text-sm font-display font-black text-slate-900 leading-none tracking-tight">
+            Cooperadora
+          </span>
+          <span class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">
+            Hospital Dr. Emilio Ferreyra
+          </span>
+        </div>
+      </div>
+      <span class="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider bg-brand-50 text-brand-700 border border-brand-200 rounded-full ml-2">
+        <span class="w-2 h-2 rounded-full bg-brand-600 animate-pulse"></span>
+        Defensa Tesis UTN
+      </span>
+    </div>
+
+    <!-- Indicador de Diapositiva y Cronómetro -->
+    <div class="flex items-center gap-4 sm:gap-6">
+      <!-- Cronómetro de Exposición -->
+      <div class="flex items-center gap-2 text-xs font-mono text-slate-700 bg-slate-100/90 px-3 py-1.5 rounded-xl border border-slate-200">
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-brand-600"></i>
+        <span id="timerDisplay" class="font-bold">00:00</span>
+        <button id="toggleTimerBtn" title="Pausar / Reanudar cronómetro" class="hover:text-black ml-1 text-slate-400">
+          <i data-lucide="play" id="timerIcon" class="w-3 h-3"></i>
+        </button>
+      </div>
+
+      <!-- Navegación y Contador de Slide -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <span class="text-xs font-mono text-slate-500 font-medium">
+          SLIDE <span id="currentSlideNum" class="text-brand-600 font-extrabold text-sm">01</span> / <span id="totalSlidesNum">10</span>
+        </span>
+        <div class="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+          <button onclick="prevSlide()" title="Anterior (Flecha Izquierda)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <button onclick="nextSlide()" title="Siguiente (Flecha Derecha / Espacio)" class="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Herramientas de Presentador -->
+      <div class="flex items-center gap-2">
+        <button onclick="toggleSpeakerNotes()" id="notesBtn" title="Notas de Orador (Tecla N)" class="flex items-center gap-1.5 text-xs bg-white hover:bg-slate-50 text-slate-700 font-bold px-3 py-2 rounded-xl border border-slate-200 shadow-sm transition">
+          <i data-lucide="speech" class="w-4 h-4 text-brand-600"></i>
+          <span class="hidden md:inline">Notas (N)</span>
+        </button>
+        <button onclick="toggleFullScreen()" title="Pantalla Completa (Tecla F)" class="p-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl border border-slate-200 shadow-sm transition">
+          <i data-lucide="maximize" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barra de progreso superior en Rojo Institucional Oficial -->
+  <div class="w-full h-1.5 bg-slate-100 shrink-0">
+    <div id="progressBar" class="h-full bg-gradient-to-r from-brand-600 via-brand-500 to-accent-600 transition-all duration-300 ease-out" style="width: 10%;"></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- CONTENEDOR PRINCIPAL DE SLIDES (FONDO CLÍNICO CLARO)         -->
+  <!-- ============================================================ -->
+  <main id="slideContainer" class="flex-1 relative overflow-y-auto overflow-x-hidden p-4 md:p-8 lg:p-10 flex items-center justify-center">
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 1: PORTADA INSTITUCIONAL (ESTILO HOME DE LA WEB)       -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition w-full max-w-6xl mx-auto flex flex-col justify-center items-center text-center space-y-6" data-slide="1">
+      
+      <!-- Badge conmemorativo -->
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-200 bg-brand-50 text-brand-700 text-xs font-black tracking-widest uppercase shadow-sm">
+        <i data-lucide="heart" class="w-3.5 h-3.5 text-brand-600 fill-brand-600"></i>
+        Trabajo Final Integrador • UTN 2026
+      </div>
+
+      <!-- Título de Display Oficial -->
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tight text-slate-900 leading-[1.1] max-w-5xl">
+        Ecosistema Digital y <br class="hidden sm:inline">
+        <span class="text-brand-600">Transparencia Financiera</span> <br class="hidden sm:inline">
+        para la Salud Pública
+      </h1>
+
+      <p class="text-base sm:text-lg text-slate-600 max-w-3xl leading-relaxed">
+        Plataforma integral de recaudación auditable, digitalización del Libro de Asociados y arquitectura de datos híbrida para la <strong class="text-slate-900 font-bold">Asociación Cooperadora del Hospital Municipal "Dr. Emilio Ferreyra"</strong> de Necochea.
+      </p>
+
+      <!-- Grid de Badges y Pilares Clínicos -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-4xl w-full pt-2">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-card text-center hover:shadow-card-hover transition">
+          <div class="w-8 h-8 mx-auto rounded-xl bg-accent-50 text-accent-700 flex items-center justify-center mb-2">
+            <i data-lucide="database" class="w-4 h-4"></i>
+          </div>
+          <div class="text-slate-900 font-display font-extrabold text-sm">PostgreSQL + Mongo</div>
+          <div class="text-[11px] text-slate-500 font-medium mt-0.5">Persistencia Híbrida</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-card text-center hover:shadow-card-hover transition">
+          <div class="w-8 h-8 mx-auto rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center mb-2">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+          </div>
+          <div class="text-slate-900 font-display font-extrabold text-sm">SELECT FOR UPDATE</div>
+          <div class="text-[11px] text-slate-500 font-medium mt-0.5">Anti Race Conditions</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-card text-center hover:shadow-card-hover transition">
+          <div class="w-8 h-8 mx-auto rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center mb-2">
+            <i data-lucide="credit-card" class="w-4 h-4"></i>
+          </div>
+          <div class="text-slate-900 font-display font-extrabold text-sm">Mercado Pago + Resend</div>
+          <div class="text-[11px] text-slate-500 font-medium mt-0.5">SDK & Webhooks HMAC</div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-card text-center hover:shadow-card-hover transition">
+          <div class="w-8 h-8 mx-auto rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center mb-2">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+          </div>
+          <div class="text-slate-900 font-display font-extrabold text-sm">79 Test Suites</div>
+          <div class="text-[11px] text-slate-500 font-medium mt-0.5">Vitest Automatizado</div>
+        </div>
+      </div>
+
+      <!-- Equipo de Tesis -->
+      <div class="pt-4 border-t border-slate-200 w-full max-w-3xl flex flex-wrap items-center justify-center gap-6 text-xs text-slate-600">
+        <div><span class="font-bold text-slate-900">Aramis Prieto</span> (Scrum Master & Frontend)</div>
+        <div><span class="font-bold text-slate-900">Santiago Ialungo</span> (Frontend & UI/UX)</div>
+        <div><span class="font-bold text-slate-900">Kevin Nielsen</span> (Backend & APIs)</div>
+        <div><span class="font-bold text-slate-900">Thiago Masson</span> (Backend & Data)</div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 2: EL PROBLEMA REAL (DIAGNÓSTICO SITUACIONAL)          -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition hidden w-full max-w-6xl mx-auto space-y-6" data-slide="2">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-4">
+        <div>
+          <span class="text-xs font-black uppercase tracking-widest text-brand-600 font-display">01 / Diagnóstico Situacional</span>
+          <h2 class="text-3xl sm:text-4xl font-display font-black text-slate-900 mt-1">El Desafío: Salud Pública en la Era Analógica</h2>
+        </div>
+        <div class="text-xs text-slate-500 max-w-xs font-medium">
+          Hospital cabecera de la Región Sanitaria VIII con cobertura a más de <strong>100.000 habitantes</strong> en Necochea, Quequén y zona.
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Tarjeta 1 -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 mb-4">
+              <i data-lucide="file-x-2" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-display font-bold text-slate-900 mb-2">Administración en Papel</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Cobranzas manuales puerta a puerta, talonarios físicos vulnerables a pérdidas y fichas de cartón sin respaldo digital ni trazabilidad.
+            </p>
+          </div>
+          <div class="bg-brand-50/70 p-3.5 rounded-2xl border border-brand-200 text-xs font-mono font-semibold text-brand-800">
+            Riesgo legal ante inspecciones de Personería Jurídica.
+          </div>
+        </div>
+
+        <!-- Tarjeta 2 -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 mb-4">
+              <i data-lucide="eye-off" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-display font-bold text-slate-900 mb-2">La "Caja Negra" Social</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              El vecino dona pero no sabe cuánto dinero falta para comprar el tomógrafo ni en qué fecha exacta se concreta la obra prometida.
+            </p>
+          </div>
+          <div class="bg-amber-50/80 p-3.5 rounded-2xl border border-amber-200 text-xs font-mono font-semibold text-amber-800">
+            Falta de visibilidad = caída sistemática en la recaudación cívica.
+          </div>
+        </div>
+
+        <!-- Tarjeta 3 -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 mb-4">
+              <i data-lucide="help-circle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-display font-bold text-slate-900 mb-2">Transferencias Huérfanas</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Donaciones bancarias que ingresaban a la cuenta oficial sin DNI asociado, sin imputación de campaña y sin emitir agradecimiento al donante.
+            </p>
+          </div>
+          <div class="bg-sky-50/80 p-3.5 rounded-2xl border border-sky-200 text-xs font-mono font-semibold text-sky-800">
+            Conciliaciones manuales en extractos bancarios de 50+ páginas.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 3: LA PROPUESTA DE VALOR                               -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition hidden w-full max-w-6xl mx-auto space-y-6" data-slide="3">
+      <div class="border-b border-slate-200 pb-4 flex justify-between items-end">
+        <div>
+          <span class="text-xs font-black uppercase tracking-widest text-brand-600 font-display">02 / Propuesta de Valor</span>
+          <h2 class="text-3xl sm:text-4xl font-display font-black text-slate-900 mt-1">No es una Web: Es un Ecosistema de Transparencia</h2>
+        </div>
+        <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-accent-50 text-accent-700 border border-accent-200 rounded-full text-xs font-black uppercase tracking-wider">
+          Solución Llave en Mano
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Pilar 1 -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4 hover:shadow-card-hover transition">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600 mb-3">
+              <i data-lucide="trending-up" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-base font-display font-bold text-slate-900">Transparencia Radical en Tiempo Real</h4>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Campañas con barras de recaudación vivas y el <strong>Timeline de Obras Concretadas</strong> para rendir cuentas públicas al 100% con fotos del equipamiento instalado y resoluciones oficiales.
+            </p>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs font-mono text-slate-700 font-semibold">
+            Seguimiento cívico abierto y auditable
+          </div>
+        </div>
+
+        <!-- Pilar 2 -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4 hover:shadow-card-hover transition">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-accent-50 border border-accent-100 flex items-center justify-center text-accent-600 mb-3">
+              <i data-lucide="credit-card" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-base font-display font-bold text-slate-900">Captación Híbrida: Mercado Pago + Transferencias</h4>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Adhesión a débito automático recurrente vía Mercado Pago para cuotas sociales, junto al módulo de declaración de transferencias bancarias directas con <strong>cero comisiones</strong>.
+            </p>
+          </div>
+          <div class="bg-accent-50/70 p-3 rounded-2xl border border-accent-200 text-xs font-mono text-accent-800 font-semibold">
+            Comprobante adjunto y auditoría en 1 clic
+          </div>
+        </div>
+
+        <!-- Pilar 3 -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4 hover:shadow-card-hover transition">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 mb-3">
+              <i data-lucide="shield-check" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-base font-display font-bold text-slate-900">Digitalización Legal del Libro de Asociados</h4>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Validación estricta de DNI único obligatorio, domicilios fiscales y generación de perfiles auditables conformes a la normativa de Personería Jurídica.
+            </p>
+          </div>
+          <div class="bg-purple-50/70 p-3 rounded-2xl border border-purple-200 text-xs font-mono text-purple-800 font-semibold">
+            Despapelización contable y administrativa
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 4: ROLES DEL SISTEMA (RBAC & GOBERNANZA)               -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition hidden w-full max-w-6xl mx-auto space-y-6" data-slide="4">
+      <div class="border-b border-slate-200 pb-4 flex justify-between items-end">
+        <div>
+          <span class="text-xs font-black uppercase tracking-widest text-brand-600 font-display">03 / Gobernanza & Control de Acceso</span>
+          <h2 class="text-3xl sm:text-4xl font-display font-black text-slate-900 mt-1">Roles del Sistema: Seguridad y Separación de Tareas</h2>
+        </div>
+        <span class="text-xs font-mono text-slate-500 font-medium">Control RBAC en Base de Datos</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Rol 1 -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700">
+              <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">Acceso Público</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-display font-bold text-slate-900">Vecino / Donante Esporádico</h3>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Cualquier ciudadano de Necochea o de cualquier parte del país puede colaborar de inmediato.
+            </p>
+          </div>
+          <ul class="text-xs space-y-2 text-slate-700 pt-3 border-t border-slate-100">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-600"></i> Seguimiento de campañas y obras</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-600"></i> Donación web sin necesidad de registro previo</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-600"></i> Compartido rápido en redes sociales</li>
+          </ul>
+        </div>
+
+        <!-- Rol 2 -->
+        <div class="bg-white p-6 rounded-3xl border border-accent-200 shadow-card space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="w-12 h-12 rounded-2xl bg-accent-50 border border-accent-100 flex items-center justify-center text-accent-600">
+              <i data-lucide="award" class="w-6 h-6"></i>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-accent-50 text-accent-700 border border-accent-200">Rol: socio (JWT)</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-display font-bold text-slate-900">Socio Activo Digital</h3>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Vecinos con registro formal en el Libro de Asociados y panel privado de autogestión.
+            </p>
+          </div>
+          <ul class="text-xs space-y-2 text-slate-700 pt-3 border-t border-slate-100">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-600"></i> Pestaña "Mi Resumen": DNI y datos fiscales</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-600"></i> Pestaña "Mis Cuotas": Pago manual o débito recurrente</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-accent-600"></i> Historial contable de donaciones y comprobantes</li>
+          </ul>
+        </div>
+
+        <!-- Rol 3 -->
+        <div class="bg-white p-6 rounded-3xl border border-brand-200 shadow-card space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-600">
+              <i data-lucide="shield-alert" class="w-6 h-6"></i>
+            </div>
+            <span class="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 border border-brand-200">Rol: admin (Restringido)</span>
+          </div>
+          <div>
+            <h3 class="text-lg font-display font-bold text-slate-900">Operador & Auditor Contable</h3>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Acceso exclusivo para la Comisión Directiva, sin auto-escalamiento de roles desde el frontend.
+            </p>
+          </div>
+          <ul class="text-xs space-y-2 text-slate-700 pt-3 border-t border-slate-100">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-600"></i> Auditoría y validación de transferencias bancarias</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-600"></i> Gráficos reales de recaudaciones (últimos 6 meses)</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-600"></i> Publicación de campañas y novedades sanitizadas</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 5: ROLES DEL EQUIPO SCRUM (QUIÉN HIZO QUÉ)             -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition hidden w-full max-w-6xl mx-auto space-y-6" data-slide="5">
+      <div class="border-b border-slate-200 pb-4 flex justify-between items-end">
+        <div>
+          <span class="text-xs font-black uppercase tracking-widest text-brand-600 font-display">04 / Ingeniería de Software en Equipo</span>
+          <h2 class="text-3xl sm:text-4xl font-display font-black text-slate-900 mt-1">El Squad Scrum: División de Responsabilidades</h2>
+        </div>
+        <span class="text-xs font-mono text-slate-500 font-medium">Metodología Ágil • Sprints de 2 Semanas</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Aramis Prieto -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4 hover:shadow-card-hover transition">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-brand-600 text-white font-display font-black text-lg flex items-center justify-center mb-3 shadow-md shadow-brand-200">
+              AP
+            </div>
+            <h4 class="text-base font-display font-bold text-slate-900">Aramis Prieto</h4>
+            <div class="text-[11px] font-mono text-brand-600 font-bold uppercase">Scrum Master & Frontend Lead</div>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Liderazgo metodológico ágil, orquestación del flujo de datos en cliente, consumo de APIs seguras y control de calidad integral de la plataforma.
+            </p>
+          </div>
+          <div class="text-[10px] font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold">
+            Arquitectura de 79 tests Vitest
+          </div>
+        </div>
+
+        <!-- Santiago Ialungo -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4 hover:shadow-card-hover transition">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-accent-600 text-white font-display font-black text-lg flex items-center justify-center mb-3 shadow-md shadow-accent-200">
+              SI
+            </div>
+            <h4 class="text-base font-display font-bold text-slate-900">Santiago Ialungo</h4>
+            <div class="text-[11px] font-mono text-accent-600 font-bold uppercase">Frontend & UI/UX Architect</div>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Diseño clínico en Tailwind CSS, maquetación responsiva del panel de administración, Scroll-Spy, Lenis smooth scrolling y accesibilidad WCAG.
+            </p>
+          </div>
+          <div class="text-[10px] font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold">
+            Micro-interacciones y UI clínica
+          </div>
+        </div>
+
+        <!-- Kevin Nielsen -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4 hover:shadow-card-hover transition">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-sky-600 text-white font-display font-black text-lg flex items-center justify-center mb-3 shadow-md shadow-sky-200">
+              KN
+            </div>
+            <h4 class="text-base font-display font-bold text-slate-900">Kevin Nielsen</h4>
+            <div class="text-[11px] font-mono text-sky-600 font-bold uppercase">Encargado de Backend & APIs</div>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Arquitectura de API REST Express, middlewares de rate limiting adaptativo por IP, validaciones estrictas y pasarela de auditoría de transferencias bancarias.
+            </p>
+          </div>
+          <div class="text-[10px] font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold">
+            Seguridad API y anti-bruteforce
+          </div>
+        </div>
+
+        <!-- Thiago Masson -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4 hover:shadow-card-hover transition">
+          <div>
+            <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white font-display font-black text-lg flex items-center justify-center mb-3 shadow-md shadow-purple-200">
+              TM
+            </div>
+            <h4 class="text-base font-display font-bold text-slate-900">Thiago Masson</h4>
+            <div class="text-[11px] font-mono text-purple-600 font-bold uppercase">Encargado de Backend & Data</div>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              Persistencia híbrida (PostgreSQL y MongoDB), integración de webhooks de Mercado Pago, servicio de emails transaccionales Resend y monorrepo pnpm.
+            </p>
+          </div>
+          <div class="text-[10px] font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-slate-700 font-semibold">
+            Data Mashup y base de datos
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 6: PERSISTENCIA HÍBRIDA & DATA MASHUP                  -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition hidden w-full max-w-6xl mx-auto space-y-6" data-slide="6">
+      <div class="border-b border-slate-200 pb-4 flex justify-between items-end">
+        <div>
+          <span class="text-xs font-black uppercase tracking-widest text-brand-600 font-display">05 / Arquitectura Polyglot Persistence</span>
+          <h2 class="text-3xl sm:text-4xl font-display font-black text-slate-900 mt-1">Persistencia Híbrida: El Poder de Dos Motores</h2>
+        </div>
+        <span class="text-xs font-mono text-slate-500 font-medium">Data Mashup en Tiempo de Ejecución</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- PostgreSQL -->
+        <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+              <i data-lucide="database" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-display font-bold text-slate-900">PostgreSQL (Relacional)</h3>
+              <p class="text-xs text-blue-600 font-mono font-bold">Consistencia Estricta ACID</p>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Resguarda las transacciones financieras y la unicidad obligatoria del Registro de Asociados.
+          </p>
+          <div class="space-y-1.5 font-mono text-xs text-slate-700">
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between">
+              <span class="font-bold">usuarios</span> <span class="text-slate-400">Credenciales & Roles</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between">
+              <span class="font-bold">perfiles_socios</span> <span class="text-slate-400">DNI único & Domicilio</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between">
+              <span class="font-bold">campanas_eco</span> <span class="text-slate-400">Meta $ & Acumulado</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between">
+              <span class="font-bold">donaciones_transferencia</span> <span class="text-slate-400">Auditoría contable</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conector Mashup -->
+        <div class="lg:col-span-2 flex flex-col items-center justify-center text-center space-y-3 py-2">
+          <div class="w-12 h-12 rounded-2xl bg-brand-50 border border-brand-200 flex items-center justify-center text-brand-600 shadow-md shadow-brand-100">
+            <i data-lucide="zap" class="w-6 h-6"></i>
+          </div>
+          <span class="text-xs font-display font-extrabold text-slate-900">Data Mashup</span>
+          <span class="text-[10px] font-mono text-brand-700 bg-brand-50 px-2.5 py-0.5 rounded-full border border-brand-200 font-bold">Promise.all()</span>
+          <p class="text-[11px] text-slate-500 leading-tight">
+            Consultas concurrentes paralelas ensambladas en una sola respuesta JSON.
+          </p>
+        </div>
+
+        <!-- MongoDB -->
+        <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-accent-50 border border-accent-100 flex items-center justify-center text-accent-600">
+              <i data-lucide="file-text" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-display font-bold text-slate-900">MongoDB (Documental)</h3>
+              <p class="text-xs text-accent-600 font-mono font-bold">Esquema Flexible Multimedia</p>
+            </div>
+          </div>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Almacena contenido no estructurado enriquecido: historias de campañas, galerías y novedades.
+          </p>
+          <div class="space-y-1.5 font-mono text-xs text-slate-700">
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between">
+              <span class="font-bold">noticias_actualidad</span> <span class="text-slate-400">Galerías & Tags</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between">
+              <span class="font-bold">campanas_detalle</span> <span class="text-slate-400">Narrativa multimedia</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between">
+              <span class="font-bold">campana_id_ref</span> <span class="text-slate-400">Foreign Key lógica</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 7: LA JOYA TÉCNICA: INMUNIDAD A RACE CONDITIONS         -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition hidden w-full max-w-6xl mx-auto space-y-6" data-slide="7">
+      <div class="border-b border-slate-200 pb-4 flex justify-between items-end">
+        <div>
+          <span class="text-xs font-black uppercase tracking-widest text-brand-600 font-display">06 / Concurrencia Crítica</span>
+          <h2 class="text-3xl sm:text-4xl font-display font-black text-slate-900 mt-1">El Gran As Bajo la Manga: Bloqueo Pesimista</h2>
+        </div>
+        <span class="text-xs font-mono text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full border border-brand-200 font-bold">SELECT ... FOR UPDATE</span>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Explicación Técnica -->
+        <div class="lg:col-span-6 space-y-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-card space-y-3">
+            <div class="flex items-center gap-2 text-brand-600 text-xs font-mono font-bold uppercase">
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i> El Peligro: Race Conditions
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Durante una campaña viral (ej: recaudación para el tomógrafo), dos donantes simultáneos o la concurrencia entre un Webhook de Mercado Pago y la aprobación administrativa podían leer el mismo saldo y sobre-recaudar o desincronizar la base.
+            </p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-accent-200 shadow-card space-y-3">
+            <div class="flex items-center gap-2 text-accent-700 text-xs font-mono font-bold uppercase">
+              <i data-lucide="shield-check" class="w-4 h-4"></i> La Solución Implementada
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Se configuró una transacción atómica aislada en Sequelize con <strong>bloqueo pesimista exclusivo de fila</strong> (<code class="text-accent-700 font-bold">lock: transaction.LOCK.UPDATE</code>).
+            </p>
+            <ul class="text-[11px] text-slate-500 space-y-1.5 font-mono">
+              <li>1. La Transacción A bloquea la fila en Postgres.</li>
+              <li>2. La Transacción B se coloca en cola ordenada esperando liberación.</li>
+              <li>3. Se verifica que el aporte no sobrepase la meta remanente.</li>
+              <li>4. Commit atómico del saldo acumulado.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Simulación Interactiva en Vivo -->
+        <div class="lg:col-span-6 bg-white p-6 rounded-3xl border border-slate-200 shadow-card space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-slate-600">Simulador de Concurrencia</span>
+            <button onclick="runConcurrencyDemo()" id="demoBtn" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+              <i data-lucide="play" class="w-3.5 h-3.5"></i> Simular 2 Donaciones Simultáneas
+            </button>
+          </div>
+
+          <!-- Tarjeta de Campaña Simulada (Idéntica a CampaignCard de la Web) -->
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-500">Meta de Campaña:</span>
+              <span class="text-slate-900 font-bold">$ 1.000.000</span>
+            </div>
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-500">Monto Recaudado:</span>
+              <span id="simCurrentAmount" class="text-brand-600 font-extrabold">$ 950.000</span>
+            </div>
+            <div class="flex justify-between text-xs font-mono">
+              <span class="text-slate-500">Cupo Restante:</span>
+              <span id="simRemaining" class="text-accent-700 font-extrabold">$ 50.000</span>
+            </div>
+            <!-- Barra de Progreso Oficial -->
+            <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+              <div id="simProgressBar" class="h-full bg-brand-600 transition-all duration-500" style="width: 95%;"></div>
+            </div>
+          </div>
+
+          <!-- Logs -->
+          <div class="grid grid-cols-2 gap-3 text-[11px] font-mono">
+            <div id="txLogA" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-1 text-slate-600">
+              <div class="font-bold text-sky-700">Donación A ($40.000)</div>
+              <div class="text-[10px] text-slate-400">Estado: En espera</div>
+            </div>
+            <div id="txLogB" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm space-y-1 text-slate-600">
+              <div class="font-bold text-purple-700">Donación B ($30.000)</div>
+              <div class="text-[10px] text-slate-400">Estado: En espera</div>
+            </div>
+          </div>
+
+          <div id="demoConclusion" class="text-xs text-center text-slate-500 italic">
+            Presiona el botón para observar cómo PostgreSQL administra el lock pesimista.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 8: SEGURIDAD OWASP & 79 TESTS VITEST                   -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition hidden w-full max-w-6xl mx-auto space-y-6" data-slide="8">
+      <div class="border-b border-slate-200 pb-4 flex justify-between items-end">
+        <div>
+          <span class="text-xs font-black uppercase tracking-widest text-brand-600 font-display">07 / Seguridad Robusta</span>
+          <h2 class="text-3xl sm:text-4xl font-display font-black text-slate-900 mt-1">Blindaje de Grado Médico: OWASP & Criptografía</h2>
+        </div>
+        <span class="text-xs font-mono text-slate-500 font-medium">Arquitectura de Confianza Cero</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Seguridad 1 -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-card space-y-3">
+          <div class="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600">
+            <i data-lucide="key" class="w-5 h-5"></i>
+          </div>
+          <h4 class="text-sm font-display font-bold text-slate-900">HMAC-SHA256 en Webhooks</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Cada notificación de pago entrante de Mercado Pago se valida criptográficamente contra el Secret Token. Imposible inyectar pagos falsos.
+          </p>
+        </div>
+
+        <!-- Seguridad 2 -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-card space-y-3">
+          <div class="w-10 h-10 rounded-2xl bg-accent-50 border border-accent-100 flex items-center justify-center text-accent-600">
+            <i data-lucide="code" class="w-5 h-5"></i>
+          </div>
+          <h4 class="text-sm font-display font-bold text-slate-900">DOMPurify & Anti-ReDoS</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Sanitización completa del contenido HTML de noticias para neutralizar Cross-Site Scripting (XSS), junto a defensas contra expresiones regulares catastróficas.
+          </p>
+        </div>
+
+        <!-- Seguridad 3 -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-card space-y-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600">
+            <i data-lucide="gauge" class="w-5 h-5"></i>
+          </div>
+          <h4 class="text-sm font-display font-bold text-slate-900">Rate Limiters por IP</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            100 peticiones globales / 15 min, 10 logins / 15 min y tope de 5 donaciones / hora para frenar ataques de fuerza bruta y raspado de datos.
+          </p>
+        </div>
+
+        <!-- Seguridad 4 -->
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-card space-y-3">
+          <div class="w-10 h-10 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600">
+            <i data-lucide="send" class="w-5 h-5"></i>
+          </div>
+          <h4 class="text-sm font-display font-bold text-slate-900">Resend API sobre HTTPS</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Reemplazo del SMTP tradicional por la API REST de Resend en el puerto seguro 443. Cero bloqueos de firewalls hospitalarios y entregabilidad del 99.8%.
+          </p>
+        </div>
+      </div>
+
+      <!-- Suite de 79 tests -->
+      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-accent-600"></span>
+            <span class="text-sm font-display font-bold text-slate-900">Batería de Pruebas Automatizadas (Vitest + Supertest)</span>
+          </div>
+          <p class="text-xs text-slate-500">
+            79 pruebas de integración ejecutadas sobre bases de datos de test aisladas (<code class="text-brand-700 font-bold">cooperadora_db_test</code>), validando transacciones, JWT y casos de borde.
+          </p>
+        </div>
+        <div class="flex items-center gap-4 shrink-0 font-mono">
+          <div class="text-center px-4 py-2 bg-slate-50 rounded-2xl border border-slate-200">
+            <div class="text-xl font-black text-accent-700">79 / 79</div>
+            <div class="text-[10px] text-slate-500 font-bold">TESTS PASSED</div>
+          </div>
+          <div class="text-center px-4 py-2 bg-slate-50 rounded-2xl border border-slate-200">
+            <div class="text-xl font-black text-brand-600">100%</div>
+            <div class="text-[10px] text-slate-500 font-bold">ACID TRANS.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 9: FLUJO TRANSACCIONAL EN VIVO                         -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition hidden w-full max-w-6xl mx-auto space-y-6" data-slide="9">
+      <div class="border-b border-slate-200 pb-4 flex justify-between items-end">
+        <div>
+          <span class="text-xs font-black uppercase tracking-widest text-brand-600 font-display">08 / Experiencia de Usuario</span>
+          <h2 class="text-3xl sm:text-4xl font-display font-black text-slate-900 mt-1">El Flujo Transaccional de Extremo a Extremo</h2>
+        </div>
+        <span class="text-xs font-mono text-slate-500 font-medium">Socio ➔ Operador ➔ Comunidad</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Paso 1 -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4">
+          <div>
+            <span class="text-xs font-mono font-bold text-brand-600">PASO 1</span>
+            <h3 class="text-lg font-display font-bold text-slate-900 mt-1">El Socio Dona o Paga</h3>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              El vecino elige una campaña (ej: Reparación Tomógrafo) o abona su cuota social. Declara su transferencia con comprobante en el formulario intuitivo.
+            </p>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-[11px] font-mono text-slate-700">
+            <div class="text-brand-600 font-bold">POST /api/donaciones/transferencias</div>
+            <div class="text-slate-400 text-[10px] mt-1">Estado inicial: 'pendiente'</div>
+          </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="bg-white p-6 rounded-3xl border border-accent-200 shadow-card flex flex-col justify-between space-y-4">
+          <div>
+            <span class="text-xs font-mono font-bold text-accent-700">PASO 2</span>
+            <h3 class="text-lg font-display font-bold text-slate-900 mt-1">Auditoría en Panel Operador</h3>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              El administrador examina el comprobante en tiempo real, coteja con su homebanking y con un solo clic ejecuta la aprobación atómica.
+            </p>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-[11px] font-mono text-slate-700">
+            <div class="text-accent-700 font-bold">PUT .../aprobar (SELECT FOR UPDATE)</div>
+            <div class="text-slate-400 text-[10px] mt-1">Incrementa recaudación y emite mail Resend</div>
+          </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-card flex flex-col justify-between space-y-4">
+          <div>
+            <span class="text-xs font-mono font-bold text-slate-800">PASO 3</span>
+            <h3 class="text-lg font-display font-bold text-slate-900 mt-1">Impacto Visible Inmediato</h3>
+            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+              La barra de progreso se actualiza al instante, el donante recibe su correo formal de agradecimiento y al llegar al 100% se promueve a <strong>Obras Concretadas</strong>.
+            </p>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-[11px] font-mono text-slate-700">
+            <div class="text-slate-900 font-bold">100% Auditado y Transparente</div>
+            <div class="text-slate-400 text-[10px] mt-1">Cero margen de desvío de fondos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ------------------------------------------------------------ -->
+    <!-- SLIDE 10: CONCLUSIÓN Y CIERRE INSTITUCIONAL                  -->
+    <!-- ------------------------------------------------------------ -->
+    <div class="slide slide-transition hidden w-full max-w-5xl mx-auto text-center space-y-6" data-slide="10">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-brand-200 bg-brand-50 text-brand-700 text-xs font-black tracking-widest uppercase mb-1">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-600"></i>
+        Conclusión y Proyección
+      </div>
+
+      <h2 class="text-4xl sm:text-6xl font-display font-black text-slate-900 tracking-tight leading-tight">
+        Tecnología al Servicio de <br>
+        <span class="text-brand-600">la Salud Pública y la Comunidad</span>
+      </h2>
+
+      <p class="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+        Demostramos que un proyecto universitario no solo cumple con los más altos estándares de ingeniería de software (persistencia híbrida, concurrencia ACID y seguridad OWASP), sino que tiene la capacidad real de <strong>transformar una institución hospitalaria centenaria</strong>.
+      </p>
+
+      <!-- Logros Clave -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto pt-4 text-left">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-card">
+          <div class="text-brand-600 font-display font-extrabold text-sm">Escalable</div>
+          <div class="text-xs text-slate-500 mt-1 leading-relaxed">Arquitectura lista para replicarse en cooperadoras de Balcarce, Tandil o Mar del Plata.</div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-card">
+          <div class="text-accent-700 font-display font-extrabold text-sm">Cero Costo Fijo</div>
+          <div class="text-xs text-slate-500 mt-1 leading-relaxed">Optimizado para operar en la nube sin comprometer el presupuesto del hospital.</div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-card">
+          <div class="text-purple-700 font-display font-extrabold text-sm">Confianza Total</div>
+          <div class="text-xs text-slate-500 mt-1 leading-relaxed">Cada peso donado tiene trazabilidad digital, nombre y destino comprobable.</div>
+        </div>
+      </div>
+
+      <!-- Preguntas del Jurado -->
+      <div class="pt-6 border-t border-slate-200">
+        <div class="text-2xl font-display font-black text-slate-900 mb-1">Muchas Gracias.</div>
+        <div class="text-sm text-brand-600 font-mono font-bold">Quedamos a disposición del Tribunal Evaluador para preguntas técnicas.</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================================ -->
+  <!-- DRAWER: NOTAS DE ORADOR (ESTILO CLÍNICO ELEGANTE)           -->
+  <!-- ============================================================ -->
+  <div id="speakerNotesDrawer" class="hidden fixed bottom-0 right-0 max-w-lg w-full bg-white border-t lg:border-l border-slate-300 shadow-2xl z-50 p-6 max-h-[80vh] overflow-y-auto rounded-t-3xl lg:rounded-tl-3xl">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+      <div class="flex items-center gap-2">
+        <i data-lucide="speech" class="w-5 h-5 text-brand-600"></i>
+        <span class="font-display font-bold text-slate-900 text-sm">Notas de Orador (Teleprompter)</span>
+      </div>
+      <button onclick="toggleSpeakerNotes()" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Contenido dinámico de las notas -->
+    <div id="notesContent" class="mt-4 space-y-4 text-xs"></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- BARRA INFERIOR DE ACCESOS RÁPIDOS                            -->
+  <!-- ============================================================ -->
+  <footer class="h-10 border-t border-slate-200 bg-white/90 px-6 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
+    <div class="flex items-center gap-4">
+      <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-700 font-mono font-bold">←</kbd> <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-700 font-mono font-bold">→</kbd> Navegar</span>
+      <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-700 font-mono font-bold">Espacio</kbd> Siguiente</span>
+      <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-700 font-mono font-bold">N</kbd> Notas</span>
+      <span><kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-700 font-mono font-bold">F</kbd> Pantalla Completa</span>
+    </div>
+    <div class="font-mono font-bold text-brand-600">
+      UTN Extensión Áulica Necochea • TFI 2026
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- JAVASCRIPT INTERACTIVO                                      -->
+  <!-- ============================================================ -->
+  <script>
+    lucide.createIcons();
+
+    let currentSlide = 1;
+    const totalSlides = 10;
+    let timerSeconds = 0;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    // Banco de notas de orador
+    const speakerNotesData = {
+      1: {
+        pitch: "Abran con seguridad. Destaquen que este proyecto no nació como un ejercicio de pizarrón, sino para resolver una necesidad real y urgente en el Hospital Municipal 'Dr. Emilio Ferreyra' de Necochea.",
+        keyPoints: [
+          "Mencionar la dualidad: impacto social concreto + rigor de ingeniería de software.",
+          "Presentar al squad y resaltar que se trabajó bajo Scrum con entregas incrementales y PRs auditados.",
+          "Destacar el stack: persistencia híbrida (PostgreSQL + Mongo), consistencia transaccional y 79 tests automatizados."
+        ],
+        tribunalTip: "Si el jurado de MDP pregunta por qué eligieron una cooperadora de hospital: 'Porque la salud pública no admite pérdidas contables ni falta de transparencia. La necesidad de trazabilidad estricta era el caso de estudio perfecto para justificar una arquitectura con consistencia ACID y bloqueo pesimista'."
+      },
+      2: {
+        pitch: "Transmitan el dolor que vivía la institución: cobranzas puerta a puerta en bicicleta, fichas de cartón y comprobantes que si se mojaban o extraviaban, se perdía el socio.",
+        keyPoints: [
+          "La 'Caja Negra': La gente quería colaborar, pero no sabía a dónde iba la plata ni cuánto faltaba para la meta.",
+          "La pesadilla de las transferencias bancarias: Entraban aportes de $20.000 pero en el extracto decía 'Transf. Inmediata' sin DNI ni destino asignado.",
+          "Riesgo legal ante inspecciones de Personería Jurídica por Libro de Asociados desactualizado."
+        ],
+        tribunalTip: "Si preguntan si esto pasa en otros hospitales: 'Sí, la gran mayoría de las cooperadoras del interior de la provincia operan en papel. Esta solución está pensada para ser replicable en toda la Región Sanitaria VIII'."
+      },
+      3: {
+        pitch: "Hagan énfasis en que el portal no es un folleto estático, sino un motor cívico-digital interactivo.",
+        keyPoints: [
+          "Transparencia en vivo: Las barras de recaudación suben con cada aporte auditado.",
+          "El Timeline de Obras Concretadas: Cuando una campaña llega al 100%, pasa automáticamente a la vista de obras con fotos del equipamiento instalado.",
+          "Doble canal: Mercado Pago para inmediatez y transferencias directas CBU con cero comisión para aportes significativos."
+        ],
+        tribunalTip: "Si preguntan por qué no usan solo Mercado Pago: 'Por las comisiones financieras. Una donación grande de una empresa local de $2.000.000 sufriría retenciones considerables si pasa por pasarelas comerciales; por eso priorizamos también la transferencia directa CBU auditada con comprobante'."
+      },
+      4: {
+        pitch: "Expliquen la granularidad del RBAC (Role-Based Access Control) y cómo se protegió la integridad de la base de datos.",
+        keyPoints: [
+          "Separación estricta de privilegios.",
+          "Los socios no pueden auto-promoverse a admin. Los administradores se insertan únicamente de forma controlada por base de datos.",
+          "Panel del Socio ('Mi Resumen'): Cumple con los requerimientos formales del Libro Registro de Asociados (DNI obligatorio y único, domicilio).",
+          "Panel Operador: Dashboard con telemetría de 6 meses y auditoría de un clic."
+        ],
+        tribunalTip: "Si preguntan sobre la seguridad de los tokens: 'Utilizamos JWT stateless con expiración, almacenados en cookies HttpOnly y SameSite strict para neutralizar ataques XSS y CSRF'."
+      },
+      5: {
+        pitch: "Momento de lucir el trabajo en equipo y la sinergia ágil. Se dividió el trabajo en dos frentes especializados: Backend y Frontend.",
+        keyPoints: [
+          "Kevin Nielsen & Thiago Masson: Encargados de todo el Backend, arquitectura de APIs Express, middlewares de seguridad, rate limiting, persistencia híbrida (PostgreSQL + MongoDB) y servicios de pagos/emails.",
+          "Aramis Prieto & Santiago Ialungo: Encargados del Frontend, experiencia de usuario clínica responsive, Scroll-Spy, Lenis, consumo seguro de endpoints y liderazgo ágil Scrum.",
+          "Ambos frentes coordinados con Pull Requests, code reviews cruzados e integración continua."
+        ],
+        tribunalTip: "Muestren que hubo verdadera sinergia y división técnica clara: hablen de la integración entre los contratos de API del Backend (Kevin y Thiago) y el consumo en los componentes de Frontend (Aramis y Santiago)."
+      },
+      6: {
+        pitch: "Acá el jurado técnico va a prestar máxima atención. Justifiquen con solvencia la persistencia híbrida.",
+        keyPoints: [
+          "PostgreSQL: Para todo lo transaccional y financiero que requiere cumplimiento ACID estricto.",
+          "MongoDB: Para lo semiestructurado y multimedia (artículos con múltiples fotos, testimonios, arrays de tags).",
+          "Data Mashup: No hacemos dos llamadas desde el cliente. El backend ejecuta Promise.all() en paralelo y une la entidad en un solo payload JSON con latencia menor a 30 milisegundos."
+        ],
+        tribunalTip: "Si el profesor pregunta: '¿Por qué no guardaron todo en Postgres con JSONB?': 'Evaluamos JSONB en Postgres, pero MongoDB nos provee mayor flexibilidad nativa para la agregación de medios, galerías fotográficas dinámicas y consultas de texto libre, además de desacoplar el tráfico de lectura pública del motor transaccional de pagos'."
+      },
+      7: {
+        pitch: "El punto culminante de la defensa técnica. Demuestren que pensaron en escenarios de alta exigencia.",
+        keyPoints: [
+          "Expliquen qué pasa cuando dos personas donan al mismo milisegundo durante una campaña que está por completarse.",
+          "Sin bloqueo, ambas leen el mismo saldo y se puede sobrepasar la meta o corromper el saldo acumulado.",
+          "Con SELECT FOR UPDATE (bloqueo pesimista), la fila de la campaña se bloquea a nivel de transacción de base de datos hasta que se hace commit.",
+          "Usen el simulador en vivo de la diapositiva para que el tribunal lo vea en acción."
+        ],
+        tribunalTip: "Si preguntan por qué no Optimistic Locking: 'Porque en transacciones financieras de recaudación con montos límites, el bloqueo pesimista garantiza que la segunda transacción espere y lea el saldo real actualizado sin arrojar un error frustrante al donante'."
+      },
+      8: {
+        pitch: "Seguridad de grado bancario y hospitalario. Muestren las defensas en capas.",
+        keyPoints: [
+          "Validación criptográfica HMAC-SHA256 en webhooks de Mercado Pago.",
+          "Protección contra inyección NoSQL y ataques ReDoS.",
+          "Rate Limiters escalonados para evitar ataques de denegación de servicio y fuerza bruta.",
+          "Migración a Resend API por HTTPS (puerto 443): resuelve los bloqueos típicos de puertos SMTP en redes corporativas o de salud pública.",
+          "79 tests automatizados en Vitest para certificar que ningún refactor rompa el core transaccional."
+        ],
+        tribunalTip: "Resalten los 79 tests: muy pocos grupos de grado llegan a una defensa con una suite completa de tests de integración con base de datos de prueba aislada."
+      },
+      9: {
+        pitch: "Recorran la experiencia del usuario y del operador. La plataforma es fluida y humana.",
+        keyPoints: [
+          "Muestren la elegancia del flujo: Donación ➔ Estado pendiente ➔ Auditoría en un clic con bloqueo seguro ➔ Email de agradecimiento ➔ Reflejo inmediato en la barra pública.",
+          "La auditoría manual previene fraudes bancarios y garantiza que ningún dinero ficticio entre a los libros contables.",
+          "El sistema despapela por completo el trabajo voluntario de la cooperadora."
+        ],
+        tribunalTip: "Remarquen que la interfaz fue probada y diseñada para que personas mayores (típicas integrantes de cooperadoras hospitalarias) puedan usarla sin capacitación informática compleja."
+      },
+      10: {
+        pitch: "El cierre debe ser emocionante, institucional y dejar una sensación de solidez absoluta.",
+        keyPoints: [
+          "El proyecto no es solo código: es infraestructura cívica que salva vidas dotando de aparatología al hospital.",
+          "Cero costo fijo: pensado para que una ONG sin presupuesto de IT pueda mantenerlo en producción.",
+          "Potencial de expansión: El modelo puede ser adoptado por cualquier hospital provincial de la región.",
+          "Agradecer al docente y al tribunal e invitar con seguridad a las preguntas."
+        ],
+        tribunalTip: "Mantengan la calma en las preguntas: ustedes conocen cada línea de código, cada modelo y cada decisión de diseño mejor que nadie. ¡El trabajo es impecable!"
+      }
+    };
+
+    function showSlide(index) {
+      if (index < 1 || index > totalSlides) return;
+      currentSlide = index;
+
+      const slides = document.querySelectorAll('.slide');
+      slides.forEach(slide => {
+        const slideNum = parseInt(slide.getAttribute('data-slide'));
+        if (slideNum === currentSlide) {
+          slide.classList.remove('hidden');
+          setTimeout(() => {
+            slide.style.opacity = '1';
+            slide.style.transform = 'translateY(0)';
+          }, 20);
+        } else {
+          slide.style.opacity = '0';
+          slide.style.transform = 'translateY(12px)';
+          slide.classList.add('hidden');
+        }
+      });
+
+      const progressPercent = (currentSlide / totalSlides) * 100;
+      document.getElementById('progressBar').style.width = `${progressPercent}%`;
+      document.getElementById('currentSlideNum').innerText = currentSlide.toString().padStart(2, '0');
+
+      updateSpeakerNotesContent();
+      lucide.createIcons();
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) showSlide(currentSlide - 1);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) return;
+
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        toggleSpeakerNotes();
+      } else if (e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+        toggleFullScreen();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        showSlide(1);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        showSlide(totalSlides);
+      }
+    });
+
+    function toggleSpeakerNotes() {
+      const drawer = document.getElementById('speakerNotesDrawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    function updateSpeakerNotesContent() {
+      const data = speakerNotesData[currentSlide] || { pitch: '', keyPoints: [], tribunalTip: '' };
+      const container = document.getElementById('notesContent');
+      
+      let pointsHtml = data.keyPoints.map(pt => `
+        <li class="flex items-start gap-2 text-slate-700">
+          <span class="text-brand-600 font-bold">•</span>
+          <span>${pt}</span>
+        </li>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="bg-brand-50 border border-brand-200 p-3.5 rounded-2xl text-brand-900">
+          <div class="font-bold uppercase tracking-wider text-[10px] text-brand-700 mb-1">Estrategia de Pitch (Slide ${currentSlide})</div>
+          <p class="leading-relaxed font-medium">${data.pitch}</p>
+        </div>
+
+        <div>
+          <div class="font-bold text-slate-900 mb-2 uppercase tracking-wider text-[10px]">Puntos Clave a Mencionar:</div>
+          <ul class="space-y-1.5 pl-1">${pointsHtml}</ul>
+        </div>
+
+        <div class="bg-accent-50 border border-accent-200 p-3.5 rounded-2xl text-accent-900">
+          <div class="font-bold uppercase tracking-wider text-[10px] text-accent-700 mb-1">Para Responder al Tribunal de MDP:</div>
+          <p class="leading-relaxed font-medium">${data.tribunalTip}</p>
+        </div>
+      `;
+    }
+
+    function toggleTimer() {
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        document.getElementById('timerIcon').setAttribute('data-lucide', 'play');
+      } else {
+        isTimerRunning = true;
+        document.getElementById('timerIcon').setAttribute('data-lucide', 'pause');
+        timerInterval = setInterval(() => {
+          timerSeconds++;
+          const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+          const secs = (timerSeconds % 60).toString().padStart(2, '0');
+          document.getElementById('timerDisplay').innerText = `${mins}:${secs}`;
+        }, 1000);
+      }
+      lucide.createIcons();
+    }
+    document.getElementById('toggleTimerBtn').addEventListener('click', toggleTimer);
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    function runConcurrencyDemo() {
+      const btn = document.getElementById('demoBtn');
+      const logA = document.getElementById('txLogA');
+      const logB = document.getElementById('txLogB');
+      const amountEl = document.getElementById('simCurrentAmount');
+      const remainingEl = document.getElementById('simRemaining');
+      const bar = document.getElementById('simProgressBar');
+      const conclusion = document.getElementById('demoConclusion');
+
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+
+      amountEl.innerText = "$ 950.000";
+      remainingEl.innerText = "$ 50.000";
+      bar.style.width = "95%";
+      
+      logA.innerHTML = `<div class="font-bold text-sky-700">Donación A ($40.000)</div><div class="text-amber-600 font-medium">1. Ejecutando SELECT FOR UPDATE...</div>`;
+      logB.innerHTML = `<div class="font-bold text-purple-700">Donación B ($30.000)</div><div class="text-amber-600 font-medium">1. Intentando adquirir lock...</div>`;
+      conclusion.innerText = "Transacción A adquiere lock exclusivo. Transacción B queda bloqueada en cola de Postgres...";
+
+      setTimeout(() => {
+        logA.innerHTML += `<div class="text-accent-700 font-bold">2. Lock adquirido. Verificando cupo ($40k <= $50k) OK!</div>`;
+        logB.innerHTML += `<div class="text-slate-400">2. En espera (Bloqueo pesimista activo)...</div>`;
+      }, 900);
+
+      setTimeout(() => {
+        logA.innerHTML += `<div class="text-slate-900 font-bold">3. COMMIT. Saldo sumado a $990.000. Liberando lock.</div>`;
+        amountEl.innerText = "$ 990.000";
+        remainingEl.innerText = "$ 10.000";
+        bar.style.width = "99%";
+      }, 2000);
+
+      setTimeout(() => {
+        logB.innerHTML += `<div class="text-purple-800 font-medium">3. Lock liberado. Transacción B entra y lee NUEVO saldo: Restan $10.000.</div>`;
+        logB.innerHTML += `<div class="text-brand-600 font-bold">4. RECHAZADA: $30.000 excede el remanente ($10.000). ROLLBACK limpio!</div>`;
+        conclusion.innerHTML = `<strong class="text-accent-700">¡Éxito total!</strong> La concurrencia evitó sobre-recaudar y mantuvo la consistencia contable al 100%.`;
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+      }, 3300);
+    }
+
+    showSlide(1);
+    toggleTimer();
+  </script>
+</body>
+</html>
