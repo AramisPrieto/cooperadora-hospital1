@@ -10,14 +10,15 @@ const FormLabel = ({ children, htmlFor }) => (
 
 const inputCls = "input-field";
 
-const NewsForm = ({ news, onSave, onCancel, submitting }) => {
-  const isEditing = !!news;
+const NewsForm = ({ news, newsItem, onSave, onCancel, submitting }) => {
+  const currentNews = news || newsItem;
+  const isEditing = !!currentNews;
 
   const [form, setForm] = useState({
-    titulo: news?.titulo || '',
-    cuerpo_html: news?.cuerpo_html || '',
-    fecha: news?.fecha ? news.fecha.split('T')[0] : '',
-    imagen_url: news?.imagen_url || ''
+    titulo: currentNews?.titulo || '',
+    cuerpo_html: currentNews?.cuerpo_html || '',
+    fecha: currentNews?.fecha ? currentNews.fecha.split('T')[0] : '',
+    imagen_url: currentNews?.imagen_url || ''
   });
 
   const handleChange = (field, val) => {
@@ -36,19 +37,24 @@ const NewsForm = ({ news, onSave, onCancel, submitting }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-100 shadow-card p-6 space-y-5">
+    <form onSubmit={handleSubmit} className="p-4 sm:p-6 md:p-8 space-y-5">
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-        <h3 className="text-lg font-display font-black text-slate-800">
-          {isEditing ? '✏️ Editar Noticia' : '+ Nueva Noticia'}
-        </h3>
+        <div>
+          <span className="text-[10px] font-black uppercase tracking-widest text-accent-600 bg-accent-50 px-2.5 py-0.5 rounded-full inline-block mb-1">
+            {isEditing ? 'Modo Edición' : 'Novedad'}
+          </span>
+          <h3 className="text-lg sm:text-xl font-display font-black text-slate-800">
+            {isEditing ? '✏️ Editar Noticia' : '+ Nueva Noticia'}
+          </h3>
+        </div>
         <button 
           type="button" 
           onClick={onCancel} 
           disabled={submitting}
           aria-label="Cerrar"
-          className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1.5 rounded-lg transition-colors disabled:opacity-40"
+          className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-2 rounded-xl transition-colors disabled:opacity-40"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
       </div>
 
@@ -96,14 +102,24 @@ const NewsForm = ({ news, onSave, onCancel, submitting }) => {
         label="Imagen de portada (opcional)"
       />
 
-      <button 
-        type="submit" 
-        disabled={submitting} 
-        className="btn-brand w-full py-3.5 shine disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <Save className="h-4 w-4" />
-        {submitting ? 'Guardando...' : (isEditing ? 'Guardar Cambios' : 'Publicar Noticia')}
-      </button>
+      <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-100">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={submitting}
+          className="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-colors disabled:opacity-40"
+        >
+          Cancelar
+        </button>
+        <button 
+          type="submit" 
+          disabled={submitting} 
+          className="btn-accent w-full sm:w-auto px-6 py-3 shine disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs"
+        >
+          <Save className="h-4 w-4" />
+          {submitting ? 'Guardando...' : (isEditing ? 'Guardar Cambios' : 'Publicar Noticia')}
+        </button>
+      </div>
     </form>
   );
 };

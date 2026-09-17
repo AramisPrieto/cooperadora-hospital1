@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import DashboardCharts from '../components/admin/DashboardCharts';
 import CampaignForm from '../components/admin/CampaignForm';
 import NewsForm from '../components/admin/NewsForm';
+import AdminModal from '../components/admin/AdminModal';
 import AdminHeader from '../components/admin/AdminHeader';
 import AdminPartnersTab from '../components/admin/AdminPartnersTab';
 import AdminTransfersTab from '../components/admin/AdminTransfersTab';
@@ -80,7 +81,6 @@ const AdminPanel = () => {
   const startEditCampaign = (camp) => {
     setEditingCampaignId(camp.id);
     setShowCampaignForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSaveCampaign = async (formData) => {
@@ -136,7 +136,6 @@ const AdminPanel = () => {
   const startEditNews = (item) => {
     setEditingNewsId(item._id);
     setShowNewsForm(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSaveNews = async (formData) => {
@@ -360,14 +359,18 @@ const AdminPanel = () => {
             {/* ══════════════ CAMPAIGNS TAB ══════════════ */}
             {activeTab === 'campaigns' && (
               <div className="space-y-5">
-                {showCampaignForm && (
+                <AdminModal
+                  isOpen={showCampaignForm}
+                  onClose={resetCampaignForm}
+                  maxWidth="max-w-3xl"
+                >
                   <CampaignForm
                     campaign={campaigns.find((c) => c.id === editingCampaignId)}
                     onSave={handleSaveCampaign}
                     onCancel={resetCampaignForm}
                     submitting={submitting}
                   />
-                )}
+                </AdminModal>
 
                 <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden">
                   <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -606,14 +609,18 @@ const AdminPanel = () => {
             {/* ══════════════ NEWS TAB ══════════════ */}
             {activeTab === 'news' && (
               <div className="space-y-5">
-                {showNewsForm && (
+                <AdminModal
+                  isOpen={showNewsForm}
+                  onClose={resetNewsForm}
+                  maxWidth="max-w-2xl"
+                >
                   <NewsForm
                     newsItem={news.find((n) => n._id === editingNewsId)}
                     onSave={handleSaveNews}
                     onCancel={resetNewsForm}
                     submitting={submitting}
                   />
-                )}
+                </AdminModal>
 
                 <div className="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden">
                   <div className="flex items-center justify-between p-5 border-b border-slate-100">
