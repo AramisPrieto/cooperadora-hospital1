@@ -31,7 +31,7 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
       case 'telefono':
         return val.replace(/[^0-9+\s\-()]/g, '');
       case 'direccion':
-        return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s,.'#°º\-\/]/g, '');
+        return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s,.'#°º\-/]/g, '');
       case 'localidad':
         return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s'.-]/g, '');
       default:

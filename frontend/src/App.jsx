@@ -7,6 +7,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import ErrorBoundary from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 const Home = lazy(() => import('./views/Home'));
@@ -53,41 +54,43 @@ function App() {
           <Navbar />
 
           <main className="flex-grow flex flex-col">
-            <Suspense fallback={
-              <div className="flex items-center justify-center min-h-[50vh]">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-600"></div>
-              </div>
-            }>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
-                <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
-                <Route path="/reset-password" element={<GuestRoute><ResetPassword /></GuestRoute>} />
-                <Route path="/campanas" element={<CampaignSearch />} />
-                <Route path="/campanas/:id" element={<CampaignDetail />} />
-                <Route path="/noticias" element={<NewsSearch />} />
-                <Route path="/noticias/:id" element={<NewsDetail />} />
-                <Route path="/obras-concretadas" element={<ObrasConcretadas />} />
-                <Route path="/terminos-y-condiciones" element={<TermsAndConditions />} />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminPanel />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/mi-panel"
-                  element={
-                    <ProtectedRoute allowedRoles={['socio', 'admin']}>
-                      <SocioPanel />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={
+                <div className="flex items-center justify-center min-h-[50vh]">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-brand-600"></div>
+                </div>
+              }>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
+                  <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
+                  <Route path="/reset-password" element={<GuestRoute><ResetPassword /></GuestRoute>} />
+                  <Route path="/campanas" element={<CampaignSearch />} />
+                  <Route path="/campanas/:id" element={<CampaignDetail />} />
+                  <Route path="/noticias" element={<NewsSearch />} />
+                  <Route path="/noticias/:id" element={<NewsDetail />} />
+                  <Route path="/obras-concretadas" element={<ObrasConcretadas />} />
+                  <Route path="/terminos-y-condiciones" element={<TermsAndConditions />} />
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin']}>
+                        <AdminPanel />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/mi-panel"
+                    element={
+                      <ProtectedRoute allowedRoles={['socio', 'admin']}>
+                        <SocioPanel />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
           </main>
 
           <Footer />

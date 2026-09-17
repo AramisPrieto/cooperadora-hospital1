@@ -29,7 +29,7 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
         return val.replace(/[^0-9+\s\-()]/g, '');
       case 'direccion':
         // Letras, números, espacios y puntuación de domicilio
-        return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s,.'#°º\-\/]/g, '');
+        return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s,.'#°º\-/]/g, '');
       case 'localidad':
         // Letras, números, espacios, apóstrofes, guiones y puntos
         return val.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s'.-]/g, '');
