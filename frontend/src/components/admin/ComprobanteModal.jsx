@@ -16,7 +16,7 @@ export const resolveComprobanteUrl = (rawUrl) => {
         return trimmed;
       }
     }
-    return trimmed;
+    return `https://cooperadora-backend.onrender.com${trimmed}`;
   }
   return trimmed;
 };
@@ -178,11 +178,17 @@ export const ComprobanteModal = ({
                 </a>
               </div>
             ) : (
-              <iframe
-                src={blobUrl}
-                title={title}
+              <object
+                data={resolvedUrl}
+                type="application/pdf"
                 className="w-full h-[65vh] rounded-xl border-none"
-              />
+              >
+                <iframe
+                  src={blobUrl || resolvedUrl}
+                  title={title}
+                  className="w-full h-[65vh] rounded-xl border-none"
+                />
+              </object>
             )
           ) : (
             <img

@@ -117,6 +117,7 @@ export const serveUploadedFile = async (req, res) => {
 
   // 1. Si existe en el disco local, servirlo directamente
   if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Disposition', 'inline');
     return res.sendFile(filePath);
   }
 
@@ -134,6 +135,7 @@ export const serveUploadedFile = async (req, res) => {
       }
 
       res.setHeader('Content-Type', doc.mimetype || 'application/octet-stream');
+      res.setHeader('Content-Disposition', 'inline');
       return res.send(doc.data);
     }
   } catch (mongoErr) {
