@@ -43,6 +43,17 @@ const Navbar = () => {
 
   useEffect(() => { setMobileOpen(false); }, [location]);
 
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
   const handleLogout = async () => {
     try {
       await logout('/');
@@ -162,7 +173,7 @@ const Navbar = () => {
 
       {/* ── Mobile menu ── */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-slate-100 animate-slide-down shadow-lg absolute w-full">
+        <div className="md:hidden bg-white border-t border-slate-100 animate-slide-down shadow-lg absolute w-full max-h-[calc(100dvh-5rem)] overflow-y-auto pb-safe">
           <div className="px-4 py-5 space-y-2">
             <MobileNavLink 
               to="/" 

@@ -191,8 +191,8 @@ const CampaignSearch = () => {
       <section className="pb-8 border-b border-slate-200/60">
         <div className="flex flex-col md:flex-row gap-5 items-start md:items-center justify-between">
           
-          {/* Categorías (Chips) */}
-          <div className="flex gap-2 flex-wrap items-center">
+          {/* Categorías (Chips con scroll horizontal en móvil) */}
+          <div className="flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-none pb-2 w-full md:w-auto md:flex-wrap items-center">
             {CATEGORIES.map(cat => {
               const count = categoryCounts[cat] || 0;
               const isActive = activeCategory === cat;
@@ -201,7 +201,7 @@ const CampaignSearch = () => {
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
                   className={`
-                    flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 border
+                    flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 border shrink-0
                     ${isActive
                       ? 'bg-slate-900 border-slate-900 text-white shadow-sm scale-[1.01]'
                       : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
@@ -221,7 +221,7 @@ const CampaignSearch = () => {
           </div>
 
           {/* Selector de ordenamiento */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center justify-between w-full md:w-auto shrink-0 pt-1 md:pt-0">
             <label className="text-xs font-bold text-slate-400 mr-2.5 uppercase tracking-wider">Ordenar:</label>
             <select
               value={activeSort}

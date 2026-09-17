@@ -269,7 +269,7 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-lg shadow-2xl overflow-hidden border border-slate-100 animate-fade-up max-h-[90vh] sm:max-h-[85vh] flex flex-col">
+      <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-lg shadow-2xl overflow-hidden border border-slate-100 animate-fade-up max-h-[90dvh] sm:max-h-[85vh] flex flex-col pb-safe sm:pb-0">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50 shrink-0">
           <div>
@@ -393,7 +393,7 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
                       <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">Monto ($) *</label>
                       <div className="relative">
                         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
-                        <input type="number" min="1000" max="10000000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
+                        <input type="number" inputMode="decimal" min="1000" max="10000000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
                       </div>
                     </div>
                     <div>
@@ -423,7 +423,7 @@ const DonationModal = ({ campaign, onClose, onSuccess }) => {
                     <label className="block text-[10px] text-slate-500 font-black uppercase tracking-wider mb-1.5">Monto a donar ($) *</label>
                     <div className="relative">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs pointer-events-none">$</span>
-                      <input type="number" min="1000" max="10000000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
+                      <input type="number" inputMode="decimal" min="1000" max="10000000" step="any" value={amount} onChange={e => setAmount(e.target.value)} placeholder="5000" className="input-field pl-7 py-2.5 text-sm" required disabled={submitting} />
                     </div>
                   </div>
                   <div className="flex gap-3">
@@ -596,7 +596,7 @@ const CampaignDetail = () => {
         ];
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="bg-slate-50 min-h-screen pt-28 pb-32 lg:pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       
       {/* Decorative background blur shapes */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent-50/40 rounded-full blur-[120px] pointer-events-none transform translate-x-1/4 -translate-y-1/4" />
@@ -811,6 +811,35 @@ const CampaignDetail = () => {
             }).catch(() => {});
           }}
         />
+      )}
+
+      {/* ── Sticky Bottom Bar en Móviles (Conversión Rápida) ── */}
+      {!isComplete && (
+        <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white/95 backdrop-blur-md border-t border-slate-200/90 lg:hidden z-40 flex items-center justify-between gap-3 shadow-dark-lg pb-safe">
+          <div className="min-w-0">
+            <div className="flex items-baseline gap-1.5 truncate">
+              <span className="text-base font-display font-black text-slate-900 leading-none">
+                {formatter.format(campaign.monto_actual)}
+              </span>
+              <span className="text-[10px] font-bold text-slate-400 truncate">
+                / {formatter.format(campaign.monto_objetivo)}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-20 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${pct}%` }} />
+              </div>
+              <span className="text-[10px] font-black text-emerald-600">{pct}%</span>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowDonationModal(true)}
+            className="btn-brand px-5 py-2.5 text-xs uppercase tracking-wider font-black shrink-0 shadow-md active:scale-95 transition-transform"
+          >
+            <Heart className="h-4 w-4 fill-white" />
+            Donar ahora
+          </button>
+        </div>
       )}
 
       <ShareModal

@@ -67,109 +67,210 @@ export const AdminTransfersTab = ({
           <p className="text-slate-400 text-sm font-semibold">No hay transferencias registradas.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
-                <th className="p-4">Socio</th>
-                <th className="p-4">Campaña</th>
-                <th className="p-4 text-right">Monto</th>
-                <th className="p-4">Comprobante</th>
-                <th className="p-4">Fecha Reporte</th>
-                <th className="p-4">Estado</th>
-                <th className="p-4 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {currentTransfers.map((tr) => (
-                <tr key={tr.id} className="hover:bg-slate-50/50 transition-colors">
-                  <td className="p-4">
-                    <div className="font-bold text-slate-700">
+        <>
+          {/* Mobile Cards View */}
+          <div className="block md:hidden divide-y divide-slate-100">
+            {currentTransfers.map((tr) => (
+              <div key={tr.id} className="p-4 space-y-3 bg-white">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="font-bold text-slate-800 text-sm">
                       {tr.usuario?.perfilSocio
                         ? `${tr.usuario.perfilSocio.nombre} ${tr.usuario.perfilSocio.apellido}`
                         : tr.usuario?.email ?? '—'}
-                    </div>
+                    </h4>
                     {tr.usuario?.perfilSocio && (
-                      <div className="text-[10px] text-slate-400 font-semibold mt-0.5">
-                        DNI: {tr.usuario.perfilSocio.dni} | {tr.usuario.email}
-                      </div>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        DNI: {tr.usuario.perfilSocio.dni}
+                      </p>
                     )}
-                  </td>
-                  <td className="p-4 text-slate-600 font-semibold">{tr.campana?.titulo ?? '—'}</td>
-                  <td className="p-4 text-right font-black text-slate-800">
-                    ${parseFloat(tr.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="p-4">
+                    <p className="text-[11px] text-slate-400">{tr.usuario?.email}</p>
+                  </div>
+                  <span
+                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shrink-0 ${
+                      tr.estado === 'aprobada'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                        : tr.estado === 'rechazada'
+                        ? 'bg-rose-50 text-rose-700 border-rose-100'
+                        : 'bg-amber-50 text-amber-700 border-amber-100'
+                    }`}
+                  >
+                    {tr.estado}
+                  </span>
+                </div>
+
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-medium">Campaña:</span>
+                    <span className="font-bold text-slate-700 text-right truncate max-w-[200px]">{tr.campana?.titulo ?? '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-medium">Monto:</span>
+                    <span className="text-sm font-black text-slate-900">
+                      ${parseFloat(tr.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 font-medium">Fecha:</span>
+                    <span className="text-slate-600">
+                      {tr.createdAt
+                        ? new Date(tr.createdAt).toLocaleDateString('es-AR', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          })
+                        : '—'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pt-1 border-t border-slate-200/60">
+                    <span className="text-slate-500 font-medium">Comprobante:</span>
                     {tr.comprobante_url ? (
                       <button
                         onClick={() => setPreviewUrl(tr.comprobante_url)}
-                        className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-bold underline transition-colors"
+                        className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-bold underline"
                       >
                         <FileText className="h-3.5 w-3.5" />
-                        Ver ({tr.numero_comprobante || 'N/A'})
+                        Ver ({tr.numero_comprobante || 'Adjunto'})
                       </button>
                     ) : tr.metodo === 'mercadopago' ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-700 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-lg font-bold">
+                      <span className="font-mono text-sky-700 text-[10px] bg-sky-50 px-2 py-0.5 rounded font-bold">
                         MP #{tr.numero_comprobante}
                       </span>
-                    ) : tr.numero_comprobante ? (
-                      <span className="text-slate-600 font-mono text-[11px]">
-                        Ref: #{tr.numero_comprobante}
-                      </span>
                     ) : (
-                      <span className="text-slate-400 italic">Sin comprobante</span>
+                      <span className="text-slate-400 italic">#{tr.numero_comprobante || 'Sin ref'}</span>
                     )}
-                  </td>
-                  <td className="p-4 text-slate-500">
-                    {tr.createdAt
-                      ? new Date(tr.createdAt).toLocaleDateString('es-AR', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric'
-                        })
-                      : '—'}
-                  </td>
-                  <td className="p-4">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                        tr.estado === 'aprobada'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                          : tr.estado === 'rechazada'
-                          ? 'bg-rose-50 text-rose-700 border-rose-100'
-                          : 'bg-amber-50 text-amber-700 border-amber-100'
-                      }`}
+                  </div>
+                </div>
+
+                {tr.estado === 'pendiente' && (
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      onClick={() => onApprove(tr.id)}
+                      disabled={submitting}
+                      className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white rounded-xl text-xs font-black uppercase tracking-wider transition-all disabled:opacity-40 shadow-sm min-h-[40px]"
                     >
-                      {tr.estado}
-                    </span>
-                  </td>
-                  <td className="p-4 text-center">
-                    {tr.estado === 'pendiente' ? (
-                      <div className="inline-flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => onApprove(tr.id)}
-                          disabled={submitting}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
-                        >
-                          <CheckCircle className="h-3 w-3" />
-                          Aprobar
-                        </button>
-                        <button
-                          onClick={() => onReject(tr.id)}
-                          disabled={submitting}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
-                        >
-                          <XCircle className="h-3 w-3" />
-                          Rechazar
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-slate-400 italic text-[11px]">Procesada</span>
-                    )}
-                  </td>
+                      <CheckCircle className="h-4 w-4" />
+                      Aprobar
+                    </button>
+                    <button
+                      onClick={() => onReject(tr.id)}
+                      disabled={submitting}
+                      className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 active:scale-98 rounded-xl text-xs font-black uppercase tracking-wider transition-all disabled:opacity-40 min-h-[40px]"
+                    >
+                      <XCircle className="h-4 w-4" />
+                      Rechazar
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                  <th className="p-4">Socio</th>
+                  <th className="p-4">Campaña</th>
+                  <th className="p-4 text-right">Monto</th>
+                  <th className="p-4">Comprobante</th>
+                  <th className="p-4">Fecha Reporte</th>
+                  <th className="p-4">Estado</th>
+                  <th className="p-4 text-center">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {currentTransfers.map((tr) => (
+                  <tr key={tr.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="p-4">
+                      <div className="font-bold text-slate-700">
+                        {tr.usuario?.perfilSocio
+                          ? `${tr.usuario.perfilSocio.nombre} ${tr.usuario.perfilSocio.apellido}`
+                          : tr.usuario?.email ?? '—'}
+                      </div>
+                      {tr.usuario?.perfilSocio && (
+                        <div className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                          DNI: {tr.usuario.perfilSocio.dni} | {tr.usuario.email}
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-4 text-slate-600 font-semibold">{tr.campana?.titulo ?? '—'}</td>
+                    <td className="p-4 text-right font-black text-slate-800">
+                      ${parseFloat(tr.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    </td>
+                    <td className="p-4">
+                      {tr.comprobante_url ? (
+                        <button
+                          onClick={() => setPreviewUrl(tr.comprobante_url)}
+                          className="inline-flex items-center gap-1.5 text-brand-600 hover:text-brand-700 font-bold underline transition-colors"
+                        >
+                          <FileText className="h-3.5 w-3.5" />
+                          Ver ({tr.numero_comprobante || 'N/A'})
+                        </button>
+                      ) : tr.metodo === 'mercadopago' ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-700 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-lg font-bold">
+                          MP #{tr.numero_comprobante}
+                        </span>
+                      ) : tr.numero_comprobante ? (
+                        <span className="text-slate-600 font-mono text-[11px]">
+                          Ref: #{tr.numero_comprobante}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 italic">Sin comprobante</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-slate-500">
+                      {tr.createdAt
+                        ? new Date(tr.createdAt).toLocaleDateString('es-AR', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          })
+                        : '—'}
+                    </td>
+                    <td className="p-4">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                          tr.estado === 'aprobada'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                            : tr.estado === 'rechazada'
+                            ? 'bg-rose-50 text-rose-700 border-rose-100'
+                            : 'bg-amber-50 text-amber-700 border-amber-100'
+                        }`}
+                      >
+                        {tr.estado}
+                      </span>
+                    </td>
+                    <td className="p-4 text-center">
+                      {tr.estado === 'pendiente' ? (
+                        <div className="inline-flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => onApprove(tr.id)}
+                            disabled={submitting}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                          >
+                            <CheckCircle className="h-3 w-3" />
+                            Aprobar
+                          </button>
+                          <button
+                            onClick={() => onReject(tr.id)}
+                            disabled={submitting}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors disabled:opacity-40"
+                          >
+                            <XCircle className="h-3 w-3" />
+                            Rechazar
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 italic text-[11px]">Procesada</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -199,7 +300,7 @@ export const AdminTransfersTab = ({
               </div>
             </div>
           )}
-        </div>
+        </>
       )}
 
       {/* Comprobante Preview Modal */}

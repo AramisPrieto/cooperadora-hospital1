@@ -127,7 +127,7 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-2xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up max-h-[90vh] sm:max-h-[85vh] flex flex-col">
+      <div className="bg-white w-full rounded-t-3xl sm:rounded-3xl sm:max-w-2xl shadow-dark-lg overflow-hidden sm:border sm:border-slate-100 animate-slide-down sm:animate-fade-up max-h-[90dvh] sm:max-h-[85vh] flex flex-col pb-safe sm:pb-0">
         {/* Modal header */}
         <div className="bg-slate-50 border-b border-slate-200 p-6 shrink-0">
           <div className="flex items-start justify-between gap-4">
@@ -359,11 +359,12 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
                         </label>
                         <input
                           type="number"
+                          inputMode="decimal"
                           min="1000"
                           value={transferenciaMonto}
                           onChange={(e) => setTransferenciaMonto(e.target.value)}
                           required
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-base sm:text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         />
                       </div>
                       <div>
@@ -375,7 +376,7 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
                           value={numeroComprobante}
                           onChange={(e) => setNumeroComprobante(e.target.value)}
                           placeholder="Ej: TRX-9821873"
-                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                          className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-base sm:text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         />
                       </div>
                     </div>
@@ -424,10 +425,11 @@ export const DonationModal = ({ selectedCampaign, onClose, onDonationSuccess }) 
                       </label>
                       <input
                         type="number"
+                        inputMode="decimal"
                         min="1000"
                         value={customDonationAmount}
                         onChange={(e) => setCustomDonationAmount(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                        className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-base sm:text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       />
                     </div>
 

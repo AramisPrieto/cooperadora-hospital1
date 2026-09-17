@@ -327,6 +327,8 @@ const Login = () => {
                     <input
                       id="dni"
                       type="number"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       required
                       min="1000000"
                       max="99999999"
@@ -350,35 +352,35 @@ const Login = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div className="space-y-1">
                       <label htmlFor="nombre" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nombre *</label>
-                      <input id="nombre" type="text" required maxLength={100} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Juan" className="input-field py-2 text-sm" />
+                      <input id="nombre" type="text" required maxLength={100} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Juan" className="input-field py-2" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="apellido" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Apellido *</label>
-                      <input id="apellido" type="text" required maxLength={100} value={apellido} onChange={e => setApellido(e.target.value)} placeholder="Pérez" className="input-field py-2 text-sm" />
+                      <input id="apellido" type="text" required maxLength={100} value={apellido} onChange={e => setApellido(e.target.value)} placeholder="Pérez" className="input-field py-2" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="telefono" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Teléfono *</label>
-                      <input id="telefono" type="text" required maxLength={50} value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="2262550000" className="input-field py-2 text-sm" />
+                      <input id="telefono" type="text" inputMode="tel" required maxLength={50} value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="2262550000" className="input-field py-2" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="nacionalidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nacionalidad *</label>
-                      <input id="nacionalidad" type="text" required maxLength={100} value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} placeholder="Argentina" className="input-field py-2 text-sm" />
+                      <input id="nacionalidad" type="text" required maxLength={100} value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} placeholder="Argentina" className="input-field py-2" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="direccion" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Dirección *</label>
-                      <input id="direccion" type="text" required maxLength={255} value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Calle 60 1234" className="input-field py-2 text-sm" />
+                      <input id="direccion" type="text" required maxLength={255} value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Calle 60 1234" className="input-field py-2" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="localidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Localidad *</label>
-                      <input id="localidad" type="text" required maxLength={100} value={localidad} onChange={e => setLocalidad(e.target.value)} placeholder="Necochea" className="input-field py-2 text-sm" />
+                      <input id="localidad" type="text" required maxLength={100} value={localidad} onChange={e => setLocalidad(e.target.value)} placeholder="Necochea" className="input-field py-2" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="fechaNacimiento" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">F. Nacimiento *</label>
-                      <input id="fechaNacimiento" type="date" required max={new Date().toISOString().split('T')[0]} value={fechaNacimiento} onChange={e => setFechaNacimiento(e.target.value)} className="input-field py-2.5 text-sm" />
+                      <input id="fechaNacimiento" type="date" required max={new Date().toISOString().split('T')[0]} value={fechaNacimiento} onChange={e => setFechaNacimiento(e.target.value)} className="input-field py-2" />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="genero" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Género *</label>
-                      <select id="genero" required value={genero} onChange={e => setGenero(e.target.value)} className="input-field py-2 text-sm">
+                      <select id="genero" required value={genero} onChange={e => setGenero(e.target.value)} className="input-field py-2">
                         <option value="">Seleccione...</option>
                         <option value="masculino">Masculino</option>
                         <option value="femenino">Femenino</option>
@@ -387,7 +389,7 @@ const Login = () => {
                     </div>
                     <div className="sm:col-span-2 space-y-1">
                       <label htmlFor="metodoPago" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Método de Pago Preferido *</label>
-                      <select id="metodoPago" required value={metodoPago} onChange={e => setMetodoPago(e.target.value)} className="input-field py-2 text-sm">
+                      <select id="metodoPago" required value={metodoPago} onChange={e => setMetodoPago(e.target.value)} className="input-field py-2">
                         <option value="">Seleccione...</option>
                         <option value="transferencia">Transferencia Bancaria</option>
                         <option value="efectivo">Efectivo</option>

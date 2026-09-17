@@ -27,75 +27,136 @@ const DonacionesTab = ({ donaciones }) => {
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
-                <th className="p-4">Campaña de Recaudación</th>
-                <th className="p-4">Método</th>
-                <th className="p-4 text-right">Monto</th>
-                <th className="p-4">Fecha</th>
-                <th className="p-4">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {donaciones.map(don => {
-                const isMp = don.metodo === 'mercadopago' || don.metodo === 'mp' || Boolean(don.mp_payment_id);
-                return (
-                  <tr key={don.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-4 font-bold text-slate-700">{don.campana?.titulo ?? 'Campaña de la Cooperadora'}</td>
-                    <td className="p-4">
-                      {isMp ? (
-                        <div className="flex flex-col items-start gap-0.5">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-sky-50 border border-sky-100 text-sky-700 rounded-full text-[10px] font-black uppercase tracking-wider">
-                            Mercado Pago
-                          </span>
-                          {don.numero_comprobante && (
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              #{don.numero_comprobante}
-                            </span>
-                          )}
-                        </div>
+        <>
+          {/* Mobile Cards View */}
+          <div className="block sm:hidden divide-y divide-slate-100">
+            {donaciones.map((don) => {
+              const isMp = don.metodo === 'mercadopago' || don.metodo === 'mp' || Boolean(don.mp_payment_id);
+              return (
+                <div key={don.id} className="py-4 first:pt-0 space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-slate-800 text-sm leading-snug">
+                      {don.campana?.titulo ?? 'Campaña de la Cooperadora'}
+                    </h3>
+                    <span className="shrink-0">
+                      {don.estado === 'aprobada' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                          <CheckCircle className="h-3 w-3" /> Aprobada
+                        </span>
+                      ) : don.estado === 'pendiente' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 border border-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                          <Clock className="h-3 w-3" /> Pendiente
+                        </span>
                       ) : (
-                        <div className="flex flex-col items-start gap-0.5">
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-wider">
-                            Transferencia
-                          </span>
-                          {don.numero_comprobante && (
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              Ref: #{don.numero_comprobante}
-                            </span>
-                          )}
-                        </div>
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 border border-rose-100 text-rose-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                          <XCircle className="h-3 w-3" /> Rechazada
+                        </span>
                       )}
-                    </td>
-                    <td className="p-4 text-right font-black text-slate-800">
-                      ${parseFloat(don.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                    </td>
-                    <td className="p-4 text-slate-400 font-medium">
-                      {new Date(don.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                    <td className="p-4">
-                    {don.estado === 'aprobada' ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-wider">
-                        <CheckCircle className="h-3 w-3" /> Aprobada
+                    </span>
+                  </div>
+
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 font-medium">Monto donado:</span>
+                      <span className="text-sm font-black text-slate-900">
+                        ${parseFloat(don.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                       </span>
-                    ) : don.estado === 'pendiente' ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 border border-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase tracking-wider">
-                        <Clock className="h-3 w-3" /> Pendiente
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 font-medium">Método:</span>
+                      {isMp ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-50 border border-sky-100 text-sky-700 rounded-full text-[10px] font-bold">
+                          Mercado Pago {don.numero_comprobante ? `#${don.numero_comprobante}` : ''}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-full text-[10px] font-bold">
+                          Transferencia {don.numero_comprobante ? `#${don.numero_comprobante}` : ''}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 font-medium">Fecha:</span>
+                      <span className="text-slate-600 font-medium">
+                        {new Date(don.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 border border-rose-100 text-rose-700 rounded-full text-[10px] font-black uppercase tracking-wider">
-                        <XCircle className="h-3 w-3" /> Rechazada
-                      </span>
-                    )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                  <th className="p-4">Campaña de Recaudación</th>
+                  <th className="p-4">Método</th>
+                  <th className="p-4 text-right">Monto</th>
+                  <th className="p-4">Fecha</th>
+                  <th className="p-4">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {donaciones.map(don => {
+                  const isMp = don.metodo === 'mercadopago' || don.metodo === 'mp' || Boolean(don.mp_payment_id);
+                  return (
+                    <tr key={don.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-4 font-bold text-slate-700">{don.campana?.titulo ?? 'Campaña de la Cooperadora'}</td>
+                      <td className="p-4">
+                        {isMp ? (
+                          <div className="flex flex-col items-start gap-0.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-sky-50 border border-sky-100 text-sky-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                              Mercado Pago
+                            </span>
+                            {don.numero_comprobante && (
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                #{don.numero_comprobante}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-start gap-0.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                              Transferencia
+                            </span>
+                            {don.numero_comprobante && (
+                              <span className="text-[10px] text-slate-400 font-mono">
+                                Ref: #{don.numero_comprobante}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-4 text-right font-black text-slate-800">
+                        ${parseFloat(don.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="p-4 text-slate-400 font-medium">
+                        {new Date(don.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="p-4">
+                      {don.estado === 'aprobada' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                          <CheckCircle className="h-3 w-3" /> Aprobada
+                        </span>
+                      ) : don.estado === 'pendiente' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 border border-amber-100 text-amber-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                          <Clock className="h-3 w-3" /> Pendiente
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 border border-rose-100 text-rose-700 rounded-full text-[10px] font-black uppercase tracking-wider">
+                          <XCircle className="h-3 w-3" /> Rechazada
+                        </span>
+                      )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
