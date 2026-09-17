@@ -341,7 +341,7 @@ const Login = () => {
                     ) : (
                       <XCircle className={`h-3.5 w-3.5 shrink-0 ${passwordHasContent ? 'text-rose-500' : 'text-slate-400'}`} />
                     )}
-                    <span>Al menos una letra mayúscula (A-Z)</span>
+                    <span>Al menos una letra mayúscula</span>
                   </div>
 
                   <div className={`flex items-center gap-1.5 text-xs transition-colors ${
@@ -356,7 +356,7 @@ const Login = () => {
                     ) : (
                       <XCircle className={`h-3.5 w-3.5 shrink-0 ${passwordHasContent ? 'text-rose-500' : 'text-slate-400'}`} />
                     )}
-                    <span>Al menos un número (0-9)</span>
+                    <span>Al menos un número</span>
                   </div>
                 </div>
               )}
