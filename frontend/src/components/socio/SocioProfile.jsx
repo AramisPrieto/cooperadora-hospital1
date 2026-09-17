@@ -204,7 +204,7 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
         )}
       </div>
 
-      {/* Formulario de Modificación de Datos (DNI, Teléfono, Dirección, Localidad) */}
+      {/* Formulario de Modificación de Datos de Contacto (Teléfono, Dirección, Localidad) */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm">
         <h2 className="text-lg font-display font-black text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3">
           <Save className="h-5 w-5 text-brand-600" />
@@ -212,27 +212,6 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                DNI / Documento
-              </label>
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-md">
-                Inmutable
-              </span>
-            </div>
-            <input
-              type="text"
-              disabled
-              readOnly
-              value={profile?.dni || ''}
-              className="input-field bg-slate-50 text-slate-500 cursor-not-allowed border-slate-200 select-none font-medium"
-            />
-            <p className="text-[10px] text-slate-400">
-              Registrado de forma inmutable en el Libro de Asociados.
-            </p>
-          </div>
-
           <div className="space-y-1.5">
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
               Teléfono
