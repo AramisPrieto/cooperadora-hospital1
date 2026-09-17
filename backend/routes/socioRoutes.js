@@ -9,8 +9,7 @@ import {
   deleteSocio,
   darDeBajaMiCuenta,
   getAllCuotas,
-  validarCuota,
-  limpiarCuentasSantiago
+  validarCuota
 } from '../controllers/socioController.js';
 import {
   iniciarSuscripcion,
@@ -65,7 +64,6 @@ router.put('/:id', authorizeRoles('admin'), validateSqlId('id'), validateAdminUp
 // Rutas exclusivas de Administrador
 router.get('/admin/cuotas', authorizeRoles('admin'), getAllCuotas);
 router.put('/admin/cuotas/:id/validar', authorizeRoles('admin'), validateSqlId('id'), validarCuota);
-router.post('/admin/limpieza-cuentas-santiago', authorizeRoles('admin'), limpiarCuentasSantiago);
 router.get('/', authorizeRoles('admin'), getAllSocios);
 router.post('/', authorizeRoles('admin'), validateAdminCreateSocio, createSocio);
 router.delete('/:id', authorizeRoles('admin'), validateSqlId('id'), deleteSocio);

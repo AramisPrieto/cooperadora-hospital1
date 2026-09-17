@@ -160,34 +160,6 @@ const startServer = async () => {
     await sqlConnection.sync({ alter: true });
     console.log('✅ Tablas relacionales de SQL sincronizadas con éxito.');
 
-    // Limpieza y corrección de cuentas solicitada para Santiago Ialungo
-    try {
-      const { PerfilSocio, Usuario, PagoCuota, DonacionTransferencia } = await import('./models/index.js');
-      const user16 = await Usuario.findOne({ where: { id: 21 } });
-      const passwordHashReciente = user16 ? user16.password_hash : null;
-
-      try {
-        await PagoCuota.destroy({ where: { socio_numero_asociado: [15, 16] } });
-      } catch (e) {}
-      try {
-        await DonacionTransferencia.destroy({ where: { usuario_id: [20, 21] } });
-      } catch (e) {}
-      await PerfilSocio.destroy({ where: { numero_asociado: [15, 16] } });
-      await Usuario.destroy({ where: { id: [20, 21] } });
-
-      const user10 = await Usuario.findByPk(10);
-      if (user10 && user10.email !== 'ialungosantiago@gmail.com') {
-        user10.email = 'ialungosantiago@gmail.com';
-        if (passwordHashReciente) {
-          user10.password_hash = passwordHashReciente;
-        }
-        await user10.save();
-        console.log('✅ Cuenta N° 9 actualizada con ialungosantiago@gmail.com y contraseña sincronizada.');
-      }
-    } catch (cleanupErr) {
-      console.warn('Nota sobre migración de cuentas:', cleanupErr.message);
-    }
-
     // 2. Conectar base de datos NoSQL
     await connectMongoDB();
 
