@@ -40,7 +40,7 @@ const DonacionesTab = ({ donaciones }) => {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {donaciones.map(don => {
-                const isMp = don.metodo === 'mercadopago' || don.metodo === 'mp' || Boolean(don.mp_payment_id) || (!don.comprobante_url && Boolean(don.numero_comprobante) && /^\d+$/.test(String(don.numero_comprobante)));
+                const isMp = don.metodo === 'mercadopago' || don.metodo === 'mp' || Boolean(don.mp_payment_id);
                 return (
                   <tr key={don.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="p-4 font-bold text-slate-700">{don.campana?.titulo ?? 'Campaña de la Cooperadora'}</td>

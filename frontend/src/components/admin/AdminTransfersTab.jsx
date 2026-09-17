@@ -107,9 +107,13 @@ export const AdminTransfersTab = ({
                         <FileText className="h-3.5 w-3.5" />
                         Ver ({tr.numero_comprobante || 'N/A'})
                       </button>
-                    ) : tr.metodo === 'mercadopago' || (tr.numero_comprobante && /^\d+$/.test(String(tr.numero_comprobante))) ? (
+                    ) : tr.metodo === 'mercadopago' ? (
                       <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sky-700 bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-lg font-bold">
                         MP #{tr.numero_comprobante}
+                      </span>
+                    ) : tr.numero_comprobante ? (
+                      <span className="text-slate-600 font-mono text-[11px]">
+                        Ref: #{tr.numero_comprobante}
                       </span>
                     ) : (
                       <span className="text-slate-400 italic">Sin comprobante</span>
