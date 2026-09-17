@@ -205,18 +205,13 @@ export const updateMyProfile = async (req, res) => {
       return res.status(403).json({ error: 'Los socios no pueden editar las observaciones administrativas.' });
     }
 
-    // Validar DNI único si se está modificando
+    // Los socios no pueden modificar su propio DNI una vez registrados en el Libro de Asociados
     if (dni !== undefined) {
       const dniInt = parseInt(dni);
-      if (isNaN(dniInt) || dniInt < 1000000 || dniInt > 99999999) {
-        return res.status(400).json({ error: 'El DNI es obligatorio y debe ser un número válido de entre 7 y 8 dígitos.' });
-      }
-      if (dniInt !== socio.dni) {
-        const existingDni = await PerfilSocio.findOne({ where: { dni: dniInt } });
-        if (existingDni) {
-          return res.status(400).json({ error: 'El DNI ingresado ya está en uso.' });
-        }
-        socio.dni = dniInt;
+      if (!isNaN(dniInt) && dniInt !== socio.dni) {
+        return res.status(403).json({
+          error: 'El DNI no puede ser modificado por el socio. Por razones estatutarias y del Libro de Asociados, cualquier corrección debe solicitarse a la administración.'
+        });
       }
     }
 

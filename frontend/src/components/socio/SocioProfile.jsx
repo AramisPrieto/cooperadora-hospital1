@@ -9,7 +9,6 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
   const [bajaSubmitting, setBajaSubmitting] = useState(false);
   const [bajaError, setBajaError] = useState('');
   const [form, setForm] = useState({
-    dni: profile?.dni ? profile.dni.toString() : '',
     telefono: profile?.telefono || '',
     direccion: profile?.direccion || '',
     localidad: profile?.localidad || ''
@@ -19,7 +18,6 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
   useEffect(() => {
     if (profile) {
       setForm({
-        dni: profile.dni ? profile.dni.toString() : '',
         telefono: profile.telefono || '',
         direccion: profile.direccion || '',
         localidad: profile.localidad || ''
@@ -33,9 +31,7 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const parsedDni = parseInt(form.dni, 10);
     onUpdate({
-      dni: isNaN(parsedDni) ? 0 : parsedDni,
       telefono: (form.telefono || '').trim(),
       direccion: (form.direccion || '').trim(),
       localidad: (form.localidad || '').trim()
@@ -64,7 +60,6 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
   };
 
   const isUnchanged = 
-    form.dni === (profile?.dni ? profile.dni.toString() : '') &&
     form.telefono === (profile?.telefono || '') &&
     form.direccion === (profile?.direccion || '') &&
     form.localidad === (profile?.localidad || '');
@@ -213,25 +208,29 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
       <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-sm">
         <h2 className="text-lg font-display font-black text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-3">
           <Save className="h-5 w-5 text-brand-600" />
-          Actualizar Datos
+          Actualizar Datos de Contacto
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-              DNI
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                DNI / Documento
+              </label>
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded-md">
+                Inmutable
+              </span>
+            </div>
             <input
-              type="number"
-              required
-              min="1000000"
-              max="99999999"
-              step="1"
-              value={form.dni}
-              onChange={e => handleChange('dni', e.target.value)}
-              className="input-field"
-              placeholder="DNI del socio"
+              type="text"
+              disabled
+              readOnly
+              value={profile?.dni || ''}
+              className="input-field bg-slate-50 text-slate-500 cursor-not-allowed border-slate-200 select-none font-medium"
             />
+            <p className="text-[10px] text-slate-400">
+              Registrado de forma inmutable en el Libro de Asociados.
+            </p>
           </div>
 
           <div className="space-y-1.5">
@@ -280,7 +279,7 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
           </div>
 
           <p className="text-[10px] text-slate-400 leading-normal">
-            Podés corregir tu DNI, cambiar tu teléfono o tu domicilio de contacto. Para otras modificaciones, contactate con la administración.
+            Podés modificar tu teléfono o tu domicilio de contacto. Para rectificaciones de DNI o datos personales registrados, contactate con la secretaría de la Cooperadora.
           </p>
 
           <button
