@@ -62,6 +62,111 @@ const cleanUrlInput = (value) => {
 };
 
 /**
+ * Validador para teléfonos:
+ * Permite números, espacios, guiones, paréntesis y prefijo opcional +.
+ * Exige entre 7 y 15 dígitos numéricos (estándar E.164 nacional e internacional).
+ */
+const validateTelefonoInput = (value) => {
+  if (value === undefined || value === null || value === '') return true;
+  const strValue = String(value).trim();
+  cleanTextInput(strValue);
+  if (!/^[+]?[\d\s\-()]+$/.test(strValue)) {
+    throw new Error("El teléfono solo puede contener números, espacios, guiones, paréntesis o '+'.");
+  }
+  const digits = strValue.replace(/\D/g, '');
+  if (digits.length < 7 || digits.length > 15) {
+    throw new Error('El teléfono debe contener entre 7 y 15 dígitos numéricos.');
+  }
+  return true;
+};
+
+/**
+ * Validador para nombres y apellidos:
+ * Solo letras, espacios, acentos, diéresis, ñ, apóstrofes y guiones. Longitud 2-100.
+ */
+const validateNombreApellidoInput = (label) => (value) => {
+  if (value === undefined || value === null || value === '') return true;
+  cleanTextInput(value);
+  const strValue = String(value).trim();
+  if (strValue.length < 2 || strValue.length > 100) {
+    throw new Error(`${label} debe tener entre 2 y 100 caracteres.`);
+  }
+  if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/.test(strValue)) {
+    throw new Error(`${label} solo puede contener letras y espacios.`);
+  }
+  return true;
+};
+
+/**
+ * Validador para nacionalidad:
+ */
+const validateNacionalidadInput = (value) => {
+  if (value === undefined || value === null || value === '') return true;
+  cleanTextInput(value);
+  const strValue = String(value).trim();
+  if (strValue.length < 2 || strValue.length > 100) {
+    throw new Error('La nacionalidad debe tener entre 2 y 100 caracteres.');
+  }
+  if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]+$/.test(strValue)) {
+    throw new Error('La nacionalidad solo puede contener letras y espacios.');
+  }
+  return true;
+};
+
+/**
+ * Validador para localidad:
+ */
+const validateLocalidadInput = (value) => {
+  if (value === undefined || value === null || value === '') return true;
+  cleanTextInput(value);
+  const strValue = String(value).trim();
+  if (strValue.length < 2 || strValue.length > 100) {
+    throw new Error('La localidad debe tener entre 2 y 100 caracteres.');
+  }
+  if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s'.-]+$/.test(strValue)) {
+    throw new Error('La localidad contiene caracteres no permitidos.');
+  }
+  return true;
+};
+
+/**
+ * Validador para dirección:
+ */
+const validateDireccionInput = (value) => {
+  if (value === undefined || value === null || value === '') return true;
+  cleanTextInput(value);
+  const strValue = String(value).trim();
+  if (strValue.length < 3 || strValue.length > 255) {
+    throw new Error('La dirección debe tener entre 3 y 255 caracteres.');
+  }
+  if (!/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s,.'#°º\-\/]+$/.test(strValue)) {
+    throw new Error('La dirección contiene caracteres no permitidos.');
+  }
+  if (!/[a-zA-Z0-9]/.test(strValue)) {
+    throw new Error('La dirección debe contener al menos letras o números.');
+  }
+  return true;
+};
+
+/**
+ * Validador para fecha de nacimiento:
+ */
+const validateFechaNacimientoInput = (val) => {
+  if (!val) return true;
+  const birthDate = new Date(val);
+  if (isNaN(birthDate.getTime())) {
+    throw new Error('La fecha de nacimiento debe ser una fecha válida (AAAA-MM-DD).');
+  }
+  if (birthDate >= new Date()) {
+    throw new Error('La fecha de nacimiento debe ser una fecha en el pasado.');
+  }
+  if (birthDate < new Date('1900-01-01T00:00:00.000Z')) {
+    throw new Error('La fecha de nacimiento debe ser posterior al año 1900.');
+  }
+  return true;
+};
+
+/**
  * Validaciones para POST /api/auth/register
  */
 export const validateRegister = [
@@ -74,7 +179,8 @@ export const validateRegister = [
   body('password')
     .notEmpty().withMessage('La contraseña es obligatoria.')
     .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres.')
-    .isLength({ max: 128 }).withMessage('La contraseña no puede superar los 128 caracteres.'),
+    .isLength({ max: 128 }).withMessage('La contraseña no puede superar los 128 caracteres.')
+    .matches(/^(?=.*[A-Z])(?=.*\d).{8,}$/).withMessage('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.'),
 
   body('dni')
     .notEmpty().withMessage('El DNI es obligatorio.')
@@ -83,43 +189,32 @@ export const validateRegister = [
 
   body('nombre')
     .notEmpty().withMessage('El nombre es obligatorio.')
-    .isLength({ min: 1, max: 100 }).withMessage('El nombre debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNombreApellidoInput('El nombre')),
 
   body('apellido')
     .notEmpty().withMessage('El apellido es obligatorio.')
-    .isLength({ min: 1, max: 100 }).withMessage('El apellido debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNombreApellidoInput('El apellido')),
 
   body('direccion')
     .notEmpty().withMessage('La dirección es obligatoria.')
-    .isLength({ min: 1, max: 255 }).withMessage('La dirección debe tener entre 1 y 255 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateDireccionInput),
 
   body('localidad')
     .notEmpty().withMessage('La localidad es obligatoria.')
-    .isLength({ min: 1, max: 100 }).withMessage('La localidad debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateLocalidadInput),
 
   body('nacionalidad')
     .notEmpty().withMessage('La nacionalidad es obligatoria.')
-    .isLength({ min: 1, max: 100 }).withMessage('La nacionalidad debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNacionalidadInput),
 
   body('telefono')
     .notEmpty().withMessage('El teléfono es obligatorio.')
-    .isLength({ min: 1, max: 50 }).withMessage('El teléfono debe tener entre 1 y 50 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateTelefonoInput),
 
   body('fecha_nacimiento')
     .notEmpty().withMessage('La fecha de nacimiento es obligatoria.')
     .isISO8601().withMessage('La fecha de nacimiento debe ser una fecha válida (AAAA-MM-DD).')
-    .custom((val) => {
-      if (new Date(val) >= new Date()) {
-        throw new Error('La fecha de nacimiento debe ser una fecha en el pasado.');
-      }
-      return true;
-    }),
+    .custom(validateFechaNacimientoInput),
 
   body('genero')
     .notEmpty().withMessage('El género es obligatorio.')
@@ -215,43 +310,32 @@ export const validateUpdateMyProfile = [
 
   body('nombre')
     .optional()
-    .isLength({ min: 1, max: 100 }).withMessage('El nombre debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNombreApellidoInput('El nombre')),
 
   body('apellido')
     .optional()
-    .isLength({ min: 1, max: 100 }).withMessage('El apellido debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNombreApellidoInput('El apellido')),
 
   body('direccion')
     .optional()
-    .isLength({ min: 1, max: 255 }).withMessage('La dirección debe tener entre 1 y 255 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateDireccionInput),
 
   body('localidad')
     .optional()
-    .isLength({ min: 1, max: 100 }).withMessage('La localidad debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateLocalidadInput),
 
   body('nacionalidad')
     .optional()
-    .isLength({ min: 1, max: 100 }).withMessage('La nacionalidad debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNacionalidadInput),
 
   body('telefono')
     .optional()
-    .isLength({ min: 1, max: 50 }).withMessage('El teléfono debe tener entre 1 y 50 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateTelefonoInput),
 
   body('fecha_nacimiento')
     .optional()
     .isISO8601().withMessage('La fecha de nacimiento debe ser una fecha válida (AAAA-MM-DD).')
-    .custom((val) => {
-      if (new Date(val) >= new Date()) {
-        throw new Error('La fecha de nacimiento debe ser en el pasado.');
-      }
-      return true;
-    }),
+    .custom(validateFechaNacimientoInput),
 
   body('genero')
     .optional()
@@ -280,41 +364,32 @@ export const validateAdminCreateSocio = [
 
   body('nombre')
     .notEmpty().withMessage('El nombre es obligatorio.')
-    .isLength({ min: 1, max: 100 }).withMessage('El nombre debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNombreApellidoInput('El nombre')),
 
   body('apellido')
     .notEmpty().withMessage('El apellido es obligatorio.')
-    .isLength({ min: 1, max: 100 }).withMessage('El apellido debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNombreApellidoInput('El apellido')),
 
   body('direccion')
     .notEmpty().withMessage('La dirección es obligatoria.')
-    .isLength({ min: 1, max: 255 }).withMessage('La dirección debe tener entre 1 y 255 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateDireccionInput),
 
   body('localidad')
     .notEmpty().withMessage('La localidad es obligatoria.')
-    .isLength({ min: 1, max: 100 }).withMessage('La localidad debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateLocalidadInput),
 
   body('nacionalidad')
     .notEmpty().withMessage('La nacionalidad es obligatoria.')
-    .isLength({ min: 1, max: 100 }).withMessage('La nacionalidad debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNacionalidadInput),
 
   body('telefono')
     .notEmpty().withMessage('El teléfono es obligatorio.')
-    .isLength({ min: 1, max: 50 }).withMessage('El teléfono debe tener entre 1 y 50 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateTelefonoInput),
 
   body('fecha_nacimiento')
     .notEmpty().withMessage('La fecha de nacimiento es obligatoria.')
     .isISO8601().withMessage('La fecha de nacimiento debe ser una fecha válida (AAAA-MM-DD).')
-    .custom((val) => {
-      if (new Date(val) >= new Date()) throw new Error('La fecha de nacimiento debe ser en el pasado.');
-      return true;
-    }),
+    .custom(validateFechaNacimientoInput),
 
   body('genero')
     .notEmpty().withMessage('El género es obligatorio.')
@@ -351,41 +426,32 @@ export const validateAdminUpdateSocio = [
 
   body('nombre')
     .optional()
-    .isLength({ min: 1, max: 100 }).withMessage('El nombre debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNombreApellidoInput('El nombre')),
 
   body('apellido')
     .optional()
-    .isLength({ min: 1, max: 100 }).withMessage('El apellido debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNombreApellidoInput('El apellido')),
 
   body('direccion')
     .optional()
-    .isLength({ min: 1, max: 255 }).withMessage('La dirección debe tener entre 1 y 255 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateDireccionInput),
 
   body('localidad')
     .optional()
-    .isLength({ min: 1, max: 100 }).withMessage('La localidad debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateLocalidadInput),
 
   body('nacionalidad')
     .optional()
-    .isLength({ min: 1, max: 100 }).withMessage('La nacionalidad debe tener entre 1 y 100 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateNacionalidadInput),
 
   body('telefono')
     .optional()
-    .isLength({ min: 1, max: 50 }).withMessage('El teléfono debe tener entre 1 y 50 caracteres.')
-    .custom(cleanTextInput),
+    .custom(validateTelefonoInput),
 
   body('fecha_nacimiento')
     .optional()
     .isISO8601().withMessage('La fecha de nacimiento debe ser una fecha válida (AAAA-MM-DD).')
-    .custom((val) => {
-      if (new Date(val) >= new Date()) throw new Error('La fecha de nacimiento debe ser en el pasado.');
-      return true;
-    }),
+    .custom(validateFechaNacimientoInput),
 
   body('genero')
     .optional()

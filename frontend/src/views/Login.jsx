@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, User, Heart, ShieldAlert, Award, Eye, EyeOff, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
+import { Mail, Lock, User, Heart, ShieldAlert, Award, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -75,6 +75,103 @@ const Login = () => {
         setLoading(false);
         return;
       }
+
+      // Validar DNI
+      const parsedDni = parseInt(dni, 10);
+      if (isNaN(parsedDni) || parsedDni < 1000000 || parsedDni > 99999999) {
+        setErrorMsg('El DNI debe ser un número válido entre 1.000.000 y 99.999.999.');
+        setLoading(false);
+        return;
+      }
+
+      // Validar Contraseña
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+      if (!passwordRegex.test(password)) {
+        setErrorMsg('La contraseña debe tener al menos 8 caracteres, una mayúscula y un número.');
+        setLoading(false);
+        return;
+      }
+
+      // Validar Teléfono
+      const cleanPhone = (telefono || '').trim();
+      if (!cleanPhone) {
+        setErrorMsg('El teléfono es obligatorio.');
+        setLoading(false);
+        return;
+      }
+      if (!/^[+]?[\d\s\-()]+$/.test(cleanPhone)) {
+        setErrorMsg("El teléfono solo puede contener números, espacios, guiones, paréntesis o '+'.");
+        setLoading(false);
+        return;
+      }
+      const digits = cleanPhone.replace(/\D/g, '');
+      if (digits.length < 7 || digits.length > 15) {
+        setErrorMsg('El teléfono debe contener entre 7 y 15 dígitos numéricos.');
+        setLoading(false);
+        return;
+      }
+
+      // Validar Nombre y Apellido
+      const cleanNombre = (nombre || '').trim();
+      const cleanApellido = (apellido || '').trim();
+      const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$/;
+      if (!cleanNombre || !nameRegex.test(cleanNombre)) {
+        setErrorMsg('El nombre solo puede contener letras y espacios (entre 2 y 100 caracteres).');
+        setLoading(false);
+        return;
+      }
+      if (!cleanApellido || !nameRegex.test(cleanApellido)) {
+        setErrorMsg('El apellido solo puede contener letras y espacios (entre 2 y 100 caracteres).');
+        setLoading(false);
+        return;
+      }
+
+      // Validar Fecha de Nacimiento
+      if (!fechaNacimiento) {
+        setErrorMsg('La fecha de nacimiento es obligatoria.');
+        setLoading(false);
+        return;
+      }
+      const birth = new Date(fechaNacimiento);
+      if (isNaN(birth.getTime()) || birth >= new Date() || birth < new Date('1900-01-01T00:00:00.000Z')) {
+        setErrorMsg('La fecha de nacimiento debe ser una fecha válida entre 1900 y la actualidad.');
+        setLoading(false);
+        return;
+      }
+
+      // Validar Dirección
+      const cleanDir = (direccion || '').trim();
+      if (!cleanDir || cleanDir.length < 3 || cleanDir.length > 255) {
+        setErrorMsg('La dirección debe tener entre 3 y 255 caracteres.');
+        setLoading(false);
+        return;
+      }
+
+      // Validar Localidad y Nacionalidad
+      const cleanLoc = (localidad || '').trim();
+      const cleanNac = (nacionalidad || '').trim();
+      if (!cleanLoc || cleanLoc.length < 2 || cleanLoc.length > 100) {
+        setErrorMsg('La localidad debe tener entre 2 y 100 caracteres.');
+        setLoading(false);
+        return;
+      }
+      if (!cleanNac || cleanNac.length < 2 || cleanNac.length > 100 || !nameRegex.test(cleanNac)) {
+        setErrorMsg('La nacionalidad solo puede contener letras y espacios (entre 2 y 100 caracteres).');
+        setLoading(false);
+        return;
+      }
+
+      // Validar Género y Método de Pago
+      if (!genero) {
+        setErrorMsg('Debe seleccionar un género.');
+        setLoading(false);
+        return;
+      }
+      if (!metodoPago) {
+        setErrorMsg('Debe seleccionar un método de pago preferido.');
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -91,18 +188,18 @@ const Login = () => {
         }
       } else {
         const res = await api.post('/auth/register', {
-          email,
+          email: email.trim(),
           password,
-          dni: parseInt(dni),
-          nombre: nombre || undefined,
-          apellido: apellido || undefined,
-          direccion: direccion || undefined,
-          localidad: localidad || undefined,
-          nacionalidad: nacionalidad || undefined,
-          telefono: telefono || undefined,
-          fecha_nacimiento: fechaNacimiento || undefined,
-          genero: genero || undefined,
-          metodo_pago: metodoPago || undefined
+          dni: parseInt(dni, 10),
+          nombre: nombre.trim(),
+          apellido: apellido.trim(),
+          direccion: direccion.trim(),
+          localidad: localidad.trim(),
+          nacionalidad: nacionalidad.trim(),
+          telefono: telefono.trim(),
+          fecha_nacimiento: fechaNacimiento,
+          genero,
+          metodo_pago: metodoPago
         });
         login(res.data.user);
         setSuccessMsg('¡Registro exitoso!');
@@ -277,6 +374,8 @@ const Login = () => {
                   required
                   minLength={8}
                   maxLength={128}
+                  pattern={isLogin ? undefined : "(?=.*[A-Z])(?=.*\\d).{8,}"}
+                  title={isLogin ? undefined : "Debe tener al menos 8 caracteres, una mayúscula y un número"}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Ingrese su contraseña"
@@ -435,15 +534,13 @@ const Login = () => {
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
                     <input
                       id="dni"
-                      type="number"
+                      type="text"
                       inputMode="numeric"
-                      pattern="[0-9]*"
                       required
-                      min="1000000"
-                      max="99999999"
-                      step="1"
+                      pattern="[0-9]{7,8}"
+                      maxLength={8}
                       value={dni}
-                      onChange={e => setDni(e.target.value)}
+                      onChange={e => setDni(e.target.value.replace(/\D/g, ''))}
                       placeholder="Sin puntos ej: 30123456"
                       className="input-field pl-10"
                     />
@@ -461,31 +558,108 @@ const Login = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div className="space-y-1">
                       <label htmlFor="nombre" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nombre *</label>
-                      <input id="nombre" type="text" required maxLength={100} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Juan" className="input-field py-2" />
+                      <input
+                        id="nombre"
+                        type="text"
+                        required
+                        minLength={2}
+                        maxLength={100}
+                        pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$"
+                        title="El nombre solo puede contener letras y espacios (entre 2 y 100 caracteres)"
+                        value={nombre}
+                        onChange={e => setNombre(e.target.value)}
+                        placeholder="Juan"
+                        className="input-field py-2"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="apellido" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Apellido *</label>
-                      <input id="apellido" type="text" required maxLength={100} value={apellido} onChange={e => setApellido(e.target.value)} placeholder="Pérez" className="input-field py-2" />
+                      <input
+                        id="apellido"
+                        type="text"
+                        required
+                        minLength={2}
+                        maxLength={100}
+                        pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$"
+                        title="El apellido solo puede contener letras y espacios (entre 2 y 100 caracteres)"
+                        value={apellido}
+                        onChange={e => setApellido(e.target.value)}
+                        placeholder="Pérez"
+                        className="input-field py-2"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="telefono" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Teléfono *</label>
-                      <input id="telefono" type="text" inputMode="tel" required maxLength={50} value={telefono} onChange={e => setTelefono(e.target.value)} placeholder="2262550000" className="input-field py-2" />
+                      <input
+                        id="telefono"
+                        type="tel"
+                        required
+                        minLength={7}
+                        maxLength={25}
+                        pattern="^[+]?[\d\s\-()]{7,25}$"
+                        title="Ingrese un teléfono válido (entre 7 y 15 dígitos numéricos, ej: 2262550000 o +54 9 2262 123456)"
+                        value={telefono}
+                        onChange={e => setTelefono(e.target.value)}
+                        placeholder="2262550000"
+                        className="input-field py-2"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="nacionalidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Nacionalidad *</label>
-                      <input id="nacionalidad" type="text" required maxLength={100} value={nacionalidad} onChange={e => setNacionalidad(e.target.value)} placeholder="Argentina" className="input-field py-2" />
+                      <input
+                        id="nacionalidad"
+                        type="text"
+                        required
+                        minLength={2}
+                        maxLength={100}
+                        pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$"
+                        value={nacionalidad}
+                        onChange={e => setNacionalidad(e.target.value)}
+                        placeholder="Argentina"
+                        className="input-field py-2"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="direccion" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Dirección *</label>
-                      <input id="direccion" type="text" required maxLength={255} value={direccion} onChange={e => setDireccion(e.target.value)} placeholder="Calle 60 1234" className="input-field py-2" />
+                      <input
+                        id="direccion"
+                        type="text"
+                        required
+                        minLength={3}
+                        maxLength={255}
+                        value={direccion}
+                        onChange={e => setDireccion(e.target.value)}
+                        placeholder="Calle 60 1234"
+                        className="input-field py-2"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="localidad" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Localidad *</label>
-                      <input id="localidad" type="text" required maxLength={100} value={localidad} onChange={e => setLocalidad(e.target.value)} placeholder="Necochea" className="input-field py-2" />
+                      <input
+                        id="localidad"
+                        type="text"
+                        required
+                        minLength={2}
+                        maxLength={100}
+                        pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s'.-]{2,100}$"
+                        value={localidad}
+                        onChange={e => setLocalidad(e.target.value)}
+                        placeholder="Necochea"
+                        className="input-field py-2"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="fechaNacimiento" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">F. Nacimiento *</label>
-                      <input id="fechaNacimiento" type="date" required max={new Date().toISOString().split('T')[0]} value={fechaNacimiento} onChange={e => setFechaNacimiento(e.target.value)} className="input-field py-2" />
+                      <input
+                        id="fechaNacimiento"
+                        type="date"
+                        required
+                        min="1900-01-01"
+                        max={new Date().toISOString().split('T')[0]}
+                        value={fechaNacimiento}
+                        onChange={e => setFechaNacimiento(e.target.value)}
+                        className="input-field py-2"
+                      />
                     </div>
                     <div className="space-y-1">
                       <label htmlFor="genero" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Género *</label>

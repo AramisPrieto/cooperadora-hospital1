@@ -169,6 +169,81 @@ describe('Rutas de Autenticación (/api/auth)', () => {
       expect(res.status).toBe(400);
       expect(res.body.error).toContain('DNI debe ser un número válido');
     });
+
+    it('debe fallar si el teléfono contiene palabras como "hola"', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          ...baseRegisterData,
+          email: 'socio-phone@test.com',
+          password: 'Password123',
+          dni: 12345679,
+          telefono: 'hola'
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('teléfono solo puede contener números');
+    });
+
+    it('debe fallar si el teléfono tiene menos de 7 dígitos', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          ...baseRegisterData,
+          email: 'socio-phone2@test.com',
+          password: 'Password123',
+          dni: 12345680,
+          telefono: '12345'
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('teléfono debe contener entre 7 y 15 dígitos');
+    });
+
+    it('debe aceptar teléfonos válidos con prefijo internacional, espacios o guiones', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          ...baseRegisterData,
+          email: 'socio-valid-phone@test.com',
+          password: 'Password123',
+          dni: 12345681,
+          telefono: '+54 9 2262 55-0000'
+        });
+
+      expect(res.status).toBe(201);
+      expect(res.body.user.perfil.telefono).toBe('+54 9 2262 55-0000');
+    });
+
+    it('debe fallar si el nombre contiene números o caracteres no permitidos', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          ...baseRegisterData,
+          email: 'socio-name@test.com',
+          password: 'Password123',
+          dni: 12345682,
+          nombre: 'Juan123'
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('solo puede contener letras y espacios');
+    });
+
+    it('debe fallar si la fecha de nacimiento es anterior a 1900', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({
+          ...baseRegisterData,
+          email: 'socio-old@test.com',
+          password: 'Password123',
+          dni: 12345683,
+          fecha_nacimiento: '1850-05-10'
+        });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('posterior al año 1900');
+    });
   });
 
   describe('POST /login', () => {

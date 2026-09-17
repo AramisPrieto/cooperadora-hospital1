@@ -217,13 +217,16 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
               Teléfono
             </label>
             <input
-              type="text"
+              type="tel"
               required
-              maxLength={50}
+              minLength={7}
+              maxLength={25}
+              pattern="^[+]?[\d\s\-()]{7,25}$"
+              title="Ingrese un teléfono válido (entre 7 y 15 dígitos numéricos)"
               value={form.telefono}
               onChange={e => handleChange('telefono', e.target.value)}
               className="input-field"
-              placeholder="Teléfono de contacto"
+              placeholder="Ej: 2262550000"
             />
           </div>
 
@@ -234,6 +237,7 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
             <input
               type="text"
               required
+              minLength={3}
               maxLength={255}
               value={form.direccion}
               onChange={e => handleChange('direccion', e.target.value)}
@@ -249,7 +253,9 @@ const SocioProfile = ({ profile, onUpdate, submitting }) => {
             <input
               type="text"
               required
+              minLength={2}
               maxLength={100}
+              pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s'.-]{2,100}$"
               value={form.localidad}
               onChange={e => handleChange('localidad', e.target.value)}
               className="input-field"

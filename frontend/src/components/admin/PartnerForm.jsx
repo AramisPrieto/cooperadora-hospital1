@@ -53,7 +53,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               <input 
                 id="nombre"
                 type="text" 
+                minLength={2}
                 maxLength={100}
+                pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$"
                 value={form.nombre} 
                 onChange={e => handleChange('nombre', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
@@ -65,7 +67,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               <input 
                 id="apellido"
                 type="text" 
+                minLength={2}
                 maxLength={100}
+                pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$"
                 value={form.apellido} 
                 onChange={e => handleChange('apellido', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
@@ -77,6 +81,7 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               <input 
                 id="fecha_nacimiento"
                 type="date" 
+                min="1900-01-01"
                 max={new Date().toISOString().split('T')[0]}
                 value={form.fecha_nacimiento} 
                 onChange={e => handleChange('fecha_nacimiento', e.target.value)} 
@@ -104,7 +109,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               <input 
                 id="nacionalidad"
                 type="text" 
+                minLength={2}
                 maxLength={100}
+                pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s'-]{2,100}$"
                 value={form.nacionalidad} 
                 onChange={e => handleChange('nacionalidad', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
@@ -125,8 +132,11 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               <label htmlFor="telefono" className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Teléfono *</label>
               <input 
                 id="telefono"
-                type="text" 
-                maxLength={50}
+                type="tel" 
+                minLength={7}
+                maxLength={25}
+                pattern="^[+]?[\d\s\-()]{7,25}$"
+                title="Ingrese un teléfono válido (entre 7 y 15 dígitos numéricos)"
                 value={form.telefono} 
                 onChange={e => handleChange('telefono', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
@@ -138,6 +148,7 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               <input 
                 id="direccion"
                 type="text" 
+                minLength={3}
                 maxLength={255}
                 value={form.direccion} 
                 onChange={e => handleChange('direccion', e.target.value)} 
@@ -150,7 +161,9 @@ const PartnerForm = ({ partner, onSave, onCancel, submitting }) => {
               <input 
                 id="localidad"
                 type="text" 
+                minLength={2}
                 maxLength={100}
+                pattern="^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s'.-]{2,100}$"
                 value={form.localidad} 
                 onChange={e => handleChange('localidad', e.target.value)} 
                 className="input-field py-1.5 px-3 text-xs" 
