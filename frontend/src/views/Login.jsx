@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, User, Heart, ShieldAlert, Award, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { Mail, Lock, User, Heart, ShieldAlert, Award, Eye, EyeOff, ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -39,6 +39,15 @@ const Login = () => {
   const [metodoPago, setMetodoPago] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
 
+  // Validación de requisitos de contraseña en tiempo real
+  const hasMinLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const isPasswordValid = hasMinLength && hasUppercase && hasNumber;
+  const passwordHasContent = password.length > 0;
+  const confirmPasswordHasContent = confirmPassword.length > 0;
+  const passwordsMatch = confirmPasswordHasContent && password === confirmPassword;
+
   const expired = searchParams.get('expired');
   const bajaConfirmada = searchParams.get('baja') === 'true';
   const redirectCampaign = searchParams.get('redirect') === 'campana';
@@ -51,6 +60,11 @@ const Login = () => {
     setSuccessMsg('');
 
     if (!isLogin) {
+      if (!isPasswordValid) {
+        setErrorMsg('La contraseña no cumple con los requisitos mínimos (al menos 8 caracteres, una mayúscula y un número).');
+        setLoading(false);
+        return;
+      }
       if (password !== confirmPassword) {
         setErrorMsg('Las contraseñas no coinciden. Por favor verifíquelas.');
         setLoading(false);
@@ -252,7 +266,11 @@ const Login = () => {
                 )}
               </div>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <Lock className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none transition-colors ${
+                  !isLogin && passwordHasContent
+                    ? (!isPasswordValid ? 'text-rose-500' : 'text-emerald-500')
+                    : 'text-slate-400'
+                }`} />
                 <input
                   id="password"
                   type={showPass ? 'text' : 'password'}
@@ -262,7 +280,13 @@ const Login = () => {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Ingrese su contraseña"
-                  className="input-field pl-10 pr-11"
+                  className={`input-field pl-10 pr-11 transition-all ${
+                    !isLogin && passwordHasContent
+                      ? (!isPasswordValid
+                          ? '!border-rose-500 !ring-2 !ring-rose-500/20 bg-rose-50/20 focus:!border-rose-600'
+                          : '!border-emerald-500 !ring-2 !ring-emerald-500/20 bg-emerald-50/10 focus:!border-emerald-600')
+                      : ''
+                  }`}
                   autoComplete={isLogin ? "current-password" : "new-password"}
                 />
                 <button
@@ -275,10 +299,66 @@ const Login = () => {
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+
+              {/* Indicadores en tiempo real de requisitos de contraseña (sólo registro) */}
               {!isLogin && (
-                <p className="text-[9px] text-slate-500 pl-0.5 mt-1 font-semibold">
-                  Debe tener al menos 8 caracteres, una mayúscula y un número.
-                </p>
+                <div className="mt-2 text-[11px] p-2.5 rounded-xl bg-slate-50/90 border border-slate-200/80 space-y-1.5 transition-all">
+                  <div className="flex items-center justify-between font-bold text-[10px] uppercase tracking-wider">
+                    <span className={passwordHasContent && !isPasswordValid ? 'text-rose-600 font-bold' : 'text-slate-500'}>
+                      Requisitos de seguridad:
+                    </span>
+                    {passwordHasContent && (
+                      <span className={isPasswordValid ? 'text-emerald-600 font-bold' : 'text-rose-500 font-bold'}>
+                        {isPasswordValid ? 'Contraseña segura ✓' : 'Faltan requisitos'}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className={`flex items-center gap-1.5 text-xs transition-colors ${
+                    !passwordHasContent
+                      ? 'text-slate-500'
+                      : hasMinLength
+                        ? 'text-emerald-700 font-medium'
+                        : 'text-rose-600 font-semibold'
+                  }`}>
+                    {passwordHasContent && hasMinLength ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <XCircle className={`h-3.5 w-3.5 shrink-0 ${passwordHasContent ? 'text-rose-500' : 'text-slate-400'}`} />
+                    )}
+                    <span>Mínimo 8 caracteres {passwordHasContent && !hasMinLength ? `(${password.length}/8)` : ''}</span>
+                  </div>
+
+                  <div className={`flex items-center gap-1.5 text-xs transition-colors ${
+                    !passwordHasContent
+                      ? 'text-slate-500'
+                      : hasUppercase
+                        ? 'text-emerald-700 font-medium'
+                        : 'text-rose-600 font-semibold'
+                  }`}>
+                    {passwordHasContent && hasUppercase ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <XCircle className={`h-3.5 w-3.5 shrink-0 ${passwordHasContent ? 'text-rose-500' : 'text-slate-400'}`} />
+                    )}
+                    <span>Al menos una letra mayúscula (A-Z)</span>
+                  </div>
+
+                  <div className={`flex items-center gap-1.5 text-xs transition-colors ${
+                    !passwordHasContent
+                      ? 'text-slate-500'
+                      : hasNumber
+                        ? 'text-emerald-700 font-medium'
+                        : 'text-rose-600 font-semibold'
+                  }`}>
+                    {passwordHasContent && hasNumber ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <XCircle className={`h-3.5 w-3.5 shrink-0 ${passwordHasContent ? 'text-rose-500' : 'text-slate-400'}`} />
+                    )}
+                    <span>Al menos un número (0-9)</span>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -289,7 +369,11 @@ const Login = () => {
                   Confirmar Contraseña *
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <Lock className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none transition-colors ${
+                    confirmPasswordHasContent
+                      ? (passwordsMatch ? 'text-emerald-500' : 'text-rose-500')
+                      : 'text-slate-400'
+                  }`} />
                   <input
                     id="confirmPassword"
                     type={showConfirmPass ? 'text' : 'password'}
@@ -299,7 +383,13 @@ const Login = () => {
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="Repita su contraseña"
-                    className="input-field pl-10 pr-11"
+                    className={`input-field pl-10 pr-11 transition-all ${
+                      confirmPasswordHasContent
+                        ? (passwordsMatch
+                            ? '!border-emerald-500 !ring-2 !ring-emerald-500/20 bg-emerald-50/10 focus:!border-emerald-600'
+                            : '!border-rose-500 !ring-2 !ring-rose-500/20 bg-rose-50/20 focus:!border-rose-600')
+                        : ''
+                    }`}
                     autoComplete="new-password"
                   />
                   <button
@@ -312,6 +402,25 @@ const Login = () => {
                     {showConfirmPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+
+                {/* Feedback en tiempo real para confirmación */}
+                {confirmPasswordHasContent && (
+                  <div className={`text-xs flex items-center gap-1.5 pt-0.5 font-medium ${
+                    passwordsMatch ? 'text-emerald-600' : 'text-rose-600 font-semibold'
+                  }`}>
+                    {passwordsMatch ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                        <span>Las contraseñas coinciden correctamente.</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="h-3.5 w-3.5 text-rose-500 shrink-0" />
+                        <span>Las contraseñas no coinciden.</span>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

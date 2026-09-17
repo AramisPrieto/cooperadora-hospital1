@@ -65,7 +65,20 @@ const FileUpload = ({
 
     try {
       const formData = new FormData();
-      formData.append('file', fileToUpload);
+      let fileName = file.name || (tipo === 'comprobante' ? 'comprobante.jpg' : 'imagen.jpg');
+      if (!fileName.includes('.')) {
+        const mimeExtMap = {
+          'image/jpeg': '.jpg',
+          'image/jpg': '.jpg',
+          'image/png': '.png',
+          'image/webp': '.webp',
+          'image/gif': '.gif',
+          'application/pdf': '.pdf'
+        };
+        const detectedExt = mimeExtMap[file.type] || (file.type.startsWith('image/') ? '.jpg' : '.pdf');
+        fileName = `${fileName}${detectedExt}`;
+      }
+      formData.append('file', fileToUpload, fileName);
 
       const res = await api.post(`/uploads?tipo=${tipo}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -74,7 +87,12 @@ const FileUpload = ({
       onChange(res.data.url);
       setPreview(res.data.url);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Error al subir el archivo. Máximo 8MB.';
+      let msg = err.response?.data?.error || 'Error al subir el archivo. Máximo 8MB.';
+      if (msg.includes('Mimetype') || msg.includes('Extensión') || msg.includes('no permitida')) {
+        msg = tipo === 'comprobante'
+          ? 'Formato de comprobante no admitido. Por favor suba una imagen (JPG, PNG, WEBP) o un documento PDF.'
+          : 'Formato de imagen no admitido. Por favor seleccione una imagen válida (JPG, PNG, WEBP o GIF).';
+      }
       setError(msg);
       setPreview(value || '');
     } finally {

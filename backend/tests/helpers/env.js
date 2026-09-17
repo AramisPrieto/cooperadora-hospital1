@@ -7,6 +7,7 @@ dotenv.config();
 process.env.NODE_ENV = 'test';
 process.env.PORT = '5002'; // Evita pisar el puerto del servidor de desarrollo
 process.env.BYPASS_WEBHOOK_SIGNATURE = 'true'; // Permitir bypass de firmas en webhooks de Mercado Pago durante los tests
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_jwt_secret_key_123456789_seguro';
 
 if (process.env.DATABASE_URL && !process.env.DATABASE_URL.includes('render') && !process.env.DATABASE_URL.includes('dpg-')) {
   const urlObj = new URL(process.env.DATABASE_URL);

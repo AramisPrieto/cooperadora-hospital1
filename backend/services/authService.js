@@ -9,7 +9,7 @@ import { enviarMailBienvenida, enviarMailRecuperacion } from './emailService.js'
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'test' ? 'test_jwt_secret_key_123456789_seguro' : undefined);
 if (!JWT_SECRET) {
   throw new Error('FATAL ERROR: JWT_SECRET is not defined in environment variables.');
 }
@@ -47,10 +47,10 @@ export const registerUserService = async (userData) => {
     throw error;
   }
 
-  // Validar si el usuario ya existe (Mitigación de enumeración de usuarios)
+  // Validar si el usuario ya existe
   const existingUser = await Usuario.findOne({ where: { email } });
   if (existingUser) {
-    const error = new Error('Error en el registro. Verifique que sus datos sean correctos o intente recuperar su cuenta si ya estaba registrado.');
+    const error = new Error('Ya existe una cuenta registrada con este correo electrónico.');
     error.status = 400;
     throw error;
   }
@@ -73,7 +73,7 @@ export const registerUserService = async (userData) => {
     // Validar DNI único dentro de la transacción
     const existingDni = await PerfilSocio.findOne({ where: { dni }, transaction });
     if (existingDni) {
-      const error = new Error('Error en el registro. Verifique que sus datos sean correctos o intente recuperar su cuenta si ya estaba registrado.');
+      const error = new Error('Ya existe un socio registrado con este número de DNI.');
       error.status = 400;
       throw error;
     }

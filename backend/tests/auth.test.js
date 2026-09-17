@@ -72,7 +72,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         });
 
       expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('error', 'Error en el registro. Verifique que sus datos sean correctos o intente recuperar su cuenta si ya estaba registrado.');
+      expect(res.body).toHaveProperty('error', 'Ya existe una cuenta registrada con este correo electrónico.');
     });
 
     it('debe fallar si el DNI ya existe', async () => {
@@ -97,7 +97,7 @@ describe('Rutas de Autenticación (/api/auth)', () => {
         });
 
       expect(res.status).toBe(400);
-      expect(res.body).toHaveProperty('error', 'Error en el registro. Verifique que sus datos sean correctos o intente recuperar su cuenta si ya estaba registrado.');
+      expect(res.body).toHaveProperty('error', 'Ya existe un socio registrado con este número de DNI.');
     });
 
     it('debe fallar si el email no es válido', async () => {

@@ -136,8 +136,14 @@ app.use((req, res, next) => {
 
 // Manejo global de errores
 app.use((err, req, res, next) => {
-  if (err.name === 'MulterError' || (err.message && err.message.includes('no permitida'))) {
-    return res.status(400).json({ error: err.message });
+  if (err.name === 'MulterError') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ error: 'El archivo supera el tamaño máximo permitido (8 MB).' });
+    }
+    return res.status(400).json({ error: `Error en la subida del archivo: ${err.message}` });
+  }
+  if (err.status === 400 || (err.message && (err.message.includes('no admitid') || err.message.includes('no permitid') || err.message.includes('Formato') || err.message.includes('comprobante')))) {
+    return res.status(err.status || 400).json({ error: err.message });
   }
   console.error('Error no controlado:', err.stack);
   res.status(500).json({ error: 'Ha ocurrido un error interno en el servidor.' });

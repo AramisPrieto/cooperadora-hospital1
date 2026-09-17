@@ -16,6 +16,16 @@ const ALLOWED_DOC_TYPES = [
   'application/pdf'
 ];
 
+// Mapeo seguro de tipos MIME a extensiones
+const MIME_TO_EXT = {
+  'image/jpeg': '.jpg',
+  'image/jpg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/gif': '.gif',
+  'application/pdf': '.pdf'
+};
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const folder = req.query.tipo === 'comprobante' ? 'comprobantes' : 'imagenes';
@@ -24,8 +34,11 @@ const storage = multer.diskStorage({
     cb(null, dest);
   },
   filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const unique = `${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`;
+    let ext = path.extname(file.originalname || '').toLowerCase();
+    if (!ext && MIME_TO_EXT[file.mimetype]) {
+      ext = MIME_TO_EXT[file.mimetype];
+    }
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e6)}${ext || '.jpg'}`;
     cb(null, unique);
   }
 });
@@ -35,14 +48,23 @@ const ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
 const ALLOWED_DOC_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.pdf'];
 
 const fileFilter = (req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  const allowedMime = req.query.tipo === 'comprobante' ? ALLOWED_DOC_TYPES : ALLOWED_IMAGE_TYPES;
-  const allowedExt = req.query.tipo === 'comprobante' ? ALLOWED_DOC_EXTENSIONS : ALLOWED_IMAGE_EXTENSIONS;
+  let ext = path.extname(file.originalname || '').toLowerCase();
+  if (!ext && MIME_TO_EXT[file.mimetype]) {
+    ext = MIME_TO_EXT[file.mimetype];
+  }
+  const isComprobante = req.query.tipo === 'comprobante';
+  const allowedMime = isComprobante ? ALLOWED_DOC_TYPES : ALLOWED_IMAGE_TYPES;
+  const allowedExt = isComprobante ? ALLOWED_DOC_EXTENSIONS : ALLOWED_IMAGE_EXTENSIONS;
 
   if (allowedMime.includes(file.mimetype) && allowedExt.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error(`Tipo de archivo o extensión no permitida. Mimetype: ${file.mimetype}, Extensión: ${ext}`), false);
+    const errorMsg = isComprobante
+      ? 'Formato de comprobante no admitido. Por favor suba un archivo en formato JPG, PNG, WEBP o PDF.'
+      : 'Formato de imagen no admitido. Por favor seleccione una imagen válida en formato JPG, PNG, WEBP o GIF.';
+    const err = new Error(errorMsg);
+    err.status = 400;
+    cb(err, false);
   }
 };
 
